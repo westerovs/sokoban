@@ -1,0 +1,11 @@
+/node_modules/
+/dist/
+/public/assets/
+/.assetpack/
+/.idea/
+/.tmp/
+.DS_Store
+/temp/
+/dist/
+/src/game/generatedAssets/buildMeta.js
+/src/game/generatedAssets/soundList.js

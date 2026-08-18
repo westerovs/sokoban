@@ -1,0 +1,3780 @@
+{
+  "skeleton": {
+    "hash": "tbnOYvd27kQ",
+    "spine": "4.1.24",
+    "y": -1080,
+    "width": 2560,
+    "height": 1080,
+    "images": "./images/",
+    "audio": "./images/"
+  },
+  "bones": [
+    {
+      "name": "root"
+    },
+    {
+      "name": "decorItems",
+      "parent": "root"
+    },
+    {
+      "name": "hogItems",
+      "parent": "root"
+    },
+    {
+      "name": "backgrounds",
+      "parent": "root",
+      "transform": "noRotationOrReflection"
+    }
+  ],
+  "slots": [
+    {
+      "name": "background_lv127",
+      "bone": "backgrounds"
+    },
+    {
+      "name": "decorItem1",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem2",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem3",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem4",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem5",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem6",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem7",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem8",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem9",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem10",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem11",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem12",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "decorItem13",
+      "bone": "decorItems",
+      "attachment": "additional_item_ps"
+    },
+    {
+      "name": "hogItem1",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem2",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem3",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem4",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem5",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem6",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem7",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem8",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem9",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem10",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem11",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    },
+    {
+      "name": "hogItem12",
+      "bone": "hogItems",
+      "attachment": "hogItem_ps"
+    }
+  ],
+  "skins": [
+    {
+      "name": "mode1/skin_mode1_v1",
+      "attachments": {
+        "decorItem1": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_abacus",
+            "type": "mesh",
+            "color": "ffffffb1",
+            "uvs": [
+              0.99266,
+              0.56955,
+              0.77136,
+              0.56561,
+              0.78894,
+              0.4245,
+              0.74024,
+              0.32941,
+              0.56841,
+              0.34372,
+              0.37136,
+              0.42183,
+              0.30058,
+              0.59081,
+              0.17071,
+              0.5673,
+              0,
+              0.56861,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              10,
+              4,
+              9,
+              3,
+              4,
+              10,
+              5,
+              9,
+              4,
+              2,
+              3,
+              10,
+              5,
+              8,
+              9,
+              7,
+              8,
+              5,
+              0,
+              2,
+              10,
+              1,
+              2,
+              0,
+              6,
+              7,
+              5
+            ],
+            "vertices": [
+              1077.16,
+              -233.45,
+              1045.5,
+              -238.9,
+              1042.26,
+              -209.5,
+              1031.45,
+              -191.39,
+              1007.58,
+              -199.19,
+              982.71,
+              -220.76,
+              979.52,
+              -257.38,
+              960.08,
+              -256.24,
+              935.83,
+              -261.34,
+              912.67,
+              -144.86,
+              1055.01,
+              -116.56
+            ],
+            "hull": 11,
+            "edges": [
+              18,
+              20,
+              14,
+              16,
+              16,
+              18,
+              2,
+              0,
+              0,
+              20,
+              12,
+              14,
+              8,
+              10,
+              10,
+              12,
+              6,
+              8,
+              2,
+              4,
+              4,
+              6
+            ],
+            "width": 205,
+            "height": 295
+          }
+        },
+        "decorItem2": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_ball",
+            "type": "mesh",
+            "color": "b9b098ff",
+            "uvs": [
+              1,
+              1,
+              0.27356,
+              0.99999,
+              0.29701,
+              1e-05,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              3,
+              0,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              1058.46,
+              -906.1,
+              1005.17,
+              -906.1,
+              1006.89,
+              -832.29,
+              1058.46,
+              -832.29
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 91,
+            "height": 92
+          }
+        },
+        "decorItem3": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_banana",
+            "color": "f1f0eaff",
+            "x": 104.36,
+            "y": -235.32,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 164,
+            "height": 91
+          }
+        },
+        "decorItem4": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_bonsai",
+            "type": "mesh",
+            "color": "dbd0bdff",
+            "uvs": [
+              1,
+              0.74204,
+              0.70603,
+              0.72688,
+              0.69827,
+              0.97047,
+              0,
+              0.9594,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              4,
+              5,
+              1,
+              5,
+              0,
+              3,
+              4,
+              1,
+              2,
+              3,
+              1
+            ],
+            "vertices": [
+              1685.15,
+              -304.34,
+              1613.37,
+              -299.51,
+              1611.48,
+              -377.17,
+              1440.98,
+              -373.64,
+              1440.98,
+              -67.76,
+              1685.15,
+              -67.76
+            ],
+            "hull": 6,
+            "edges": [
+              6,
+              8,
+              8,
+              10,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              10
+            ],
+            "width": 305,
+            "height": 398
+          }
+        },
+        "decorItem5": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_books",
+            "color": "f2eddfff",
+            "x": 2046.91,
+            "y": -653.81,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 202,
+            "height": 154
+          }
+        },
+        "decorItem6": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_candlestick",
+            "type": "mesh",
+            "color": "afada9c1",
+            "uvs": [
+              1,
+              0.66275,
+              0.58805,
+              0.80174,
+              0.61309,
+              0.85767,
+              0.30687,
+              0.94766,
+              0.20571,
+              0.53802,
+              0.01238,
+              0.28457,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              5,
+              6,
+              7,
+              4,
+              5,
+              7,
+              4,
+              7,
+              0,
+              1,
+              4,
+              0,
+              3,
+              4,
+              1,
+              3,
+              1,
+              2
+            ],
+            "vertices": [
+              1142.08,
+              -671.4,
+              1075.34,
+              -671.09,
+              1073.9,
+              -682.86,
+              1025.43,
+              -680.2,
+              1046.98,
+              -599.1,
+              1042.91,
+              -540.77,
+              1065.59,
+              -488.04,
+              1198.75,
+              -550.39
+            ],
+            "hull": 8,
+            "edges": [
+              12,
+              14,
+              10,
+              12,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              14,
+              6,
+              8,
+              8,
+              10
+            ],
+            "width": 216,
+            "height": 297
+          }
+        },
+        "decorItem7": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_clock",
+            "color": "e8e6cdff",
+            "x": 426.36,
+            "y": -796.98,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 170,
+            "height": 176
+          }
+        },
+        "decorItem8": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_diary",
+            "color": "e6e4d6ff",
+            "x": 695.7,
+            "y": -701.22,
+            "scaleX": 0.8,
+            "scaleY": 0.6416795307193577,
+            "width": 217,
+            "height": 157
+          }
+        },
+        "decorItem9": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_elephant",
+            "color": "d9d6ccff",
+            "x": 254.15,
+            "y": -782.51,
+            "scaleX": -0.7826309067688378,
+            "scaleY": 0.8,
+            "width": 194,
+            "height": 202
+          }
+        },
+        "decorItem10": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_glasses",
+            "color": "e1dec8db",
+            "x": 243.02,
+            "y": -514.46,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 13.95,
+            "width": 178,
+            "height": 70
+          }
+        },
+        "decorItem11": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_globe",
+            "color": "e3e1d9ff",
+            "x": 645.89,
+            "y": -279.44,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 191,
+            "height": 266
+          }
+        },
+        "decorItem12": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_hamster",
+            "color": "e7e5dbff",
+            "x": 1801.36,
+            "y": -282.66,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 55,
+            "height": 57
+          }
+        },
+        "decorItem13": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_hat",
+            "color": "f5e7d5ff",
+            "x": 2308.8,
+            "y": -330.94,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 23.79,
+            "width": 218,
+            "height": 133
+          }
+        },
+        "hogItem1": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_lamp",
+            "color": "ded7c5ff",
+            "x": 1586.31,
+            "y": -748.35,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 129,
+            "height": 273
+          }
+        },
+        "hogItem2": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_makeupbag",
+            "type": "mesh",
+            "color": "c8c4baff",
+            "uvs": [
+              1,
+              1,
+              0.264,
+              0.99999,
+              0.25087,
+              0.4578,
+              0.13273,
+              0.4578,
+              0.15023,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              6,
+              7,
+              3,
+              6,
+              2,
+              0,
+              1,
+              2,
+              5,
+              6,
+              3,
+              5,
+              3,
+              4,
+              0,
+              2,
+              7
+            ],
+            "vertices": [
+              900.78,
+              -396.32,
+              763.82,
+              -396.32,
+              761.37,
+              -309.19,
+              739.39,
+              -309.19,
+              742.64,
+              -396.32,
+              714.69,
+              -396.32,
+              714.69,
+              -235.63,
+              900.78,
+              -235.63
+            ],
+            "hull": 8,
+            "edges": [
+              10,
+              12,
+              12,
+              14,
+              0,
+              14,
+              8,
+              10,
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              6,
+              8
+            ],
+            "width": 232,
+            "height": 200
+          }
+        },
+        "hogItem3": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_paper",
+            "color": "dfdcd4ff",
+            "x": 1194.65,
+            "y": -349.09,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -34.28,
+            "width": 227,
+            "height": 181
+          }
+        },
+        "hogItem4": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_parrot",
+            "color": "d5cdc3ff",
+            "x": 2070.02,
+            "y": -254.21,
+            "scaleX": -0.840270827200471,
+            "scaleY": 0.8,
+            "width": 290,
+            "height": 265
+          }
+        },
+        "hogItem5": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_racket",
+            "type": "mesh",
+            "color": "e8e1d3ff",
+            "uvs": [
+              0.77584,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              0.79686,
+              1e-05
+            ],
+            "triangles": [
+              0,
+              2,
+              3,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              2368.16,
+              -906.81,
+              2237.85,
+              -906.81,
+              2237.85,
+              -829.83,
+              2371.69,
+              -829.83
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 178,
+            "height": 96
+          }
+        },
+        "hogItem6": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_radio",
+            "color": "e2e0d5ff",
+            "x": 1392.38,
+            "y": -279.61,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 217,
+            "height": 246
+          }
+        },
+        "hogItem7": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_rose",
+            "x": 946.04,
+            "y": -376,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -5.87,
+            "width": 243,
+            "height": 72
+          }
+        },
+        "hogItem8": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_scales",
+            "color": "d1d1d1ff",
+            "x": 241.78,
+            "y": -187.6,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 173,
+            "height": 230
+          }
+        },
+        "hogItem9": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_slippers",
+            "color": "ece8deff",
+            "x": 1317.44,
+            "y": -870.93,
+            "scaleX": 0.8,
+            "scaleY": 0.6847785634536658,
+            "width": 292,
+            "height": 210
+          }
+        },
+        "hogItem10": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_umbrella",
+            "color": "e1c199ff",
+            "x": 777.31,
+            "y": -606.75,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 165.63,
+            "width": 371,
+            "height": 189
+          }
+        },
+        "hogItem11": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_vase",
+            "type": "mesh",
+            "color": "e1e0dcff",
+            "uvs": [
+              0.98336,
+              0.91751,
+              0.7859,
+              0.61983,
+              0,
+              0.61942,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              2,
+              3,
+              4,
+              1,
+              3,
+              0,
+              1,
+              4
+            ],
+            "vertices": [
+              557.36,
+              -342.52,
+              538.44,
+              -278.01,
+              463.15,
+              -277.92,
+              463.15,
+              -143.7,
+              558.96,
+              -143.7
+            ],
+            "hull": 5,
+            "edges": [
+              4,
+              6,
+              6,
+              8,
+              0,
+              8,
+              0,
+              2,
+              2,
+              4
+            ],
+            "width": 119,
+            "height": 270
+          }
+        },
+        "hogItem12": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_yarn",
+            "color": "ebe4d7ff",
+            "x": 1871.54,
+            "y": -832.71,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 212,
+            "height": 88
+          }
+        }
+      }
+    },
+    {
+      "name": "mode1/skin_mode1_v2",
+      "attachments": {
+        "decorItem1": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_globe",
+            "color": "e3e1d9ff",
+            "x": 645.89,
+            "y": -279.44,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 191,
+            "height": 266
+          }
+        },
+        "decorItem2": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_yarn",
+            "color": "ebe4d7ff",
+            "x": 1871.54,
+            "y": -832.71,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 212,
+            "height": 88
+          }
+        },
+        "decorItem3": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_vase",
+            "type": "mesh",
+            "color": "e1e0dcff",
+            "uvs": [
+              0.98336,
+              0.91751,
+              0.7859,
+              0.61983,
+              0,
+              0.61942,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              2,
+              3,
+              4,
+              1,
+              3,
+              0,
+              1,
+              4
+            ],
+            "vertices": [
+              557.36,
+              -342.52,
+              538.44,
+              -278.01,
+              463.15,
+              -277.92,
+              463.15,
+              -143.7,
+              558.96,
+              -143.7
+            ],
+            "hull": 5,
+            "edges": [
+              4,
+              6,
+              6,
+              8,
+              0,
+              8,
+              0,
+              2,
+              2,
+              4
+            ],
+            "width": 119,
+            "height": 270
+          }
+        },
+        "decorItem4": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_umbrella",
+            "color": "e1c199ff",
+            "x": 777.31,
+            "y": -606.75,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 165.63,
+            "width": 371,
+            "height": 189
+          }
+        },
+        "decorItem5": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_slippers",
+            "color": "ece8deff",
+            "x": 1317.44,
+            "y": -870.93,
+            "scaleX": 0.8,
+            "scaleY": 0.6847785634536658,
+            "width": 292,
+            "height": 210
+          }
+        },
+        "decorItem6": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_scales",
+            "color": "d1d1d1ff",
+            "x": 241.78,
+            "y": -187.6,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 173,
+            "height": 230
+          }
+        },
+        "decorItem7": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_rose",
+            "x": 946.04,
+            "y": -376,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -5.87,
+            "width": 243,
+            "height": 72
+          }
+        },
+        "decorItem8": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_radio",
+            "color": "e2e0d5ff",
+            "x": 1392.38,
+            "y": -279.61,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 217,
+            "height": 246
+          }
+        },
+        "decorItem9": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_racket",
+            "type": "mesh",
+            "color": "e8e1d3ff",
+            "uvs": [
+              0.77584,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              0.79686,
+              1e-05
+            ],
+            "triangles": [
+              0,
+              2,
+              3,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              2368.16,
+              -906.81,
+              2237.85,
+              -906.81,
+              2237.85,
+              -829.83,
+              2371.69,
+              -829.83
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 178,
+            "height": 96
+          }
+        },
+        "decorItem10": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_parrot",
+            "color": "d5cdc3ff",
+            "x": 2070.02,
+            "y": -254.21,
+            "scaleX": -0.840270827200471,
+            "scaleY": 0.8,
+            "width": 290,
+            "height": 265
+          }
+        },
+        "decorItem11": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_paper",
+            "color": "dfdcd4ff",
+            "x": 1194.65,
+            "y": -349.09,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -34.28,
+            "width": 227,
+            "height": 181
+          }
+        },
+        "decorItem12": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_makeupbag",
+            "type": "mesh",
+            "color": "c8c4baff",
+            "uvs": [
+              1,
+              1,
+              0.264,
+              0.99999,
+              0.25087,
+              0.4578,
+              0.13273,
+              0.4578,
+              0.15023,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              6,
+              7,
+              3,
+              6,
+              2,
+              0,
+              1,
+              2,
+              5,
+              6,
+              3,
+              5,
+              3,
+              4,
+              0,
+              2,
+              7
+            ],
+            "vertices": [
+              900.78,
+              -396.32,
+              763.82,
+              -396.32,
+              761.37,
+              -309.19,
+              739.39,
+              -309.19,
+              742.64,
+              -396.32,
+              714.69,
+              -396.32,
+              714.69,
+              -235.63,
+              900.78,
+              -235.63
+            ],
+            "hull": 8,
+            "edges": [
+              10,
+              12,
+              12,
+              14,
+              0,
+              14,
+              8,
+              10,
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              6,
+              8
+            ],
+            "width": 232,
+            "height": 200
+          }
+        },
+        "decorItem13": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_lamp",
+            "color": "ded7c5ff",
+            "x": 1586.31,
+            "y": -748.35,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 129,
+            "height": 273
+          }
+        },
+        "hogItem1": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_hat",
+            "color": "f5e7d5ff",
+            "x": 2308.8,
+            "y": -330.94,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 23.79,
+            "width": 218,
+            "height": 133
+          }
+        },
+        "hogItem2": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_hamster",
+            "color": "e7e5dbff",
+            "x": 1801.36,
+            "y": -282.66,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 55,
+            "height": 57
+          }
+        },
+        "hogItem3": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_abacus",
+            "type": "mesh",
+            "color": "ffffffb1",
+            "uvs": [
+              0.99266,
+              0.56955,
+              0.77136,
+              0.56561,
+              0.78894,
+              0.4245,
+              0.74024,
+              0.32941,
+              0.56841,
+              0.34372,
+              0.37136,
+              0.42183,
+              0.30058,
+              0.59081,
+              0.17071,
+              0.5673,
+              0,
+              0.56861,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              10,
+              4,
+              9,
+              3,
+              4,
+              10,
+              5,
+              9,
+              4,
+              2,
+              3,
+              10,
+              5,
+              8,
+              9,
+              7,
+              8,
+              5,
+              0,
+              2,
+              10,
+              1,
+              2,
+              0,
+              6,
+              7,
+              5
+            ],
+            "vertices": [
+              1077.16,
+              -233.45,
+              1045.5,
+              -238.9,
+              1042.26,
+              -209.5,
+              1031.45,
+              -191.39,
+              1007.58,
+              -199.19,
+              982.71,
+              -220.76,
+              979.52,
+              -257.38,
+              960.08,
+              -256.24,
+              935.83,
+              -261.34,
+              912.67,
+              -144.86,
+              1055.01,
+              -116.56
+            ],
+            "hull": 11,
+            "edges": [
+              18,
+              20,
+              14,
+              16,
+              16,
+              18,
+              2,
+              0,
+              0,
+              20,
+              12,
+              14,
+              8,
+              10,
+              10,
+              12,
+              6,
+              8,
+              2,
+              4,
+              4,
+              6
+            ],
+            "width": 205,
+            "height": 295
+          }
+        },
+        "hogItem4": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_glasses",
+            "color": "e1dec8db",
+            "x": 243.02,
+            "y": -514.46,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 13.95,
+            "width": 178,
+            "height": 70
+          }
+        },
+        "hogItem5": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_elephant",
+            "color": "d9d6ccff",
+            "x": 254.15,
+            "y": -782.51,
+            "scaleX": -0.7826309067688378,
+            "scaleY": 0.8,
+            "width": 194,
+            "height": 202
+          }
+        },
+        "hogItem6": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_diary",
+            "color": "e6e4d6ff",
+            "x": 695.7,
+            "y": -701.22,
+            "scaleX": 0.8,
+            "scaleY": 0.6416795307193577,
+            "width": 217,
+            "height": 157
+          }
+        },
+        "hogItem7": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_clock",
+            "color": "e8e6cdff",
+            "x": 426.36,
+            "y": -796.98,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 170,
+            "height": 176
+          }
+        },
+        "hogItem8": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_candlestick",
+            "type": "mesh",
+            "color": "afada9c1",
+            "uvs": [
+              1,
+              0.66275,
+              0.58805,
+              0.80174,
+              0.61309,
+              0.85767,
+              0.30687,
+              0.94766,
+              0.20571,
+              0.53802,
+              0.01238,
+              0.28457,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              5,
+              6,
+              7,
+              4,
+              5,
+              7,
+              4,
+              7,
+              0,
+              1,
+              4,
+              0,
+              3,
+              4,
+              1,
+              3,
+              1,
+              2
+            ],
+            "vertices": [
+              1142.08,
+              -671.4,
+              1075.34,
+              -671.09,
+              1073.9,
+              -682.86,
+              1025.43,
+              -680.2,
+              1046.98,
+              -599.1,
+              1042.91,
+              -540.77,
+              1065.59,
+              -488.04,
+              1198.75,
+              -550.39
+            ],
+            "hull": 8,
+            "edges": [
+              12,
+              14,
+              10,
+              12,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              14,
+              6,
+              8,
+              8,
+              10
+            ],
+            "width": 216,
+            "height": 297
+          }
+        },
+        "hogItem9": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_books",
+            "color": "f2eddfff",
+            "x": 2046.91,
+            "y": -653.81,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 202,
+            "height": 154
+          }
+        },
+        "hogItem10": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_bonsai",
+            "type": "mesh",
+            "color": "dbd0bdff",
+            "uvs": [
+              1,
+              0.74204,
+              0.70603,
+              0.72688,
+              0.69827,
+              0.97047,
+              0,
+              0.9594,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              4,
+              5,
+              1,
+              5,
+              0,
+              3,
+              4,
+              1,
+              2,
+              3,
+              1
+            ],
+            "vertices": [
+              1685.15,
+              -304.34,
+              1613.37,
+              -299.51,
+              1611.48,
+              -377.17,
+              1440.98,
+              -373.64,
+              1440.98,
+              -67.76,
+              1685.15,
+              -67.76
+            ],
+            "hull": 6,
+            "edges": [
+              6,
+              8,
+              8,
+              10,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              10
+            ],
+            "width": 305,
+            "height": 398
+          }
+        },
+        "hogItem11": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_banana",
+            "color": "f1f0eaff",
+            "x": 104.36,
+            "y": -235.32,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 164,
+            "height": 91
+          }
+        },
+        "hogItem12": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_ball",
+            "type": "mesh",
+            "color": "b9b098ff",
+            "uvs": [
+              1,
+              1,
+              0.27356,
+              0.99999,
+              0.29701,
+              1e-05,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              3,
+              0,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              1058.46,
+              -906.1,
+              1005.17,
+              -906.1,
+              1006.89,
+              -832.29,
+              1058.46,
+              -832.29
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 91,
+            "height": 92
+          }
+        }
+      }
+    },
+    {
+      "name": "mode1/skin_mode1_v3",
+      "attachments": {
+        "decorItem1": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_abacus",
+            "type": "mesh",
+            "color": "ffffffb1",
+            "uvs": [
+              0.99266,
+              0.56955,
+              0.77136,
+              0.56561,
+              0.78894,
+              0.4245,
+              0.74024,
+              0.32941,
+              0.56841,
+              0.34372,
+              0.37136,
+              0.42183,
+              0.30058,
+              0.59081,
+              0.17071,
+              0.5673,
+              0,
+              0.56861,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              10,
+              4,
+              9,
+              3,
+              4,
+              10,
+              5,
+              9,
+              4,
+              2,
+              3,
+              10,
+              5,
+              8,
+              9,
+              7,
+              8,
+              5,
+              0,
+              2,
+              10,
+              1,
+              2,
+              0,
+              6,
+              7,
+              5
+            ],
+            "vertices": [
+              1077.16,
+              -233.45,
+              1045.5,
+              -238.9,
+              1042.26,
+              -209.5,
+              1031.45,
+              -191.39,
+              1007.58,
+              -199.19,
+              982.71,
+              -220.76,
+              979.52,
+              -257.38,
+              960.08,
+              -256.24,
+              935.83,
+              -261.34,
+              912.67,
+              -144.86,
+              1055.01,
+              -116.56
+            ],
+            "hull": 11,
+            "edges": [
+              18,
+              20,
+              14,
+              16,
+              16,
+              18,
+              2,
+              0,
+              0,
+              20,
+              12,
+              14,
+              8,
+              10,
+              10,
+              12,
+              6,
+              8,
+              2,
+              4,
+              4,
+              6
+            ],
+            "width": 205,
+            "height": 295
+          }
+        },
+        "decorItem2": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_ball",
+            "type": "mesh",
+            "color": "b9b098ff",
+            "uvs": [
+              1,
+              1,
+              0.27356,
+              0.99999,
+              0.29701,
+              1e-05,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              3,
+              0,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              1058.46,
+              -906.1,
+              1005.17,
+              -906.1,
+              1006.89,
+              -832.29,
+              1058.46,
+              -832.29
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 91,
+            "height": 92
+          }
+        },
+        "decorItem3": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_banana",
+            "color": "f1f0eaff",
+            "x": 104.36,
+            "y": -235.32,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 164,
+            "height": 91
+          }
+        },
+        "decorItem4": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_bonsai",
+            "type": "mesh",
+            "color": "dbd0bdff",
+            "uvs": [
+              1,
+              0.74204,
+              0.70603,
+              0.72688,
+              0.69827,
+              0.97047,
+              0,
+              0.9594,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              4,
+              5,
+              1,
+              5,
+              0,
+              3,
+              4,
+              1,
+              2,
+              3,
+              1
+            ],
+            "vertices": [
+              1685.15,
+              -304.34,
+              1613.37,
+              -299.51,
+              1611.48,
+              -377.17,
+              1440.98,
+              -373.64,
+              1440.98,
+              -67.76,
+              1685.15,
+              -67.76
+            ],
+            "hull": 6,
+            "edges": [
+              6,
+              8,
+              8,
+              10,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              10
+            ],
+            "width": 305,
+            "height": 398
+          }
+        },
+        "decorItem5": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_books",
+            "color": "f2eddfff",
+            "x": 2046.91,
+            "y": -653.81,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 202,
+            "height": 154
+          }
+        },
+        "decorItem6": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_candlestick",
+            "type": "mesh",
+            "color": "afada9c1",
+            "uvs": [
+              1,
+              0.66275,
+              0.58805,
+              0.80174,
+              0.61309,
+              0.85767,
+              0.30687,
+              0.94766,
+              0.20571,
+              0.53802,
+              0.01238,
+              0.28457,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              5,
+              6,
+              7,
+              4,
+              5,
+              7,
+              4,
+              7,
+              0,
+              1,
+              4,
+              0,
+              3,
+              4,
+              1,
+              3,
+              1,
+              2
+            ],
+            "vertices": [
+              1142.08,
+              -671.4,
+              1075.34,
+              -671.09,
+              1073.9,
+              -682.86,
+              1025.43,
+              -680.2,
+              1046.98,
+              -599.1,
+              1042.91,
+              -540.77,
+              1065.59,
+              -488.04,
+              1198.75,
+              -550.39
+            ],
+            "hull": 8,
+            "edges": [
+              12,
+              14,
+              10,
+              12,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              14,
+              6,
+              8,
+              8,
+              10
+            ],
+            "width": 216,
+            "height": 297
+          }
+        },
+        "decorItem7": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_clock",
+            "color": "e8e6cdff",
+            "x": 426.36,
+            "y": -796.98,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 170,
+            "height": 176
+          }
+        },
+        "decorItem8": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_diary",
+            "color": "e6e4d6ff",
+            "x": 695.7,
+            "y": -701.22,
+            "scaleX": 0.8,
+            "scaleY": 0.6416795307193577,
+            "width": 217,
+            "height": 157
+          }
+        },
+        "decorItem9": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_elephant",
+            "color": "d9d6ccff",
+            "x": 254.15,
+            "y": -782.51,
+            "scaleX": -0.7826309067688378,
+            "scaleY": 0.8,
+            "width": 194,
+            "height": 202
+          }
+        },
+        "decorItem10": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_glasses",
+            "color": "e1dec8db",
+            "x": 243.02,
+            "y": -514.46,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 13.95,
+            "width": 178,
+            "height": 70
+          }
+        },
+        "decorItem11": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_globe",
+            "color": "e3e1d9ff",
+            "x": 645.89,
+            "y": -279.44,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 191,
+            "height": 266
+          }
+        },
+        "decorItem12": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_hamster",
+            "color": "e7e5dbff",
+            "x": 1801.36,
+            "y": -282.66,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 55,
+            "height": 57
+          }
+        },
+        "decorItem13": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_hat",
+            "color": "f5e7d5ff",
+            "x": 2308.8,
+            "y": -330.94,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 23.79,
+            "width": 218,
+            "height": 133
+          }
+        },
+        "hogItem1": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_lamp",
+            "color": "ded7c5ff",
+            "x": 1586.31,
+            "y": -748.35,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 129,
+            "height": 273
+          }
+        },
+        "hogItem2": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_makeupbag",
+            "type": "mesh",
+            "color": "c8c4baff",
+            "uvs": [
+              1,
+              1,
+              0.264,
+              0.99999,
+              0.25087,
+              0.4578,
+              0.13273,
+              0.4578,
+              0.15023,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              6,
+              7,
+              3,
+              6,
+              2,
+              0,
+              1,
+              2,
+              5,
+              6,
+              3,
+              5,
+              3,
+              4,
+              0,
+              2,
+              7
+            ],
+            "vertices": [
+              900.78,
+              -396.32,
+              763.82,
+              -396.32,
+              761.37,
+              -309.19,
+              739.39,
+              -309.19,
+              742.64,
+              -396.32,
+              714.69,
+              -396.32,
+              714.69,
+              -235.63,
+              900.78,
+              -235.63
+            ],
+            "hull": 8,
+            "edges": [
+              10,
+              12,
+              12,
+              14,
+              0,
+              14,
+              8,
+              10,
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              6,
+              8
+            ],
+            "width": 232,
+            "height": 200
+          }
+        },
+        "hogItem3": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_paper",
+            "color": "dfdcd4ff",
+            "x": 1194.65,
+            "y": -349.09,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -34.28,
+            "width": 227,
+            "height": 181
+          }
+        },
+        "hogItem4": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_parrot",
+            "color": "d5cdc3ff",
+            "x": 2070.02,
+            "y": -254.21,
+            "scaleX": -0.840270827200471,
+            "scaleY": 0.8,
+            "width": 290,
+            "height": 265
+          }
+        },
+        "hogItem5": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_racket",
+            "type": "mesh",
+            "color": "e8e1d3ff",
+            "uvs": [
+              0.77584,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              0.79686,
+              1e-05
+            ],
+            "triangles": [
+              0,
+              2,
+              3,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              2368.16,
+              -906.81,
+              2237.85,
+              -906.81,
+              2237.85,
+              -829.83,
+              2371.69,
+              -829.83
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 178,
+            "height": 96
+          }
+        },
+        "hogItem6": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_radio",
+            "color": "e2e0d5ff",
+            "x": 1392.38,
+            "y": -279.61,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 217,
+            "height": 246
+          }
+        },
+        "hogItem7": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_rose",
+            "x": 946.04,
+            "y": -376,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -5.87,
+            "width": 243,
+            "height": 72
+          }
+        },
+        "hogItem8": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_scales",
+            "color": "d1d1d1ff",
+            "x": 241.78,
+            "y": -187.6,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 173,
+            "height": 230
+          }
+        },
+        "hogItem9": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_slippers",
+            "color": "ece8deff",
+            "x": 1317.44,
+            "y": -870.93,
+            "scaleX": 0.8,
+            "scaleY": 0.6847785634536658,
+            "width": 292,
+            "height": 210
+          }
+        },
+        "hogItem10": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_umbrella",
+            "color": "e1c199ff",
+            "x": 777.31,
+            "y": -606.75,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 165.63,
+            "width": 371,
+            "height": 189
+          }
+        },
+        "hogItem11": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_vase",
+            "type": "mesh",
+            "color": "e1e0dcff",
+            "uvs": [
+              0.98336,
+              0.91751,
+              0.7859,
+              0.61983,
+              0,
+              0.61942,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              2,
+              3,
+              4,
+              1,
+              3,
+              0,
+              1,
+              4
+            ],
+            "vertices": [
+              557.36,
+              -342.52,
+              538.44,
+              -278.01,
+              463.15,
+              -277.92,
+              463.15,
+              -143.7,
+              558.96,
+              -143.7
+            ],
+            "hull": 5,
+            "edges": [
+              4,
+              6,
+              6,
+              8,
+              0,
+              8,
+              0,
+              2,
+              2,
+              4
+            ],
+            "width": 119,
+            "height": 270
+          }
+        },
+        "hogItem12": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_yarn",
+            "color": "ebe4d7ff",
+            "x": 1871.54,
+            "y": -832.71,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 212,
+            "height": 88
+          }
+        }
+      }
+    },
+    {
+      "name": "mode1/skin_mode1_v4",
+      "attachments": {
+        "decorItem1": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_globe",
+            "color": "e3e1d9ff",
+            "x": 645.89,
+            "y": -279.44,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 191,
+            "height": 266
+          }
+        },
+        "decorItem2": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_yarn",
+            "color": "ebe4d7ff",
+            "x": 1871.54,
+            "y": -832.71,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 212,
+            "height": 88
+          }
+        },
+        "decorItem3": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_vase",
+            "type": "mesh",
+            "color": "e1e0dcff",
+            "uvs": [
+              0.98336,
+              0.91751,
+              0.7859,
+              0.61983,
+              0,
+              0.61942,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              2,
+              3,
+              4,
+              1,
+              3,
+              0,
+              1,
+              4
+            ],
+            "vertices": [
+              557.36,
+              -342.52,
+              538.44,
+              -278.01,
+              463.15,
+              -277.92,
+              463.15,
+              -143.7,
+              558.96,
+              -143.7
+            ],
+            "hull": 5,
+            "edges": [
+              4,
+              6,
+              6,
+              8,
+              0,
+              8,
+              0,
+              2,
+              2,
+              4
+            ],
+            "width": 119,
+            "height": 270
+          }
+        },
+        "decorItem4": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_umbrella",
+            "color": "e1c199ff",
+            "x": 777.31,
+            "y": -606.75,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 165.63,
+            "width": 371,
+            "height": 189
+          }
+        },
+        "decorItem5": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_slippers",
+            "color": "ece8deff",
+            "x": 1317.44,
+            "y": -870.93,
+            "scaleX": 0.8,
+            "scaleY": 0.6847785634536658,
+            "width": 292,
+            "height": 210
+          }
+        },
+        "decorItem6": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_scales",
+            "color": "d1d1d1ff",
+            "x": 241.78,
+            "y": -187.6,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 173,
+            "height": 230
+          }
+        },
+        "decorItem7": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_rose",
+            "x": 946.04,
+            "y": -376,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -5.87,
+            "width": 243,
+            "height": 72
+          }
+        },
+        "decorItem8": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_radio",
+            "color": "e2e0d5ff",
+            "x": 1392.38,
+            "y": -279.61,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 217,
+            "height": 246
+          }
+        },
+        "decorItem9": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_racket",
+            "type": "mesh",
+            "color": "e8e1d3ff",
+            "uvs": [
+              0.77584,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              0.79686,
+              1e-05
+            ],
+            "triangles": [
+              0,
+              2,
+              3,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              2368.16,
+              -906.81,
+              2237.85,
+              -906.81,
+              2237.85,
+              -829.83,
+              2371.69,
+              -829.83
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 178,
+            "height": 96
+          }
+        },
+        "decorItem10": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_parrot",
+            "color": "d5cdc3ff",
+            "x": 2070.02,
+            "y": -254.21,
+            "scaleX": -0.840270827200471,
+            "scaleY": 0.8,
+            "width": 290,
+            "height": 265
+          }
+        },
+        "decorItem11": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_paper",
+            "color": "dfdcd4ff",
+            "x": 1194.65,
+            "y": -349.09,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -34.28,
+            "width": 227,
+            "height": 181
+          }
+        },
+        "decorItem12": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_makeupbag",
+            "type": "mesh",
+            "color": "c8c4baff",
+            "uvs": [
+              1,
+              1,
+              0.264,
+              0.99999,
+              0.25087,
+              0.4578,
+              0.13273,
+              0.4578,
+              0.15023,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              6,
+              7,
+              3,
+              6,
+              2,
+              0,
+              1,
+              2,
+              5,
+              6,
+              3,
+              5,
+              3,
+              4,
+              0,
+              2,
+              7
+            ],
+            "vertices": [
+              900.78,
+              -396.32,
+              763.82,
+              -396.32,
+              761.37,
+              -309.19,
+              739.39,
+              -309.19,
+              742.64,
+              -396.32,
+              714.69,
+              -396.32,
+              714.69,
+              -235.63,
+              900.78,
+              -235.63
+            ],
+            "hull": 8,
+            "edges": [
+              10,
+              12,
+              12,
+              14,
+              0,
+              14,
+              8,
+              10,
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              6,
+              8
+            ],
+            "width": 232,
+            "height": 200
+          }
+        },
+        "decorItem13": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_lamp",
+            "color": "ded7c5ff",
+            "x": 1586.31,
+            "y": -748.35,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 129,
+            "height": 273
+          }
+        },
+        "hogItem1": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_hat",
+            "color": "f5e7d5ff",
+            "x": 2308.8,
+            "y": -330.94,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 23.79,
+            "width": 218,
+            "height": 133
+          }
+        },
+        "hogItem2": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_hamster",
+            "color": "e7e5dbff",
+            "x": 1801.36,
+            "y": -282.66,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 55,
+            "height": 57
+          }
+        },
+        "hogItem3": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_abacus",
+            "type": "mesh",
+            "color": "ffffffb1",
+            "uvs": [
+              0.99266,
+              0.56955,
+              0.77136,
+              0.56561,
+              0.78894,
+              0.4245,
+              0.74024,
+              0.32941,
+              0.56841,
+              0.34372,
+              0.37136,
+              0.42183,
+              0.30058,
+              0.59081,
+              0.17071,
+              0.5673,
+              0,
+              0.56861,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              10,
+              4,
+              9,
+              3,
+              4,
+              10,
+              5,
+              9,
+              4,
+              2,
+              3,
+              10,
+              5,
+              8,
+              9,
+              7,
+              8,
+              5,
+              0,
+              2,
+              10,
+              1,
+              2,
+              0,
+              6,
+              7,
+              5
+            ],
+            "vertices": [
+              1077.16,
+              -233.45,
+              1045.5,
+              -238.9,
+              1042.26,
+              -209.5,
+              1031.45,
+              -191.39,
+              1007.58,
+              -199.19,
+              982.71,
+              -220.76,
+              979.52,
+              -257.38,
+              960.08,
+              -256.24,
+              935.83,
+              -261.34,
+              912.67,
+              -144.86,
+              1055.01,
+              -116.56
+            ],
+            "hull": 11,
+            "edges": [
+              18,
+              20,
+              14,
+              16,
+              16,
+              18,
+              2,
+              0,
+              0,
+              20,
+              12,
+              14,
+              8,
+              10,
+              10,
+              12,
+              6,
+              8,
+              2,
+              4,
+              4,
+              6
+            ],
+            "width": 205,
+            "height": 295
+          }
+        },
+        "hogItem4": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_glasses",
+            "color": "e1dec8db",
+            "x": 243.02,
+            "y": -514.46,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 13.95,
+            "width": 178,
+            "height": 70
+          }
+        },
+        "hogItem5": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_elephant",
+            "color": "d9d6ccff",
+            "x": 254.15,
+            "y": -782.51,
+            "scaleX": -0.7826309067688378,
+            "scaleY": 0.8,
+            "width": 194,
+            "height": 202
+          }
+        },
+        "hogItem6": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_diary",
+            "color": "e6e4d6ff",
+            "x": 695.7,
+            "y": -701.22,
+            "scaleX": 0.8,
+            "scaleY": 0.6416795307193577,
+            "width": 217,
+            "height": 157
+          }
+        },
+        "hogItem7": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_clock",
+            "color": "e8e6cdff",
+            "x": 426.36,
+            "y": -796.98,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 170,
+            "height": 176
+          }
+        },
+        "hogItem8": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_candlestick",
+            "type": "mesh",
+            "color": "afada9c1",
+            "uvs": [
+              1,
+              0.66275,
+              0.58805,
+              0.80174,
+              0.61309,
+              0.85767,
+              0.30687,
+              0.94766,
+              0.20571,
+              0.53802,
+              0.01238,
+              0.28457,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              5,
+              6,
+              7,
+              4,
+              5,
+              7,
+              4,
+              7,
+              0,
+              1,
+              4,
+              0,
+              3,
+              4,
+              1,
+              3,
+              1,
+              2
+            ],
+            "vertices": [
+              1142.08,
+              -671.4,
+              1075.34,
+              -671.09,
+              1073.9,
+              -682.86,
+              1025.43,
+              -680.2,
+              1046.98,
+              -599.1,
+              1042.91,
+              -540.77,
+              1065.59,
+              -488.04,
+              1198.75,
+              -550.39
+            ],
+            "hull": 8,
+            "edges": [
+              12,
+              14,
+              10,
+              12,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              14,
+              6,
+              8,
+              8,
+              10
+            ],
+            "width": 216,
+            "height": 297
+          }
+        },
+        "hogItem9": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_books",
+            "color": "f2eddfff",
+            "x": 2046.91,
+            "y": -653.81,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 202,
+            "height": 154
+          }
+        },
+        "hogItem10": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_bonsai",
+            "type": "mesh",
+            "color": "dbd0bdff",
+            "uvs": [
+              1,
+              0.74204,
+              0.70603,
+              0.72688,
+              0.69827,
+              0.97047,
+              0,
+              0.9594,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              4,
+              5,
+              1,
+              5,
+              0,
+              3,
+              4,
+              1,
+              2,
+              3,
+              1
+            ],
+            "vertices": [
+              1685.15,
+              -304.34,
+              1613.37,
+              -299.51,
+              1611.48,
+              -377.17,
+              1440.98,
+              -373.64,
+              1440.98,
+              -67.76,
+              1685.15,
+              -67.76
+            ],
+            "hull": 6,
+            "edges": [
+              6,
+              8,
+              8,
+              10,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              10
+            ],
+            "width": 305,
+            "height": 398
+          }
+        },
+        "hogItem11": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_banana",
+            "color": "f1f0eaff",
+            "x": 104.36,
+            "y": -235.32,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 164,
+            "height": 91
+          }
+        },
+        "hogItem12": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_ball",
+            "type": "mesh",
+            "color": "b9b098ff",
+            "uvs": [
+              1,
+              1,
+              0.27356,
+              0.99999,
+              0.29701,
+              1e-05,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              3,
+              0,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              1058.46,
+              -906.1,
+              1005.17,
+              -906.1,
+              1006.89,
+              -832.29,
+              1058.46,
+              -832.29
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 91,
+            "height": 92
+          }
+        }
+      }
+    },
+    {
+      "name": "mode1/skin_mode1_v5",
+      "attachments": {
+        "decorItem1": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_globe",
+            "color": "e3e1d9ff",
+            "x": 645.89,
+            "y": -279.44,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 191,
+            "height": 266
+          }
+        },
+        "decorItem2": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_yarn",
+            "color": "ebe4d7ff",
+            "x": 1871.54,
+            "y": -832.71,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 212,
+            "height": 88
+          }
+        },
+        "decorItem3": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_vase",
+            "type": "mesh",
+            "color": "e1e0dcff",
+            "uvs": [
+              0.98336,
+              0.91751,
+              0.7859,
+              0.61983,
+              0,
+              0.61942,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              2,
+              3,
+              4,
+              1,
+              3,
+              0,
+              1,
+              4
+            ],
+            "vertices": [
+              557.36,
+              -342.52,
+              538.44,
+              -278.01,
+              463.15,
+              -277.92,
+              463.15,
+              -143.7,
+              558.96,
+              -143.7
+            ],
+            "hull": 5,
+            "edges": [
+              4,
+              6,
+              6,
+              8,
+              0,
+              8,
+              0,
+              2,
+              2,
+              4
+            ],
+            "width": 119,
+            "height": 270
+          }
+        },
+        "decorItem4": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_umbrella",
+            "color": "e1c199ff",
+            "x": 777.31,
+            "y": -606.75,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 165.63,
+            "width": 371,
+            "height": 189
+          }
+        },
+        "decorItem5": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_slippers",
+            "color": "ece8deff",
+            "x": 1317.44,
+            "y": -870.93,
+            "scaleX": 0.8,
+            "scaleY": 0.6847785634536658,
+            "width": 292,
+            "height": 210
+          }
+        },
+        "decorItem6": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_scales",
+            "color": "d1d1d1ff",
+            "x": 241.78,
+            "y": -187.6,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 173,
+            "height": 230
+          }
+        },
+        "decorItem7": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_rose",
+            "x": 946.04,
+            "y": -376,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -5.87,
+            "width": 243,
+            "height": 72
+          }
+        },
+        "decorItem8": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_radio",
+            "color": "e2e0d5ff",
+            "x": 1392.38,
+            "y": -279.61,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 217,
+            "height": 246
+          }
+        },
+        "decorItem9": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_racket",
+            "type": "mesh",
+            "color": "e8e1d3ff",
+            "uvs": [
+              0.77584,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              0.79686,
+              1e-05
+            ],
+            "triangles": [
+              0,
+              2,
+              3,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              2368.16,
+              -906.81,
+              2237.85,
+              -906.81,
+              2237.85,
+              -829.83,
+              2371.69,
+              -829.83
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 178,
+            "height": 96
+          }
+        },
+        "decorItem10": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_parrot",
+            "color": "d5cdc3ff",
+            "x": 2070.02,
+            "y": -254.21,
+            "scaleX": -0.840270827200471,
+            "scaleY": 0.8,
+            "width": 290,
+            "height": 265
+          }
+        },
+        "decorItem11": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_paper",
+            "color": "dfdcd4ff",
+            "x": 1194.65,
+            "y": -349.09,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": -34.28,
+            "width": 227,
+            "height": 181
+          }
+        },
+        "decorItem12": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_makeupbag",
+            "type": "mesh",
+            "color": "c8c4baff",
+            "uvs": [
+              1,
+              1,
+              0.264,
+              0.99999,
+              0.25087,
+              0.4578,
+              0.13273,
+              0.4578,
+              0.15023,
+              0.99999,
+              0,
+              1,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              6,
+              7,
+              3,
+              6,
+              2,
+              0,
+              1,
+              2,
+              5,
+              6,
+              3,
+              5,
+              3,
+              4,
+              0,
+              2,
+              7
+            ],
+            "vertices": [
+              900.78,
+              -396.32,
+              763.82,
+              -396.32,
+              761.37,
+              -309.19,
+              739.39,
+              -309.19,
+              742.64,
+              -396.32,
+              714.69,
+              -396.32,
+              714.69,
+              -235.63,
+              900.78,
+              -235.63
+            ],
+            "hull": 8,
+            "edges": [
+              10,
+              12,
+              12,
+              14,
+              0,
+              14,
+              8,
+              10,
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              6,
+              8
+            ],
+            "width": 232,
+            "height": 200
+          }
+        },
+        "decorItem13": {
+          "additional_item_ps": {
+            "name": "obj-lvl-127/lvl_127_lamp",
+            "color": "ded7c5ff",
+            "x": 1586.31,
+            "y": -748.35,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 129,
+            "height": 273
+          }
+        },
+        "hogItem1": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_hat",
+            "color": "f5e7d5ff",
+            "x": 2308.8,
+            "y": -330.94,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 23.79,
+            "width": 218,
+            "height": 133
+          }
+        },
+        "hogItem2": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_hamster",
+            "color": "e7e5dbff",
+            "x": 1801.36,
+            "y": -282.66,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 55,
+            "height": 57
+          }
+        },
+        "hogItem3": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_abacus",
+            "type": "mesh",
+            "color": "ffffffb1",
+            "uvs": [
+              0.99266,
+              0.56955,
+              0.77136,
+              0.56561,
+              0.78894,
+              0.4245,
+              0.74024,
+              0.32941,
+              0.56841,
+              0.34372,
+              0.37136,
+              0.42183,
+              0.30058,
+              0.59081,
+              0.17071,
+              0.5673,
+              0,
+              0.56861,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              10,
+              4,
+              9,
+              3,
+              4,
+              10,
+              5,
+              9,
+              4,
+              2,
+              3,
+              10,
+              5,
+              8,
+              9,
+              7,
+              8,
+              5,
+              0,
+              2,
+              10,
+              1,
+              2,
+              0,
+              6,
+              7,
+              5
+            ],
+            "vertices": [
+              1077.16,
+              -233.45,
+              1045.5,
+              -238.9,
+              1042.26,
+              -209.5,
+              1031.45,
+              -191.39,
+              1007.58,
+              -199.19,
+              982.71,
+              -220.76,
+              979.52,
+              -257.38,
+              960.08,
+              -256.24,
+              935.83,
+              -261.34,
+              912.67,
+              -144.86,
+              1055.01,
+              -116.56
+            ],
+            "hull": 11,
+            "edges": [
+              18,
+              20,
+              14,
+              16,
+              16,
+              18,
+              2,
+              0,
+              0,
+              20,
+              12,
+              14,
+              8,
+              10,
+              10,
+              12,
+              6,
+              8,
+              2,
+              4,
+              4,
+              6
+            ],
+            "width": 205,
+            "height": 295
+          }
+        },
+        "hogItem4": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_glasses",
+            "color": "e1dec8db",
+            "x": 243.02,
+            "y": -514.46,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "rotation": 13.95,
+            "width": 178,
+            "height": 70
+          }
+        },
+        "hogItem5": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_elephant",
+            "color": "d9d6ccff",
+            "x": 254.15,
+            "y": -782.51,
+            "scaleX": -0.7826309067688378,
+            "scaleY": 0.8,
+            "width": 194,
+            "height": 202
+          }
+        },
+        "hogItem6": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_diary",
+            "color": "e6e4d6ff",
+            "x": 695.7,
+            "y": -701.22,
+            "scaleX": 0.8,
+            "scaleY": 0.6416795307193577,
+            "width": 217,
+            "height": 157
+          }
+        },
+        "hogItem7": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_clock",
+            "color": "e8e6cdff",
+            "x": 426.36,
+            "y": -796.98,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 170,
+            "height": 176
+          }
+        },
+        "hogItem8": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_candlestick",
+            "type": "mesh",
+            "color": "afada9c1",
+            "uvs": [
+              1,
+              0.66275,
+              0.58805,
+              0.80174,
+              0.61309,
+              0.85767,
+              0.30687,
+              0.94766,
+              0.20571,
+              0.53802,
+              0.01238,
+              0.28457,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              5,
+              6,
+              7,
+              4,
+              5,
+              7,
+              4,
+              7,
+              0,
+              1,
+              4,
+              0,
+              3,
+              4,
+              1,
+              3,
+              1,
+              2
+            ],
+            "vertices": [
+              1142.08,
+              -671.4,
+              1075.34,
+              -671.09,
+              1073.9,
+              -682.86,
+              1025.43,
+              -680.2,
+              1046.98,
+              -599.1,
+              1042.91,
+              -540.77,
+              1065.59,
+              -488.04,
+              1198.75,
+              -550.39
+            ],
+            "hull": 8,
+            "edges": [
+              12,
+              14,
+              10,
+              12,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              14,
+              6,
+              8,
+              8,
+              10
+            ],
+            "width": 216,
+            "height": 297
+          }
+        },
+        "hogItem9": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_books",
+            "color": "f2eddfff",
+            "x": 2046.91,
+            "y": -653.81,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 202,
+            "height": 154
+          }
+        },
+        "hogItem10": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_bonsai",
+            "type": "mesh",
+            "color": "dbd0bdff",
+            "uvs": [
+              1,
+              0.74204,
+              0.70603,
+              0.72688,
+              0.69827,
+              0.97047,
+              0,
+              0.9594,
+              0,
+              0,
+              1,
+              0
+            ],
+            "triangles": [
+              1,
+              4,
+              5,
+              1,
+              5,
+              0,
+              3,
+              4,
+              1,
+              2,
+              3,
+              1
+            ],
+            "vertices": [
+              1685.15,
+              -304.34,
+              1613.37,
+              -299.51,
+              1611.48,
+              -377.17,
+              1440.98,
+              -373.64,
+              1440.98,
+              -67.76,
+              1685.15,
+              -67.76
+            ],
+            "hull": 6,
+            "edges": [
+              6,
+              8,
+              8,
+              10,
+              2,
+              4,
+              4,
+              6,
+              2,
+              0,
+              0,
+              10
+            ],
+            "width": 305,
+            "height": 398
+          }
+        },
+        "hogItem11": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_banana",
+            "color": "f1f0eaff",
+            "x": 104.36,
+            "y": -235.32,
+            "scaleX": 0.8,
+            "scaleY": 0.8,
+            "width": 164,
+            "height": 91
+          }
+        },
+        "hogItem12": {
+          "hogItem_ps": {
+            "name": "obj-lvl-127/lvl_127_ball",
+            "type": "mesh",
+            "color": "b9b098ff",
+            "uvs": [
+              1,
+              1,
+              0.27356,
+              0.99999,
+              0.29701,
+              1e-05,
+              1,
+              0
+            ],
+            "triangles": [
+              2,
+              3,
+              0,
+              1,
+              2,
+              0
+            ],
+            "vertices": [
+              1058.46,
+              -906.1,
+              1005.17,
+              -906.1,
+              1006.89,
+              -832.29,
+              1058.46,
+              -832.29
+            ],
+            "hull": 4,
+            "edges": [
+              0,
+              2,
+              2,
+              4,
+              4,
+              6,
+              0,
+              6
+            ],
+            "width": 91,
+            "height": 92
+          }
+        }
+      }
+    }
+  ],
+  "animations": {
+    "animation": {}
+  }
+}

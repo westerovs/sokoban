@@ -1,0 +1,73 @@
+export const mockData = [
+  {
+    id: '28yQ21ULb5LqwMQQnIYzwFHCcjDgQpMKUzcyOZqsL4w=',
+    title: 'Александр Гарадзецкийassf',
+    avatar: 'https://games-sdk.yandex.ru/games/api/sdk/v1/player/avatar/CSWGYQG5ALAM3PRRHLPOJZBEKCI2GXU4V4CJ3NAXS44WRS5JNMA6ENBU24EXIEKYNKWZOIQ7WESLUZFC7ZYG4S3V4JXR3MRTP5IU5WAV3L3T3MLW7MMOI22OWFTPES7S/islands-retina-small',
+    score: 152231,
+    rank: 1
+  },
+  {
+    id: 'ZxkLD1t5N8LpQVzv9tFyl0x8Ejx3TjF5A7cYKn2QyAA=',
+    title: 'Иван Сидоров Сусанинsdf',
+    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+    score: 32224,
+    rank: 2
+  },
+  {
+    id: '7kPdYv5mNvVqbQ1z8yT1xQXhXnE4uJpLa8cBKx9UwF8=',
+    title: 'Мария Петрова Попова',
+    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+    score: 515320,
+    rank: 3
+  },
+  {
+    id: '9yXjZ9RtGvLqcZ1d0uF9l7YsNcD2jYtOe6wPxJcGtP4=',
+    title: 'Алексей Смирнов',
+    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+    score: 15,
+    rank: 4
+  },
+  {
+    id: 'XpUtMb3qKlPjsG6d5fVs5QYhBkQ2wRnDg9tBaMvLpO7=',
+    title: 'Дарья Кузнецова',
+    avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+    score: 10,
+    rank: 5
+  },
+  {
+    id: 'VpMdHj4rJkLpwG5c2aRy8XeGnBv3tUmNf7pKsLqNwP8=',
+    title: 'Дмитрий Орлов',
+    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+    score: 1,
+    rank: 111
+  },
+  {
+    id: 'TkOsGj6sLjHpaN7c4yBt2QWmBkA8kRnVf1mPcJqGmP3=',
+    title: 'Александра Граздецкая',
+    avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
+    score: 505994,
+    rank: 123456
+  },
+  {
+    id: 'PkTqZl5rJoDpqM8d6hQk1UtGmCr7nBmZc3oPsLvWmO2=',
+    title: 'Максим Фёдоров',
+    avatar: 'https://randomuser.me/api/portraits/men/7.jpg',
+    score: 4,
+    rank: 55555
+  },
+  {
+    id: 'OkHrJj2uMnOvcB6p3qBt6YvGmCp8nRmLc2aPvKwLmN1=',
+    title: 'Анна Егорова',
+    avatar: 'https://randomuser.me/api/portraits/women/8.jpg',
+    score: 3,
+    rank: 212347
+  },
+  {
+    id: 'NkErIj1vLnPwbA7o4rCt7ZxHnBr9oQmKd4bRsKvXmM2=',
+    title: 'Сергей Павлов',
+    avatar: 'https://randomuser.me/api/portraits/men/9.jpg',
+    score: 2,
+    rank: 312348
+  },
+
+]

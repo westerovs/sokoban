@@ -1,0 +1,79 @@
+{
+  "dartsHint": {
+    "id": "dartsHint",
+    "title": "Добавляет 3 подсказки Дартс",
+    "price": 129,
+    "photo_url": "#"
+  },
+  "compassHint": {
+    "id": "compassHint",
+    "title": "Добавляет 3 подсказки Компас",
+    "price": 99,
+    "photo_url": "#"
+  },
+
+  "coinLarge": {
+    "id": "coinLarge",
+    "title": "Добавляет 5000 монет",
+    "price": 379,
+    "photo_url": "#"
+  },
+  "coinXL": {
+    "id": "coinXL",
+    "title": "Добавляет 12000 монет",
+    "price": 749,
+    "photo_url": "#"
+  },
+
+
+
+  "smallPack": {
+    "id": "smallPack",
+    "title": "Добавляет 5 подсказок",
+    "price": 39,
+    "photo_url": "#"
+  },
+  "mediumPack": {
+    "id": "mediumPack",
+    "title": "Добавляет 15 подсказок",
+    "price": 99,
+    "photo_url": "#"
+  },
+  "largePack": {
+    "id": "largePack",
+    "title": "Добавляет 50 подсказок",
+    "price": 239,
+    "photo_url": "#"
+  },
+  "extraLargePack": {
+    "id": "extraLargePack",
+    "title": "Добавляет 100 подсказок",
+    "price": 399,
+    "photo_url": "#"
+  },
+  "noAdPack": {
+    "id": "noAdPack",
+    "title": "Убирает внутриигровую рекламу.",
+    "price": 99,
+    "photo_url": "#"
+  },
+
+  "promoStartedPack": {
+    "id": "promoStartedPack",
+    "title": "Убирает внутриигровую рекламу и даёт 30 подсказок!",
+    "price": 199,
+    "photo_url": "#"
+  },
+  "promoRemoveAdPack": {
+    "id": "promoRemoveAdPack",
+    "title": "Отключение внутриигровой рекламы со скидкой!",
+    "price": 79,
+    "photo_url": "#"
+  },
+  "promoMegaHintsPack": {
+    "id": "promoMegaHintsPack",
+    "title": "50 подсказок со скидкой!",
+    "price": 199,
+    "photo_url": "#"
+  }
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="description" content="Hidden Object: Clues and Mysteries transforms the classic hidden object genre into an engaging adventure. Immerse yourself in a world of riddles, concealed items, and unsolved enigmas.">
+  <meta name="keywords" content="hidden object game, clues and mysteries, riddles, mysteries, point and click">
+  <title>Hidden Object: Clues and Mysteries</title>
+  <script src="https://cdn.frvr.com/sdk/frvr-sdk.min.js"></script>
+  <script src="https://cdn.frvr.com/sdk/frvr-channel-dev.min.js"></script>
+  <script>
+    window.FRVR.config = {
+      gameId: "awesomegame",
+      cloudStorage: { playerStorage: { gameId: "G48WRPH" } },
+      social: { syncFriendsOnLogin: false },
+      iap: { catalog: { chestofgems: { label: "chestofgems", storeId: "chestofgems", consumable: true } } },
+      ads: { autoInit: true, throttling: { maxfrequency: 30000 }, providers: [ ] },
+      auth: { enableAnonymousLogin: true, facebookSdk: { permissions: "gaming_profile,gaming_user_picture" } },
+      features: { gameId: "G48WRPH" },
+      shop: { gameId: "G48WRPH" },
+      consent: { providerName: "cookiepro", config: { websiteKey: "acd0a7d3-539e-483c-8c17-484beca00b4d" } }
+    };
+  </script>
+</head>
+<body>
+<div id="canvas-wrapper"></div>
+</body>
+</html>

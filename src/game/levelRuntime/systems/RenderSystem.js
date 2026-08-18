@@ -1,0 +1,30 @@
+import Locator from '../../engine/Locator.ts'
+import BackgroundComponent from '../components/BackgroundComponent.js'
+import System from './System.js'
+
+export default class RenderSystem extends System {
+  #game = Locator.game
+  #view = this.#game.view
+
+  constructor() {
+    super()
+  }
+
+  init() {
+    this.entities.forEach(entity => {
+      this.#initializeBackground(entity)
+    })
+  }
+
+  #initializeBackground(entity) {
+    const backgroundComponent = entity.getComponent(BackgroundComponent)
+
+    if (backgroundComponent) {
+      const background = backgroundComponent.view
+
+      if (!this.#view.children.includes(background)) {
+        this.#view.addChild(background)
+      }
+    }
+  }
+}

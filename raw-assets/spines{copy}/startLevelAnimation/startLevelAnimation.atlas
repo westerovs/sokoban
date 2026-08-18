@@ -1,0 +1,10 @@
+startLevelAnimation.webp
+size:316,109
+filter:Linear,Linear
+pma:true
+scale:0.7
+images/smoke1
+bounds:2,2,182,105
+images/smoke2
+bounds:186,13,128,94
+offsets:0,0,140,97

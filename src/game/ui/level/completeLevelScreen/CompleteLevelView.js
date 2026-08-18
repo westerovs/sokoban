@@ -1,0 +1,149 @@
+import {Container} from 'pixi.js'
+import i18next from 'i18next'
+import {GAME_NAMES, WORLD} from '@/game/gameConfig/constants.js'
+import {applyInteractive} from '@/game/components/buttons/buttons.js'
+import {primaryFontStyle} from '@/game/styles.js'
+import SdkManager from '@/game/engine/SdkManager.js'
+import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
+import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+
+
+const STYLES = {
+  btnNext: {
+    ...primaryFontStyle,
+    fontSize: 36,
+  },
+  arrow: {
+    ...primaryFontStyle,
+    fontSize: 22,
+    fill: 0xFFFFFF,
+  }
+}
+
+
+export default class CompleteLevelView extends Container {
+  #refs
+
+  constructor({refs} = {}) {
+    super()
+
+    this.#refs = refs
+    this.label = 'completeLevelView'
+    this.zIndex = 1
+
+    this.#init()
+  }
+
+  #init = () => {
+    this.#refs.completeLevelView = this
+    this.#createButtonsContainer()
+  }
+
+  #createButtonsContainer() {
+    const buttonsContainer = new Container()
+    buttonsContainer.label = 'btnsContainer'
+    buttonsContainer.position.set(WORLD.HALF_W, 800)
+
+    buttonsContainer.addChild(this.#createButtonNext())
+
+    if (SdkManager.flags?.noStore) {
+      buttonsContainer.addChild(this.#createButtonHome())
+    } else {
+      buttonsContainer.addChild(
+        this.#createButtonStore(),
+        this.#createButtonHome(),
+        this.#createButtonByeAd(),
+      )
+    }
+
+    this.addChild(buttonsContainer)
+  }
+
+  #createButtonNext() {
+    const button = new Container()
+    button.label = 'btnNext'
+    applyInteractive(button, {isButton: true})
+
+    const textureKey = GAME_NAME === GAME_NAMES.hotel ? 'btn-start' : 'btn-next'
+    const background = GameUtils.createSprite(textureKey)
+    const text = GameUtils.createText(`${i18next.t('btnNextText')}`, {
+      style: STYLES.btnNext
+    })
+    const arrow = this.#createButtonNextArrow()
+
+    button.addChild(background, text, arrow)
+    return button
+  }
+
+  #createButtonNextArrow() {
+    const arrow = new Container()
+    arrow.label = 'btnNextArrow'
+    arrow.position.set(-54, -75)
+
+    const background = GameUtils.createSprite('btn-next-arrow')
+    const text = GameUtils.createText('', {
+      name: 'arrowText',
+      style: STYLES.arrow
+    })
+
+    arrow.addChild(background, text)
+    return arrow
+  }
+
+  #createButtonStore() {
+    return new ButtonContainer({
+      props: {
+        name: 'btnBuyLoupe',
+        x: -155,
+        y: 195,
+      },
+      spriteKeys: [
+        'btn-ui-2',
+        {key: 'icon-loupe-plus', scale: 0.6}
+      ],
+      overHandler: false,
+    })
+  }
+
+  #createButtonHome() {
+    return new ButtonContainer({
+      props: {
+        name: 'btnHome',
+        y: 199,
+      },
+      spriteKeys: ['btn-ui-1', 'icon-home'],
+      overHandler: false,
+    })
+  }
+
+  #createButtonByeAd() {
+    const button = new ButtonContainer({
+      props: {
+        name: 'btnByeAd',
+        x: 155,
+        y: 199,
+      },
+      spriteKeys: ['btn-ui-2', 'icon-noAd'],
+      overHandler: false,
+    })
+
+    const text = GameUtils.createText('100\nголосов', {
+      name: 'btnByeAdText',
+      anchorX: 1,
+      anchorY: 0,
+      style: {
+        ...primaryFontStyle,
+        fontSize: 22,
+        lineHeight: 21,
+        fill: 0xFFFFFF,
+        stroke: {color: '#000000', width: 2},
+        align: 'right'
+      }
+    })
+    text.position.set(50, 10)
+
+    button.addChild(text)
+    return button
+  }
+}
