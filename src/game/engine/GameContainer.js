@@ -14,7 +14,7 @@ export default class GameContainer extends Container {
   
   constructor(game) {
     super({label: 'GameContainer', sortableChildren: true})
-
+    
     this.game = game
     this.#init()
   }
@@ -46,13 +46,11 @@ export default class GameContainer extends Container {
   #updateDebugRect() {
     if (!this.#isDebug) return
     
-    const {width, height} = Locator.uiLayer.uiData
-
     this.#debugRect?.update({
-      width: width,
-      height: height,
+      width: WORLD.WIDTH,
+      height: WORLD.HEIGHT,
       scale: this.scale.x,
     })
   }
-
+  
 }

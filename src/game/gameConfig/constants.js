@@ -2,8 +2,8 @@ import {URL_PRESET} from '../../../utils/getAssetsUrl.js'
 import {GAME_NAME} from '../generatedAssets/buildMeta.js'
 
 // ---------- game app settings ----------
-const width = 720
-const height = 1280
+const width = 2560
+const height = 1080
 const WORLD = Object.freeze({
   WIDTH: width,
   HEIGHT: height,

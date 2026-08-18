@@ -23,6 +23,10 @@ export default class Options {
     // setTimeout(() => this.#toggleVisibility(), 500)
   }
   
+  get view () {
+    return this.#view
+  }
+  
   get optionsToggleBtn() {
     return this.#optionsToggleBtn
   }

@@ -26,7 +26,7 @@ import {getGameResolution} from '@/game/gameConfig/resolutionConfig.mjs'
 export default class Game extends EventEmitter {
   #app
   #states = []
-  #stateAfterPreload = GAME_STATES.gameState
+  #stateAfterPreload = GAME_STATES.levelPreload
   #gameContainer
   #locale
   #currentStateName

@@ -75,6 +75,7 @@ export default class Level {
   unlockScene = () => {
     this.stage.interactiveChildren = true
     this.game.gameContainer.eventMode = 'static'
+    Locator.options.view.optionsToggleBtn.eventMode = 'static'
   }
   
   #initComponents = () => {
