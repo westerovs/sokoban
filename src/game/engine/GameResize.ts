@@ -68,8 +68,8 @@ export default class GameResize {
   }
 
   #resizeRootContainers = () => {
-    this.#game?.gameContainer?.resize()
     Locator.uiLayer.resize()
+    this.#game?.gameContainer?.resize()
   }
 
   #resizeCurrentState = async () => {

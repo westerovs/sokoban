@@ -10,7 +10,7 @@ import DebugRect from '../utils/debug/DebugRect.ts'
 
 export default class GameContainer extends Container {
   #debugRect = null
-  #isDebug = false
+  #isDebug = true
   
   constructor(game) {
     super({label: 'GameContainer', sortableChildren: true})
@@ -46,9 +46,11 @@ export default class GameContainer extends Container {
   #updateDebugRect() {
     if (!this.#isDebug) return
     
+    const {width, height} = Locator.uiLayer.uiData
+
     this.#debugRect?.update({
-      width: WORLD.WIDTH,
-      height: WORLD.HEIGHT,
+      width: width,
+      height: height,
       scale: this.scale.x,
     })
   }
