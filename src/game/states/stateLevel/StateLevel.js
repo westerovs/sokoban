@@ -1,9 +1,9 @@
 import {gsap} from 'gsap'
-import BaseState from '../BaseState.js'
-import LevelView from './LevelView.js'
-import {GAME_STATES} from '../../gameConfig/constants.js'
-import Level from './Level.js'
 import Locator from '../../engine/Locator.ts'
+import {GAME_STATES} from '../../gameConfig/constants.js'
+import BaseState from '../BaseState.js'
+import Level from './Level.js'
+import LevelView from './LevelView.js'
 
 export default class StateLevel extends BaseState {
   #game = null
@@ -38,7 +38,7 @@ export default class StateLevel extends BaseState {
   
   async start() {
     this.level = new Level(this)
-    this.level.init()
+    await this.level.init()
     await Locator.gameResize.resize()
     Locator.soundManager.startLevelMusic()
   }

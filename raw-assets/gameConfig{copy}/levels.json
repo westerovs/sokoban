@@ -1,678 +1,154 @@
 {
   "level0": {
+    "id": "sokoban-01",
     "spineName": "level0",
-    "music": "velvet_orbit"
+    "back": "back_lv0",
+    "music": "velvet_orbit",
+    "map": [
+      "######",
+      "#    #",
+      "# @$.#",
+      "#    #",
+      "######"
+    ]
   },
   "level1": {
+    "id": "sokoban-02",
     "spineName": "level1",
-    "amb": "amb_city",
-    "music": "amber_signal"
+    "back": "back_lv1",
+    "music": "amber_signal",
+    "map": [
+      "######",
+      "# .  #",
+      "# $  #",
+      "# @  #",
+      "#    #",
+      "######"
+    ]
   },
   "level2": {
-    "spineName": "level2_shadows",
-    "music": "quiet_comet"
+    "id": "sokoban-03",
+    "spineName": "level2",
+    "back": "back_lv2",
+    "music": "quiet_comet",
+    "map": [
+      "#######",
+      "#     #",
+      "# .#  #",
+      "#  $  #",
+      "#  @  #",
+      "#     #",
+      "#######"
+    ]
   },
   "level3": {
+    "id": "sokoban-04",
     "spineName": "level3",
-    "music": "velvet_orbit"
+    "back": "back_lv3",
+    "music": "velvet_orbit",
+    "map": [
+      "########",
+      "#      #",
+      "# ..   #",
+      "# $$   #",
+      "#  @   #",
+      "#      #",
+      "########"
+    ]
   },
   "level4": {
+    "id": "sokoban-05",
     "spineName": "level4",
-    "amb": "amb_street",
-    "music": "amber_signal"
+    "back": "back_lv4",
+    "music": "amber_signal",
+    "map": [
+      "########",
+      "#  . . #",
+      "#      #",
+      "#  $ $ #",
+      "#   #  #",
+      "#  @   #",
+      "#      #",
+      "########"
+    ]
   },
   "level5": {
-    "spineName": "level105_ny",
-    "isRemote": true,
-    "music": "quiet_comet"
+    "id": "sokoban-06",
+    "spineName": "level5",
+    "back": "back_lv5",
+    "music": "quiet_comet",
+    "map": [
+      "########",
+      "#  .   #",
+      "#  .   #",
+      "#  $$  #",
+      "#   @  #",
+      "#      #",
+      "#      #",
+      "########"
+    ]
   },
   "level6": {
-    "spineName": "level125_anagrams",
-    "music": "velvet_orbit"
+    "id": "sokoban-07",
+    "spineName": "level6",
+    "back": "back_lv6",
+    "music": "velvet_orbit",
+    "map": [
+      "#########",
+      "# . . . #",
+      "#       #",
+      "# $ $ $ #",
+      "#   @   #",
+      "#       #",
+      "#########"
+    ]
   },
   "level7": {
-    "spineName": "level6",
-    "amb": "amb_stepsShop",
-    "music": "amber_signal"
+    "id": "sokoban-08",
+    "spineName": "level7",
+    "back": "back_lv7",
+    "music": "amber_signal",
+    "map": [
+      "#########",
+      "#  . .  #",
+      "# .     #",
+      "#  $ $  #",
+      "# $ #   #",
+      "#   @   #",
+      "#       #",
+      "#########"
+    ]
   },
   "level8": {
-    "spineName": "level131_identical_cup",
-    "music": "quiet_comet"
+    "id": "sokoban-09",
+    "spineName": "level8",
+    "back": "back_lv8",
+    "music": "quiet_comet",
+    "map": [
+      "##########",
+      "#   . .  #",
+      "#   .    #",
+      "#        #",
+      "#  $$$   #",
+      "#  # #   #",
+      "#   @    #",
+      "##########"
+    ]
   },
   "level9": {
-    "spineName": "level7",
-    "amb": "amb_cafe",
-    "music": "velvet_orbit"
-  },
-  "level10": {
-    "spineName": "level8",
-    "amb": "amb_miniShop",
-    "music": "amber_signal"
-  },
-  "level11": {
-    "spineName": "level9_generator",
-    "music": "quiet_comet"
-  },
-  "level12": {
-    "spineName": "level106_ny",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level13": {
-    "spineName": "level10",
-    "amb": "amb_workshop",
-    "music": "amber_signal"
-  },
-  "level14": {
-    "spineName": "level11",
-    "amb": "amb_kitchen",
-    "music": "quiet_comet"
-  },
-  "level15": {
-    "spineName": "level5_words",
-    "music": "velvet_orbit"
-  },
-  "level16": {
-    "spineName": "level12_shadows",
-    "amb": "amb_eatery",
-    "music": "amber_signal"
-  },
-  "level17": {
-    "spineName": "level13",
-    "music": "quiet_comet"
-  },
-  "level18": {
-    "spineName": "level14",
-    "amb": "amb_street",
-    "music": "velvet_orbit"
-  },
-  "level19": {
-    "spineName": "level107_ny",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level20": {
-    "spineName": "level15_anagrams",
-    "music": "quiet_comet"
-  },
-  "level21": {
-    "spineName": "level16",
-    "amb": "amb_workshop",
-    "music": "velvet_orbit"
-  },
-  "level22": {
-    "spineName": "level132_identical_origami",
-    "music": "amber_signal"
-  },
-  "level23": {
-    "spineName": "level17",
-    "music": "quiet_comet"
-  },
-  "level24": {
-    "spineName": "level18",
-    "music": "velvet_orbit"
-  },
-  "level25": {
-    "spineName": "level19_generator",
-    "amb": "amb_sea",
-    "music": "amber_signal"
-  },
-  "level26": {
-    "spineName": "level108_ny",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level27": {
-    "spineName": "level20",
-    "amb": "amb_workshop",
-    "music": "velvet_orbit"
-  },
-  "level28": {
-    "spineName": "level21",
-    "amb": "amb_kitchen",
-    "music": "amber_signal"
-  },
-  "level29": {
-    "spineName": "level25_words",
-    "music": "quiet_comet"
-  },
-  "level30": {
-    "spineName": "level22_shadows",
-    "music": "velvet_orbit"
-  },
-  "level31": {
-    "spineName": "level23",
-    "amb": "amb_nature",
-    "music": "amber_signal"
-  },
-  "level32": {
-    "spineName": "level24",
-    "amb": "amb_shop",
-    "music": "quiet_comet"
-  },
-  "level33": {
-    "spineName": "level109_ny",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level34": {
-    "spineName": "level126_anagrams",
-    "music": "amber_signal"
-  },
-  "level35": {
-    "spineName": "level26",
-    "music": "quiet_comet"
-  },
-  "level36": {
-    "spineName": "level133_identical_bag",
-    "music": "velvet_orbit"
-  },
-  "level37": {
-    "spineName": "level27",
-    "music": "amber_signal"
-  },
-  "level38": {
-    "spineName": "level28",
-    "amb": "amb_workshop",
-    "music": "quiet_comet"
-  },
-  "level39": {
-    "spineName": "level29_generator",
-    "music": "velvet_orbit"
-  },
-  "level40": {
-    "spineName": "level110_ny",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level41": {
-    "spineName": "level30",
-    "music": "quiet_comet"
-  },
-  "level42": {
-    "spineName": "level31",
-    "amb": "amb_kitchen",
-    "music": "velvet_orbit"
-  },
-  "level43": {
-    "spineName": "level127_words",
-    "music": "amber_signal"
-  },
-  "level44": {
-    "spineName": "level32_shadows",
-    "amb": "amb_shop",
-    "music": "quiet_comet"
-  },
-  "level45": {
-    "spineName": "level33",
-    "music": "velvet_orbit"
-  },
-  "level46": {
-    "spineName": "level34",
-    "amb": "amb_kitchen",
-    "music": "amber_signal"
-  },
-  "level47": {
-    "spineName": "level111_ny",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level48": {
-    "spineName": "level35_anagrams",
-    "amb": "amb_stepsShop",
-    "music": "velvet_orbit"
-  },
-  "level49": {
-    "spineName": "level36",
-    "music": "amber_signal"
-  },
-  "level50": {
-    "spineName": "level134_identical_clock",
-    "music": "quiet_comet"
-  },
-  "level51": {
-    "spineName": "level37",
-    "music": "velvet_orbit"
-  },
-  "level52": {
-    "spineName": "level38",
-    "music": "amber_signal"
-  },
-  "level53": {
-    "spineName": "level39_generator",
-    "music": "quiet_comet"
-  },
-  "level54": {
-    "spineName": "level112_ny",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level55": {
-    "spineName": "level40",
-    "music": "amber_signal"
-  },
-  "level56": {
-    "spineName": "level41",
-    "music": "quiet_comet"
-  },
-  "level57": {
-    "spineName": "level45_words",
-    "music": "velvet_orbit"
-  },
-  "level58": {
-    "spineName": "level42_shadows",
-    "music": "amber_signal"
-  },
-  "level59": {
-    "spineName": "level43",
-    "music": "quiet_comet"
-  },
-  "level60": {
-    "spineName": "level44",
-    "music": "velvet_orbit"
-  },
-  "level61": {
-    "spineName": "level113_ny",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level62": {
-    "spineName": "level128_anagrams",
-    "music": "quiet_comet"
-  },
-  "level63": {
-    "spineName": "level46",
-    "music": "velvet_orbit"
-  },
-  "level64": {
-    "spineName": "level135_identical_flower",
-    "music": "amber_signal"
-  },
-  "level65": {
-    "spineName": "level47",
-    "music": "quiet_comet"
-  },
-  "level66": {
-    "spineName": "level48",
-    "music": "velvet_orbit"
-  },
-  "level67": {
-    "spineName": "level49_generator",
-    "music": "amber_signal"
-  },
-  "level68": {
-    "spineName": "level114_ny",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level69": {
-    "spineName": "level50",
-    "music": "velvet_orbit"
-  },
-  "level70": {
-    "spineName": "level51",
-    "music": "amber_signal"
-  },
-  "level71": {
-    "spineName": "level129_words",
-    "music": "quiet_comet"
-  },
-  "level72": {
-    "spineName": "level52_shadows",
-    "amb": "amb_street",
-    "music": "velvet_orbit"
-  },
-  "level73": {
-    "spineName": "level53",
-    "music": "amber_signal"
-  },
-  "level74": {
-    "spineName": "level54",
-    "music": "quiet_comet"
-  },
-  "level75": {
-    "spineName": "level115_ny",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level76": {
-    "spineName": "level55_anagrams",
-    "music": "amber_signal"
-  },
-  "level77": {
-    "spineName": "level56",
-    "music": "quiet_comet"
-  },
-  "level78": {
-    "spineName": "level136_identical_cookie",
-    "music": "velvet_orbit"
-  },
-  "level79": {
-    "spineName": "level57",
-    "music": "amber_signal"
-  },
-  "level80": {
-    "spineName": "level58",
-    "music": "quiet_comet"
-  },
-  "level81": {
-    "spineName": "level59_generator",
-    "music": "velvet_orbit"
-  },
-  "level82": {
-    "spineName": "level116_ny",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level83": {
-    "spineName": "level60",
-    "music": "quiet_comet"
-  },
-  "level84": {
-    "spineName": "level61",
-    "music": "velvet_orbit"
-  },
-  "level85": {
-    "spineName": "level65_words",
-    "music": "amber_signal"
-  },
-  "level86": {
-    "spineName": "level62_shadows",
-    "amb": "amb_kitchen",
-    "music": "quiet_comet"
-  },
-  "level87": {
-    "spineName": "level63",
-    "music": "velvet_orbit"
-  },
-  "level88": {
-    "spineName": "level64",
-    "music": "amber_signal"
-  },
-  "level89": {
-    "spineName": "level117_ny",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level90": {
-    "spineName": "level130_anagrams",
-    "music": "velvet_orbit"
-  },
-  "level91": {
-    "spineName": "level66",
-    "music": "amber_signal"
-  },
-  "level92": {
-    "spineName": "level137_identical_cat",
-    "music": "quiet_comet"
-  },
-  "level93": {
-    "spineName": "level67",
-    "music": "velvet_orbit"
-  },
-  "level94": {
-    "spineName": "level68",
-    "music": "amber_signal"
-  },
-  "level95": {
-    "spineName": "level69_generator",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level96": {
-    "spineName": "level118_ny",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level97": {
-    "spineName": "level70",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level98": {
-    "spineName": "level71",
-    "isRemote": true,
-    "amb": "amb_streetCafe",
-    "music": "quiet_comet"
-  },
-  "level99": {
-    "spineName": "level141_words",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level100": {
-    "spineName": "level72_shadows",
-    "isRemote": true,
-    "amb": "amb_workshop",
-    "music": "amber_signal"
-  },
-  "level101": {
-    "spineName": "level73",
-    "isRemote": true,
-    "amb": "amb_streetCafe",
-    "music": "quiet_comet"
-  },
-  "level102": {
-    "spineName": "level74",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level103": {
-    "spineName": "level119_ny",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level104": {
-    "spineName": "level75_anagrams",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level105": {
-    "spineName": "level76",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level106": {
-    "spineName": "level138_identical_softToy",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level107": {
-    "spineName": "level77",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level108": {
-    "spineName": "level78",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level109": {
-    "spineName": "level79_generator",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level110": {
-    "spineName": "level120_ny",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level111": {
-    "spineName": "level80",
-    "isRemote": true,
-    "amb": "amb_cafe",
-    "music": "velvet_orbit"
-  },
-  "level112": {
-    "spineName": "level81",
-    "isRemote": true,
-    "amb": "amb_eatery",
-    "music": "amber_signal"
-  },
-  "level113": {
-    "spineName": "level85_words",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level114": {
-    "spineName": "level82_shadows",
-    "isRemote": true,
-    "amb": "amb_workshop",
-    "music": "velvet_orbit"
-  },
-  "level115": {
-    "spineName": "level83",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level116": {
-    "spineName": "level84",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level117": {
-    "spineName": "level121_ny",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level118": {
-    "spineName": "level142_anagrams",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level119": {
-    "spineName": "level86",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level120": {
-    "spineName": "level139_identical_butterfly",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level121": {
-    "spineName": "level87",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level122": {
-    "spineName": "level88",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level123": {
-    "spineName": "level89_generator",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level124": {
-    "spineName": "level122_ny",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level125": {
-    "spineName": "level90",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level126": {
-    "spineName": "level91",
-    "isRemote": true,
-    "amb": "amb_miniShop",
-    "music": "velvet_orbit"
-  },
-  "level127": {
-    "spineName": "level143_words",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level128": {
-    "spineName": "level92_shadows",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level129": {
-    "spineName": "level93",
-    "isRemote": true,
-    "amb": "amb_eatery",
-    "music": "velvet_orbit"
-  },
-  "level130": {
-    "spineName": "level94",
-    "isRemote": true,
-    "amb": "amb_nature",
-    "music": "amber_signal"
-  },
-  "level131": {
-    "spineName": "level123_ny",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level132": {
-    "spineName": "level95_anagrams",
-    "isRemote": true,
-    "amb": "amb_stepsShop",
-    "music": "velvet_orbit"
-  },
-  "level133": {
-    "spineName": "level96",
-    "isRemote": true,
-    "amb": "amb_city",
-    "music": "amber_signal"
-  },
-  "level134": {
-    "spineName": "level140_identical_newspaper",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level135": {
-    "spineName": "level97",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level136": {
-    "spineName": "level98",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level137": {
-    "spineName": "level99_generator",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level138": {
-    "spineName": "level124_ny",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level139": {
-    "spineName": "level100",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level140": {
-    "spineName": "level101",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level141": {
-    "spineName": "level144_words",
-    "isRemote": true,
-    "music": "velvet_orbit"
-  },
-  "level142": {
-    "spineName": "level102_shadows",
-    "isRemote": true,
-    "music": "amber_signal"
-  },
-  "level143": {
-    "spineName": "level103",
-    "isRemote": true,
-    "music": "quiet_comet"
-  },
-  "level144": {
-    "spineName": "level104",
-    "isRemote": true,
-    "music": "velvet_orbit"
+    "id": "sokoban-10",
+    "spineName": "level9",
+    "back": "back_lv9",
+    "music": "velvet_orbit",
+    "map": [
+      "##########",
+      "# . . .  #",
+      "#        #",
+      "#  $ $ $ #",
+      "#   # #  #",
+      "# @      #",
+      "#        #",
+      "##########"
+    ]
   }
 }

@@ -1,21 +1,19 @@
 import {Assets} from 'pixi.js'
-import BaseState from '@/game/states/BaseState.js'
-import {GAME_STATES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
-import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '@/game/engine/Locator.ts'
-import {Logger, MODULES} from '@/game/utils/Logger.js'
+import SdkManager from '@/game/engine/SdkManager.js'
+import LocalStorage from '@/game/engine/storage/LocalStorage.js'
+import {GAME_STATES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
+import BaseState from '@/game/states/BaseState.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+import {Logger, MODULES} from '@/game/utils/Logger.js'
 import TestController from '@/game/utils/testing/autotest/TestController.js'
+import Finalize from './states/Finalize.js'
 // states
 import InitialLoad from './states/InitialLoad.js'
-import PreparePreloadText from './states/PreparePreloadText.js'
 import LoadLevelResources from './states/LoadLevelResources.js'
-import Finalize from './states/Finalize.js'
-import LevelConfig from '@/game/gameConfig/LevelConfig.js'
-import LocalStorage from '@/game/engine/storage/LocalStorage.js'
-import SdkManager from '@/game/engine/SdkManager.js'
+import PreparePreloadText from './states/PreparePreloadText.js'
 
-let spineName = null
 let isFirstInit = false
 
 export default class LevelPreload extends BaseState {
@@ -25,7 +23,6 @@ export default class LevelPreload extends BaseState {
   levelIndex
   textPreloadData
   #sfxIsLoaded = false
-  #loadResourcesState
   
   get initEventName() {
     return GAME_STATES.levelPreload
@@ -46,7 +43,6 @@ export default class LevelPreload extends BaseState {
     
     // prepare
     await this.#runInitializeState()
-    spineName = LevelConfig.getGameLevelData(this.levelIndex).spineName
     await Locator.gameResize.resize()
     await this.#runPreparePreloadText()
     // level load
@@ -66,6 +62,11 @@ export default class LevelPreload extends BaseState {
   
   resize() {
     this.view.resize()
+  }
+
+  clearLevelCache = async () => {
+    Logger.log(MODULES.LevelPreload, 'clear Sokoban level cache')
+    await Assets.unloadBundle('levelBundle')
   }
   
   terminate() {
@@ -135,8 +136,8 @@ export default class LevelPreload extends BaseState {
   }
   
   #runLoadLevelResources = async (levelIndex) => {
-    this.#loadResourcesState = new LoadLevelResources(this,true)
-    await this.#loadResourcesState.execute(levelIndex)
+    const loadResourcesState = new LoadLevelResources(this, true)
+    await loadResourcesState.execute(levelIndex)
   }
   
   #checkoutState = async (startTime) => {
@@ -145,48 +146,6 @@ export default class LevelPreload extends BaseState {
     
     const finalizeState = new Finalize(this)
     await finalizeState.startGame()
-  }
-  
-  // todo при первом запуске получать spineName
-  clearLevelCache = async () => {
-    if (!spineName) return
-    
-    Logger.log(MODULES.LevelPreload, '-------- clearLevel Cache', spineName)
-    
-    return new Promise(async resolve => {
-      try {
-        // выгружает содержимое preloadList
-        await Assets.unloadBundle('levelBundle')
-        await Assets.unloadBundle('levelBundle_2')
-        
-        // spineLevel
-        await Assets.unload(`${spineName}.spineData`) // spine
-        await Assets.unload(`${spineName}`) // background
-        await Assets.unload(`${spineName}_2`) // background_2
-        
-        const {levelIndex, skinIndex} = Locator.storage.playerData
-        
-        if (levelIndex === 1 && skinIndex === 1) {
-          Assets.cache.remove('intro.spineData')
-          await Assets.unload('intro.spineData') // spine
-          await Assets.unload('intro') // spriteSheet
-        }
-        try {
-          const {spriteSheet} = this.#loadResourcesState.hudSpriteSheetData
-          spriteSheet.destroy(true)
-        } catch (err) {
-          console.log('[hudSpriteSheet destroy]', err)
-        }
-
-        // Очистка аудио ресурсов, если используется soundManager
-        const soundManager = Locator.soundManager
-        soundManager.clearSoundList(soundManager.speechList)
-        
-        resolve()
-      } catch (err) {
-        console.error('[clearLevel Cache]', err)
-      }
-    })
   }
   
   #postLoadLazySFX = async () => {
