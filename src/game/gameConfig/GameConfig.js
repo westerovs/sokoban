@@ -1,5 +1,6 @@
-import {ASSETS_URL} from './constants.js'
 import LoadUtils from '../utils/gameUtils/LoadUtils.js'
+import {ASSETS_URL} from './constants.js'
+import levels from './levels.json'
 
 
 export default class GameConfig {
@@ -32,8 +33,7 @@ export default class GameConfig {
   }
   
   loadLevelsJson = async () => {
-    const url = `${this.gameConfigUrl}/levels.json`
-    this.levels = await LoadUtils.loadJson(url)
+    this.levels = levels
   }
 
   loadMusicPlaylistsJson = async () => {
