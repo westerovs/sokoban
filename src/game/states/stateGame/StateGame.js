@@ -50,10 +50,6 @@ export default class StateGame extends BaseState {
     this.#soundManager = Locator.soundManager
   }
   
-  async resize() {
-    await this.#view.resize()
-  }
-  
   checkoutState = async (stateName) => {
     super.checkoutState()
     this.terminate()

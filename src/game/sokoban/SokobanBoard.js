@@ -1,6 +1,6 @@
 import {Container, Graphics} from 'pixi.js'
-import Locator from '@/game/engine/Locator.ts'
-import {WORLD} from '@/game/gameConfig/constants.js'
+import Locator from '../engine/Locator.ts'
+import {WORLD} from '../gameConfig/constants.js'
 import {ROTATED_DIRECTIONS, SOKOBAN_COLORS} from './config.js'
 import {SOKOBAN_SETTINGS} from './settings.js'
 import SokobanBoxView from './SokobanBoxView.js'
@@ -30,19 +30,13 @@ export default class SokobanBoard extends Container {
   }
 
   resize() {
-    const {scaleFactor} = Locator.gameResize.resizeData
-    const visibleWidth = window.innerWidth / scaleFactor
-    const shouldRotate = SOKOBAN_SETTINGS.rotateTallBoardInLandscape && this.#level.height > this.#level.width && WORLD.isLandscape
-    const displayedWidth = shouldRotate ? this.#boardHeight : this.#boardWidth
-    const displayedHeight = shouldRotate ? this.#boardWidth : this.#boardHeight
-    const horizontalPadding = this.#getHorizontalPadding(visibleWidth)
-    const availableWidth = visibleWidth - horizontalPadding * 2
-    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.verticalPadding * 2
-    const boardScale = Math.min(availableWidth / displayedWidth, availableHeight / displayedHeight)
+    const shouldRotate = this.#shouldRotate()
+    const {width, height} = this.#getDisplayedSize(shouldRotate)
+    const boardScale = this.#getBoardScale(width, height)
 
     this.#isRotated = shouldRotate
     this.rotation = shouldRotate ? Math.PI / 2 : 0
-    this.scale.set(Math.max(boardScale, 0.1))
+    this.scale.set(boardScale)
     this.position.set(WORLD.HALF_W, WORLD.HALF_H)
   }
 
@@ -60,6 +54,29 @@ export default class SokobanBoard extends Container {
     this.pivot.set(this.#boardWidth / 2, this.#boardHeight / 2)
     this.update()
     this.resize()
+  }
+
+  #shouldRotate() {
+    return SOKOBAN_SETTINGS.rotateTallBoardInLandscape
+      && this.#level.height > this.#level.width
+      && WORLD.isLandscape
+  }
+
+  #getDisplayedSize(shouldRotate) {
+    return {
+      width: shouldRotate ? this.#boardHeight : this.#boardWidth,
+      height: shouldRotate ? this.#boardWidth : this.#boardHeight,
+    }
+  }
+
+  #getBoardScale(displayedWidth, displayedHeight) {
+    const {scaleFactor} = Locator.gameResize.resizeData
+    const visibleWidth = window.innerWidth / scaleFactor
+    const horizontalPadding = this.#getHorizontalPadding(visibleWidth)
+    const availableWidth = visibleWidth - horizontalPadding * 2
+    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.verticalPadding * 2
+
+    return Math.max(Math.min(availableWidth / displayedWidth, availableHeight / displayedHeight), 0.1)
   }
 
   #getHorizontalPadding(visibleWidth) {
@@ -97,7 +114,10 @@ export default class SokobanBoard extends Container {
     const x = position.x * this.#tileSize
     const y = position.y * this.#tileSize
 
-    tiles.rect(x, y, this.#tileSize, this.#tileSize).fill(SOKOBAN_COLORS.floor).stroke({color: SOKOBAN_COLORS.floorBorder, width: 2})
+    tiles
+      .rect(x, y, this.#tileSize, this.#tileSize)
+      .fill(SOKOBAN_COLORS.floor)
+      .stroke({color: SOKOBAN_COLORS.floorBorder, width: 2})
   }
 
   #drawWall(tiles, position) {

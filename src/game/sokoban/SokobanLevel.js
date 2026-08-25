@@ -114,7 +114,7 @@ export default class SokobanLevel {
       return
     }
 
-    throw new Error(`Unsupported Sokoban symbol: ${symbol}`)
+    throw new Error('Unsupported Sokoban symbol: ' + symbol)
   }
 
   #validateEntities() {
@@ -144,9 +144,7 @@ export default class SokobanLevel {
 
   #isBlocked(position) {
     if (this.#isWallOrOutside(position)) return true
-
-    const positionKey = this.#getPositionKey(position)
-    return this.#boxes.has(positionKey)
+    return this.#boxes.has(this.#getPositionKey(position))
   }
 
   #isWallOrOutside(position) {
@@ -173,7 +171,7 @@ export default class SokobanLevel {
   }
 
   #getPositionKey(position) {
-    return `${position.x}:${position.y}`
+    return position.x + ':' + position.y
   }
 
   #parsePositionKey(positionKey) {

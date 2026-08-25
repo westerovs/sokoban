@@ -10,11 +10,11 @@ import DebugRect from '../utils/debug/DebugRect.ts'
 
 export default class GameContainer extends Container {
   #debugRect = null
-  #isDebug = true
+  #isDebug = false
   
   constructor(game) {
     super({label: 'GameContainer', sortableChildren: true})
-    
+
     this.game = game
     this.#init()
   }
@@ -52,5 +52,5 @@ export default class GameContainer extends Container {
       scale: this.scale.x,
     })
   }
-  
+
 }

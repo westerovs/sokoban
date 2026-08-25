@@ -11,7 +11,6 @@ import {
   TextureAtlas,
 } from '@esotericsoftware/spine-pixi-v8'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
-import Locator from '@/game/engine/Locator.ts'
 import {ASSETS_URL, WORLD} from '@/game/gameConfig/constants.js'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 

@@ -171,12 +171,12 @@ export default class YaMetrika {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'startLevel')
     
-    const {spineName, currentSkinName} = config
+    const {levelName, currentSkinName} = config
     const {userLevel} = storage
     
     ym(COUNTER_ID, 'params', {
       startLevel: {
-        spineName,
+        levelName,
         currentSkinName,
         userLevel,
       }
@@ -187,11 +187,11 @@ export default class YaMetrika {
   static completeLevel = (config, storage, levelPlayTime) => {
     if (typeof ym !== 'function') return
     
-    const {spineName, currentSkinName} = config
+    const {levelName, currentSkinName} = config
     const {userLevel} = storage
     
     const data = {
-      spineName: `spineName: ${spineName} / levelPlayTime: ${levelPlayTime}`,
+      levelName: `levelName: ${levelName} / levelPlayTime: ${levelPlayTime}`,
       currentSkinName,
       userLevel: {
         [userLevel]: {levelPlayTime},
@@ -209,11 +209,11 @@ export default class YaMetrika {
   static earlyExit = (config, storage, levelPlayTime) => {
     if (typeof ym !== 'function') return
     
-    const {spineName, currentSkinName} = config
+    const {levelName, currentSkinName} = config
     const {userLevel} = storage
     
     const data = {
-      spineName: `spineName: ${spineName} / levelPlayTime: ${levelPlayTime}`,
+      levelName: `levelName: ${levelName} / levelPlayTime: ${levelPlayTime}`,
       currentSkinName,
       userLevel: {
         [userLevel]: {levelPlayTime},
@@ -253,7 +253,7 @@ export default class YaMetrika {
     
     ym(COUNTER_ID, 'params', {
       hintCounter: {
-        spineName: levelIndex,
+        levelName: levelIndex,
         currentSkinName: skinIndex,
         userLevel: {
           [userLevel]: {counter},
@@ -275,7 +275,7 @@ export default class YaMetrika {
       missClickCounter: {
         counter,
         userLevel,
-        spineName: levelIndex,
+        levelName: levelIndex,
         currentSkinName: skinIndex,
       }
     })

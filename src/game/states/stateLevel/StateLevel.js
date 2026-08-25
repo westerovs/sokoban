@@ -43,10 +43,6 @@ export default class StateLevel extends BaseState {
     Locator.soundManager.startLevelMusic()
   }
   
-  async resize() {
-    await this.#view.resize()
-  }
-  
   runNextLevel = async () => {
     await this.level?.exit()
     
@@ -74,10 +70,6 @@ export default class StateLevel extends BaseState {
     this.#view = null
     this.#controller = null
     
-    if (this.#refs.camera) {
-      this.#refs.camera.destroy({children: true})
-    }
-
     this.isInitialized = false
   }
   

@@ -20,7 +20,6 @@ export default class GameResize {
   public resize = async () => {
     this.#saveCurrentSize()
     this.#resizeRootContainers()
-    await this.#resizeCurrentState()
     this.#emitResize()
   }
 
@@ -68,15 +67,8 @@ export default class GameResize {
   }
 
   #resizeRootContainers = () => {
-    Locator.uiLayer.resize()
     this.#game?.gameContainer?.resize()
-  }
-
-  #resizeCurrentState = async () => {
-    const state = this.#game.currentState
-    if (!state?.isInitialized) return
-
-    await state.resize()
+    Locator.uiLayer.resize()
   }
 
   #emitResize = () => {

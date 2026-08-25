@@ -46,6 +46,7 @@ export default class InitialLoad {
       } catch (err) {
         attempts++
         await GameUtils.showTextPreloadAttempts(this.#preloadText, attempts, maxAttempts)
+        console.error(err)
       }
     }
   }
@@ -55,14 +56,6 @@ export default class InitialLoad {
 
     await Locator.gameConfig.loadLevelConfiguration()
     this.#updateProgress(10)
-    
-    await Locator.gameConfig.loadStoryTexts()
-      .catch(e => console.error('loadStoryTexts err:', e))
-    this.#updateProgress(15)
-    
-    await Locator.gameConfig.loadLocalesHud()
-      .catch(e => console.error('loadLocalesHud err:', e))
-    this.#updateProgress(25)
     
     await this.#loadSpines()
     
@@ -80,39 +73,7 @@ export default class InitialLoad {
       spineName: 'startLevelAnimation', folderPath: 'spines/startLevelAnimation'
     })
     
-    this.#updateProgress(60)
-    
-    if (GAME_NAMES.currentName === GAME_NAMES.hotel) {
-      await this.#loadHotelLevelSpineItems()
-        .catch(e => console.error('spines/startLevelAnimation err:', e))
-    }
-    
     this.#updateProgress(80)
-  }
-  
-  #loadHotelLevelSpineItems = async () => {
-    const basePath = ASSETS_URL.local
-    const jsonUrl = `${basePath}assets/spines/levelItems/levelItems.json`
-    const atlasUrl = `${basePath}assets/spines/levelItems/levelItems.atlas`
-    
-    const jsonParent = await LoadUtils.loadJson(jsonUrl)
-    const atlas = await LoadUtils.loadAtlas(atlasUrl)
-    await Assets.load({alias: 'levelItems', src: 'assets/spines/levelItems/levelItems.webp'})
-    
-    const animations = {
-      animBroom: jsonParent.animBroom,
-      animFeatherDuster: jsonParent.animFeatherDuster,
-      animFeathers: jsonParent.animFeathers,
-      animFlash: jsonParent.animFlash,
-      animFoam: jsonParent.animFoam,
-      animLeaves: jsonParent.animLeaves,
-      animVacuumCleaner: jsonParent.animVacuumCleaner,
-    }
-    
-    Object.entries(animations).forEach(([key, value]) => {
-      const assets = {name: key, json: value, atlas}
-      SpineUtils.spineParser([assets])
-    })
   }
   
   #createUiSpriteSheet = async () => {

@@ -1,8 +1,8 @@
-import BackgroundComponent from '@/game/levelRuntime/components/BackgroundComponent.js'
 import Entity from '@/game/levelRuntime/entities/Entity.js'
+import BackgroundComponent from '@/game/levelRuntime/components/BackgroundComponent.js'
+
 
 export default class EntityManager {
-  #createdHogItems = []
   #config
   #entities = new Map()
   
@@ -14,16 +14,10 @@ export default class EntityManager {
     return this.#entities
   }
   
-  get createdHogItems() {
-    return this.#createdHogItems
-  }
-  
   createEntities = async () => {
     await this.#createBackgroundEntity()
-    
-    return Promise.resolve()
   }
-
+  
   #createBackgroundEntity = async () => {
     const textureName = this.#config.bgTexture
 

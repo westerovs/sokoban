@@ -1,7 +1,7 @@
 {
   "level0": {
     "id": "sokoban-01",
-    "spineName": "level0",
+    "levelName": "level0",
     "back": "back_lv0",
     "music": "velvet_orbit",
     "map": [
@@ -14,7 +14,7 @@
   },
   "level1": {
     "id": "sokoban-02",
-    "spineName": "level1",
+    "levelName": "level1",
     "back": "back_lv1",
     "music": "amber_signal",
     "map": [
@@ -28,7 +28,7 @@
   },
   "level2": {
     "id": "sokoban-03",
-    "spineName": "level2",
+    "levelName": "level2",
     "back": "back_lv2",
     "music": "quiet_comet",
     "map": [
@@ -43,7 +43,7 @@
   },
   "level3": {
     "id": "sokoban-04",
-    "spineName": "level3",
+    "levelName": "level3",
     "back": "back_lv3",
     "music": "velvet_orbit",
     "map": [
@@ -58,7 +58,7 @@
   },
   "level4": {
     "id": "sokoban-05",
-    "spineName": "level4",
+    "levelName": "level4",
     "back": "back_lv4",
     "music": "amber_signal",
     "map": [
@@ -74,7 +74,7 @@
   },
   "level5": {
     "id": "sokoban-06",
-    "spineName": "level5",
+    "levelName": "level5",
     "back": "back_lv5",
     "music": "quiet_comet",
     "map": [
@@ -90,7 +90,7 @@
   },
   "level6": {
     "id": "sokoban-07",
-    "spineName": "level6",
+    "levelName": "level6",
     "back": "back_lv6",
     "music": "velvet_orbit",
     "map": [
@@ -105,7 +105,7 @@
   },
   "level7": {
     "id": "sokoban-08",
-    "spineName": "level7",
+    "levelName": "level7",
     "back": "back_lv7",
     "music": "amber_signal",
     "map": [
@@ -121,7 +121,7 @@
   },
   "level8": {
     "id": "sokoban-09",
-    "spineName": "level8",
+    "levelName": "level8",
     "back": "back_lv8",
     "music": "quiet_comet",
     "map": [
@@ -137,7 +137,7 @@
   },
   "level9": {
     "id": "sokoban-10",
-    "spineName": "level9",
+    "levelName": "level9",
     "back": "back_lv9",
     "music": "velvet_orbit",
     "map": [

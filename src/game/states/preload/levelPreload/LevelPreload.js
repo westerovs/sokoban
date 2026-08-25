@@ -7,9 +7,7 @@ import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import BaseState from '@/game/states/BaseState.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {Logger, MODULES} from '@/game/utils/Logger.js'
-import TestController from '@/game/utils/testing/autotest/TestController.js'
 import Finalize from './states/Finalize.js'
-// states
 import InitialLoad from './states/InitialLoad.js'
 import LoadLevelResources from './states/LoadLevelResources.js'
 import PreparePreloadText from './states/PreparePreloadText.js'
@@ -17,62 +15,53 @@ import PreparePreloadText from './states/PreparePreloadText.js'
 let isFirstInit = false
 
 export default class LevelPreload extends BaseState {
+  #sfxIsLoaded = false
   view
   storage
   playerData
   levelIndex
   textPreloadData
-  #sfxIsLoaded = false
-  
+
   get initEventName() {
     return GAME_STATES.levelPreload
   }
-  
+
   async initialize() {
     super.initialize()
-    
     SdkManager.gameplayStop()
-    
-    this.storage = Locator.storage
-    this.levelIndex = this.storage.playerData.levelIndex
-    this.playerData = this.storage.playerData
-    this.game.clearLevelCache = this.clearLevelCache
-    const startTime = performance.now()
-    
-    const adPromise = this.#maybeShowAd()
-    
-    // prepare
-    await this.#runInitializeState()
-    await Locator.gameResize.resize()
-    await this.#runPreparePreloadText()
-    // level load
-    await this.#runLoadLevelResources(this.levelIndex)
-    this.#postLoadLazySFX()
+    this.#initLevelData()
 
-    // ждём окончания рекламы
+    const startTime = performance.now()
+    const adPromise = this.#maybeShowAd()
+
+    await this.#runInitializeState()
+    await this.#runPreparePreloadText()
+    await this.#runLoadLevelResources()
+    this.#postLoadLazySFX()
     await adPromise
-    
+
     if (LocalStorage.testLoad) {
       await this.#testing()
       return
     }
-    
+
     await this.#checkoutState(startTime)
-  }
-  
-  resize() {
-    this.view.resize()
   }
 
   clearLevelCache = async () => {
-    Logger.log(MODULES.LevelPreload, 'clear Sokoban level cache')
-    await Assets.unloadBundle('levelBundle')
+    Logger.log(MODULES.LevelPreload, 'очистка кэша уровня Sokoban')
+
+    try {
+      await Assets.unloadBundle('levelBundle')
+    } catch (err) {
+      console.error('[clearLevel Cache]', err)
+    }
   }
-  
+
   terminate() {
     this.game.emit(GAME_EVENTS.clearLevel)
     this.isInitialized = false
-    
+
     this.view.destroy({children: true})
     this.view = null
     this.storage = null
@@ -80,83 +69,83 @@ export default class LevelPreload extends BaseState {
     this.levelIndex = null
     this.textPreloadData = null
   }
-  
-  #maybeShowAd = () => {
+
+  #initLevelData() {
+    this.storage = Locator.storage
+    this.levelIndex = this.storage.playerData.levelIndex
+    this.playerData = this.storage.playerData
+    this.game.clearLevelCache = this.clearLevelCache
+  }
+
+  #maybeShowAd() {
     if (!isFirstInit) {
       isFirstInit = true
       return
     }
-    
-    let resolveAD
-    
-    const adPromise = new Promise((resolve) => {
-      resolveAD = resolve
+
+    return new Promise((resolve) => {
+      this.#showAdOrResolve(resolve)
     })
-    
-    // Платформа VK — пропуск рекламы
+  }
+
+  #showAdOrResolve(resolve) {
     if (SdkManager.isPlatform(PLATFORM_ID.vk)) {
       Logger.log(MODULES.LevelPreload, '[flag vk], blocking showAd')
-      resolveAD(true)
-      return adPromise
+      resolve(true)
+      return
     }
-    
+
     if (GameUtils.skipAdInFirstLevel(this.levelIndex)) {
       Logger.warn('', 'первый уровень, не показываем рекламу!')
-      resolveAD(true)
-      return adPromise
+      resolve(true)
+      return
     }
-    
-    // Нет AdPass — показываем рекламу
-    const hasAdPass = this.storage.playerData.hasAdPass
-    if (!hasAdPass) {
-      SdkManager.showInterstitial({
-        onFinally: () => resolveAD(true)
-      })
-      return adPromise
+
+    if (!this.storage.playerData.hasAdPass) {
+      SdkManager.showInterstitial({onFinally: () => resolve(true)})
+      return
     }
-    
-    // По умолчанию пропускаем
-    resolveAD(true)
-    return adPromise
+
+    resolve(true)
   }
-  
-  #runInitializeState = async () => {
+
+  async #runInitializeState() {
     const initialState = new InitialLoad(this)
     initialState.initView()
     this.view = initialState.view
     await initialState.execute()
-    
     this.isInitialized = true
   }
-  
-  #runPreparePreloadText = async () => {
+
+  async #runPreparePreloadText() {
     const prepareState = new PreparePreloadText(this)
     await prepareState.execute(this.levelIndex)
     this.textPreloadData = prepareState.textPreloadData
+    await Locator.gameResize.resize()
   }
-  
-  #runLoadLevelResources = async (levelIndex) => {
+
+  async #runLoadLevelResources() {
     const loadResourcesState = new LoadLevelResources(this, true)
-    await loadResourcesState.execute(levelIndex)
+    await loadResourcesState.execute(this.levelIndex)
   }
-  
-  #checkoutState = async (startTime) => {
+
+  async #checkoutState(startTime) {
     super.checkoutState()
-    GameUtils.checkLoadTime(startTime, `level ${this.levelIndex} loaded in`)
-    
+    GameUtils.checkLoadTime(startTime, 'level ' + this.levelIndex + ' loaded in')
+
     const finalizeState = new Finalize(this)
     await finalizeState.startGame()
   }
-  
-  #postLoadLazySFX = async () => {
+
+  async #postLoadLazySFX() {
     if (this.#sfxIsLoaded) return
-    await Locator.soundManager.preloadSFXFLevel() // фоновая загрузка SFX
+    await Locator.soundManager.preloadSFXFLevel()
     this.#sfxIsLoaded = true
   }
-  
-  #testing = async () => {
+
+  async #testing() {
     try {
-      new TestController(this)
+      console.log('тут может быть запуск тестирования')
     } catch (err) {
       console.error('[LevelPreload] testing error!', err)
       LocalStorage.testLoad = false

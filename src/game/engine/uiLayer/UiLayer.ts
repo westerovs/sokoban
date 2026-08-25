@@ -40,7 +40,7 @@ export default class UiLayer extends Container {
   readonly #uiBounds = new Rectangle()
   readonly #uiPadding = 40
   readonly #adaptiveLayout = new AdaptiveLayout(this.#uiPadding)
-  readonly #isDebug = true
+  readonly #isDebug = false
 
   constructor() {
     super()

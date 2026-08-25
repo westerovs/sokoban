@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import {GAME_STATES, LEVEL_TYPES, WORLD} from '@/game/gameConfig/constants.js'
+import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import Locator from '@/game/engine/Locator.ts'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
@@ -13,12 +13,7 @@ import SdkManager from '@/game/engine/SdkManager.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import RateUs from '@/game/features/rateUs/RateUs.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
-import MathTools from '@/game/utils/MathTools.js'
-import SkinContainerView from '@/game/ui/level/skinContainer/SkinContainerView.js'
 import GrayscaleFilter from '@/game/utils/filters/GrayscaleFilter.js'
-import SkinManager from '@/game/features/skinManager/SkinManager.js'
-import InitialLoad from '@/game/states/preload/levelPreload/states/InitialLoad.js'
-import {primaryFontStyle} from '@/game/styles.js'
 import StoreView from '@/game/features/store/StoreView.js'
 import Store from '@/game/features/store/Store.js'
 
@@ -32,7 +27,6 @@ export default class CompleteLevel {
   #showTimeline
   #canPlaySounds = true
   #levelType
-  #skinManager
   
   constructor(levelEntity) {
     this.levelEntity = levelEntity
@@ -57,9 +51,6 @@ export default class CompleteLevel {
       this.#setBtnNextValue()
       this.#checkAdPassPurchased()
       await RateUs.checkAndShowRateUs(this.#storage, this.levelEntity)
-      await this.#initCharacter()
-      this.#initSkinManager()
-      this.#setStoryText()
       
       await this.#showAndAnimate()
       SdkManager.gameplayStop()
@@ -120,7 +111,6 @@ export default class CompleteLevel {
         .call(async () => {
           await this.#soundManager.stopAll()
           await this.#soundManager.play('sfx_victory')
-          this.#playSpeech()
           this.#soundManager.play('m_victory')
         })
         .fromTo(characterSpine, {alpha: 0}, {alpha: 1}, '<')
@@ -160,65 +150,13 @@ export default class CompleteLevel {
   #createBtnBadge = () => {
     // 1 определить какой следующий уровень
     const nextLevel = LevelConfig.getGameLevelData(this.#storage.playerData.levelIndex)
-    const {levelType} = GameUtils.extractSpineLevelSuffix(nextLevel.spineName)
+    const {levelType} = GameUtils.extractLevelSuffix(nextLevel.levelName)
     // ничего не делаем если тип уровня не определен
     if (!levelType) return
     this.#levelType = levelType
     
     const badge = new BtnBadge({type: levelType})
     this.#btnNext.addChild(badge)
-  }
-  
-  #initCharacter = async () => {
-    let loadingText = null
-    
-    if (!InitialLoad.characterSpineIsLoaded) {
-      loadingText = GameUtils.createText(`${i18next.t('textLoading')}...`, {
-        style: {...primaryFontStyle, fill: 0xFFFFFF, fontSize: 60},
-      })
-      loadingText.position.set(WORLD.HALF_W, WORLD.HALF_H)
-      this.#game.view.addChildAt(loadingText, 2)
-    }
-    
-    await InitialLoad.characterSpinePromise()
-    loadingText?.destroy()
-    
-    const hero = new SkinContainerView({refs: this.#refs})
-    this.#game.view.addChildAt(hero, 2)
-    
-    const {characterSpine} = this.#refs
-    
-    const animations = characterSpine.skeleton.data.animations
-      .filter(anim => anim.name !== 'startLevel')
-      .map(anim => anim.name)
-    
-    const randomNumber = MathTools.getRandomNumber(0, animations.length - 1, 0)
-    characterSpine.state.setAnimation(0, animations[randomNumber], true)
-  }
-  
-  #initSkinManager = () => {
-    this.#skinManager = new SkinManager()
-  }
-  
-  #setStoryText = () => {
-    try {
-      const {outroText} = this.levelEntity.storyTextData
-      // const testText = "Великолепная работа! Из хаоса и забытых вещей ты сотворил уют и чистоту — теперь номер снова готов принимать гостей с распростёртыми объятиями."
-      this.#refs.speechBubbleText.text = outroText
-    } catch (e) {
-      console.warn('speechBubbleText error', e)
-    }
-  }
-  
-  #playSpeech = () => {
-    if (!this.#canPlaySounds) return
-    
-    try {
-      const {outroSpeech} = this.levelEntity.storyTextData
-      this.#soundManager.play(outroSpeech)
-    } catch (e) {
-      console.warn('playSpeech error', e)
-    }
   }
   
   #hideInterface = () => {

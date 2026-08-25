@@ -6,7 +6,7 @@
  * Wrapper удаляет только незавершённый кэш, запускает штатный AssetPack CLI
  * и создаёт marker лишь после полностью успешной сборки.
  */
-import {existsSync, mkdirSync, rmSync, writeFileSync} from 'node:fs'
+import {existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync} from 'node:fs'
 import {spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
 import path from 'node:path'
@@ -15,19 +15,40 @@ import path from 'node:path'
 const projectRoot = path.resolve(fileURLToPath(new URL('..', import.meta.url)))
 const cachePath = path.join(projectRoot, '.assetpack')
 const completeMarker = path.join(cachePath, 'build-complete')
-// Обязательный `{copy}`-результат показывает, что public/assets не удалён
-// отдельно от кэша после предыдущего успешного запуска.
-const requiredOutput = path.join(
-  projectRoot,
-  'public',
-  'assets',
-  'levels',
-  'gameLevels',
-  'level0.atlas',
+const sourcePath = path.join(projectRoot, 'raw-assets')
+const outputPath = path.join(projectRoot, 'public', 'assets')
+
+const listFiles = (rootPath, currentPath = rootPath) => {
+  if (!existsSync(currentPath)) return []
+
+  return readdirSync(currentPath, {withFileTypes: true}).flatMap((entry) => {
+    const entryPath = path.join(currentPath, entry.name)
+
+    if (entry.isDirectory()) return listFiles(rootPath, entryPath)
+    return [path.relative(rootPath, entryPath).replaceAll('\\', '/')]
+  })
+}
+
+const readBuildState = () => {
+  if (!existsSync(completeMarker)) return null
+
+  try {
+    return JSON.parse(readFileSync(completeMarker, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+const hasMissingFiles = (rootPath, relativePaths = []) => relativePaths.some(
+  (relativePath) => !existsSync(path.join(rootPath, relativePath)),
 )
 
-const cacheIsIncomplete = existsSync(cachePath)
-  && (!existsSync(completeMarker) || !existsSync(requiredOutput))
+const buildState = readBuildState()
+const cacheIsIncomplete = existsSync(cachePath) && (
+  !buildState
+  || hasMissingFiles(sourcePath, buildState.sourceFiles)
+  || hasMissingFiles(outputPath, buildState.outputFiles)
+)
 
 // raw-assets не затрагивается: удаляется только генерируемый `.assetpack`.
 if (cacheIsIncomplete) {
@@ -54,7 +75,10 @@ const result = spawnSync(
 if (result.error) throw result.error
 if (result.status !== 0) process.exit(result.status ?? 1)
 
-// Marker создаётся только после exit code 0. Оборванный процесс его не оставит,
-// поэтому следующий запуск автоматически выполнит полную пересборку.
+// Marker хранит успешно собранные входы и выходы для поиска удалённых файлов.
 mkdirSync(cachePath, {recursive: true})
-writeFileSync(completeMarker, `${new Date().toISOString()}\n`)
+writeFileSync(completeMarker, JSON.stringify({
+  completedAt: new Date().toISOString(),
+  sourceFiles: listFiles(sourcePath),
+  outputFiles: listFiles(outputPath),
+}, null, 2))

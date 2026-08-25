@@ -31,6 +31,7 @@ export default class DebugHotkeys {
     if (tag === 'INPUT' || tag === 'TEXTAREA' || event.target.isContentEditable) return
     
     this.#checkoutSkin(numKey)
+    this.#runNextPart(numKey)
     this.#runFastWin(numKey)
     this.#runNextLevel(numKey)
   }
@@ -51,6 +52,12 @@ export default class DebugHotkeys {
       }
       
       this.#softReset(numKey)
+    }
+  }
+  
+  #runNextPart = (numKey) => {
+    if (numKey === 7) {
+      GameUtils.showPopUp('next part not found')
     }
   }
   

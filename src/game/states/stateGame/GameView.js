@@ -1,6 +1,5 @@
 import {Container} from 'pixi.js'
-import GameUtils, {viewResize} from '../../utils/gameUtils/GameUtils.js'
-import {WORLD} from '@/game/gameConfig/constants.js'
+import GameUtils from '../../utils/gameUtils/GameUtils.js'
 
 
 export default class GameView extends Container {
@@ -13,11 +12,7 @@ export default class GameView extends Container {
 
     this.#init()
   }
-  
-  resize() {
-    return viewResize(this.refs)
-  }
-  
+
   #init = () => {
     this.#createBackground()
   }
@@ -25,9 +20,8 @@ export default class GameView extends Container {
   #createBackground() {
     const background = GameUtils.createSprite('startScreen')
     background.anchor.set(0)
-    background.anchor.set(0.5)
-    background.position.set(WORLD.HALF_W,  WORLD.HALF_H)
-    background.height = WORLD.HEIGHT
+    background.width = 2560
+    background.height = 1080
 
     this.addChild(background)
   }

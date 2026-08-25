@@ -14,7 +14,7 @@ export default class ClearLevel {
     this.#game.emit(GAME_EVENTS.clearLevel)
     
     this.#removeView(entities)
-    this.#cleaEntitiesAndSystems(entities, systems)
+    this.#clearEntitiesAndSystems(entities, systems)
     this.#clearParams()
   }
   
@@ -24,11 +24,12 @@ export default class ClearLevel {
       
       if (backgroundComponent) {
         this.#view.removeChild(backgroundComponent.view)
+        backgroundComponent.destroy()
       }
     })
   }
   
-  #cleaEntitiesAndSystems = (entities, systems) => {
+  #clearEntitiesAndSystems = (entities, systems) => {
     entities.clear()
     systems.clear()
   }
@@ -38,7 +39,6 @@ export default class ClearLevel {
     
     // main params
     level.entityManager = null
-    level.camera = null
-    level.clearLevel = null
+    level.systemManager = null
   }
 }

@@ -23,7 +23,7 @@ export default class Options {
     // setTimeout(() => this.#toggleVisibility(), 500)
   }
   
-  get view () {
+  get view() {
     return this.#view
   }
   

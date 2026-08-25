@@ -2,11 +2,9 @@
  * hit - ключевое событие. Эмитит HogItemComponent
  * На него подписаны:
  *  - LevelMechanicLearning
- *  - FoundItemsCounter
  *  - AdLvlTimer
  *  - FirstLevelLearning
  *  - ErrorCross
- *  - Hud
  *  - LevelSoundsSystem
  *
  * */
@@ -40,10 +38,6 @@ const GAME_EVENTS = {
   paymentManager: {
     hasNoAdsPass: 'paymentManager:hasNoAdsPass',
     giveReward: 'paymentManager:giveReward',
-  },
-  CAMERA: {
-    zoomIn: 'camera:zoomIn',
-    zoomOut: 'camera:zoomOut',
   },
   Options: {
     toggleAudioVolume: 'options:toggleAudioVolume',

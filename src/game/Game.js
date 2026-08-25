@@ -21,7 +21,7 @@ import LiveOpsController from './components/liveOpsController/LiveOpsController.
 // other
 import {getGameResolution} from '@/game/gameConfig/resolutionConfig.mjs'
 
-// todo удалить инлайн поля game.refs, game.camera
+// todo удалить инлайн поля game.refs, game.clearLevelCache
 
 export default class Game extends EventEmitter {
   #app
@@ -31,6 +31,7 @@ export default class Game extends EventEmitter {
   #locale
   #currentStateName
   #adapter
+  #view // у каждого стейта есть view-контейнер
   
   constructor(adapter) {
     super()
@@ -65,6 +66,14 @@ export default class Game extends EventEmitter {
   
   set currentStateName(stateName) {
     this.#currentStateName = stateName
+  }
+  
+  get view() {
+    return this.#view
+  }
+  
+  set view(view) {
+    this.#view = view
   }
   
   init = async () => {

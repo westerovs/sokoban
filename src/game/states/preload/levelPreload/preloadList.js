@@ -1,14 +1,17 @@
 import LevelConfig from '../../../gameConfig/LevelConfig.js'
 
-const createPreloadList = (levelIndex) => {
-  const levelData = LevelConfig.getGameLevelData(levelIndex)
+// при формировании листа берет отфильтрованные уровни по флагам из LevelConfig (а в нем ABTest)
+export const createPreloadList = (game, storage, levelIndex) => {
+  const spineLevelData = LevelConfig.getGameLevelData(levelIndex)
+  
+  const {background} = spineLevelData
 
   return {
-    levelData,
-    levelList: [levelData.background],
-  }
-}
+    spineLevelData,
 
-export {
-  createPreloadList,
+    levelList: [
+      background,
+    ],
+    onceLoadList: [],
+  }
 }

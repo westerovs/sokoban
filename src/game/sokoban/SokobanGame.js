@@ -6,27 +6,32 @@ import SokobanLevel from './SokobanLevel.js'
 export default class SokobanGame extends Container {
   #map
   #onComplete
+  #onMove
+  #canMove
   #level
   #board
   #input
   #isInputEnabled = false
 
-  constructor({map, onComplete}) {
+  constructor({map, onComplete, onMove, canMove}) {
     super({label: 'sokoban-game'})
 
     this.#map = map
     this.#onComplete = onComplete
+    this.#onMove = onMove
+    this.#canMove = canMove
     this.#init()
   }
 
   move(direction) {
-    if (!this.#isInputEnabled) return false
+    if (!this.#isInputEnabled || this.#canMove?.() === false) return false
 
     const levelDirection = this.#board.getLevelDirection(direction)
     const result = this.#level.move(levelDirection)
     if (!result.moved) return false
 
     this.#board.update()
+    this.#onMove?.()
     if (result.completed) this.#complete()
     return true
   }

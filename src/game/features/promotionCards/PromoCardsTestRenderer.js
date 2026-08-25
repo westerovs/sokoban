@@ -15,7 +15,7 @@ export default class PromoCardsTestRenderer {
     const cards = this.#createCards(promoData)
 
     preview.addChild(...cards)
-    Locator.game.camera.addChild(preview)
+    Locator.game.view.addChild(preview)
   }
 
   #createPreview = () => {

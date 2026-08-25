@@ -116,15 +116,6 @@ const PLATFORM_SCENARIOS = {
 /**
  * Имена [words, shadows, generator и тд] это имена из кости спайна, например level55_shadows
  * Поле difficulty определяет какой лейбл создавать перед запуском этого уровня
- *
- * note: При добавлении уровней нового типа(_префикс), они будут по умолчанию как обычные уровни идти, например level123_newType
- * Поэтому что бы добавить уровень нового типа таким образом, что бы был новый hud, работали AB тесты и бейджы сложности показывались,
- * нужно внести изменения в следующих файлах:
- * - constants.js (LEVEL_TYPES, DEFAULT_FLAGS) + если это яндекс, флаги включить в настройках флагов.
- * - ABTest.js (getFilteredLevels) - возможность вкл/выкл уровни
- * - CompleteLevel.js (checkoutNextLevel)
- * - BtnBadge.js - цвета для плашки
- * - Hud.js (setStrategy) + создать новый файл под стратегию в папке strategies, если это уникальный hud
  */
 const LEVEL_TYPES = {
   DEFAULT: {name: 'default', difficulty: null},

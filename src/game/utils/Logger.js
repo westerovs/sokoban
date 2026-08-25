@@ -6,7 +6,6 @@ export const MODULES = {
   LevelPreload: 'LevelPreload',
   LOAD_ACTION: 'LOAD_ACTION',
   Config: 'config',
-  Hud: 'Hud',
   SOUND_MANAGER: 'SOUND_MANAGER',
   DestroyMessage: 'DestroyMessage',
 }
@@ -18,7 +17,6 @@ const COLORS = {
   [MODULES.GamePreload]: 'yellow',
   [MODULES.LevelPreload]: 'orange',
   [MODULES.Config]: '#3DB4FB',
-  [MODULES.Hud]: '#999000',
   [MODULES.SOUND_MANAGER]: '#08FE00',
   [MODULES.DestroyMessage]: '#FF0000',
   [MODULES.LOAD_ACTION]: '#08FE00',
@@ -47,7 +45,6 @@ enabledModules.add(MODULES.Config)
 // enabledModules.add(MODULES.GamePreload)
 // enabledModules.add(MODULES.LevelPreload)
 // enabledModules.add(MODULES.LOAD_ACTION)
-// enabledModules.add(MODULES.Hud)
 // enabledModules.add(MODULES.SOUND_MANAGER)
 // enabledModules.add(MODULES.DestroyMessage)
 

@@ -1,6 +1,6 @@
-import Locator from '../engine/Locator.ts'
-import {GAME_EVENTS} from '../gameConfig/gameEvents.js'
 import Stopwatch from '../ui/level/clock/Stopwatch.js'
+import {GAME_EVENTS} from '../gameConfig/gameEvents.js'
+import Locator from '../engine/Locator.ts'
 
 export default class ModulesInitializer {
   #game = Locator.game

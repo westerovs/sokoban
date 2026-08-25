@@ -1,10 +1,9 @@
-import Locator from '../../engine/Locator.ts'
-import BackgroundComponent from '../components/BackgroundComponent.js'
 import System from './System.js'
+import BackgroundComponent from '../components/BackgroundComponent.js'
+import Locator from '../../engine/Locator.ts'
 
 export default class RenderSystem extends System {
-  #game = Locator.game
-  #view = this.#game.view
+  #view = Locator.game.view
 
   constructor() {
     super()

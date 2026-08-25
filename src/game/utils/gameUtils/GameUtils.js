@@ -160,13 +160,13 @@ export default class GameUtils {
   }
   
   // пример работы: level131_identical_cup -> levelType: identical / identicalName: cup
-  static extractSpineLevelSuffix = (spineName) => {
-    if (!spineName) return {levelType: null, identicalName: null}
+  static extractLevelSuffix = (levelName) => {
+    if (!levelName) return {levelType: null, identicalName: null}
     
-    const firstUnderscoreIndex = spineName.indexOf('_')
+    const firstUnderscoreIndex = levelName.indexOf('_')
     if (firstUnderscoreIndex === -1) return {levelType: null, identicalName: null}
     
-    const suffix = spineName.slice(firstUnderscoreIndex + 1)
+    const suffix = levelName.slice(firstUnderscoreIndex + 1)
     const [levelType, identicalNamePart] = suffix.split('_')
     
     if (levelType === LEVEL_TYPES.IDENTICAL.name) {
@@ -343,17 +343,6 @@ const createGradientTexture = ({
   return Texture.from({resource: canvas, autoGenerateMipmaps: false})
 }
 
-const viewResize = (refs) => {
-  const promises = Object.keys(refs).map(key => {
-    if (refs[key].resize) {
-      return Promise.resolve(refs[key].resize())
-    }
-    return Promise.resolve()
-  })
-  
-  return Promise.all(promises)
-}
-
 const logReadableTime = (timeMs) => {
   const totalSeconds = Math.floor(timeMs / 1000)
   const minutes = Math.floor(totalSeconds / 60)
@@ -373,8 +362,6 @@ const eventToggle = (bool) => ({
 })
 
 export {
-  viewResize,
-  logReadableTime,
+  createGradientTexture,
   eventToggle,
-  createGradientTexture
-}
+  logReadableTime}

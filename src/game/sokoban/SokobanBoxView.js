@@ -6,7 +6,7 @@ export default class SokobanBoxView extends Container {
   #goalMark
 
   constructor(index, tileSize) {
-    super({label: `sokoban-box-${index}`})
+    super({label: 'sokoban-box-' + index})
 
     this.#tileSize = tileSize
     this.#init(index)
@@ -25,7 +25,7 @@ export default class SokobanBoxView extends Container {
   #createBox(index) {
     const inset = this.#tileSize * 0.12
     const size = this.#tileSize - inset * 2
-    const box = new Graphics({label: `sokoban-box-shape-${index}`})
+    const box = new Graphics({label: 'sokoban-box-shape-' + index})
 
     box
       .roundRect(inset, inset, size, size, this.#tileSize * 0.1)
@@ -40,12 +40,14 @@ export default class SokobanBoxView extends Container {
 
   #createGoalMark(index) {
     const center = this.#tileSize / 2
-    const goalMark = new Graphics({label: `sokoban-box-goal-mark-${index}`})
+    const goalMark = new Graphics({label: 'sokoban-box-goal-mark-' + index})
+
     goalMark
       .circle(center, center, this.#tileSize * 0.16)
       .fill(SOKOBAN_COLORS.boxOnTarget)
       .stroke({color: 0xffffff, width: this.#tileSize * 0.04})
     goalMark.visible = false
+
     return goalMark
   }
 }

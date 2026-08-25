@@ -1,7 +1,7 @@
 import {Container} from 'pixi.js'
 import i18next from 'i18next'
 import {WORLD} from '../../gameConfig/constants.js'
-import GameUtils, {viewResize} from '../../utils/gameUtils/GameUtils.js'
+import GameUtils from '../../utils/gameUtils/GameUtils.js'
 
 
 export default class PreloadView extends Container {
@@ -12,10 +12,6 @@ export default class PreloadView extends Container {
     this.sortableChildren = true
 
     this.#init()
-  }
-
-  resize() {
-    return viewResize(this.refs)
   }
 
   #init = () => {

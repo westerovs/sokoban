@@ -47,15 +47,6 @@ const getLeaderAndStoreColors = () => {
 }
 const leaderAndStoreColors = getLeaderAndStoreColors()
 
-const getFoundItemsCounterStyles = () => {
-  return {
-    body: 0x000000,
-    textColor: FONT_COLORS.mainFont,
-    fontSize: 44,
-  }
-}
-const foundItemsCounterStyles = getFoundItemsCounterStyles()
-
 const getSKinStoreColors = () => {
   return {
     body: 0x2E1313,
@@ -77,7 +68,6 @@ export {
   FONT_COLORS,
   popupColors,
   leaderAndStoreColors,
-  foundItemsCounterStyles,
   rewardWindowStyles,
   skinStoreColors,
   COMPASS_TIMER_TEXT_COLOR,

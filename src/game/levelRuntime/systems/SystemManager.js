@@ -1,6 +1,6 @@
+import RenderSystem from './RenderSystem.js'
 import AdLvlTimer from '../../features/AdLvlTimer.js'
 import MetrikaSystem from './MetrikaSystem.js'
-import RenderSystem from './RenderSystem.js'
 
 export default class SystemManager {
   #levelEntity
@@ -13,10 +13,8 @@ export default class SystemManager {
   }
   
   initSystems() {
-    if (this.entityManager.spineLevelComponent) {
-      this.systems.set('adLvlTimer', new AdLvlTimer(this.#levelEntity))
-      this.systems.set('metrikaSystem', new MetrikaSystem(this.#levelEntity))
-    }
+    this.systems.set('adLvlTimer', new AdLvlTimer(this.#levelEntity))
+    this.systems.set('metrikaSystem', new MetrikaSystem(this.#levelEntity))
     
     const renderSystem = new RenderSystem()
     this.systems.set('renderSystem', renderSystem)

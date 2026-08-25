@@ -202,7 +202,7 @@ export default class AdminPanel {
         
         if (data.key === 'levelIndex') {
           const lvl = levels[i]
-          label = `[${i}] spine ${lvl.spineName}`
+          label = `[${i}] spine ${lvl.levelName}`
         }
         
         opts.push({value: i, label})

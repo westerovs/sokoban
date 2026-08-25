@@ -52,15 +52,15 @@ const DEFAULT_DEV_PLATFORM = PLATFORMS.base.name
 
 const PLATFORMS_TO_BUILD = Object.freeze([
   PLATFORMS.base,
-  // PLATFORMS.crazyGames,
-  // PLATFORMS.frvr,
-  // PLATFORMS.gameDistribution,
-  // PLATFORMS.playgama,
-  // PLATFORMS.playgamaYoutube,
-  // PLATFORMS.ok,
-  // PLATFORMS.vk,
+  PLATFORMS.crazyGames,
+  PLATFORMS.frvr,
+  PLATFORMS.gameDistribution,
+  PLATFORMS.playgama,
+  PLATFORMS.playgamaYoutube,
+  PLATFORMS.ok,
+  PLATFORMS.vk,
   PLATFORMS.yandex,
-  // PLATFORMS.youtube,
+  PLATFORMS.youtube,
 ])
 
 const DEV_SERVER_CONFIG = Object.freeze({

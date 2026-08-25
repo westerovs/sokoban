@@ -15,9 +15,11 @@ import SokobanGame from '@/game/sokoban/SokobanGame.js'
 import {STOPWATCH_LABELS} from '@/game/ui/level/clock/Stopwatch.js'
 import CompleteLevel from '@/game/ui/level/completeLevelScreen/CompleteLevel.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
+import StateIntro from './states/intro/StateIntro.js'
 
 export default class Level {
   #storage = Locator.storage
+  #stateIntro
   #clearLevel
   #completeLevel
   #isLevelCompleted = false
@@ -26,7 +28,6 @@ export default class Level {
   stage = this.game.app.stage
   entityManager
   systemManager
-  storyTextData
   config
   modulesInitializer
   levelConfig
@@ -34,12 +35,10 @@ export default class Level {
 
   constructor(state) {
     this.state = state
-    this.game.level = this
-    this.game.levelType = null
   }
 
   async init() {
-    this.#lockScene()
+    this.#prepareScene()
     this.#setEvents(true)
     this.#initComponents()
     this.#initConfig()
@@ -48,8 +47,9 @@ export default class Level {
     this.#initSystemManager()
     this.#createSokobanGame()
     this.#initModules()
-    this.#unlockScene()
+    await this.#stateIntro.execute()
 
+    this.#unlockScene()
     SdkManager.gameplayStart()
     SdkManager.gameReady()
     this.#testing()
@@ -68,44 +68,51 @@ export default class Level {
     this.#destroyLevel()
   }
 
-  #lockScene = () => {
+  #prepareScene() {
+    this.#lockScene()
+    Locator.uiLayer.stateUiLayer.visible = false
+    this.game.level = this
+    this.game.levelType = null
+  }
+
+  #lockScene() {
     this.stage.interactiveChildren = false
   }
 
-  #unlockScene = () => {
+  #unlockScene() {
     this.stage.interactiveChildren = true
     this.game.gameContainer.eventMode = 'static'
-    Locator.options.view.optionsToggleBtn.eventMode = 'static'
-    Locator.options.setVisibleToggle(true)
     this.sokobanGame.setInputEnabled(true)
   }
 
-  #initComponents = () => {
+  #initComponents() {
+    this.#stateIntro = new StateIntro(this)
     this.#clearLevel = new ClearLevel(this)
     this.#completeLevel = new CompleteLevel(this)
     this.modulesInitializer = new ModulesInitializer()
     this.levelConfig = new LevelConfig()
-    this.storyTextData = LevelConfig.getSpeechAndTextData()
   }
 
-  #initConfig = () => {
+  #initConfig() {
     this.config = this.levelConfig.getConfig()
     this.game.levelType = this.config.levelType
   }
 
-  #initEntityManager = async () => {
+  async #initEntityManager() {
     this.entityManager = new EntityManager(this.config)
     await this.entityManager.createEntities()
   }
 
-  #initSystemManager = () => {
+  #initSystemManager() {
     this.systemManager = new SystemManager(this)
     this.systemManager.initSystems()
   }
 
-  #createSokobanGame = () => {
+  #createSokobanGame() {
     this.sokobanGame = new SokobanGame({
       map: this.config.map,
+      canMove: this.#canMove,
+      onMove: this.#notifyMove,
       onComplete: this.#requestWin,
     })
     this.sokobanGame.zIndex = -1
@@ -114,7 +121,7 @@ export default class Level {
     this.game.view.addChild(this.sokobanGame)
   }
 
-  #initModules = () => {
+  #initModules() {
     this.modulesInitializer.init({
       stopwatch: {
         game: this.game,
@@ -123,15 +130,28 @@ export default class Level {
     })
   }
 
-  #setEvents = (isEnabled) => {
+  #setEvents(isEnabled) {
     const toggle = eventToggle(isEnabled)
 
     this.game[toggle.gameOnOff](GAME_EVENTS.completeLevelWin, this.#winAction)
     this.game[toggle.gameOnOff](GAME_EVENTS.LEVEL.forceNextLevel, this.#forceNextLevel)
+    this.game[toggle.gameOnOff](GAME_EVENTS.gameResize, this.#resize)
+  }
+
+  #canMove = () => {
+    return !Locator.options.isVisible
+  }
+
+  #notifyMove = () => {
+    this.game.emit(GAME_EVENTS.startHit)
   }
 
   #requestWin = () => {
     this.game.emit(GAME_EVENTS.completeLevelWin)
+  }
+
+  #resize = () => {
+    this.sokobanGame?.resize()
   }
 
   #winAction = async () => {
@@ -153,26 +173,26 @@ export default class Level {
     this.levelConfig.updateSavedLevel()
   }
 
-  #sendEarlyExitMetrika = () => {
+  #sendEarlyExitMetrika() {
     if (this.#isLevelCompleted) return
 
     const stopwatch = this.modulesInitializer.getMod('stopwatch')
     YaMetrika.earlyExit(this.config, this.#storage, stopwatch?.seconds ?? 0)
   }
 
-  #destroyLevel = () => {
+  #destroyLevel() {
     this.#destroySokobanGame()
     this.systemManager.removeAllSystems()
     this.#clearLevel.clear(this.entityManager.entities, this.systemManager.systems)
   }
 
-  #destroySokobanGame = () => {
+  #destroySokobanGame() {
     this.sokobanGame?.destroy({children: true})
     this.sokobanGame = null
     this.refs.sokobanGame = null
   }
 
-  #testing = () => {
+  #testing() {
     if (!LocalStorage.isDebug) return
     if (LocalStorage.testPromo) PromoManager.testRender()
   }

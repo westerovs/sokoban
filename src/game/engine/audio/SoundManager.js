@@ -1,12 +1,10 @@
 import {Howl, Howler} from 'howler'
-import {gsap} from 'gsap'
 import Locator from '../Locator.ts'
 import YaMetrika, {ERROR_TYPES} from '../../modules/metrika/YaMetrika.js'
 import {createPreloadAudioList} from './preloadAudioList.ts'
 import {Logger, MODULES} from '../../utils/Logger.js'
 import MusicManager from './MusicManager.js'
 import {GAME_EVENTS, ADAPTER_EVENTS} from '../../gameConfig/gameEvents.js'
-import MathTools from '../../utils/MathTools.js'
 import {antiMuteIOS} from './antiMuteIOS.js'
 import {ASSETS_URL} from '../../gameConfig/constants.js'
 import SdkManager from '../SdkManager.js'
@@ -22,7 +20,6 @@ export default class SoundManager {
   #isInit = false
   #musicList = []
   #sfxList = []
-  #speechList = []
   #levelMusicAliases = []
   
   get preloadAudioList() {
@@ -33,10 +30,6 @@ export default class SoundManager {
     return this.#musicList
   }
   
-  get speechList() {
-    return this.#speechList
-  }
-
   getAudioDebugStats = () => {
     const allSounds = [...new Set(Howler._howls ?? [])]
       .filter(sound => sound?.state?.() !== 'unloaded')
@@ -199,17 +192,9 @@ export default class SoundManager {
   
   preloadSFXFLevel = async () => {
     try {
-      const {CLICK_ITEMS_SPEECH, CLICK_ITEMS, PARTS_SPEECH} = this.#preloadAudioList
-      const delay = 2 // искусственная задержка, что бы снизить сетевую нагрузку
+      const {SFX} = this.#preloadAudioList
       
-      await gsap.to({}, {delay})
-      await this.preload(this.#sfxList, CLICK_ITEMS_SPEECH, true)
-
-      await gsap.to({}, {delay})
-      await this.preload(this.#sfxList, CLICK_ITEMS, true)
-
-      await gsap.to({}, {delay})
-      await this.preload(this.#sfxList, PARTS_SPEECH, true)
+      await this.preload(this.#sfxList, SFX, true)
     } catch (err) {
       console.error(`[SoundManager firstLoadAndInit error]: ${err}`)
     }
@@ -320,9 +305,6 @@ export default class SoundManager {
         else if (this.#sfxList[keySound]) {
           this.#playSound(sound, {loop, volume})
         }
-        else if (this.#speechList[keySound]) {
-          this.#playSound(sound, {loop, volume, isSpeech: true})
-        }
 
         // Возвращаем промис, который разрешится по завершению звука
         return new Promise(resolve => {
@@ -337,18 +319,7 @@ export default class SoundManager {
     }
   }
   
-  playRandomSpeech = async ({maxCount, nameTemplate}) => {
-    const locale = Locator.gameConfig.locale
-    const randomIndex = MathTools.getRandomNumber(0, maxCount, 0)
-    
-    const name = nameTemplate
-      .replace('{locale}', locale)
-      .replace('{i}', randomIndex)
-    
-    await this.play(name)
-  }
-  
-  #playSound(sound, {loop = false, volume = 1.0, isMusic = false, isSpeech = true}) {
+  #playSound(sound, {loop = false, volume = 1.0, isMusic = false}) {
     if (isMusic) {
       Object.values(this.#musicList).forEach(music => music.stop())
     }
@@ -363,7 +334,7 @@ export default class SoundManager {
   }
   
   #getSound(keySound) {
-    return this.#musicList[keySound] || this.#sfxList[keySound] || this.#speechList[keySound]
+    return this.#musicList[keySound] || this.#sfxList[keySound]
   }
   
   stop(keySound, fadeDuration = 0) {
@@ -378,7 +349,7 @@ export default class SoundManager {
   
   stopAll() {
     console.log('[stopAll sounds]')
-    ;[this.#musicList, this.#sfxList, this.#speechList].forEach(type => {
+    ;[this.#musicList, this.#sfxList].forEach(type => {
       Object.values(type).forEach(sound => {
         if (sound.playing()) sound.stop()
       })
@@ -403,7 +374,7 @@ export default class SoundManager {
     if (type === STORAGE_KEYS.option_isPlaySFX) this.#sfxVolume = volume
     
     const soundMap = {
-      [STORAGE_KEYS.option_isPlaySFX]: [this.#sfxList, this.#speechList],
+      [STORAGE_KEYS.option_isPlaySFX]: [this.#sfxList],
       [STORAGE_KEYS.option_isPlayMusic]: [this.#musicList],
     }
     

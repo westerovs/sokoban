@@ -42,10 +42,10 @@ export default class ABTest {
       .map(([mode]) => mode.toLowerCase())
     
     const levels = Locator.gameConfig.levels
-    // Фильтрует уровни, исключая spineName с disabled-модами в названии
+    // Фильтрует уровни, исключая levelName с disabled-модами в названии
     const filteredLevels = Object.fromEntries(
-      Object.entries(levels).filter(([, { spineName }]) => {
-        return !disabledModes.some(mode => spineName.toLowerCase().includes(mode))
+      Object.entries(levels).filter(([, { levelName }]) => {
+        return !disabledModes.some(mode => levelName.toLowerCase().includes(mode))
       })
     )
     
