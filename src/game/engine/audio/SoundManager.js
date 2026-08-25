@@ -308,6 +308,8 @@ export default class SoundManager {
           })
         }
         else if (this.#sfxList[keySound]) {
+          // Если игра вызывает звук, который сейчас грузится, резолвим, что бы звук не пытался отыграть после своей загрузки, т.к это может быть поздно.
+          if (sound.state() !== 'loaded') return Promise.resolve(false)
           this.#playSound(sound, {loop, volume})
         }
 
