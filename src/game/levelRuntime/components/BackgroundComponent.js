@@ -10,7 +10,6 @@ export default class BackgroundComponent extends Sprite {
     this.anchor.set(0.5)
     this.position.set(WORLD.HALF_W, WORLD.HALF_H)
     this.height = WORLD.HEIGHT
-    this.zIndex = -2
   }
   
   get view() {

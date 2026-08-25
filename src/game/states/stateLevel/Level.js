@@ -47,6 +47,7 @@ export default class Level {
     this.#initSystemManager()
     this.#createSokobanGame()
     this.#initModules()
+    // this.#hintsController.init()
     await this.#stateIntro.execute()
 
     this.#unlockScene()
@@ -87,6 +88,7 @@ export default class Level {
 
   #initComponents() {
     this.#stateIntro = new StateIntro(this)
+    // this.#hintsController = new HintsController(this)
     this.#clearLevel = new ClearLevel(this)
     this.#completeLevel = new CompleteLevel(this)
     this.modulesInitializer = new ModulesInitializer()
@@ -115,7 +117,6 @@ export default class Level {
       onMove: this.#notifyMove,
       onComplete: this.#requestWin,
     })
-    this.sokobanGame.zIndex = -1
 
     this.refs.sokobanGame = this.sokobanGame
     this.game.view.addChild(this.sokobanGame)
@@ -162,13 +163,14 @@ export default class Level {
     SdkManager.gameplayStop()
     this.game.emit(GAME_EVENTS.completeLevel)
     this.systemManager.removeAllSystems()
+    this.#destroySokobanGame()
 
-    await Locator.uiFader.hide([this.sokobanGame])
     await GameUtils.showVkOkAdAfterLevelStart()
 
     CrazyGames.showCrazyGamesBanner()
     await new LevelResultsReward().init()
 
+    this.game.view.createCompleteLevelView()
     this.#completeLevel.init()
     this.levelConfig.updateSavedLevel()
   }
@@ -187,7 +189,10 @@ export default class Level {
   }
 
   #destroySokobanGame() {
-    this.sokobanGame?.destroy({children: true})
+    if (!this.sokobanGame) return
+
+    this.game.view.removeChild(this.sokobanGame)
+    this.sokobanGame.destroy({children: true})
     this.sokobanGame = null
     this.refs.sokobanGame = null
   }
@@ -202,8 +207,8 @@ export default class Level {
     this.sokobanGame.setInputEnabled(false)
     this.game.emit(GAME_EVENTS.completeLevel)
     this.systemManager.removeAllSystems()
+    this.#destroySokobanGame()
 
-    await Locator.uiFader.hide([this.sokobanGame])
     this.levelConfig.updateSavedLevel()
   }
 }

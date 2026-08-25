@@ -6,21 +6,15 @@ export default class LevelView extends Container {
   #game
 
   constructor(game) {
-    super()
+    super({label: 'levelView'})
 
     this.#game = game
     this.refs = {}
-    this.sortableChildren = true
-    this.label = 'levelView'
-
-    this.#init()
   }
 
-  #init = () => {
-    this.#createCompleteLevelView()
-  }
+  createCompleteLevelView() {
+    if (this.refs.completeLevelView) return this.refs.completeLevelView
 
-  #createCompleteLevelView() {
     const completeLevelView = new CompleteLevelView({
       refs: this.refs
     })
@@ -28,6 +22,7 @@ export default class LevelView extends Container {
 
     this.refs.completeLevelView = completeLevelView
     this.addChild(completeLevelView)
-  }
 
+    return completeLevelView
+  }
 }

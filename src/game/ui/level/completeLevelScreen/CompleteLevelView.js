@@ -1,11 +1,11 @@
-import {Container} from 'pixi.js'
 import i18next from 'i18next'
-import {GAME_NAMES, WORLD} from '@/game/gameConfig/constants.js'
-import {applyInteractive} from '@/game/components/buttons/buttons.js'
-import {primaryFontStyle} from '@/game/styles.js'
-import SdkManager from '@/game/engine/SdkManager.js'
-import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
+import {Container} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
+import {applyInteractive} from '@/game/components/buttons/buttons.js'
+import SdkManager from '@/game/engine/SdkManager.js'
+import {GAME_NAMES, WORLD} from '@/game/gameConfig/constants.js'
+import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
+import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
 
@@ -30,7 +30,6 @@ export default class CompleteLevelView extends Container {
 
     this.#refs = refs
     this.label = 'completeLevelView'
-    this.zIndex = 1
 
     this.#init()
   }
