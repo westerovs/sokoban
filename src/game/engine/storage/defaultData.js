@@ -20,6 +20,7 @@ const STORAGE_KEYS = {
   option_isPlayMusic: 'option_isPlayMusic',
   option_isPlaySFX: 'option_isPlaySFX',
   option_zoom: 'option_zoom',
+  option_sokobanDpad: 'option_sokobanDpad',
   
   timer_RewardMagnifier: 'timer_RewardMagnifier',
   timer_RewardDarts: 'timer_RewardDarts',
@@ -60,6 +61,7 @@ const DEFAULT_DATA = {
   [STORAGE_KEYS.option_isPlayMusic]: {type: 'bool', value: true},
   [STORAGE_KEYS.option_isPlaySFX]:   {type: 'bool', value: true},
   [STORAGE_KEYS.option_zoom]:   {type: 'bool', value: null},
+  [STORAGE_KEYS.option_sokobanDpad]: {type: 'bool', value: false},
   
   [STORAGE_KEYS.timer_RewardMagnifier]: {type: 'number', value: null},
   [STORAGE_KEYS.timer_RewardDarts]: {type: 'number', value: null},
@@ -87,7 +89,7 @@ const DEFAULT_DATA_VALUES = Object.fromEntries(
 )
 
 export {
-  STORAGE_KEYS,
   DEFAULT_DATA,
   DEFAULT_DATA_VALUES,
+  STORAGE_KEYS,
 }

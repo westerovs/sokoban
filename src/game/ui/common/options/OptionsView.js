@@ -1,23 +1,29 @@
-import {Container} from 'pixi.js'
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import Locator from '../../../engine/Locator.ts'
-import GameUtils from '../../../utils/gameUtils/GameUtils.js'
-import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
+import {Container} from 'pixi.js'
 import BaseModal from '@/game/ui/common/modal/BaseModal.js'
 import {applyInteractive} from '../../../components/buttons/buttons.js'
-import ButtonAnimator from '../../../utils/animations/ButtonAnimator.js'
+import Locator from '../../../engine/Locator.ts'
 import SdkManager from '../../../engine/SdkManager.js'
-import {destroyTimeLine} from '../../../utils/animations/gsapUtils.js'
 import {GAME_NAMES} from '../../../gameConfig/constants.js'
+import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
+import ButtonAnimator from '../../../utils/animations/ButtonAnimator.js'
+import {destroyTimeLine} from '../../../utils/animations/gsapUtils.js'
+import GameUtils from '../../../utils/gameUtils/GameUtils.js'
 import Credits from './Credits.js'
 
-export const VIEW_SIZE = {
+const VIEW_SIZE = {
   w: 430,
-  h: 400,
+  h: 470,
   buttonsGap: 74,
 }
 const BUTTONS_GAP = 15
+const CHECKBOX_TEXT_STYLE = Object.freeze({
+  fill: 0xf4edc5,
+  fontFamily: 'primaryFont',
+  fontSize: 24,
+  fontWeight: '700',
+})
 const BUTTONS_DATA = {
   sfxBtn: {
     name: 'sfxBtn',
@@ -25,7 +31,7 @@ const BUTTONS_DATA = {
     textureOFF: 'icon-sfx-off',
     position: {
       x: -VIEW_SIZE.buttonsGap,
-      y: -(VIEW_SIZE.buttonsGap) - BUTTONS_GAP,
+      y: -(VIEW_SIZE.buttonsGap) - BUTTONS_GAP - 30,
     }
   },
   musicBtn: {
@@ -34,7 +40,7 @@ const BUTTONS_DATA = {
     textureOFF: 'icon-music-off',
     position: {
       x: VIEW_SIZE.buttonsGap,
-      y: -(VIEW_SIZE.buttonsGap) - BUTTONS_GAP,
+      y: -(VIEW_SIZE.buttonsGap) - BUTTONS_GAP - 30,
     }
   },
   btnMainScreen: {
@@ -43,7 +49,7 @@ const BUTTONS_DATA = {
     textureOFF: null,
     position: {
       x: 0,
-      y: (VIEW_SIZE.buttonsGap) - BUTTONS_GAP,
+      y: 10,
     }
   }
 }
@@ -61,6 +67,7 @@ export default class OptionsView extends BaseModal {
   #musicBtn
   #btnMainScreen
   #checkboxZoom
+  #checkboxSokobanDpad
   #buttons = []
   #timeLine = null
   #credits
@@ -100,6 +107,10 @@ export default class OptionsView extends BaseModal {
   get checkboxZoom() {
     return this.#checkboxZoom
   }
+
+  get checkboxSokobanDpad() {
+    return this.#checkboxSokobanDpad
+  }
   
   get btnMainScreen() {
     return this.#btnMainScreen
@@ -117,7 +128,8 @@ export default class OptionsView extends BaseModal {
 
     this.visible = isVisible
     
-    isVisible ? SdkManager.gameplayStop() : SdkManager.gameplayStart()
+    if (isVisible) SdkManager.gameplayStop()
+    else SdkManager.gameplayStart()
     
     if (!isVisible) {
       this.#game.emit(GAME_EVENTS.Options.hide)
@@ -134,7 +146,7 @@ export default class OptionsView extends BaseModal {
   #init = () => {
     this.#createWheel()
     this.#createButtons()
-    this.#createCheckboxRow()
+    this.#createCheckboxRows()
     this.#checkFlagVisibleSoundButtons()
     
     this.#buttons = [this.#sfxBtn, this.#musicBtn, this.#btnMainScreen]
@@ -167,12 +179,11 @@ export default class OptionsView extends BaseModal {
   }
   
   #createButton = ({name, textureON, textureOFF, position} = {}) => {
-    const container = new Container()
+    const container = new Container({label: name})
     container.audioData = {
       textureON,
       textureOFF
     }
-    container.label = name
     container.position.copyFrom(position)
     
     if (isNeedCreditsField()) {
@@ -191,18 +202,33 @@ export default class OptionsView extends BaseModal {
     return container
   }
   
-  #createCheckboxRow = () => {
-    const checkboxes = new Container()
-    checkboxes.label = 'checkboxes'
-    checkboxes.position.set(0, isNeedCreditsField() ? 140 : 180)
+  #createCheckboxRows = () => {
+    const checkboxes = new Container({label: 'option-checkboxes'})
+    checkboxes.position.set(-VIEW_SIZE.w / 2 + 70, isNeedCreditsField() ? 140 : 148)
     
     this.#checkboxZoom = GameUtils.createCheckbox({
       text: `${i18next.t('option.checkboxZoom')}`,
-      name: 'checkboxZoom'
+      name: 'checkboxZoom',
+      style: CHECKBOX_TEXT_STYLE,
     })
-    
-    checkboxes.addChild(this.#checkboxZoom)
+    this.#checkboxSokobanDpad = GameUtils.createCheckbox({
+      text: `${i18next.t('option.checkboxSokobanDpad')}`,
+      name: 'checkboxSokobanDpad',
+      style: CHECKBOX_TEXT_STYLE,
+    })
+    this.#checkboxZoom.y = -25
+    this.#checkboxSokobanDpad.y = 35
+    this.#styleCheckbox(this.#checkboxZoom)
+    this.#styleCheckbox(this.#checkboxSokobanDpad)
+
+    checkboxes.addChild(this.#checkboxZoom, this.#checkboxSokobanDpad)
     this.addChild(checkboxes)
+  }
+
+  #styleCheckbox = (checkbox) => {
+    checkbox.pivot.x = 0
+    checkbox.getChildByLabel('checkbox').tint = 0xf4edc5
+    checkbox.getChildByLabel('checkboxMark').tint = 0xf4edc5
   }
   
   #checkFlagVisibleSoundButtons = () => {
@@ -219,4 +245,8 @@ export default class OptionsView extends BaseModal {
     
     this.#credits = new Credits(this)
   }
+}
+
+export {
+  VIEW_SIZE,
 }

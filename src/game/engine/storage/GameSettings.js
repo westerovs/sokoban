@@ -19,4 +19,9 @@ export default class GameSettings {
     this.#storage.playerData.option_zoom = !this.#storage.playerData.option_zoom
     this.#storage.save()
   }
+
+  toggleSokobanDpad = () => {
+    this.#storage.playerData.option_sokobanDpad = !this.#storage.playerData.option_sokobanDpad
+    this.#storage.save()
+  }
 }

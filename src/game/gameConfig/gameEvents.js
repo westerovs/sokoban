@@ -42,6 +42,7 @@ const GAME_EVENTS = {
   Options: {
     toggleAudioVolume: 'options:toggleAudioVolume',
     checkboxZoom: 'options:checkboxZoom',
+    checkboxSokobanDpad: 'options:checkboxSokobanDpad',
     btnCredits: 'options:btnCredits',
     hide: 'options:hide'
   },
@@ -95,6 +96,6 @@ const ADAPTER_EVENTS = {
 }
 
 export {
-  GAME_EVENTS,
   ADAPTER_EVENTS,
+  GAME_EVENTS,
 }

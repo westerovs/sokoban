@@ -1,6 +1,8 @@
 import {Container} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
+import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import SokobanBoard from './SokobanBoard.js'
+import SokobanDpad from './SokobanDpad.js'
 import SokobanHud from './SokobanHud.js'
 import SokobanInput from './SokobanInput.js'
 import SokobanLevel from './SokobanLevel.js'
@@ -14,7 +16,9 @@ export default class SokobanGame extends Container {
   #level
   #board
   #hud
+  #dpad
   #input
+  #dpadVisibilityHandler
   #isInputEnabled = false
   #isAnimatingMove = false
 
@@ -47,11 +51,12 @@ export default class SokobanGame extends Container {
     this.#isInputEnabled = isEnabled
     this.#input.setEnabled(isEnabled)
     this.#hud.setEnabled(isEnabled)
+    this.#dpad.setEnabled(isEnabled)
   }
 
   attachHud() {
-    Locator.uiLayer.stateUiLayer.addChild(this.#hud)
-    this.#resizeHud()
+    Locator.uiLayer.stateUiLayer.addChild(this.#hud, this.#dpad)
+    this.#resizeUi()
   }
 
   undo() {
@@ -70,12 +75,14 @@ export default class SokobanGame extends Container {
 
   resize() {
     this.#board.resize()
-    this.#resizeHud()
+    this.#resizeUi()
   }
 
   destroy(options) {
+    Locator.game.off(GAME_EVENTS.Options.checkboxSokobanDpad, this.#dpadVisibilityHandler)
     this.#input?.destroy()
     this.#hud?.destroy({children: true})
+    this.#dpad?.destroy({children: true})
     this.#isInputEnabled = false
     super.destroy(options)
   }
@@ -88,7 +95,14 @@ export default class SokobanGame extends Container {
       onUndo: () => this.undo(),
       onRestart: () => this.restart(),
     })
-    this.#input = new SokobanInput((direction) => this.move(direction))
+    this.#dpad = new SokobanDpad((direction) => this.move(direction))
+    this.#input = new SokobanInput({
+      onMove: (direction) => this.move(direction),
+      pointerTarget: Locator.game.app.canvas,
+    })
+    this.#dpadVisibilityHandler = this.#setDpadVisible.bind(this)
+    Locator.game.on(GAME_EVENTS.Options.checkboxSokobanDpad, this.#dpadVisibilityHandler)
+    this.#setDpadVisible(Locator.storage.playerData.option_sokobanDpad)
     this.addChild(this.#board)
   }
 
@@ -113,7 +127,7 @@ export default class SokobanGame extends Container {
     this.#hud.setSteps(this.#level.steps)
   }
 
-  #resizeHud() {
+  #resizeUi() {
     if (!this.#hud.parent) return
 
     const {width, height, center} = Locator.uiLayer.uiData
@@ -125,6 +139,11 @@ export default class SokobanGame extends Container {
       availableHeight: height,
       centerX: center.x,
     })
+    this.#dpad.layout({width, height})
+  }
+
+  #setDpadVisible(isVisible) {
+    this.#dpad.setVisible(isVisible)
   }
 
   #complete() {

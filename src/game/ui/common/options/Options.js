@@ -1,9 +1,9 @@
 import {Texture} from 'pixi.js'
 import Locator from '../../../engine/Locator.ts'
+import {STORAGE_KEYS} from '../../../engine/storage/defaultData.js'
 import {GAME_STATES} from '../../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import OptionsView from './OptionsView.js'
-import {STORAGE_KEYS} from '../../../engine/storage/defaultData.js'
 
 export default class Options {
   #game
@@ -15,6 +15,7 @@ export default class Options {
   #btnMainScreen
   #musicBtn
   #sfxBtn
+  #checkboxSokobanDpad
   
   constructor(game) {
     this.#game = game
@@ -74,12 +75,14 @@ export default class Options {
     this.#btnMainScreen = this.#view.btnMainScreen
     this.#musicBtn = this.#view.musicBtn
     this.#sfxBtn = this.#view.sfxBtn
+    this.#checkboxSokobanDpad = this.#view.checkboxSokobanDpad
   }
   
   #setInitParams = () => {
     this.#setAudioStatus(this.#sfxBtn, STORAGE_KEYS.option_isPlaySFX)
     this.#setAudioStatus(this.#musicBtn, STORAGE_KEYS.option_isPlayMusic)
-    this.#setCheckboxStatus()
+    this.#setCheckboxStatus(this.#view.checkboxZoom, STORAGE_KEYS.option_zoom)
+    this.#setCheckboxStatus(this.#checkboxSokobanDpad, STORAGE_KEYS.option_sokobanDpad)
   }
   
   #setAudioStatus = (button, storageKey) => {
@@ -92,9 +95,9 @@ export default class Options {
     this.#game.emit(GAME_EVENTS.Options.toggleAudioVolume, storageKey, isPlay)
   }
   
-  #setCheckboxStatus = () => {
-    const mark = this.#view.checkboxZoom.getChildByLabel('checkboxMark')
-    mark.visible = this.#storage.playerData.option_zoom
+  #setCheckboxStatus = (checkbox, storageKey) => {
+    const mark = checkbox.getChildByLabel('checkboxMark')
+    mark.visible = this.#storage.playerData[storageKey]
   }
   
   #setEvents = () => {
@@ -145,11 +148,16 @@ export default class Options {
   #checkboxHandler = (target) => {
     if (target.label === 'checkboxZoom') {
       this.#storage.gameSettings.toggleZoom()
-      
-      const mark = this.#view.checkboxZoom.getChildByLabel('checkboxMark')
-      mark.visible = this.#storage.playerData.option_zoom
-
+      this.#setCheckboxStatus(this.#view.checkboxZoom, STORAGE_KEYS.option_zoom)
       this.#game.emit(GAME_EVENTS.Options.checkboxZoom)
+    }
+    if (target.label === 'checkboxSokobanDpad') {
+      this.#storage.gameSettings.toggleSokobanDpad()
+      this.#setCheckboxStatus(target, STORAGE_KEYS.option_sokobanDpad)
+      this.#game.emit(
+        GAME_EVENTS.Options.checkboxSokobanDpad,
+        this.#storage.playerData.option_sokobanDpad,
+      )
     }
   }
 }

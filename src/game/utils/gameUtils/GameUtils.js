@@ -1,13 +1,13 @@
-import {Cache, Container, Matrix, RenderTexture, Sprite, Spritesheet, Text, Texture} from 'pixi.js'
-import {Logger} from '../Logger.js'
-import {LEVEL_TYPES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
-import PurchaseError from '@/game/ui/common/purchaseError/PurchaseError.js'
-import SdkManager from '@/game/engine/SdkManager.js'
-import Locator from '@/game/engine/Locator.ts'
-import LocalStorage from '@/game/engine/storage/LocalStorage.js'
-import {FONT_COLORS, primaryFontStyle} from '@/game/styles.js'
-import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import i18next from 'i18next'
+import {Cache, Container, Matrix, RenderTexture, Sprite, Spritesheet, Text, Texture} from 'pixi.js'
+import {applyInteractive} from '@/game/components/buttons/buttons.js'
+import Locator from '@/game/engine/Locator.ts'
+import SdkManager from '@/game/engine/SdkManager.js'
+import LocalStorage from '@/game/engine/storage/LocalStorage.js'
+import {LEVEL_TYPES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
+import {FONT_COLORS, primaryFontStyle} from '@/game/styles.js'
+import PurchaseError from '@/game/ui/common/purchaseError/PurchaseError.js'
+import {Logger} from '../Logger.js'
 
 export default class GameUtils {
   static popupEl
@@ -60,11 +60,10 @@ export default class GameUtils {
       fontSize: 26,
     }
   } = {}) => {
-    const checkboxContainer = new Container()
+    const checkboxContainer = new Container({label: name})
     if (interactive) applyInteractive(checkboxContainer)
-    checkboxContainer.label = name
     
-    const checkboxText = new Text({text, style})
+    const checkboxText = new Text({label: `${name}-text`, text, style})
     checkboxText.anchor.set(0, 0.5)
     checkboxText.x = 30
     
