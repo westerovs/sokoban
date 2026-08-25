@@ -37,11 +37,27 @@ export default class SokobanBoard extends Container {
     this.#isRotated = shouldRotate
     this.rotation = shouldRotate ? Math.PI / 2 : 0
     this.scale.set(boardScale)
-    this.position.set(WORLD.HALF_W, WORLD.HALF_H)
+    this.position.set(WORLD.HALF_W, this.#getBoardCenterY())
   }
 
   getLevelDirection(direction) {
     return this.#isRotated ? ROTATED_DIRECTIONS[direction] : direction
+  }
+
+  getLayout(parent) {
+    const bounds = this.getBounds()
+    const topLeft = parent.toLocal({x: bounds.x, y: bounds.y})
+    const bottomRight = parent.toLocal({
+      x: bounds.x + bounds.width,
+      y: bounds.y + bounds.height,
+    })
+    const tileStart = parent.toLocal(this.toGlobal({x: 0, y: 0}))
+    const tileEnd = parent.toLocal(this.toGlobal({x: this.#tileSize, y: 0}))
+
+    return {
+      boardWidth: Math.abs(bottomRight.x - topLeft.x),
+      tileSize: Math.hypot(tileEnd.x - tileStart.x, tileEnd.y - tileStart.y),
+    }
   }
 
   #init() {
@@ -74,9 +90,19 @@ export default class SokobanBoard extends Container {
     const visibleWidth = window.innerWidth / scaleFactor
     const horizontalPadding = this.#getHorizontalPadding(visibleWidth)
     const availableWidth = visibleWidth - horizontalPadding * 2
-    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.verticalPadding * 2
+    const availableHeight = WORLD.HEIGHT
+      - SOKOBAN_SETTINGS.boardTopPadding
+      - SOKOBAN_SETTINGS.boardBottomPadding
 
     return Math.max(Math.min(availableWidth / displayedWidth, availableHeight / displayedHeight), 0.1)
+  }
+
+  #getBoardCenterY() {
+    const availableHeight = WORLD.HEIGHT
+      - SOKOBAN_SETTINGS.boardTopPadding
+      - SOKOBAN_SETTINGS.boardBottomPadding
+
+    return SOKOBAN_SETTINGS.boardTopPadding + availableHeight / 2
   }
 
   #getHorizontalPadding(visibleWidth) {

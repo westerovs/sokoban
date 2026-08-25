@@ -113,6 +113,7 @@ export default class Level {
   #createSokobanGame() {
     this.sokobanGame = new SokobanGame({
       map: this.config.map,
+      levelNumber: this.config.levelIndex + 1,
       canMove: this.#canMove,
       onMove: this.#notifyMove,
       onComplete: this.#requestWin,
@@ -120,6 +121,7 @@ export default class Level {
 
     this.refs.sokobanGame = this.sokobanGame
     this.game.view.addChild(this.sokobanGame)
+    this.sokobanGame.attachHud()
   }
 
   #initModules() {

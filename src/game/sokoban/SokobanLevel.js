@@ -9,6 +9,8 @@ export default class SokobanLevel {
   #boxes = new Set()
   #playerPosition = null
   #isCompleted = false
+  #initialState = null
+  #history = []
 
   constructor(map) {
     this.#init(map)
@@ -42,6 +44,10 @@ export default class SokobanLevel {
     return this.#isCompleted
   }
 
+  get steps() {
+    return this.#history.length
+  }
+
   isWall(position) {
     return this.#walls.has(this.#getPositionKey(position))
   }
@@ -54,13 +60,31 @@ export default class SokobanLevel {
     const offset = SOKOBAN_DIRECTIONS[direction]
     if (!offset || this.#isCompleted) return {moved: false, completed: this.#isCompleted}
 
+    const previousState = this.#createStateSnapshot()
     const nextPosition = this.#addPositions(this.#playerPosition, offset)
     if (this.#isWallOrOutside(nextPosition)) return {moved: false, completed: false}
     if (!this.#tryMoveBox(nextPosition, offset)) return {moved: false, completed: false}
 
+    this.#history.push(previousState)
     this.#playerPosition = nextPosition
     this.#isCompleted = this.#checkCompleted()
     return {moved: true, completed: this.#isCompleted}
+  }
+
+  undo() {
+    const previousState = this.#history.pop()
+    if (!previousState) return false
+
+    this.#restoreState(previousState)
+    return true
+  }
+
+  restart() {
+    if (this.#history.length === 0) return false
+
+    this.#restoreState(this.#initialState)
+    this.#history = []
+    return true
   }
 
   #init(map) {
@@ -70,6 +94,7 @@ export default class SokobanLevel {
     this.#parseMap(map)
     this.#validateEntities()
     this.#isCompleted = this.#checkCompleted()
+    this.#initialState = this.#createStateSnapshot()
   }
 
   #validateMap(map) {
@@ -158,6 +183,20 @@ export default class SokobanLevel {
 
   #checkCompleted() {
     return this.#boxes.size > 0 && Array.from(this.#boxes).every((positionKey) => this.#targets.has(positionKey))
+  }
+
+  #createStateSnapshot() {
+    return {
+      boxes: new Set(this.#boxes),
+      playerPosition: {...this.#playerPosition},
+      isCompleted: this.#isCompleted,
+    }
+  }
+
+  #restoreState(state) {
+    this.#boxes = new Set(state.boxes)
+    this.#playerPosition = {...state.playerPosition}
+    this.#isCompleted = state.isCompleted
   }
 
   #addPosition(collection, position) {
