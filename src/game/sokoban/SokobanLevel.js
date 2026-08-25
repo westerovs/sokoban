@@ -4,6 +4,7 @@ import {SOKOBAN_SETTINGS} from './settings.js'
 export default class SokobanLevel {
   #width = 0
   #height = 0
+  #voids = new Set()
   #walls = new Set()
   #targets = new Set()
   #boxes = new Set()
@@ -50,6 +51,10 @@ export default class SokobanLevel {
 
   isWall(position) {
     return this.#walls.has(this.#getPositionKey(position))
+  }
+
+  isVoid(position) {
+    return this.#voids.has(this.#getPositionKey(position))
   }
 
   isTarget(position) {
@@ -121,6 +126,7 @@ export default class SokobanLevel {
   }
 
   #parseSymbol(symbol, position) {
+    if (symbol === SOKOBAN_SYMBOLS.void) return this.#addPosition(this.#voids, position)
     if (symbol === SOKOBAN_SYMBOLS.floor) return
     if (symbol === SOKOBAN_SYMBOLS.wall) return this.#addPosition(this.#walls, position)
     if (symbol === SOKOBAN_SYMBOLS.target) return this.#addPosition(this.#targets, position)
@@ -174,7 +180,9 @@ export default class SokobanLevel {
 
   #isWallOrOutside(position) {
     if (!this.#isInside(position)) return true
-    return this.#walls.has(this.#getPositionKey(position))
+    const positionKey = this.#getPositionKey(position)
+
+    return this.#voids.has(positionKey) || this.#walls.has(positionKey)
   }
 
   #isInside(position) {

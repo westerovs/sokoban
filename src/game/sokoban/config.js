@@ -1,4 +1,5 @@
 const SOKOBAN_SYMBOLS = Object.freeze({
+  void: '_',
   wall: '#',
   floor: ' ',
   player: '@',

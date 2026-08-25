@@ -127,6 +127,8 @@ export default class SokobanBoard extends Container {
   }
 
   #drawTile(tiles, position) {
+    if (this.#level.isVoid(position)) return
+
     if (this.#level.isWall(position)) {
       this.#drawWall(tiles, position)
       return
