@@ -1,15 +1,14 @@
 import {Howl, Howler} from 'howler'
-import Locator from '../Locator.ts'
-import YaMetrika, {ERROR_TYPES} from '../../modules/metrika/YaMetrika.js'
-import {createPreloadAudioList} from './preloadAudioList.ts'
-import {Logger, MODULES} from '../../utils/Logger.js'
-import MusicManager from './MusicManager.js'
-import {GAME_EVENTS, ADAPTER_EVENTS} from '../../gameConfig/gameEvents.js'
-import {antiMuteIOS} from './antiMuteIOS.js'
 import {ASSETS_URL} from '../../gameConfig/constants.js'
+import {ADAPTER_EVENTS,GAME_EVENTS} from '../../gameConfig/gameEvents.js'
+import YaMetrika, {ERROR_TYPES} from '../../modules/metrika/YaMetrika.js'
+import {Logger, MODULES} from '../../utils/Logger.js'
+import Locator from '../Locator.ts'
 import SdkManager from '../SdkManager.js'
 import {STORAGE_KEYS} from '../storage/defaultData.js'
-import {createMusicPlayerList} from '@/game/generatedAssets/soundList.js'
+import {antiMuteIOS} from './antiMuteIOS.js'
+import MusicManager from './MusicManager.js'
+import {createPreloadAudioList} from './preloadAudioList.ts'
 
 export default class SoundManager {
   #game
@@ -147,12 +146,9 @@ export default class SoundManager {
     this.unloadLevelMusic()
 
     const basePath = ASSETS_URL.local
-    const track = createMusicPlayerList({basePath})
-      .find(({alias}) => alias === trackAlias)
-
-    if (!track) {
-      Logger.warn(MODULES.SOUND_MANAGER, `[preloadLevelMusic] Track not found: ${trackAlias}`)
-      return false
+    const track = {
+      alias: trackAlias,
+      src: `${basePath}assets/audio/music/level-music/${trackAlias}.mp3`,
     }
 
     const victory = {

@@ -1,9 +1,9 @@
-import Locator from '../Locator.ts'
 import {GAME_STATES} from '../../gameConfig/constants.js'
-import {Logger, MODULES} from '../../utils/Logger.js'
 import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
-import {STORAGE_KEYS} from '../storage/defaultData.js'
 import LevelConfig from '../../gameConfig/LevelConfig.js'
+import {Logger, MODULES} from '../../utils/Logger.js'
+import Locator from '../Locator.ts'
+import {STORAGE_KEYS} from '../storage/defaultData.js'
 
 /*
  * Отвечает за запуск и приостановку музыки на конкретном уровне
@@ -67,16 +67,14 @@ export default class MusicManager {
 
   #getLevelTrackName = () => {
     const levelIndex = Locator.storage.playerData.levelIndex
-    const {music: playlistName} = LevelConfig.getGameLevelData(levelIndex)
-    const playlist = Locator.gameConfig.musicPlaylists?.[playlistName]
+    const {music: trackName} = LevelConfig.getGameLevelData(levelIndex)
 
-    if (!Array.isArray(playlist) || playlist.length === 0) {
-      Logger.warn(MODULES.SOUND_MANAGER, `[MusicManager] Playlist not found or empty: ${playlistName}`)
+    if (!trackName) {
+      Logger.warn(MODULES.SOUND_MANAGER, `[MusicManager] Music is not configured for level: ${levelIndex}`)
       return null
     }
 
-    const randomIndex = Math.floor(Math.random() * playlist.length)
-    return playlist[randomIndex]
+    return trackName
   }
   
   #play = () => {

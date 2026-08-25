@@ -2,8 +2,9 @@
   "level0": {
     "id": "sokoban-01",
     "levelName": "level0",
-    "back": "back_lv0",
-    "music": "velvet_orbit",
+    "back": "garden",
+    "amb": "amb_garden",
+    "music": "m_garden",
     "map": [
       "___###___",
       "___#.#___",
@@ -19,8 +20,9 @@
   "level1": {
     "id": "sokoban-02",
     "levelName": "level1",
-    "back": "back_lv1",
-    "music": "amber_signal",
+    "back": "antarctica",
+    "amb": "amb_antarctica",
+    "music": "m_antarctica",
     "map": [
       "######",
       "# .  #",
@@ -33,8 +35,9 @@
   "level2": {
     "id": "sokoban-03",
     "levelName": "level2",
-    "back": "back_lv2",
-    "music": "quiet_comet",
+    "back": "forest",
+    "amb": "amb_forest",
+    "music": "m_forest",
     "map": [
       "#####____",
       "#@  #____",
@@ -50,8 +53,9 @@
   "level3": {
     "id": "sokoban-04",
     "levelName": "level3",
-    "back": "back_lv3",
-    "music": "velvet_orbit",
+    "back": "garden",
+    "amb": "amb_garden",
+    "music": "m_garden",
     "map": [
       "_####_",
       "##  #_",
@@ -66,8 +70,9 @@
   "level4": {
     "id": "sokoban-05",
     "levelName": "level4",
-    "back": "back_lv4",
-    "music": "amber_signal",
+    "back": "antarctica",
+    "amb": "amb_antarctica",
+    "music": "m_antarctica",
     "map": [
       "_#######__",
       "_#     ###",
@@ -81,8 +86,9 @@
   "level5": {
     "id": "sokoban-06",
     "levelName": "level5",
-    "back": "back_lv5",
-    "music": "quiet_comet",
+    "back": "forest",
+    "amb": "amb_forest",
+    "music": "m_forest",
     "map": [
       "_#####__",
       "_#@ ###_",
@@ -97,8 +103,9 @@
   "level6": {
     "id": "sokoban-07",
     "levelName": "level6",
-    "back": "back_lv6",
-    "music": "velvet_orbit",
+    "back": "garden",
+    "amb": "amb_garden",
+    "music": "m_garden",
     "map": [
       "___#######___",
       "####     #___",
@@ -116,8 +123,9 @@
   "level7": {
     "id": "sokoban-08",
     "levelName": "level7",
-    "back": "back_lv7",
-    "music": "amber_signal",
+    "back": "antarctica",
+    "amb": "amb_antarctica",
+    "music": "m_antarctica",
     "map": [
       "___#######",
       "__##  # @#",
@@ -132,8 +140,9 @@
   "level8": {
     "id": "sokoban-09",
     "levelName": "level8",
-    "back": "back_lv8",
-    "music": "quiet_comet",
+    "back": "forest",
+    "amb": "amb_forest",
+    "music": "m_forest",
     "map": [
       "___######_",
       "_###    #_",
@@ -147,8 +156,9 @@
   "level9": {
     "id": "sokoban-10",
     "levelName": "level9",
-    "back": "back_lv9",
-    "music": "velvet_orbit",
+    "back": "garden",
+    "amb": "amb_garden",
+    "music": "m_garden",
     "map": [
       "______####____",
       "______#  #____",
@@ -168,8 +178,9 @@
   "level10": {
     "id": "sokoban-11",
     "levelName": "level10",
-    "back": "back_lv10",
-    "music": "amber_signal",
+    "back": "antarctica",
+    "amb": "amb_antarctica",
+    "music": "m_antarctica",
     "map": [
       "___##########_",
       "####......  #_",

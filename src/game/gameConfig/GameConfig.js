@@ -8,7 +8,6 @@ export default class GameConfig {
   #locale
   #levelConfigurationPromise = null
   levels
-  musicPlaylists
   locales
   
   constructor() {
@@ -36,17 +35,9 @@ export default class GameConfig {
     this.levels = levels
   }
 
-  loadMusicPlaylistsJson = async () => {
-    const url = `${this.gameConfigUrl}/musicPlaylists.json`
-    this.musicPlaylists = await LoadUtils.loadJson(url)
-  }
-
   loadLevelConfiguration = () => {
     if (!this.#levelConfigurationPromise) {
-      this.#levelConfigurationPromise = Promise.all([
-        this.loadLevelsJson(),
-        this.loadMusicPlaylistsJson(),
-      ]).catch((error) => {
+      this.#levelConfigurationPromise = this.loadLevelsJson().catch((error) => {
         this.#levelConfigurationPromise = null
         throw error
       })
