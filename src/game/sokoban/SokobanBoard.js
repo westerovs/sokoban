@@ -112,7 +112,7 @@ export default class SokobanBoard extends Container {
       - SOKOBAN_SETTINGS.boardTopPadding
       - SOKOBAN_SETTINGS.boardBottomPadding
 
-    return Math.max(Math.min(availableWidth / displayedWidth, availableHeight / displayedHeight), 0.1)
+    return Math.min(availableWidth / displayedWidth, availableHeight / displayedHeight)
   }
 
   #getBoardCenterY() {

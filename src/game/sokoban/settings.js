@@ -3,15 +3,15 @@ const SOKOBAN_SETTINGS = Object.freeze({
   moveDuration: 0.18, // Длительность перемещения игрока и ящика между клетками
   moveEase: 'power2.out', // Плавность перемещения игрока и ящика
   boxOnTargetTint: 0xaaaaaa, // Затемнение ящика, установленного на точку
-  maxBoardColumns: 10, // Максимальное количество столбцов игровой доски
-  maxBoardRows: 10, // Максимальное количество строк игровой доски
+  maxBoardColumns: 20, // Максимальное количество столбцов игровой доски
+  maxBoardRows: 14, // Максимальное количество строк игровой доски
   minHorizontalPadding: 32, // Минимальный боковой отступ в координатах игрового мира
   maxHorizontalPadding: 96, // Максимальный боковой отступ в координатах игрового мира
   horizontalPaddingRatio: 0.06, // Доля видимой ширины для бокового отступа
   maxHorizontalPaddingRatio: 0.1, // Предельная доля ширины для одного бокового отступа
   boardTopPadding: 48, // Верхний отступ доски в координатах игрового мира
   boardBottomPadding: 110, // Нижняя область, зарезервированная под компактный HUD
-  rotateTallBoardInLandscape: true, // Разрешает поворот вытянутой доски в горизонтальной ориентации
+  rotateTallBoardInLandscape: false, // Сохраняет исходную ориентацию структуры уровня
 })
 
 const SOKOBAN_HUD_SETTINGS = Object.freeze({
