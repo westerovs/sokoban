@@ -33,6 +33,6 @@ export default class StateIntro {
     
     const basePath = ASSETS_URL.local
     const src = `${basePath}assets/audio/ambience/${amb}.mp3`
-    Locator.soundManager.loadAndPlaySFX(amb, src, {loop: true})
+    Locator.soundManager.loadAndPlayAmbient(amb, src, {loop: true})
   }
 }

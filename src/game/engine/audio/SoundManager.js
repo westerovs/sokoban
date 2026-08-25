@@ -18,6 +18,7 @@ export default class SoundManager {
   #sfxVolume = 1
   #isInit = false
   #musicList = []
+  #ambienceList = []
   #sfxList = []
   #levelMusicAliases = []
   
@@ -265,24 +266,30 @@ export default class SoundManager {
     })
   }
   
-  /* метод мгновенно подгружает звук и воспроизводит. Используется для уникальных звуков и амбиента
-   возможно стоит переделать такие звуки грузить фоном, но т.к они очень мало весят, проблемы не создают*/
-  loadAndPlaySFX = (keySound, src, {loop = true, volume = 1.0} = {}) => {
-    if (this.#sfxList[keySound]) {
-      // Если уже загружен, просто воспроизводим
-      this.#playSound(this.#sfxList[keySound], {loop, volume})
+  // Мгновенно загружает и воспроизводит амбиент с громкостью музыкальной группы
+  loadAndPlayAmbient = (keySound, src, {loop = true, volume = 1.0} = {}) => {
+    if (this.#ambienceList[keySound]) {
+      this.#playSound(this.#ambienceList[keySound], {
+        loop,
+        volume,
+        volumeMultiplier: this.#musicVolume,
+      })
       return
     }
     
     const sound = new Howl({src: [src], loop, volume, preload: true,})
-    this.#sfxList[keySound] = sound
+    this.#ambienceList[keySound] = sound
     
     sound.once('load', () => {
-      this.#playSound(sound, {loop, volume})
+      this.#playSound(sound, {
+        loop,
+        volume,
+        volumeMultiplier: this.#musicVolume,
+      })
     })
     
     sound.once('loaderror', (id, err) => {
-      Logger.warn(MODULES.SOUND_MANAGER, `[loadAndPlaySFX] Load error: ${keySound}`, err)
+      Logger.warn(MODULES.SOUND_MANAGER, `[loadAndPlayAmbient] Load error: ${keySound}`, err)
     })
   }
   
@@ -296,7 +303,19 @@ export default class SoundManager {
 
       if (sound) {
         if (this.#musicList[keySound]) {
-          this.#playSound(sound, {loop, volume, isMusic: true})
+          this.#playSound(sound, {
+            loop,
+            volume,
+            stopMusic: true,
+            volumeMultiplier: this.#musicVolume,
+          })
+        }
+        else if (this.#ambienceList[keySound]) {
+          this.#playSound(sound, {
+            loop,
+            volume,
+            volumeMultiplier: this.#musicVolume,
+          })
         }
         else if (this.#sfxList[keySound]) {
           this.#playSound(sound, {loop, volume})
@@ -315,22 +334,25 @@ export default class SoundManager {
     }
   }
   
-  #playSound(sound, {loop = false, volume = 1.0, isMusic = false}) {
-    if (isMusic) {
+  #playSound(sound, {
+    loop = false,
+    volume = 1.0,
+    stopMusic = false,
+    volumeMultiplier = this.#sfxVolume,
+  }) {
+    if (stopMusic) {
       Object.values(this.#musicList).forEach(music => music.stop())
     }
     
-    const finalVolume = isMusic
-      ? volume * this.#musicVolume
-      : volume * this.#sfxVolume
-    
     sound.loop(loop)
-    sound.volume(finalVolume)
+    sound.volume(volume * volumeMultiplier)
     sound.play()
   }
   
   #getSound(keySound) {
-    return this.#musicList[keySound] || this.#sfxList[keySound]
+    return this.#musicList[keySound]
+      || this.#ambienceList[keySound]
+      || this.#sfxList[keySound]
   }
   
   stop(keySound, fadeDuration = 0) {
@@ -345,7 +367,7 @@ export default class SoundManager {
   
   stopAll() {
     console.log('[stopAll sounds]')
-    ;[this.#musicList, this.#sfxList].forEach(type => {
+    ;[this.#musicList, this.#ambienceList, this.#sfxList].forEach(type => {
       Object.values(type).forEach(sound => {
         if (sound.playing()) sound.stop()
       })
@@ -371,7 +393,7 @@ export default class SoundManager {
     
     const soundMap = {
       [STORAGE_KEYS.option_isPlaySFX]: [this.#sfxList],
-      [STORAGE_KEYS.option_isPlayMusic]: [this.#musicList],
+      [STORAGE_KEYS.option_isPlayMusic]: [this.#musicList, this.#ambienceList],
     }
     
     const soundGroups = soundMap[type]
