@@ -1,5 +1,5 @@
 import {gsap} from 'gsap'
-import {Container} from 'pixi.js'
+import {Container, Graphics} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '../engine/Locator.ts'
 import {WORLD} from '../gameConfig/constants.js'
@@ -16,6 +16,8 @@ export default class SokobanBoard extends Container {
   #boxViews = []
   #player
   #movementTimeline = null
+  #deadlockHighlight
+  #deadlockTimeline = null
   #isRotated = false
 
   constructor(level) {
@@ -29,8 +31,19 @@ export default class SokobanBoard extends Container {
 
   update() {
     this.#killMovementTimeline()
+    this.#hideDeadlockHighlight()
     this.#updateBoxes()
     this.#updatePlayer()
+  }
+
+  showDeadlock(position) {
+    this.#hideDeadlockHighlight()
+    this.#deadlockHighlight.position.set(
+      position.x * this.#tileSize,
+      position.y * this.#tileSize,
+    )
+    this.#deadlockHighlight.visible = true
+    this.#deadlockTimeline = this.#createDeadlockTimeline()
   }
 
   animateMove(moveResult) {
@@ -72,6 +85,7 @@ export default class SokobanBoard extends Container {
 
   destroy(options) {
     this.#killMovementTimeline()
+    this.#hideDeadlockHighlight()
     super.destroy(options)
   }
 
@@ -79,12 +93,14 @@ export default class SokobanBoard extends Container {
     const staticTiles = this.#createStaticTiles()
     this.#boxesContainer = new Container({label: 'sokoban-boxes'})
     this.#player = this.#createPlayer()
+    this.#deadlockHighlight = this.#createDeadlockHighlight()
     staticTiles.zIndex = 0
     this.#boxesContainer.zIndex = 1
     this.#player.zIndex = 2
+    this.#deadlockHighlight.zIndex = 3
 
     this.#createBoxes()
-    this.addChild(staticTiles, this.#boxesContainer, this.#player)
+    this.addChild(staticTiles, this.#boxesContainer, this.#player, this.#deadlockHighlight)
     this.pivot.set(this.#boardWidth / 2, this.#boardHeight / 2)
     this.update()
     this.resize()
@@ -187,6 +203,17 @@ export default class SokobanBoard extends Container {
     return player
   }
 
+  #createDeadlockHighlight() {
+    const inset = this.#tileSize * 0.06
+    const size = this.#tileSize - inset * 2
+    const cornerRadius = this.#tileSize * 0.12
+
+    return new Graphics({label: 'sokoban-deadlock-highlight', visible: false})
+      .roundRect(inset, inset, size, size, cornerRadius)
+      .fill({color: 0xff2f3d, alpha: 0.34})
+      .stroke({color: 0xff6b75, width: this.#tileSize * 0.05})
+  }
+
   #createMovementTimeline(moveResult, resolve) {
     const timeline = gsap.timeline({
       onComplete: () => this.#finishMovement(resolve),
@@ -243,9 +270,32 @@ export default class SokobanBoard extends Container {
     resolve()
   }
 
+  #createDeadlockTimeline() {
+    return gsap.timeline({
+      onComplete: () => this.#hideDeadlockHighlight(),
+    })
+      .fromTo(this.#deadlockHighlight, {alpha: 0}, {alpha: 1, duration: 0.14})
+      .to(this.#deadlockHighlight, {
+        alpha: 0.28,
+        duration: 0.22,
+        repeat: 5,
+        yoyo: true,
+      })
+      .to(this.#deadlockHighlight, {alpha: 0, duration: 0.3})
+  }
+
   #killMovementTimeline() {
     this.#movementTimeline?.kill()
     this.#movementTimeline = null
+  }
+
+  #hideDeadlockHighlight() {
+    this.#deadlockTimeline?.kill()
+    this.#deadlockTimeline = null
+    if (!this.#deadlockHighlight) return
+
+    this.#deadlockHighlight.alpha = 0
+    this.#deadlockHighlight.visible = false
   }
 
   #updateBoxes() {

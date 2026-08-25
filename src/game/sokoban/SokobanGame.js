@@ -100,10 +100,15 @@ export default class SokobanGame extends Container {
 
   #finishMove(result) {
     this.#isAnimatingMove = false
+    if (result.deadlockedBox) {
+      this.#board.showDeadlock(result.deadlockedBox)
+      this.#hud.showDeadlockFeedback()
+    }
     if (result.completed) this.#complete()
   }
 
   #updateViews() {
+    this.#hud.clearDeadlockFeedback()
     this.#board.update()
     this.#hud.setSteps(this.#level.steps)
   }

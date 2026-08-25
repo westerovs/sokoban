@@ -1,3 +1,4 @@
+import {gsap} from 'gsap'
 import {Container, Graphics, Rectangle} from 'pixi.js'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
@@ -10,6 +11,7 @@ export default class SokobanHudButton extends Container {
   #icon
   #size = 0
   #isEnabled = null
+  #pulseTimeline = null
 
   constructor({iconName, label, onPress}) {
     super({label})
@@ -34,6 +36,32 @@ export default class SokobanHudButton extends Container {
     this.#setHitArea()
     this.#setIconSize(iconSize)
     this.#drawBackground()
+  }
+
+  pulse() {
+    this.stopPulse()
+    this.#pulseTimeline = gsap.timeline({
+      onComplete: () => this.stopPulse(),
+    })
+      .to(this.scale, {
+        x: 1.14,
+        y: 1.14,
+        duration: 0.18,
+        ease: 'sine.inOut',
+        repeat: 5,
+        yoyo: true,
+      })
+  }
+
+  stopPulse() {
+    this.#pulseTimeline?.kill()
+    this.#pulseTimeline = null
+    this.scale.set(1)
+  }
+
+  destroy(options) {
+    this.stopPulse()
+    super.destroy(options)
   }
 
   #init() {

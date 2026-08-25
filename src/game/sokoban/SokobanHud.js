@@ -1,3 +1,4 @@
+import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
@@ -15,6 +16,10 @@ export default class SokobanHud extends Container {
   #panel
   #backButton
   #restartButton
+  #deadlockWarning
+  #deadlockWarningBackground
+  #deadlockWarningY = 0
+  #deadlockTimeline = null
   #isEnabled = false
   #steps = 0
 
@@ -40,6 +45,24 @@ export default class SokobanHud extends Container {
     this.#updateButtons()
   }
 
+  showDeadlockFeedback() {
+    this.clearDeadlockFeedback()
+    this.#deadlockWarning.visible = true
+    this.#backButton.pulse()
+    this.#deadlockTimeline = this.#createDeadlockTimeline()
+  }
+
+  clearDeadlockFeedback() {
+    this.#deadlockTimeline?.kill()
+    this.#deadlockTimeline = null
+    this.#backButton?.stopPulse()
+    if (!this.#deadlockWarning) return
+
+    this.#deadlockWarning.alpha = 0
+    this.#deadlockWarning.visible = false
+    this.#deadlockWarning.y = this.#deadlockWarningY
+  }
+
   layout({boardWidth, tileSize, availableWidth, centerX, availableHeight}) {
     const settings = SOKOBAN_HUD_SETTINGS
     const height = tileSize * settings.heightInTiles
@@ -49,19 +72,60 @@ export default class SokobanHud extends Container {
 
     this.#drawPanel(width, height)
     this.#layoutContent(width, height)
+    this.#layoutDeadlockWarning(width, height)
     this.#positionHud(centerX, availableHeight, height)
+  }
+
+  destroy(options) {
+    this.clearDeadlockFeedback()
+    super.destroy(options)
   }
 
   #init() {
     this.#panel = new Graphics({label: 'sokoban-hud-panel'})
     this.#stepsView = this.#createStepsView()
     this.#levelText = this.#createLevelText()
+    this.#deadlockWarning = this.#createDeadlockWarning()
 
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
-    this.addChild(this.#panel, this.#stepsView, this.#backButton, this.#levelText, this.#restartButton)
+    this.addChild(
+      this.#panel,
+      this.#stepsView,
+      this.#backButton,
+      this.#levelText,
+      this.#restartButton,
+      this.#deadlockWarning,
+    )
     this.setSteps(0)
+  }
+
+  #createDeadlockWarning() {
+    const warning = new Container({
+      label: 'sokoban-deadlock-warning',
+      alpha: 0,
+      visible: false,
+    })
+    this.#deadlockWarningBackground = new Graphics({label: 'sokoban-deadlock-warning-background'})
+    const text = this.#createDeadlockWarningText()
+
+    warning.addChild(this.#deadlockWarningBackground, text)
+    return warning
+  }
+
+  #createDeadlockWarningText() {
+    const text = new Text({
+      label: 'sokoban-deadlock-warning-text',
+      text: i18next.t('sokoban.deadlock'),
+      style: {
+        ...this.#createTextStyle(22),
+        fill: 0xffffff,
+      },
+    })
+
+    text.anchor.set(0.5)
+    return text
   }
 
   #createStepsView() {
@@ -111,6 +175,20 @@ export default class SokobanHud extends Container {
     this.#backButton.setLayoutSize(buttonSize, height * settings.buttonIconSizeRatio)
     this.#restartButton.setLayoutSize(buttonSize, height * settings.buttonIconSizeRatio)
     this.#positionContent(width)
+  }
+
+  #layoutDeadlockWarning(width, hudHeight) {
+    const warningHeight = Math.max(hudHeight, 44)
+    const warningWidth = Math.min(width, 520)
+    const cornerRadius = warningHeight * 0.28
+
+    this.#deadlockWarningBackground
+      .clear()
+      .roundRect(-warningWidth / 2, -warningHeight / 2, warningWidth, warningHeight, cornerRadius)
+      .fill({color: 0x8f2634, alpha: 0.94})
+      .stroke({color: 0xff8c96, width: 2})
+    this.#deadlockWarningY = -hudHeight / 2 - warningHeight / 2 - 12
+    this.#deadlockWarning.y = this.#deadlockWarningY
   }
 
   #positionContent(width) {
@@ -170,6 +248,27 @@ export default class SokobanHud extends Container {
 
   #createButton(iconName, label, onPress) {
     return new SokobanHudButton({iconName, label, onPress})
+  }
+
+  #createDeadlockTimeline() {
+    return gsap.timeline({onComplete: () => this.#finishDeadlockFeedback()})
+      .fromTo(
+        this.#deadlockWarning,
+        {alpha: 0, y: this.#deadlockWarningY + 10},
+        {alpha: 1, y: this.#deadlockWarningY, duration: 0.2},
+      )
+      .to(this.#deadlockWarning, {
+        alpha: 0,
+        y: this.#deadlockWarningY - 6,
+        duration: 0.3,
+        delay: 1.7,
+      })
+  }
+
+  #finishDeadlockFeedback() {
+    this.#deadlockTimeline = null
+    this.#backButton.stopPulse()
+    this.#deadlockWarning.visible = false
   }
 
   #updateButtons() {

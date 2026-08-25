@@ -77,6 +77,7 @@ export default class SokobanLevel {
     return {
       moved: true,
       completed: this.#isCompleted,
+      deadlockedBox: this.#getDeadlockedBox(boxMove.pushedBox),
       pushedBox: boxMove.pushedBox,
     }
   }
@@ -199,6 +200,26 @@ export default class SokobanLevel {
 
   #checkCompleted() {
     return this.#boxes.size > 0 && Array.from(this.#boxes).every((positionKey) => this.#targets.has(positionKey))
+  }
+
+  #getDeadlockedBox(pushedBox) {
+    if (!pushedBox || this.isTarget(pushedBox.to)) return null
+    if (!this.#isStaticCorner(pushedBox.to)) return null
+
+    return {...pushedBox.to}
+  }
+
+  #isStaticCorner(position) {
+    const verticalBlocked = this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.up))
+      || this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.down))
+    const horizontalBlocked = this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.left))
+      || this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.right))
+
+    return verticalBlocked && horizontalBlocked
+  }
+
+  #isTerrainBlocked(position) {
+    return this.#isWallOrOutside(position)
   }
 
   #createStateSnapshot() {
