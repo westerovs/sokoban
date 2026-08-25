@@ -170,7 +170,7 @@ export default class Level {
     await GameUtils.showVkOkAdAfterLevelStart()
 
     CrazyGames.showCrazyGamesBanner()
-    await new LevelResultsReward().init()
+    // await new LevelResultsReward().init()
 
     this.game.view.createCompleteLevelView()
     this.#completeLevel.init()

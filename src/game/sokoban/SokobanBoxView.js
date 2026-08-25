@@ -1,10 +1,11 @@
 import {Container} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_TEXTURES} from './config.js'
+import {SOKOBAN_SETTINGS} from './settings.js'
 
 export default class SokobanBoxView extends Container {
   #tileSize
-  #goalMark
+  #box
 
   constructor(index, tileSize) {
     super({label: 'sokoban-box-' + index})
@@ -14,13 +15,12 @@ export default class SokobanBoxView extends Container {
   }
 
   setOnTarget(isOnTarget) {
-    this.#goalMark.visible = isOnTarget
+    this.#box.tint = isOnTarget ? SOKOBAN_SETTINGS.boxOnTargetTint : 0xffffff
   }
 
   #init(index) {
-    const box = this.#createBox(index)
-    this.#goalMark = this.#createGoalMark(index)
-    this.addChild(box, this.#goalMark)
+    this.#box = this.#createBox(index)
+    this.addChild(this.#box)
   }
 
   #createBox(index) {
@@ -33,18 +33,5 @@ export default class SokobanBoxView extends Container {
     box.setSize(this.#tileSize, this.#tileSize)
 
     return box
-  }
-
-  #createGoalMark(index) {
-    const goalMark = GameUtils.createSprite(SOKOBAN_TEXTURES.target, {
-      label: 'sokoban-box-goal-mark-' + index,
-      anchorX: 0,
-      anchorY: 0,
-    })
-
-    goalMark.setSize(this.#tileSize, this.#tileSize)
-    goalMark.visible = false
-
-    return goalMark
   }
 }

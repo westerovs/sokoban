@@ -16,6 +16,7 @@ export default class SokobanGame extends Container {
   #hud
   #input
   #isInputEnabled = false
+  #isAnimatingMove = false
 
   constructor({map, levelNumber, onComplete, onMove, canMove}) {
     super({label: 'sokoban-game'})
@@ -35,10 +36,10 @@ export default class SokobanGame extends Container {
     const result = this.#level.move(levelDirection)
     if (!result.moved) return false
 
-    this.#board.update()
+    this.#isAnimatingMove = true
     this.#hud.setSteps(this.#level.steps)
     this.#onMove?.()
-    if (result.completed) this.#complete()
+    this.#board.animateMove(result).then(() => this.#finishMove(result))
     return true
   }
 
@@ -92,7 +93,14 @@ export default class SokobanGame extends Container {
   }
 
   #canUseControls() {
-    return this.#isInputEnabled && this.#canMove?.() !== false
+    return this.#isInputEnabled
+      && !this.#isAnimatingMove
+      && this.#canMove?.() !== false
+  }
+
+  #finishMove(result) {
+    this.#isAnimatingMove = false
+    if (result.completed) this.#complete()
   }
 
   #updateViews() {

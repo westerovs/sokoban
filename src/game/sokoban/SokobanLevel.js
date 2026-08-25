@@ -68,12 +68,17 @@ export default class SokobanLevel {
     const previousState = this.#createStateSnapshot()
     const nextPosition = this.#addPositions(this.#playerPosition, offset)
     if (this.#isWallOrOutside(nextPosition)) return {moved: false, completed: false}
-    if (!this.#tryMoveBox(nextPosition, offset)) return {moved: false, completed: false}
+    const boxMove = this.#tryMoveBox(nextPosition, offset)
+    if (!boxMove.canMove) return {moved: false, completed: false}
 
     this.#history.push(previousState)
     this.#playerPosition = nextPosition
     this.#isCompleted = this.#checkCompleted()
-    return {moved: true, completed: this.#isCompleted}
+    return {
+      moved: true,
+      completed: this.#isCompleted,
+      pushedBox: boxMove.pushedBox,
+    }
   }
 
   undo() {
@@ -163,14 +168,17 @@ export default class SokobanLevel {
 
   #tryMoveBox(position, offset) {
     const positionKey = this.#getPositionKey(position)
-    if (!this.#boxes.has(positionKey)) return true
+    if (!this.#boxes.has(positionKey)) return {canMove: true, pushedBox: null}
 
     const boxNextPosition = this.#addPositions(position, offset)
-    if (this.#isBlocked(boxNextPosition)) return false
+    if (this.#isBlocked(boxNextPosition)) return {canMove: false, pushedBox: null}
 
     this.#boxes.delete(positionKey)
     this.#boxes.add(this.#getPositionKey(boxNextPosition))
-    return true
+    return {
+      canMove: true,
+      pushedBox: {from: position, to: boxNextPosition},
+    }
   }
 
   #isBlocked(position) {

@@ -105,7 +105,6 @@ export default class CompleteLevel {
     try {
       const btnNextArrow = btnNext.getChildByLabel('btnNextArrow')
       const btnBadge = btnNext.getChildByLabel('btnBadge')
-      const {characterSpine} = this.#refs
       
       this.#showTimeline = gsap.timeline()
         .call(async () => {
@@ -113,13 +112,11 @@ export default class CompleteLevel {
           await this.#soundManager.play('sfx_victory')
           this.#soundManager.play('m_victory')
         })
-        .fromTo(characterSpine, {alpha: 0}, {alpha: 1}, '<')
         .fromTo(this.#view, {alpha: 0}, {alpha: 1})
       
       this.#showTimeline
-        .fromTo(this.#refs.speechBubble.scale, {x: 0, y: 0}, {x: 1, y: 1, duration: 1, ease: 'back.out(2.5)'}, '<')
         .set(btnNext, {eventMode: 'none'})
-        .fromTo(btnNext.scale, {x: 0, y: 0}, {x: 1, y: 1, delay: 2.5, ease: 'back.out(2.5)'})
+        .fromTo(btnNext.scale, {x: 0, y: 0}, {x: 1, y: 1, ease: 'back.out(2.5)'})
         .from(btnNextArrow, {x: '-=150', alpha: 0, duration: 0.3, delay: 0.2, ease: 'elastic.out(0.5, 0.3)'}, '<')
       
       if (btnBadge) {
@@ -130,7 +127,6 @@ export default class CompleteLevel {
       
       this.#showTimeline
         .set(btnNext, {eventMode: 'static'})
-        .to(this.#refs.speechBubble, {alpha: 0, delay: 2})
       
     } catch (err) {
       btnNext.eventMode = 'static'

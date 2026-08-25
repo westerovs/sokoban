@@ -1,3 +1,4 @@
+import {gsap} from 'gsap'
 import {Container} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '../engine/Locator.ts'
@@ -14,10 +15,11 @@ export default class SokobanBoard extends Container {
   #boxesContainer
   #boxViews = []
   #player
+  #movementTimeline = null
   #isRotated = false
 
   constructor(level) {
-    super({label: 'sokoban-board'})
+    super({label: 'sokoban-board', sortableChildren: true})
 
     this.#level = level
     this.#boardWidth = level.width * this.#tileSize
@@ -26,8 +28,15 @@ export default class SokobanBoard extends Container {
   }
 
   update() {
+    this.#killMovementTimeline()
     this.#updateBoxes()
     this.#updatePlayer()
+  }
+
+  animateMove(moveResult) {
+    return new Promise((resolve) => {
+      this.#movementTimeline = this.#createMovementTimeline(moveResult, resolve)
+    })
   }
 
   resize() {
@@ -61,10 +70,18 @@ export default class SokobanBoard extends Container {
     }
   }
 
+  destroy(options) {
+    this.#killMovementTimeline()
+    super.destroy(options)
+  }
+
   #init() {
     const staticTiles = this.#createStaticTiles()
     this.#boxesContainer = new Container({label: 'sokoban-boxes'})
     this.#player = this.#createPlayer()
+    staticTiles.zIndex = 0
+    this.#boxesContainer.zIndex = 1
+    this.#player.zIndex = 2
 
     this.#createBoxes()
     this.addChild(staticTiles, this.#boxesContainer, this.#player)
@@ -170,16 +187,87 @@ export default class SokobanBoard extends Container {
     return player
   }
 
+  #createMovementTimeline(moveResult, resolve) {
+    const timeline = gsap.timeline({
+      onComplete: () => this.#finishMovement(resolve),
+    })
+    const playerPosition = this.#getPlayerPixelPosition()
+
+    timeline.to(this.#player.position, this.#getMovementVars(playerPosition))
+    this.#addBoxMovement(timeline, moveResult.pushedBox)
+    return timeline
+  }
+
+  #addBoxMovement(timeline, pushedBox) {
+    if (!pushedBox) return
+
+    const boxView = this.#findBoxView(pushedBox.from)
+    if (!boxView) return
+
+    timeline.to(boxView.position, this.#getMovementVars(this.#getBoxPixelPosition(pushedBox.to)), '<')
+  }
+
+  #getMovementVars(position) {
+    return {
+      ...position,
+      duration: SOKOBAN_SETTINGS.moveDuration,
+      ease: SOKOBAN_SETTINGS.moveEase,
+    }
+  }
+
+  #getPlayerPixelPosition() {
+    const {x, y} = this.#level.playerPosition
+    return {
+      x: (x + 0.5) * this.#tileSize,
+      y: (y + 0.5) * this.#tileSize,
+    }
+  }
+
+  #getBoxPixelPosition(position) {
+    return {
+      x: position.x * this.#tileSize,
+      y: position.y * this.#tileSize,
+    }
+  }
+
+  #findBoxView(position) {
+    const pixelPosition = this.#getBoxPixelPosition(position)
+    return this.#boxViews.find((boxView) => (
+      boxView.x === pixelPosition.x && boxView.y === pixelPosition.y
+    ))
+  }
+
+  #finishMovement(resolve) {
+    this.#movementTimeline = null
+    this.#updateBoxTargetStates()
+    resolve()
+  }
+
+  #killMovementTimeline() {
+    this.#movementTimeline?.kill()
+    this.#movementTimeline = null
+  }
+
   #updateBoxes() {
     this.#level.boxes.forEach((position, index) => {
       const boxView = this.#boxViews[index]
       boxView.position.set(position.x * this.#tileSize, position.y * this.#tileSize)
-      boxView.setOnTarget(this.#level.isTarget(position))
     })
+    this.#updateBoxTargetStates()
   }
 
   #updatePlayer() {
-    const {x, y} = this.#level.playerPosition
-    this.#player.position.set((x + 0.5) * this.#tileSize, (y + 0.5) * this.#tileSize)
+    const {x, y} = this.#getPlayerPixelPosition()
+    this.#player.position.set(x, y)
+  }
+
+  #updateBoxTargetStates() {
+    this.#boxViews.forEach((boxView) => {
+      const position = {
+        x: Math.round(boxView.x / this.#tileSize),
+        y: Math.round(boxView.y / this.#tileSize),
+      }
+      boxView.setOnTarget(this.#level.isTarget(position))
+    })
   }
 }
