@@ -15,7 +15,6 @@ import PreparePreloadText from './states/PreparePreloadText.js'
 let isFirstInit = false
 
 export default class LevelPreload extends BaseState {
-  #sfxIsLoaded = false
   view
   storage
   playerData
@@ -37,7 +36,6 @@ export default class LevelPreload extends BaseState {
     await this.#runInitializeState()
     await this.#runPreparePreloadText()
     await this.#runLoadLevelResources()
-    this.#postLoadLazySFX()
     await adPromise
 
     if (LocalStorage.testLoad) {
@@ -135,12 +133,6 @@ export default class LevelPreload extends BaseState {
 
     const finalizeState = new Finalize(this)
     await finalizeState.startGame()
-  }
-
-  async #postLoadLazySFX() {
-    if (this.#sfxIsLoaded) return
-    await Locator.soundManager.preloadSFXFLevel()
-    this.#sfxIsLoaded = true
   }
 
   async #testing() {

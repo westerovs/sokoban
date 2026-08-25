@@ -212,7 +212,7 @@ export default class GamePreload extends BaseState {
     
     Assets.backgroundLoadBundle(['secondaryFont'])
     Locator.soundManager.init()
-    Locator.soundManager.preloadSFXFMain() // фоновая загрузка SFX
+    Locator.soundManager.preloadSFXF() // фоновая загрузка SFX
     
     new GameTimeTrackerCounter()
 

@@ -175,23 +175,13 @@ export default class SoundManager {
     this.#levelMusicAliases = []
   }
   
-  preloadSFXFMain = async () => {
+  preloadSFXF = async () => {
     try {
       const {SFX} = this.#preloadAudioList
 
       await this.preload(this.#sfxList, SFX, true)
 
       Logger.log(MODULES.SOUND_MANAGER, 'soundManager loaded: sfx')
-    } catch (err) {
-      console.error(`[SoundManager firstLoadAndInit error]: ${err}`)
-    }
-  }
-  
-  preloadSFXFLevel = async () => {
-    try {
-      const {SFX} = this.#preloadAudioList
-      
-      await this.preload(this.#sfxList, SFX, true)
     } catch (err) {
       console.error(`[SoundManager firstLoadAndInit error]: ${err}`)
     }
