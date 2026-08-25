@@ -1,7 +1,8 @@
-import {Container, Graphics} from 'pixi.js'
+import {Container} from 'pixi.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '../engine/Locator.ts'
 import {WORLD} from '../gameConfig/constants.js'
-import {ROTATED_DIRECTIONS, SOKOBAN_COLORS} from './config.js'
+import {ROTATED_DIRECTIONS, SOKOBAN_TEXTURES} from './config.js'
 import {SOKOBAN_SETTINGS} from './settings.js'
 import SokobanBoxView from './SokobanBoxView.js'
 
@@ -115,60 +116,41 @@ export default class SokobanBoard extends Container {
   }
 
   #createStaticTiles() {
-    const tiles = new Graphics({label: 'sokoban-static-tiles'})
+    const tiles = new Container({label: 'sokoban-static-tiles'})
 
     for (let y = 0; y < this.#level.height; y++) {
       for (let x = 0; x < this.#level.width; x++) {
-        this.#drawTile(tiles, {x, y})
+        this.#addTileViews(tiles, {x, y})
       }
     }
 
     return tiles
   }
 
-  #drawTile(tiles, position) {
+  #addTileViews(tiles, position) {
     if (this.#level.isVoid(position)) return
 
     if (this.#level.isWall(position)) {
-      this.#drawWall(tiles, position)
+      tiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.wall, position, 'wall'))
       return
     }
 
-    this.#drawFloor(tiles, position)
-    if (this.#level.isTarget(position)) this.#drawTarget(tiles, position)
+    tiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.floor, position, 'floor'))
+    if (this.#level.isTarget(position)) {
+      tiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.target, position, 'target'))
+    }
   }
 
-  #drawFloor(tiles, position) {
-    const x = position.x * this.#tileSize
-    const y = position.y * this.#tileSize
+  #createTileSprite(textureName, position, type) {
+    const tile = GameUtils.createSprite(textureName, {
+      label: `sokoban-${type}-${position.x}-${position.y}`,
+      anchorX: 0,
+      anchorY: 0,
+    })
 
-    tiles
-      .rect(x, y, this.#tileSize, this.#tileSize)
-      .fill(SOKOBAN_COLORS.floor)
-      .stroke({color: SOKOBAN_COLORS.floorBorder, width: 2})
-  }
-
-  #drawWall(tiles, position) {
-    const x = position.x * this.#tileSize
-    const y = position.y * this.#tileSize
-    const inset = this.#tileSize * 0.06
-
-    tiles.rect(x, y, this.#tileSize, this.#tileSize).fill(SOKOBAN_COLORS.wall)
-    tiles
-      .roundRect(x + inset, y + inset, this.#tileSize - inset * 2, this.#tileSize - inset * 2, inset)
-      .fill(SOKOBAN_COLORS.wallInset)
-      .stroke({color: SOKOBAN_COLORS.wallBorder, width: 3})
-  }
-
-  #drawTarget(tiles, position) {
-    const centerX = (position.x + 0.5) * this.#tileSize
-    const centerY = (position.y + 0.5) * this.#tileSize
-
-    tiles
-      .circle(centerX, centerY, this.#tileSize * 0.26)
-      .fill({color: SOKOBAN_COLORS.target, alpha: 0.9})
-      .stroke({color: SOKOBAN_COLORS.targetCenter, width: this.#tileSize * 0.06})
-    tiles.circle(centerX, centerY, this.#tileSize * 0.08).fill(SOKOBAN_COLORS.targetCenter)
+    tile.position.set(position.x * this.#tileSize, position.y * this.#tileSize)
+    tile.setSize(this.#tileSize, this.#tileSize)
+    return tile
   }
 
   #createBoxes() {
@@ -180,19 +162,11 @@ export default class SokobanBoard extends Container {
   }
 
   #createPlayer() {
-    const player = new Graphics({label: 'sokoban-player'})
-    const radius = this.#tileSize * 0.34
+    const player = GameUtils.createSprite(SOKOBAN_TEXTURES.player, {
+      label: 'sokoban-player',
+    })
 
-    player
-      .circle(0, 0, radius)
-      .fill(SOKOBAN_COLORS.player)
-      .stroke({color: SOKOBAN_COLORS.playerBorder, width: this.#tileSize * 0.06})
-    player.circle(-this.#tileSize * 0.12, -this.#tileSize * 0.08, this.#tileSize * 0.055).fill(SOKOBAN_COLORS.playerDetail)
-    player.circle(this.#tileSize * 0.12, -this.#tileSize * 0.08, this.#tileSize * 0.055).fill(SOKOBAN_COLORS.playerDetail)
-    player
-      .roundRect(-this.#tileSize * 0.15, this.#tileSize * 0.13, this.#tileSize * 0.3, this.#tileSize * 0.05, 3)
-      .fill(SOKOBAN_COLORS.playerDetail)
-
+    player.setSize(this.#tileSize, this.#tileSize)
     return player
   }
 

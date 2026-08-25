@@ -1,5 +1,6 @@
-import {Container, Graphics} from 'pixi.js'
-import {SOKOBAN_COLORS} from './config.js'
+import {Container} from 'pixi.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+import {SOKOBAN_TEXTURES} from './config.js'
 
 export default class SokobanBoxView extends Container {
   #tileSize
@@ -23,29 +24,25 @@ export default class SokobanBoxView extends Container {
   }
 
   #createBox(index) {
-    const inset = this.#tileSize * 0.12
-    const size = this.#tileSize - inset * 2
-    const box = new Graphics({label: 'sokoban-box-shape-' + index})
+    const box = GameUtils.createSprite(SOKOBAN_TEXTURES.box, {
+      label: 'sokoban-box-sprite-' + index,
+      anchorX: 0,
+      anchorY: 0,
+    })
 
-    box
-      .roundRect(inset, inset, size, size, this.#tileSize * 0.1)
-      .fill(SOKOBAN_COLORS.box)
-      .stroke({color: SOKOBAN_COLORS.boxBorder, width: this.#tileSize * 0.06})
-    box
-      .roundRect(inset * 1.55, inset * 1.55, size - inset * 1.1, size - inset * 1.1, this.#tileSize * 0.06)
-      .stroke({color: SOKOBAN_COLORS.boxInset, width: this.#tileSize * 0.05})
+    box.setSize(this.#tileSize, this.#tileSize)
 
     return box
   }
 
   #createGoalMark(index) {
-    const center = this.#tileSize / 2
-    const goalMark = new Graphics({label: 'sokoban-box-goal-mark-' + index})
+    const goalMark = GameUtils.createSprite(SOKOBAN_TEXTURES.target, {
+      label: 'sokoban-box-goal-mark-' + index,
+      anchorX: 0,
+      anchorY: 0,
+    })
 
-    goalMark
-      .circle(center, center, this.#tileSize * 0.16)
-      .fill(SOKOBAN_COLORS.boxOnTarget)
-      .stroke({color: 0xffffff, width: this.#tileSize * 0.04})
+    goalMark.setSize(this.#tileSize, this.#tileSize)
     goalMark.visible = false
 
     return goalMark
