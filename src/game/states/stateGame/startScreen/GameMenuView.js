@@ -5,8 +5,7 @@ import Locator from '../../../engine/Locator.ts'
 import {FONT_COLORS, primaryFontStyle} from '../../../styles.js'
 
 export default class GameMenuView extends Container {
-  #game = Locator.game
-  #offsetY = 10
+  #buttons = []
   #textStyle = {
     ...primaryFontStyle,
     fontSize: 36,
@@ -21,6 +20,10 @@ export default class GameMenuView extends Container {
     this.#init()
   }
 
+  get buttons() {
+    return this.#buttons
+  }
+
   updateAdaptive = () => {
     const {x, y} = Locator.uiLayer.uiData.center
     this.position.set(x, y)
@@ -28,8 +31,8 @@ export default class GameMenuView extends Container {
 
   #init = () => {
     this.#createBtnStart()
-    this.#createBtnStore(1)
-    this.#createBtnLeaders(2)
+    this.#createBtnStore()
+    this.#createBtnLeaders()
 
     Locator.uiLayer.stateUiLayer.addChild(this)
     this.updateAdaptive()
@@ -37,7 +40,7 @@ export default class GameMenuView extends Container {
 
   #createBtnStart = () => {
     const button = new ButtonContainer({
-      props: {name: 'btnStart', x: 0, y: 0},
+      props: {name: 'btnStart', x: 0, y: 420},
       spriteKeys: ['btn-primary'],
     })
     button.addCenterText({
@@ -45,34 +48,39 @@ export default class GameMenuView extends Container {
       style: {...this.#textStyle, fontSize: 46},
     })
 
+    this.#buttons.push(button)
     this.addChild(button)
   }
 
-  #createBtnStore = (offsetOrder) => {
+  #createBtnStore = () => {
     const button = new ButtonContainer({
       props: {name: 'btnStore', x: 0, y: 0},
-      spriteKeys: ['btn-secondary'],
+      spriteKeys: ['btn-ui-3', 'icon-cup'],
     })
-    button.addCenterText({
-      text: `${i18next.t('btnStore')}`,
-      style: this.#textStyle,
-    })
-    button.y = (button.height + this.#offsetY) * offsetOrder
 
-    this.addChild(button)
+    button.alignRight = () => {
+      Locator.uiLayer.alignRight(button, {x: -70, y: 60})
+    }
+    button.alignRight()
+    this.#buttons.push(button)
+    Locator.uiLayer.stateUiLayer.addChild(button)
   }
 
-  #createBtnLeaders = (offsetOrder) => {
+  #createBtnLeaders = () => {
     const button = new ButtonContainer({
       props: {name: 'btnLeaders', x: 0, y: 0},
-      spriteKeys: ['btn-secondary'],
+      spriteKeys: ['btn-ui-3', 'icon-store'],
     })
-    button.addCenterText({
-      text: `${i18next.t('btnLeaders')}`,
-      style: this.#textStyle,
-    })
-    button.y = (button.height + this.#offsetY) * offsetOrder
 
-    this.addChild(button)
+    button.alignRight = () => {
+      Locator.uiLayer.alignRight(button, {
+        x: -140,
+        y: 60,
+      })
+    }
+
+    button.alignRight()
+    this.#buttons.push(button)
+    Locator.uiLayer.stateUiLayer.addChild(button)
   }
 }

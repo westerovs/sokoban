@@ -25,6 +25,11 @@ export default class StatBadge extends Container {
   }
 
   alignRight = () => {
+    if (!this.#alignRight) {
+      this.position.copyFrom(this.#basePosition)
+      return
+    }
+    
     Locator.uiLayer.alignRight(this, {
       ...this.#basePosition,
       alignRight: this.#alignRight,

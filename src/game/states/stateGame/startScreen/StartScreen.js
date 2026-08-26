@@ -46,7 +46,7 @@ export default class StartScreen {
     this.#gameMenu = new GameMenuView()
     this.#refs.gameMenuView = this.#gameMenu
 
-    this.#buttons = this.#gameMenu.children
+    this.#buttons = this.#gameMenu.buttons
   }
 
   // todo пересмотреть. Похоже на костыль
@@ -54,8 +54,10 @@ export default class StartScreen {
     const action = bool ? 'on' : 'off'
     const eventMode = bool ? 'static' : 'none'
 
-    this.#gameMenu.eventMode = eventMode
-    this.#gameMenu[action]('pointertap', this.#handleMainMenuClick)
+    this.#buttons.forEach((button) => {
+      button.eventMode = eventMode
+      button[action]('pointertap', this.#handleMainMenuClick)
+    })
 
     Locator.options.optionsToggleBtn.eventMode = eventMode
   }

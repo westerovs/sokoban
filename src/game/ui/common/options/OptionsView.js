@@ -146,6 +146,7 @@ export default class OptionsView extends BaseModal {
 
   #init = () => {
     this.#createWheel()
+    this.#alightRightWheel()
     this.#createButtons()
     this.#createCheckboxRows()
     this.#checkFlagVisibleSoundButtons()
@@ -159,16 +160,24 @@ export default class OptionsView extends BaseModal {
     this.#optionsToggleBtn = GameUtils.createSprite('icon-wheel', {
       label: 'optionsToggleBtn',
       interactive: true,
+      visible: false,
     })
+    
     ButtonAnimator.initOverHandler(this.#optionsToggleBtn)
-
-    this.#optionsToggleBtn.visible = false
-    this.#optionsToggleBtn.position.set(50, 60)
-    this.#optionsToggleBtn._initPosition = {x: 50, y: 60}
-
     Locator.uiLayer.globalUiLayer.addChild(this.#optionsToggleBtn)
   }
 
+  #alightRightWheel = () => {
+    this.#optionsToggleBtn.alignRight = () => {
+      Locator.uiLayer.alignRight(this.#optionsToggleBtn, {
+        x: 0,
+        y: 60,
+      })
+    }
+    
+    this.#optionsToggleBtn.alignRight()
+  }
+  
   #createButtons = () => {
     const map = Object.values(BUTTONS_DATA).map((data) => {
       return this.#createButton(data)
