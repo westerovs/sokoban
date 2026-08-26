@@ -7,7 +7,6 @@ import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
-import GameLogo from '@/game/ui/startScreen/special/GameLogo.ts'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import GameMenuView from './GameMenuView.js'
 import StateBadgeController from './statBadge/StateBadgeController.js'
@@ -19,7 +18,6 @@ export default class StartScreen {
   #soundManager = Locator.soundManager
   #stage = this.#game.app.stage
   #gameMenu
-  #gameLogo
 
   #buttons
   #backTimeLine = gsap.timeline()
@@ -35,7 +33,6 @@ export default class StartScreen {
     this.#prepare()
     this.#createGameMenu()
     this.#setUserStats()
-    this.#createGameLogo()
   }
 
   #prepare = () => {
@@ -50,16 +47,6 @@ export default class StartScreen {
     this.#refs.gameMenuView = this.#gameMenu
 
     this.#buttons = this.#gameMenu.children
-  }
-
-  #createGameLogo = () => {
-    const gameLogo = new GameLogo()
-    this.#gameLogo = gameLogo
-
-    gameLogo.init().then(() => {
-      if (this.#gameLogo !== gameLogo || !gameLogo.view) return
-      this.#game.refs.gameLogo = gameLogo.view
-    })
   }
 
   // todo пересмотреть. Похоже на костыль
@@ -122,8 +109,6 @@ export default class StartScreen {
   #clear = () => {
     this.#game.off(GAME_EVENTS.clearLevel, this.#clear)
     clearTimeLine(this.#backTimeLine, true)
-    this.#gameLogo?.destroy()
-    this.#gameLogo = null
   }
 
   #createStore = () => {
