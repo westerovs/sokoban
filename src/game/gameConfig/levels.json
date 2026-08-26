@@ -1,9 +1,7 @@
 {
   "level0": {
-    "id": "sokoban-01",
+    "id": "sokoban-001",
     "levelName": "level0",
-    "source": "project",
-    "sourceLevel": 1,
     "difficulty": "custom",
     "back": "garden",
     "amb": "amb_garden",
@@ -11,10 +9,8 @@
     "map": ["___###___", "___#.#___", "___# #___", "####$####", "#.$   $.#", "####@####", "___#$#___", "___#.#___", "___###___"]
   },
   "level1": {
-    "id": "sokoban-02",
+    "id": "sokoban-002",
     "levelName": "level1",
-    "source": "project",
-    "sourceLevel": 2,
     "difficulty": "custom",
     "back": "antarctica",
     "amb": "amb_antarctica",
@@ -22,10 +18,8 @@
     "map": ["######", "# .  #", "# $  #", "# @  #", "#    #", "######"]
   },
   "level2": {
-    "id": "sokoban-03",
+    "id": "sokoban-003",
     "levelName": "level2",
-    "source": "project",
-    "sourceLevel": 3,
     "difficulty": "custom",
     "back": "forest",
     "amb": "amb_forest",
@@ -33,10 +27,8 @@
     "map": ["#####____", "#@  #____", "# $$#_###", "# $ #_#.#", "### ###.#", "_##    .#", "_#   #  #", "_#   ####", "_#####___"]
   },
   "level3": {
-    "id": "sokoban-04",
+    "id": "sokoban-004",
     "levelName": "level3",
-    "source": "project",
-    "sourceLevel": 4,
     "difficulty": "custom",
     "back": "garden",
     "amb": "amb_garden",
@@ -44,10 +36,8 @@
     "map": ["_####_", "##  #_", "#@$ #_", "##$ ##", "## $ #", "#.$  #", "#..-.#", "######"]
   },
   "level4": {
-    "id": "sokoban-05",
+    "id": "sokoban-005",
     "levelName": "level4",
-    "source": "project",
-    "sourceLevel": 5,
     "difficulty": "custom",
     "back": "antarctica",
     "amb": "amb_antarctica",
@@ -55,10 +45,8 @@
     "map": ["_#######__", "_#     ###", "##$###   #", "# @ $  $ #", "# ..# $ ##", "##..#   #_", "_########_"]
   },
   "level5": {
-    "id": "sokoban-06",
+    "id": "sokoban-006",
     "levelName": "level5",
-    "source": "project",
-    "sourceLevel": 6,
     "difficulty": "custom",
     "back": "forest",
     "amb": "amb_forest",
@@ -66,10 +54,8 @@
     "map": ["_#####__", "_#@ ###_", "_# $  #_", "### # ##", "#.# #  #", "#.$  # #", "#.   $ #", "########"]
   },
   "level6": {
-    "id": "sokoban-07",
+    "id": "sokoban-007",
     "levelName": "level6",
-    "source": "project",
-    "sourceLevel": 7,
     "difficulty": "custom",
     "back": "garden",
     "amb": "amb_garden",
@@ -89,10 +75,8 @@
     ]
   },
   "level7": {
-    "id": "sokoban-08",
+    "id": "sokoban-008",
     "levelName": "level7",
-    "source": "project",
-    "sourceLevel": 8,
     "difficulty": "custom",
     "back": "antarctica",
     "amb": "amb_antarctica",
@@ -100,10 +84,8 @@
     "map": ["___#######", "__##  # @#", "__#   #  #", "__#$ $ $ #", "__# $##  #", "### $ # ##", "#.....  #_", "#########_"]
   },
   "level8": {
-    "id": "sokoban-09",
+    "id": "sokoban-009",
     "levelName": "level8",
-    "source": "project",
-    "sourceLevel": 9,
     "difficulty": "custom",
     "back": "forest",
     "amb": "amb_forest",
@@ -111,10 +93,8 @@
     "map": ["___######_", "_###    #_", "##. $## ##", "#..$ $  @#", "#.. $ $ ##", "######  #_", "_____####_"]
   },
   "level9": {
-    "id": "sokoban-10",
+    "id": "sokoban-010",
     "levelName": "level9",
-    "source": "project",
-    "sourceLevel": 10,
     "difficulty": "custom",
     "back": "garden",
     "amb": "amb_garden",
@@ -136,10 +116,8 @@
     ]
   },
   "level10": {
-    "id": "sokoban-11",
+    "id": "sokoban-011",
     "levelName": "level10",
-    "source": "project",
-    "sourceLevel": 11,
     "difficulty": "custom",
     "back": "antarctica",
     "amb": "amb_antarctica",
@@ -161,10 +139,8 @@
     ]
   },
   "level11": {
-    "id": "xsokoban-001",
+    "id": "sokoban-012",
     "levelName": "level11",
-    "source": "xsokoban-90",
-    "sourceLevel": 1,
     "difficulty": "easy",
     "difficultyRank": 1,
     "difficultyScore": 179.25,
@@ -187,10 +163,8 @@
     ]
   },
   "level12": {
-    "id": "xsokoban-006",
+    "id": "sokoban-013",
     "levelName": "level12",
-    "source": "xsokoban-90",
-    "sourceLevel": 6,
     "difficulty": "easy",
     "difficultyRank": 2,
     "difficultyScore": 198.9,
@@ -213,10 +187,8 @@
     ]
   },
   "level13": {
-    "id": "xsokoban-038",
+    "id": "sokoban-014",
     "levelName": "level13",
-    "source": "xsokoban-90",
-    "sourceLevel": 38,
     "difficulty": "easy",
     "difficultyRank": 3,
     "difficultyScore": 199.9,
@@ -239,10 +211,8 @@
     ]
   },
   "level14": {
-    "id": "xsokoban-007",
+    "id": "sokoban-015",
     "levelName": "level14",
-    "source": "xsokoban-90",
-    "sourceLevel": 7,
     "difficulty": "easy",
     "difficultyRank": 4,
     "difficultyScore": 231.55,
@@ -266,10 +236,8 @@
     ]
   },
   "level15": {
-    "id": "xsokoban-003",
+    "id": "sokoban-016",
     "levelName": "level15",
-    "source": "xsokoban-90",
-    "sourceLevel": 3,
     "difficulty": "easy",
     "difficultyRank": 5,
     "difficultyScore": 245.15,
@@ -291,10 +259,8 @@
     ]
   },
   "level16": {
-    "id": "xsokoban-078",
+    "id": "sokoban-017",
     "levelName": "level16",
-    "source": "xsokoban-90",
-    "sourceLevel": 78,
     "difficulty": "easy",
     "difficultyRank": 6,
     "difficultyScore": 252.2,
@@ -318,10 +284,8 @@
     ]
   },
   "level17": {
-    "id": "xsokoban-055",
+    "id": "sokoban-018",
     "levelName": "level17",
-    "source": "xsokoban-90",
-    "sourceLevel": 55,
     "difficulty": "easy",
     "difficultyRank": 7,
     "difficultyScore": 254.95,
@@ -346,10 +310,8 @@
     ]
   },
   "level18": {
-    "id": "xsokoban-051",
+    "id": "sokoban-019",
     "levelName": "level18",
-    "source": "xsokoban-90",
-    "sourceLevel": 51,
     "difficulty": "easy",
     "difficultyRank": 8,
     "difficultyScore": 256.7,
@@ -374,10 +336,8 @@
     ]
   },
   "level19": {
-    "id": "xsokoban-002",
+    "id": "sokoban-020",
     "levelName": "level19",
-    "source": "xsokoban-90",
-    "sourceLevel": 2,
     "difficulty": "easy",
     "difficultyRank": 9,
     "difficultyScore": 267.2,
@@ -399,10 +359,8 @@
     ]
   },
   "level20": {
-    "id": "xsokoban-005",
+    "id": "sokoban-021",
     "levelName": "level20",
-    "source": "xsokoban-90",
-    "sourceLevel": 5,
     "difficulty": "easy",
     "difficultyRank": 10,
     "difficultyScore": 272.5,
@@ -427,10 +385,8 @@
     ]
   },
   "level21": {
-    "id": "xsokoban-043",
+    "id": "sokoban-022",
     "levelName": "level21",
-    "source": "xsokoban-90",
-    "sourceLevel": 43,
     "difficulty": "easy",
     "difficultyRank": 11,
     "difficultyScore": 275.2,
@@ -453,10 +409,8 @@
     ]
   },
   "level22": {
-    "id": "xsokoban-086",
+    "id": "sokoban-023",
     "levelName": "level22",
-    "source": "xsokoban-90",
-    "sourceLevel": 86,
     "difficulty": "easy",
     "difficultyRank": 12,
     "difficultyScore": 284,
@@ -478,10 +432,8 @@
     ]
   },
   "level23": {
-    "id": "xsokoban-082",
+    "id": "sokoban-024",
     "levelName": "level23",
-    "source": "xsokoban-90",
-    "sourceLevel": 82,
     "difficulty": "easy",
     "difficultyRank": 13,
     "difficultyScore": 285.1,
@@ -506,10 +458,8 @@
     ]
   },
   "level24": {
-    "id": "xsokoban-077",
+    "id": "sokoban-025",
     "levelName": "level24",
-    "source": "xsokoban-90",
-    "sourceLevel": 77,
     "difficulty": "easy",
     "difficultyRank": 14,
     "difficultyScore": 297.15,
@@ -534,10 +484,8 @@
     ]
   },
   "level25": {
-    "id": "xsokoban-060",
+    "id": "sokoban-026",
     "levelName": "level25",
-    "source": "xsokoban-90",
-    "sourceLevel": 60,
     "difficulty": "easy",
     "difficultyRank": 15,
     "difficultyScore": 297.7,
@@ -561,10 +509,8 @@
     ]
   },
   "level26": {
-    "id": "xsokoban-084",
+    "id": "sokoban-027",
     "levelName": "level26",
-    "source": "xsokoban-90",
-    "sourceLevel": 84,
     "difficulty": "easy",
     "difficultyRank": 16,
     "difficultyScore": 309.55,
@@ -588,10 +534,8 @@
     ]
   },
   "level27": {
-    "id": "xsokoban-021",
+    "id": "sokoban-028",
     "levelName": "level27",
-    "source": "xsokoban-90",
-    "sourceLevel": 21,
     "difficulty": "easy",
     "difficultyRank": 17,
     "difficultyScore": 310.1,
@@ -618,10 +562,8 @@
     ]
   },
   "level28": {
-    "id": "xsokoban-081",
+    "id": "sokoban-029",
     "levelName": "level28",
-    "source": "xsokoban-90",
-    "sourceLevel": 81,
     "difficulty": "easy",
     "difficultyRank": 18,
     "difficultyScore": 328.35,
@@ -646,10 +588,8 @@
     ]
   },
   "level29": {
-    "id": "xsokoban-079",
+    "id": "sokoban-030",
     "levelName": "level29",
-    "source": "xsokoban-90",
-    "sourceLevel": 79,
     "difficulty": "easy",
     "difficultyRank": 19,
     "difficultyScore": 330.95,
@@ -673,10 +613,8 @@
     ]
   },
   "level30": {
-    "id": "xsokoban-015",
+    "id": "sokoban-031",
     "levelName": "level30",
-    "source": "xsokoban-90",
-    "sourceLevel": 15,
     "difficulty": "easy",
     "difficultyRank": 20,
     "difficultyScore": 336.9,
@@ -704,10 +642,8 @@
     ]
   },
   "level31": {
-    "id": "xsokoban-017",
+    "id": "sokoban-032",
     "levelName": "level31",
-    "source": "xsokoban-90",
-    "sourceLevel": 17,
     "difficulty": "easy",
     "difficultyRank": 21,
     "difficultyScore": 337.8,
@@ -733,10 +669,8 @@
     ]
   },
   "level32": {
-    "id": "xsokoban-026",
+    "id": "sokoban-033",
     "levelName": "level32",
-    "source": "xsokoban-90",
-    "sourceLevel": 26,
     "difficulty": "easy",
     "difficultyRank": 22,
     "difficultyScore": 340.95,
@@ -760,10 +694,8 @@
     ]
   },
   "level33": {
-    "id": "xsokoban-044",
+    "id": "sokoban-034",
     "levelName": "level33",
-    "source": "xsokoban-90",
-    "sourceLevel": 44,
     "difficulty": "easy",
     "difficultyRank": 23,
     "difficultyScore": 345.2,
@@ -790,10 +722,8 @@
     ]
   },
   "level34": {
-    "id": "xsokoban-049",
+    "id": "sokoban-035",
     "levelName": "level34",
-    "source": "xsokoban-90",
-    "sourceLevel": 49,
     "difficulty": "easy",
     "difficultyRank": 24,
     "difficultyScore": 354.85,
@@ -820,10 +750,8 @@
     ]
   },
   "level35": {
-    "id": "xsokoban-083",
+    "id": "sokoban-036",
     "levelName": "level35",
-    "source": "xsokoban-90",
-    "sourceLevel": 83,
     "difficulty": "easy",
     "difficultyRank": 25,
     "difficultyScore": 358.05,
@@ -848,10 +776,8 @@
     ]
   },
   "level36": {
-    "id": "xsokoban-034",
+    "id": "sokoban-037",
     "levelName": "level36",
-    "source": "xsokoban-90",
-    "sourceLevel": 34,
     "difficulty": "easy",
     "difficultyRank": 26,
     "difficultyScore": 361.5,
@@ -878,10 +804,8 @@
     ]
   },
   "level37": {
-    "id": "xsokoban-032",
+    "id": "sokoban-038",
     "levelName": "level37",
-    "source": "xsokoban-90",
-    "sourceLevel": 32,
     "difficulty": "easy",
     "difficultyRank": 27,
     "difficultyScore": 379.65,
@@ -908,10 +832,8 @@
     ]
   },
   "level38": {
-    "id": "xsokoban-047",
+    "id": "sokoban-039",
     "levelName": "level38",
-    "source": "xsokoban-90",
-    "sourceLevel": 47,
     "difficulty": "easy",
     "difficultyRank": 28,
     "difficultyScore": 388.1,
@@ -934,10 +856,8 @@
     ]
   },
   "level39": {
-    "id": "xsokoban-009",
+    "id": "sokoban-040",
     "levelName": "level39",
-    "source": "xsokoban-90",
-    "sourceLevel": 9,
     "difficulty": "easy",
     "difficultyRank": 29,
     "difficultyScore": 401.5,
@@ -963,10 +883,8 @@
     ]
   },
   "level40": {
-    "id": "xsokoban-065",
+    "id": "sokoban-041",
     "levelName": "level40",
-    "source": "xsokoban-90",
-    "sourceLevel": 65,
     "difficulty": "easy",
     "difficultyRank": 30,
     "difficultyScore": 405.75,
@@ -990,10 +908,8 @@
     ]
   },
   "level41": {
-    "id": "xsokoban-080",
+    "id": "sokoban-042",
     "levelName": "level41",
-    "source": "xsokoban-90",
-    "sourceLevel": 80,
     "difficulty": "medium",
     "difficultyRank": 31,
     "difficultyScore": 407.2,
@@ -1018,10 +934,8 @@
     ]
   },
   "level42": {
-    "id": "xsokoban-056",
+    "id": "sokoban-043",
     "levelName": "level42",
-    "source": "xsokoban-90",
-    "sourceLevel": 56,
     "difficulty": "medium",
     "difficultyRank": 32,
     "difficultyScore": 408.9,
@@ -1045,10 +959,8 @@
     ]
   },
   "level43": {
-    "id": "xsokoban-033",
+    "id": "sokoban-044",
     "levelName": "level43",
-    "source": "xsokoban-90",
-    "sourceLevel": 33,
     "difficulty": "medium",
     "difficultyRank": 33,
     "difficultyScore": 410.45,
@@ -1075,10 +987,8 @@
     ]
   },
   "level44": {
-    "id": "xsokoban-074",
+    "id": "sokoban-045",
     "levelName": "level44",
-    "source": "xsokoban-90",
-    "sourceLevel": 74,
     "difficulty": "medium",
     "difficultyRank": 34,
     "difficultyScore": 422.45,
@@ -1102,10 +1012,8 @@
     ]
   },
   "level45": {
-    "id": "xsokoban-012",
+    "id": "sokoban-046",
     "levelName": "level45",
-    "source": "xsokoban-90",
-    "sourceLevel": 12,
     "difficulty": "medium",
     "difficultyRank": 35,
     "difficultyScore": 426.25,
@@ -1130,10 +1038,8 @@
     ]
   },
   "level46": {
-    "id": "xsokoban-054",
+    "id": "sokoban-047",
     "levelName": "level46",
-    "source": "xsokoban-90",
-    "sourceLevel": 54,
     "difficulty": "medium",
     "difficultyRank": 36,
     "difficultyScore": 427.2,
@@ -1157,10 +1063,8 @@
     ]
   },
   "level47": {
-    "id": "xsokoban-018",
+    "id": "sokoban-048",
     "levelName": "level47",
-    "source": "xsokoban-90",
-    "sourceLevel": 18,
     "difficulty": "medium",
     "difficultyRank": 37,
     "difficultyScore": 432.5,
@@ -1185,10 +1089,8 @@
     ]
   },
   "level48": {
-    "id": "xsokoban-087",
+    "id": "sokoban-049",
     "levelName": "level48",
-    "source": "xsokoban-90",
-    "sourceLevel": 87,
     "difficulty": "medium",
     "difficultyRank": 38,
     "difficultyScore": 438.2,
@@ -1214,10 +1116,8 @@
     ]
   },
   "level49": {
-    "id": "xsokoban-057",
+    "id": "sokoban-050",
     "levelName": "level49",
-    "source": "xsokoban-90",
-    "sourceLevel": 57,
     "difficulty": "medium",
     "difficultyRank": 39,
     "difficultyScore": 440.95,
@@ -1241,10 +1141,8 @@
     ]
   },
   "level50": {
-    "id": "xsokoban-062",
+    "id": "sokoban-051",
     "levelName": "level50",
-    "source": "xsokoban-90",
-    "sourceLevel": 62,
     "difficulty": "medium",
     "difficultyRank": 40,
     "difficultyScore": 441.95,
@@ -1268,10 +1166,8 @@
     ]
   },
   "level51": {
-    "id": "xsokoban-048",
+    "id": "sokoban-052",
     "levelName": "level51",
-    "source": "xsokoban-90",
-    "sourceLevel": 48,
     "difficulty": "medium",
     "difficultyRank": 41,
     "difficultyScore": 442.15,
@@ -1300,10 +1196,8 @@
     ]
   },
   "level52": {
-    "id": "xsokoban-058",
+    "id": "sokoban-053",
     "levelName": "level52",
-    "source": "xsokoban-90",
-    "sourceLevel": 58,
     "difficulty": "medium",
     "difficultyRank": 42,
     "difficultyScore": 444.05,
@@ -1327,10 +1221,8 @@
     ]
   },
   "level53": {
-    "id": "xsokoban-013",
+    "id": "sokoban-054",
     "levelName": "level53",
-    "source": "xsokoban-90",
-    "sourceLevel": 13,
     "difficulty": "medium",
     "difficultyRank": 43,
     "difficultyScore": 452.8,
@@ -1355,10 +1247,8 @@
     ]
   },
   "level54": {
-    "id": "xsokoban-059",
+    "id": "sokoban-055",
     "levelName": "level54",
-    "source": "xsokoban-90",
-    "sourceLevel": 59,
     "difficulty": "medium",
     "difficultyRank": 44,
     "difficultyScore": 471,
@@ -1382,10 +1272,8 @@
     ]
   },
   "level55": {
-    "id": "xsokoban-008",
+    "id": "sokoban-056",
     "levelName": "level55",
-    "source": "xsokoban-90",
-    "sourceLevel": 8,
     "difficulty": "medium",
     "difficultyRank": 45,
     "difficultyScore": 483,
@@ -1413,10 +1301,8 @@
     ]
   },
   "level56": {
-    "id": "xsokoban-011",
+    "id": "sokoban-057",
     "levelName": "level56",
-    "source": "xsokoban-90",
-    "sourceLevel": 11,
     "difficulty": "medium",
     "difficultyRank": 46,
     "difficultyScore": 485.99,
@@ -1443,10 +1329,8 @@
     ]
   },
   "level57": {
-    "id": "xsokoban-031",
+    "id": "sokoban-058",
     "levelName": "level57",
-    "source": "xsokoban-90",
-    "sourceLevel": 31,
     "difficulty": "medium",
     "difficultyRank": 47,
     "difficultyScore": 495.85,
@@ -1474,10 +1358,8 @@
     ]
   },
   "level58": {
-    "id": "xsokoban-076",
+    "id": "sokoban-059",
     "levelName": "level58",
-    "source": "xsokoban-90",
-    "sourceLevel": 76,
     "difficulty": "medium",
     "difficultyRank": 48,
     "difficultyScore": 504.5,
@@ -1501,10 +1383,8 @@
     ]
   },
   "level59": {
-    "id": "xsokoban-046",
+    "id": "sokoban-060",
     "levelName": "level59",
-    "source": "xsokoban-90",
-    "sourceLevel": 46,
     "difficulty": "medium",
     "difficultyRank": 49,
     "difficultyScore": 510.3,
@@ -1532,10 +1412,8 @@
     ]
   },
   "level60": {
-    "id": "xsokoban-041",
+    "id": "sokoban-061",
     "levelName": "level60",
-    "source": "xsokoban-90",
-    "sourceLevel": 41,
     "difficulty": "medium",
     "difficultyRank": 50,
     "difficultyScore": 522.79,
@@ -1562,10 +1440,8 @@
     ]
   },
   "level61": {
-    "id": "xsokoban-019",
+    "id": "sokoban-062",
     "levelName": "level61",
-    "source": "xsokoban-90",
-    "sourceLevel": 19,
     "difficulty": "medium",
     "difficultyRank": 51,
     "difficultyScore": 527.3,
@@ -1593,10 +1469,8 @@
     ]
   },
   "level62": {
-    "id": "xsokoban-014",
+    "id": "sokoban-063",
     "levelName": "level62",
-    "source": "xsokoban-90",
-    "sourceLevel": 14,
     "difficulty": "medium",
     "difficultyRank": 52,
     "difficultyScore": 536.34,
@@ -1624,10 +1498,8 @@
     ]
   },
   "level63": {
-    "id": "xsokoban-042",
+    "id": "sokoban-064",
     "levelName": "level63",
-    "source": "xsokoban-90",
-    "sourceLevel": 42,
     "difficulty": "medium",
     "difficultyRank": 53,
     "difficultyScore": 537.05,
@@ -1652,10 +1524,8 @@
     ]
   },
   "level64": {
-    "id": "xsokoban-072",
+    "id": "sokoban-065",
     "levelName": "level64",
-    "source": "xsokoban-90",
-    "sourceLevel": 72,
     "difficulty": "medium",
     "difficultyRank": 54,
     "difficultyScore": 547.65,
@@ -1679,10 +1549,8 @@
     ]
   },
   "level65": {
-    "id": "xsokoban-045",
+    "id": "sokoban-066",
     "levelName": "level65",
-    "source": "xsokoban-90",
-    "sourceLevel": 45,
     "difficulty": "medium",
     "difficultyRank": 55,
     "difficultyScore": 561.39,
@@ -1708,10 +1576,8 @@
     ]
   },
   "level66": {
-    "id": "xsokoban-061",
+    "id": "sokoban-067",
     "levelName": "level66",
-    "source": "xsokoban-90",
-    "sourceLevel": 61,
     "difficulty": "medium",
     "difficultyRank": 56,
     "difficultyScore": 561.8,
@@ -1735,10 +1601,8 @@
     ]
   },
   "level67": {
-    "id": "xsokoban-028",
+    "id": "sokoban-068",
     "levelName": "level67",
-    "source": "xsokoban-90",
-    "sourceLevel": 28,
     "difficulty": "medium",
     "difficultyRank": 57,
     "difficultyScore": 581.79,
@@ -1765,10 +1629,8 @@
     ]
   },
   "level68": {
-    "id": "xsokoban-037",
+    "id": "sokoban-069",
     "levelName": "level68",
-    "source": "xsokoban-90",
-    "sourceLevel": 37,
     "difficulty": "medium",
     "difficultyRank": 58,
     "difficultyScore": 591.85,
@@ -1795,10 +1657,8 @@
     ]
   },
   "level69": {
-    "id": "xsokoban-004",
+    "id": "sokoban-070",
     "levelName": "level69",
-    "source": "xsokoban-90",
-    "sourceLevel": 4,
     "difficulty": "medium",
     "difficultyRank": 59,
     "difficultyScore": 592.45,
@@ -1825,10 +1685,8 @@
     ]
   },
   "level70": {
-    "id": "xsokoban-071",
+    "id": "sokoban-071",
     "levelName": "level70",
-    "source": "xsokoban-90",
-    "sourceLevel": 71,
     "difficulty": "medium",
     "difficultyRank": 60,
     "difficultyScore": 606.69,
@@ -1852,10 +1710,8 @@
     ]
   },
   "level71": {
-    "id": "xsokoban-070",
+    "id": "sokoban-072",
     "levelName": "level71",
-    "source": "xsokoban-90",
-    "sourceLevel": 70,
     "difficulty": "hard",
     "difficultyRank": 61,
     "difficultyScore": 607.6,
@@ -1879,10 +1735,8 @@
     ]
   },
   "level72": {
-    "id": "xsokoban-016",
+    "id": "sokoban-073",
     "levelName": "level72",
-    "source": "xsokoban-90",
-    "sourceLevel": 16,
     "difficulty": "hard",
     "difficultyRank": 62,
     "difficultyScore": 608.54,
@@ -1909,10 +1763,8 @@
     ]
   },
   "level73": {
-    "id": "xsokoban-068",
+    "id": "sokoban-074",
     "levelName": "level73",
-    "source": "xsokoban-90",
-    "sourceLevel": 68,
     "difficulty": "hard",
     "difficultyRank": 63,
     "difficultyScore": 622.1,
@@ -1936,10 +1788,8 @@
     ]
   },
   "level74": {
-    "id": "xsokoban-064",
+    "id": "sokoban-075",
     "levelName": "level74",
-    "source": "xsokoban-90",
-    "sourceLevel": 64,
     "difficulty": "hard",
     "difficultyRank": 64,
     "difficultyScore": 632.5,
@@ -1963,10 +1813,8 @@
     ]
   },
   "level75": {
-    "id": "xsokoban-035",
+    "id": "sokoban-076",
     "levelName": "level75",
-    "source": "xsokoban-90",
-    "sourceLevel": 35,
     "difficulty": "hard",
     "difficultyRank": 65,
     "difficultyScore": 655.2,
@@ -1994,10 +1842,8 @@
     ]
   },
   "level76": {
-    "id": "xsokoban-029",
+    "id": "sokoban-077",
     "levelName": "level76",
-    "source": "xsokoban-90",
-    "sourceLevel": 29,
     "difficulty": "hard",
     "difficultyRank": 66,
     "difficultyScore": 667,
@@ -2022,10 +1868,8 @@
     ]
   },
   "level77": {
-    "id": "xsokoban-027",
+    "id": "sokoban-078",
     "levelName": "level77",
-    "source": "xsokoban-90",
-    "sourceLevel": 27,
     "difficulty": "hard",
     "difficultyRank": 67,
     "difficultyScore": 677,
@@ -2050,10 +1894,8 @@
     ]
   },
   "level78": {
-    "id": "xsokoban-067",
+    "id": "sokoban-079",
     "levelName": "level78",
-    "source": "xsokoban-90",
-    "sourceLevel": 67,
     "difficulty": "hard",
     "difficultyRank": 68,
     "difficultyScore": 679.3,
@@ -2077,10 +1919,8 @@
     ]
   },
   "level79": {
-    "id": "xsokoban-040",
+    "id": "sokoban-080",
     "levelName": "level79",
-    "source": "xsokoban-90",
-    "sourceLevel": 40,
     "difficulty": "hard",
     "difficultyRank": 69,
     "difficultyScore": 691.4,
@@ -2108,10 +1948,8 @@
     ]
   },
   "level80": {
-    "id": "xsokoban-066",
+    "id": "sokoban-081",
     "levelName": "level80",
-    "source": "xsokoban-90",
-    "sourceLevel": 66,
     "difficulty": "hard",
     "difficultyRank": 70,
     "difficultyScore": 701.55,
@@ -2135,10 +1973,8 @@
     ]
   },
   "level81": {
-    "id": "xsokoban-085",
+    "id": "sokoban-082",
     "levelName": "level81",
-    "source": "xsokoban-90",
-    "sourceLevel": 85,
     "difficulty": "hard",
     "difficultyRank": 71,
     "difficultyScore": 727.75,
@@ -2166,10 +2002,8 @@
     ]
   },
   "level82": {
-    "id": "xsokoban-025",
+    "id": "sokoban-083",
     "levelName": "level82",
-    "source": "xsokoban-90",
-    "sourceLevel": 25,
     "difficulty": "hard",
     "difficultyRank": 72,
     "difficultyScore": 738.65,
@@ -2197,10 +2031,8 @@
     ]
   },
   "level83": {
-    "id": "xsokoban-073",
+    "id": "sokoban-084",
     "levelName": "level83",
-    "source": "xsokoban-90",
-    "sourceLevel": 73,
     "difficulty": "hard",
     "difficultyRank": 73,
     "difficultyScore": 749.5,
@@ -2224,10 +2056,8 @@
     ]
   },
   "level84": {
-    "id": "xsokoban-063",
+    "id": "sokoban-085",
     "levelName": "level84",
-    "source": "xsokoban-90",
-    "sourceLevel": 63,
     "difficulty": "hard",
     "difficultyRank": 74,
     "difficultyScore": 752.2,
@@ -2251,10 +2081,8 @@
     ]
   },
   "level85": {
-    "id": "xsokoban-022",
+    "id": "sokoban-086",
     "levelName": "level85",
-    "source": "xsokoban-90",
-    "sourceLevel": 22,
     "difficulty": "hard",
     "difficultyRank": 75,
     "difficultyScore": 753.1,
@@ -2282,10 +2110,8 @@
     ]
   },
   "level86": {
-    "id": "xsokoban-069",
+    "id": "sokoban-087",
     "levelName": "level86",
-    "source": "xsokoban-90",
-    "sourceLevel": 69,
     "difficulty": "hard",
     "difficultyRank": 76,
     "difficultyScore": 758.95,
@@ -2309,10 +2135,8 @@
     ]
   },
   "level87": {
-    "id": "xsokoban-075",
+    "id": "sokoban-088",
     "levelName": "level87",
-    "source": "xsokoban-90",
-    "sourceLevel": 75,
     "difficulty": "hard",
     "difficultyRank": 77,
     "difficultyScore": 773.05,
@@ -2336,10 +2160,8 @@
     ]
   },
   "level88": {
-    "id": "xsokoban-023",
+    "id": "sokoban-089",
     "levelName": "level88",
-    "source": "xsokoban-90",
-    "sourceLevel": 23,
     "difficulty": "hard",
     "difficultyRank": 78,
     "difficultyScore": 784.44,
@@ -2365,10 +2187,8 @@
     ]
   },
   "level89": {
-    "id": "xsokoban-050",
+    "id": "sokoban-090",
     "levelName": "level89",
-    "source": "xsokoban-90",
-    "sourceLevel": 50,
     "difficulty": "hard",
     "difficultyRank": 79,
     "difficultyScore": 789.3,
@@ -2396,10 +2216,8 @@
     ]
   },
   "level90": {
-    "id": "xsokoban-053",
+    "id": "sokoban-091",
     "levelName": "level90",
-    "source": "xsokoban-90",
-    "sourceLevel": 53,
     "difficulty": "hard",
     "difficultyRank": 80,
     "difficultyScore": 791.59,
@@ -2426,10 +2244,8 @@
     ]
   },
   "level91": {
-    "id": "xsokoban-088",
+    "id": "sokoban-092",
     "levelName": "level91",
-    "source": "xsokoban-90",
-    "sourceLevel": 88,
     "difficulty": "hard",
     "difficultyRank": 81,
     "difficultyScore": 805.29,
@@ -2457,10 +2273,8 @@
     ]
   },
   "level92": {
-    "id": "xsokoban-089",
+    "id": "sokoban-093",
     "levelName": "level92",
-    "source": "xsokoban-90",
-    "sourceLevel": 89,
     "difficulty": "hard",
     "difficultyRank": 82,
     "difficultyScore": 819.04,
@@ -2489,10 +2303,8 @@
     ]
   },
   "level93": {
-    "id": "xsokoban-030",
+    "id": "sokoban-094",
     "levelName": "level93",
-    "source": "xsokoban-90",
-    "sourceLevel": 30,
     "difficulty": "hard",
     "difficultyRank": 83,
     "difficultyScore": 850.04,
@@ -2518,10 +2330,8 @@
     ]
   },
   "level94": {
-    "id": "xsokoban-090",
+    "id": "sokoban-095",
     "levelName": "level94",
-    "source": "xsokoban-90",
-    "sourceLevel": 90,
     "difficulty": "hard",
     "difficultyRank": 84,
     "difficultyScore": 888,
@@ -2549,10 +2359,8 @@
     ]
   },
   "level95": {
-    "id": "xsokoban-036",
+    "id": "sokoban-096",
     "levelName": "level95",
-    "source": "xsokoban-90",
-    "sourceLevel": 36,
     "difficulty": "hard",
     "difficultyRank": 85,
     "difficultyScore": 906.65,
@@ -2580,10 +2388,8 @@
     ]
   },
   "level96": {
-    "id": "xsokoban-020",
+    "id": "sokoban-097",
     "levelName": "level96",
-    "source": "xsokoban-90",
-    "sourceLevel": 20,
     "difficulty": "hard",
     "difficultyRank": 86,
     "difficultyScore": 913.45,
@@ -2611,10 +2417,8 @@
     ]
   },
   "level97": {
-    "id": "xsokoban-010",
+    "id": "sokoban-098",
     "levelName": "level97",
-    "source": "xsokoban-90",
-    "sourceLevel": 10,
     "difficulty": "hard",
     "difficultyRank": 87,
     "difficultyScore": 914.45,
@@ -2642,10 +2446,8 @@
     ]
   },
   "level98": {
-    "id": "xsokoban-024",
+    "id": "sokoban-099",
     "levelName": "level98",
-    "source": "xsokoban-90",
-    "sourceLevel": 24,
     "difficulty": "hard",
     "difficultyRank": 88,
     "difficultyScore": 965.15,
@@ -2673,10 +2475,8 @@
     ]
   },
   "level99": {
-    "id": "xsokoban-039",
+    "id": "sokoban-100",
     "levelName": "level99",
-    "source": "xsokoban-90",
-    "sourceLevel": 39,
     "difficulty": "hard",
     "difficultyRank": 89,
     "difficultyScore": 1145.94,
@@ -2704,10 +2504,8 @@
     ]
   },
   "level100": {
-    "id": "xsokoban-052",
+    "id": "sokoban-101",
     "levelName": "level100",
-    "source": "xsokoban-90",
-    "sourceLevel": 52,
     "difficulty": "hard",
     "difficultyRank": 90,
     "difficultyScore": 1194,

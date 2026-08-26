@@ -6,19 +6,19 @@ import {fileURLToPath} from 'node:url'
 import prettier from 'prettier'
 
 /**
- * Собирает канонические XSB-паки в игровой JSON и единый файл для решателя.
+ * Собирает единый канонический XSB-файл в игровой JSON.
  * Внешние пробелы карт превращаются во внутренний символ пустоты `_`.
  */
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(scriptDirectory, '..', '..')
 const levelsDirectory = path.resolve(projectRoot, 'levels')
-const catalogPath = path.resolve(levelsDirectory, 'catalog.json')
+const levelsSourcePath = path.resolve(levelsDirectory, 'levels.xsb')
+const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
 const gameOutputPath = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels.json')
-const solverOutputPath = path.resolve(levelsDirectory, 'solver', 'all-levels.xsb')
 const isCheckMode = process.argv.includes('--check')
 const standardRowPattern = /^[ #.$@*+]+$/
-const metadataKeys = Object.freeze({id: 'id', 'source-level': 'sourceLevel'})
+const metadataKeys = Object.freeze({id: 'id'})
 const themes = Object.freeze([
   Object.freeze({back: 'garden', amb: 'amb_garden', music: 'm_garden'}),
   Object.freeze({back: 'antarctica', amb: 'amb_antarctica', music: 'm_antarctica'}),
@@ -34,8 +34,6 @@ const lurdDirections = Object.freeze({
 const readText = (filePath) => fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n')
 
 const readJson = (filePath) => JSON.parse(readText(filePath))
-
-const resolveLevelsPath = (relativePath) => path.resolve(levelsDirectory, relativePath)
 
 const normalizeMapForHash = (map) => {
   const rows = map.map((row) => row.trimEnd()).filter((row) => row.trim())
@@ -62,20 +60,20 @@ const addParsedLevel = (levels, rows, metadata) => {
   Object.keys(metadata).forEach((key) => delete metadata[key])
 }
 
-const parseXsb = (text, packId) => {
+const parseXsb = (text) => {
   const levels = []
   const rows = []
   const metadata = {}
 
-  text.split('\n').forEach((line) => parseXsbLine(line, packId, levels, rows, metadata))
+  text.split('\n').forEach((line) => parseXsbLine(line, levels, rows, metadata))
   addParsedLevel(levels, rows, metadata)
   return levels
 }
 
-const parseXsbLine = (line, packId, levels, rows, metadata) => {
+const parseXsbLine = (line, levels, rows, metadata) => {
   if (!line.trim()) return addParsedLevel(levels, rows, metadata)
   if (line.trimStart().startsWith(';')) return parseMetadata(line.trimStart(), metadata)
-  if (!standardRowPattern.test(line)) throw new Error(`Недопустимая строка XSB в пакете ${packId}: ${line}`)
+  if (!standardRowPattern.test(line)) throw new Error(`Недопустимая строка в levels/levels.xsb: ${line}`)
 
   rows.push(line.trimEnd())
 }
@@ -102,20 +100,12 @@ const validateStandardMap = (level) => {
   return metrics
 }
 
-const getStatsByLevel = (pack) => {
-  if (!pack.statsFile) return {solver: null, levels: new Map()}
-
-  const stats = readJson(resolveLevelsPath(pack.statsFile))
+const getStatsById = () => {
+  const stats = readJson(solverStatsPath)
   return {
     solver: stats.solver,
-    levels: new Map(stats.levels.map((level) => [level.sourceLevel, level])),
+    levels: new Map(stats.levels.map((level) => [level.id, level])),
   }
-}
-
-const createLevelId = (pack, sourceLevel, metadata) => {
-  if (metadata.id) return metadata.id
-
-  return `${pack.idPrefix}-${String(sourceLevel).padStart(3, '0')}`
 }
 
 const calculateDifficultyScore = (stats) => {
@@ -125,14 +115,12 @@ const calculateDifficultyScore = (stats) => {
   return Number(score.toFixed(2))
 }
 
-const createPackLevel = (pack, parsedLevel, index, statsData) => {
-  const sourceLevel = Number(parsedLevel.metadata.sourceLevel || index + 1)
-  const stats = statsData.levels.get(sourceLevel) || null
+const createLevel = (parsedLevel, index, statsData) => {
+  const id = parsedLevel.metadata.id || `sokoban-${String(index + 1).padStart(3, '0')}`
+  const stats = statsData.levels.get(id) || null
 
   return {
-    id: createLevelId(pack, sourceLevel, parsedLevel.metadata),
-    source: pack.id,
-    sourceLevel,
+    id,
     map: parsedLevel.map,
     stats,
     solver: stats ? {name: statsData.solver.name, version: stats.solverVersion} : null,
@@ -211,23 +199,24 @@ const validateLurdSolution = (level) => {
   if (!isSolved) throw new Error(`${level.id}: сохранённое решение не завершает карту`)
 }
 
-const loadPackLevels = (pack) => {
-  const source = readText(resolveLevelsPath(pack.file))
-  const parsedLevels = parseXsb(source, pack.id)
-  const statsData = getStatsByLevel(pack)
-  const levels = parsedLevels.map((level, index) => createPackLevel(pack, level, index, statsData))
+const loadLevels = () => {
+  const parsedLevels = parseXsb(readText(levelsSourcePath))
+  const statsData = getStatsById()
+  const levels = parsedLevels.map((level, index) => createLevel(level, index, statsData))
 
-  if (levels.length !== pack.expectedLevels) throw new Error(`${pack.id}: ожидалось ${pack.expectedLevels} карт, найдено ${levels.length}`)
+  if (levels.length === 0) throw new Error('Файл levels/levels.xsb не содержит карт')
   levels.forEach((level) => validateStats(level, validateStandardMap(level)))
-  if (pack.statsFile && levels.some((level) => !level.stats)) throw new Error(`${pack.id}: не для всех карт найдена статистика`)
+  if (levels.filter((level) => level.stats).length !== statsData.levels.size) throw new Error('Не все записи статистики связаны с картами')
 
-  return sortPackLevels(pack, levels)
+  return assignDifficulty(levels)
 }
 
-const sortPackLevels = (pack, levels) => {
-  if (pack.order !== 'difficulty') return levels
+const validateDifficultyOrder = (levels) => {
+  const verifiedLevels = levels.filter((level) => level.stats)
 
-  return [...levels].sort((first, second) => first.difficultyScore - second.difficultyScore || first.sourceLevel - second.sourceLevel)
+  verifiedLevels.slice(1).forEach((level, index) => {
+    if (verifiedLevels[index].difficultyScore > level.difficultyScore) throw new Error('Проверенные уровни расположены не по сложности')
+  })
 }
 
 const getDifficulty = (rank, total) => {
@@ -236,14 +225,16 @@ const getDifficulty = (rank, total) => {
   return 'hard'
 }
 
-const assignPackDifficulty = (pack, levels) => {
-  if (pack.order !== 'difficulty') return levels.map((level) => ({...level, difficulty: pack.difficulty}))
+const assignDifficulty = (levels) => {
+  validateDifficultyOrder(levels)
+  const verifiedCount = levels.filter((level) => level.stats).length
+  let difficultyRank = 0
 
-  return levels.map((level, index) => ({
-    ...level,
-    difficulty: getDifficulty(index + 1, levels.length),
-    difficultyRank: index + 1,
-  }))
+  return levels.map((level) => {
+    if (!level.stats) return {...level, difficulty: 'custom'}
+    difficultyRank++
+    return {...level, difficulty: getDifficulty(difficultyRank, verifiedCount), difficultyRank}
+  })
 }
 
 const getBoundaryPositions = (width, height) => {
@@ -332,8 +323,6 @@ const createRuntimeLevel = (level, index) => {
   return {
     id: level.id,
     levelName: `level${index}`,
-    source: level.source,
-    sourceLevel: level.sourceLevel,
     difficulty: level.difficulty,
     ...(level.difficultyRank && {difficultyRank: level.difficultyRank}),
     ...(level.difficultyScore && {difficultyScore: level.difficultyScore}),
@@ -347,28 +336,6 @@ const createRuntimeLevel = (level, index) => {
 const createRuntimeCatalog = (levels) => {
   return Object.fromEntries(levels.map((level, index) => [`level${index}`, createRuntimeLevel(level, index)]))
 }
-
-const getSolverComment = (level) => {
-  if (!level.stats) return '; solver: not-verified'
-
-  return `; solver: ${level.solver.name} ${level.solver.version}, moves ${level.stats.moves}, pushes ${level.stats.pushes}`
-}
-
-const createSolverLevel = (level) => {
-  const difficulty = level.difficultyRank
-    ? `${level.difficulty}, rank ${level.difficultyRank}, score ${level.difficultyScore}`
-    : level.difficulty
-  const header = [
-    `; id: ${level.id}`,
-    `; source: ${level.source}, level ${level.sourceLevel}`,
-    `; difficulty: ${difficulty}`,
-    getSolverComment(level),
-  ]
-
-  return [...header, ...level.map].join('\n')
-}
-
-const createSolverExport = (levels) => `${levels.map(createSolverLevel).join('\n\n')}\n`
 
 const validateUniqueIds = (levels) => {
   const ids = new Set()
@@ -390,16 +357,14 @@ const writeOutput = (filePath, content) => {
 }
 
 const buildLevels = async () => {
-  const catalog = readJson(catalogPath)
-  const levels = catalog.packs.flatMap((pack) => assignPackDifficulty(pack, loadPackLevels(pack)))
+  const levels = loadLevels()
   validateUniqueIds(levels)
 
   const gameCatalog = createRuntimeCatalog(levels)
   const prettierConfig = await prettier.resolveConfig(gameOutputPath)
   const gameJson = await prettier.format(JSON.stringify(gameCatalog), {...prettierConfig, parser: 'json'})
   writeOutput(gameOutputPath, gameJson)
-  writeOutput(solverOutputPath, createSolverExport(levels))
-  console.log(`Уровни собраны: ${levels.length}; игровой JSON и XSB для решателя готовы.`)
+  console.log(`Уровни собраны: ${levels.length}; levels/levels.xsb проверен и игровой JSON обновлён.`)
 }
 
 await buildLevels()
