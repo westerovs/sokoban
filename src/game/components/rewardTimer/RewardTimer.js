@@ -40,11 +40,11 @@ export default class RewardTimer {
   }
 
   // Публичные методы, который можно переопределить
-  onError(onError) {}
+  onError() {}
 
   onTimerEnd() {}
 
-  onTimerTick(currentTimeWithZero) {}
+  onTimerTick() {}
 
   // ------------- ↓ timer ↓ -------------
   #startTimer = (duration) => {
@@ -168,9 +168,6 @@ export default class RewardTimer {
   }
 
   #onFinally = () => {
-    if (this.#hasReward) {
-    }
-
     this.#isDisabledBtn = false
   }
 }
