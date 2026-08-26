@@ -16,6 +16,7 @@ export default class StateIntro {
 
   // -------------------- STATE INTRO
   #createStartLevelAnimation = async () => {
+    Locator.options.setMainScreenNavigation(false)
     Locator.options.setVisibleToggle(true)
 
     const {globalUiLayer, stateUiLayer} = Locator.uiLayer

@@ -58,6 +58,10 @@ export default class Options {
     }
   }
 
+  setMainScreenNavigation = (isMainScreen) => {
+    this.#view?.setMainScreenNavigation(isMainScreen)
+  }
+
   #toggleVisibility = async () => {
     if (!this.#view) return
     await this.#view.toggleVisibility()
@@ -124,12 +128,7 @@ export default class Options {
     Locator.soundManager.play('sfx_btnClick')
 
     if (target.label === this.#btnMainScreen.label) {
-      this.#toggleVisibility()
-
-      if (this.#game.stateName === GAME_STATES.gameState) return
-      if (this.#game.stateName === GAME_STATES.levelState) {
-        this.#game.currentState.checkoutState(GAME_STATES.gameState)
-      }
+      this.#navigateHome()
     }
 
     if (target.label === this.#btnBackToLevels.label) {
@@ -163,6 +162,19 @@ export default class Options {
 
     this.#game.requestSelectedLocationOnStart()
     this.#game.currentState.checkoutState(GAME_STATES.gameState)
+  }
+
+  #navigateHome = () => {
+    this.#toggleVisibility()
+
+    if (this.#game.stateName === GAME_STATES.gameState) {
+      this.#game.currentState.stateStartScreen.showMainScreen()
+      return
+    }
+
+    if (this.#game.stateName === GAME_STATES.levelState) {
+      this.#game.currentState.checkoutState(GAME_STATES.gameState)
+    }
   }
 
   #checkboxHandler = (target) => {

@@ -43,8 +43,15 @@ export default class StartScreen {
     this.#stage.interactiveChildren = isInteractive
   }
 
+  showMainScreen = () => {
+    if (this.#selectedLocationId === null) return
+
+    this.showLocations(false)
+  }
+
   showLocations = (playSound = true) => {
     this.#selectedLocationId = null
+    Locator.options.setMainScreenNavigation(true)
     this.#game.view.setBackground('startScreen')
     const unlockedLocation = this.#progress.consumeUnlockCelebration()
     const pageIndex = unlockedLocation ? getLocationPageIndex(unlockedLocation.id) : this.#progress.locationPageIndex
@@ -92,6 +99,7 @@ export default class StartScreen {
     }
 
     this.#selectedLocationId = locationId
+    Locator.options.setMainScreenNavigation(false)
     this.#game.view.setBackground(location.background)
     this.#gameMenu.showLevels(location, this.#progress.getLevelStates(locationId), this.#progress.getSelectedEntry(locationId))
   }
@@ -100,6 +108,7 @@ export default class StartScreen {
     if (!this.#progress.selectLocation(locationId)) return
 
     this.#selectedLocationId = locationId
+    Locator.options.setMainScreenNavigation(false)
     const location = getLocationById(locationId)
     const selectedEntry = this.#progress.getSelectedEntry(locationId)
     this.#game.view.setBackground(location.background)

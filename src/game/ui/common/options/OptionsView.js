@@ -131,6 +131,11 @@ export default class OptionsView extends BaseModal {
     return this.#btnBackToLevels
   }
 
+  setMainScreenNavigation(isMainScreen) {
+    this.#btnBackToLevels.visible = !isMainScreen
+    this.#btnMainScreen.x = isMainScreen ? 0 : VIEW_SIZE.buttonsGap
+  }
+
   async hide() {
     await this.toggleVisibility()
   }
