@@ -1,6 +1,6 @@
 import i18next from 'i18next'
-import PromoCard from '@/game/features/promotionCards/PromoCard.js'
 import Locator from '@/game/engine/Locator.ts'
+import PromoCard from '@/game/features/promotionCards/PromoCard.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import PromoCardsTestRenderer from './PromoCardsTestRenderer.js'
@@ -25,51 +25,63 @@ export const PROMO_DATA = {
   STARTED_PACK: {
     id: rewardsCatalog.promo.promoStartedPack.id,
     texture: 'promoStartedPack',
-    get header() { return `${i18next.t('promoStartedPack.header')}` },
-    get description() { return `${i18next.t('promoStartedPack.description')}` }
+    get header() {
+      return `${i18next.t('promoStartedPack.header')}`
+    },
+    get description() {
+      return `${i18next.t('promoStartedPack.description')}`
+    },
   },
   REMOVE_AD_PACK: {
     id: rewardsCatalog.promo.promoRemoveAdPack.id,
     texture: 'promoRemoveAdPack',
-    get header() { return `${i18next.t('promoRemoveAdPack.header')}` },
-    get description() { return `${i18next.t('promoRemoveAdPack.description')}` }
+    get header() {
+      return `${i18next.t('promoRemoveAdPack.header')}`
+    },
+    get description() {
+      return `${i18next.t('promoRemoveAdPack.description')}`
+    },
   },
   MEGA_HINTS_PACK: {
     id: rewardsCatalog.promo.promoMegaHintsPack.id,
     texture: 'promoMegaHintsPack',
-    get header() { return `${i18next.t('promoMegaHintsPack.header')}` },
-    get description() { return `${i18next.t('promoMegaHintsPack.description')}` }
-  }
+    get header() {
+      return `${i18next.t('promoMegaHintsPack.header')}`
+    },
+    get description() {
+      return `${i18next.t('promoMegaHintsPack.description')}`
+    },
+  },
 }
 
 export default class PromoManager {
   #game = Locator.game
   #card = null
   #resolveLearningComplete
-  
+
   static get promoPacksId() {
-    return Object.values(rewardsCatalog.promo).map(pack => pack.id)
+    return Object.values(rewardsCatalog.promo).map((pack) => pack.id)
   }
-  
+
   static testRender = () => new PromoCardsTestRenderer().render(PROMO_DATA)
-  
+
   static getPromoDataForLevel = (storage) => {
     const hasAdPass = storage.playerData.hasAdPass
     const level = storage.levelIndex
-    
+
     if (!hasAdPass) {
       if (level === 2) return PROMO_DATA.STARTED_PACK
       if (level === 5) return PROMO_DATA.MEGA_HINTS_PACK
       if (level === 10) return PROMO_DATA.REMOVE_AD_PACK
     }
-    
+
     if (hasAdPass) {
       if (level === 20) return PROMO_DATA.MEGA_HINTS_PACK
     }
-    
+
     return null
   }
-  
+
   createPromoCard = async (promoData) => {
     const completionPromise = this.#createCompletionPromise()
 
@@ -83,7 +95,7 @@ export default class PromoManager {
   }
 
   #createCompletionPromise = () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.#resolveLearningComplete = resolve
     })
   }
@@ -96,22 +108,22 @@ export default class PromoManager {
       return false
     }
   }
-  
+
   #setEvents = (bool) => {
     const status = bool ? 'on' : 'off'
-    
+
     this.#game[status](GAME_EVENTS.PROMO_CARD_CLICK, this.#onHandlerBtnByeAction)
     this.#game[status](GAME_EVENTS.completeLevel, this.#destroy)
     this.#game[status](GAME_EVENTS.HIDE_PROMO_CARD, this.#onPromoCardHidden)
   }
-  
+
   #destroy = () => {
     if (this.#card && !this.#card.destroyed) this.#card.destroy()
     this.#complete()
-    
+
     this.#card = null
   }
-  
+
   #onHandlerBtnByeAction = async (id) => {
     if (!PromoManager.promoPacksId.includes(id)) return
 

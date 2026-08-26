@@ -1,24 +1,24 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import SdkManager from '../../engine/SdkManager.js'
 import {Sprite, Texture} from 'pixi.js'
-import ScoreRow, {ROW_SIZE} from './ScoreRow.js'
-import {mockData} from './mockData.js'
+import SdkManager from '../../engine/SdkManager.js'
 import LoadUtils from '../../utils/gameUtils/LoadUtils.js'
+import {mockData} from './mockData.js'
+import ScoreRow, {ROW_SIZE} from './ScoreRow.js'
 
 const avatarTextures = []
 
 export default class Scoreboard {
   #view
-  
+
   #textLoading
   #maxTopPlayers = 5
   #maxPlayers = 8
   #maxNeighbors = 2
-  
+
   constructor(view) {
     this.#view = view
-    
+
     this.#init()
   }
 
@@ -58,24 +58,22 @@ export default class Scoreboard {
     this.#markCurrentPlayer()
     this.#animateList()
   }
-  
+
   #prepare = () => {
-    avatarTextures.forEach(texture => texture.destroy(true))
+    avatarTextures.forEach((texture) => texture.destroy(true))
     avatarTextures.length = 0
-    
+
     if (this.#view.loadingText) {
       this.#view.loadingText.visible = true
       this.#textLoading = this.#view.loadingText
     }
   }
-  
+
   #getPlayers = async () => {
-    const players = import.meta.env.VITE_PLATFORM_NAME === 'noAdapter'
-      ? mockData.slice(0, this.#maxPlayers)
-      : await SdkManager.leaderboard.getEntries(
-        this.#maxPlayers,
-        this.#maxNeighbors,
-      )
+    const players =
+      import.meta.env.VITE_PLATFORM_NAME === 'noAdapter'
+        ? mockData.slice(0, this.#maxPlayers)
+        : await SdkManager.leaderboard.getEntries(this.#maxPlayers, this.#maxNeighbors)
 
     if (!players) {
       this.#textLoading.text = i18next.t('scoreBoard.networkError')
@@ -89,23 +87,23 @@ export default class Scoreboard {
     this.#textLoading.text = `${i18next.t('textLoading')}...`
     return Promise.resolve(players)
   }
-  
+
   #createPlayersList = (players) => {
     const startPositionY = this.#view.startPositionYFirstRow
-    const offsetAfterFifthRow = (i) => (i > 4) ? this.#view.header.height / 2 : 0
-    
+    const offsetAfterFifthRow = (i) => (i > 4 ? this.#view.header.height / 2 : 0)
+
     Object.values(players).forEach((data, i) => {
       const {title, id, avatar, rank, score} = data
-      
-      const row = new ScoreRow({view: this.#view, id, rank, title, score, y: (ROW_SIZE.rowHeight * i)})
+
+      const row = new ScoreRow({view: this.#view, id, rank, title, score, y: ROW_SIZE.rowHeight * i})
       row.y = i * (ROW_SIZE.rowHeight + ROW_SIZE.offsetBetweenRows) - startPositionY + offsetAfterFifthRow(i)
       this.#view.list.addChild(row)
-      
+
       this.#loadAvatar(row, avatar)
-      
+
       row.changeFontSizeAfterTop(row, i)
       this.#addTopRankMedal(row, i)
-      
+
       row.trimUserNameByAvailableWidth(title)
     })
   }
@@ -116,13 +114,13 @@ export default class Scoreboard {
 
     const fifthRow = this.#view.list.children.at(4)
     if (!fifthRow) return
-    
+
     gapLine.y = fifthRow.y + fifthRow.height + (gapLine.height + 20)
   }
-  
+
   #markCurrentPlayer = () => {
     const currentPlayerID = SdkManager.sdk.player.getId()
-    const row = this.#view.list.children.find(item => item?.id === currentPlayerID)
+    const row = this.#view.list.children.find((item) => item?.id === currentPlayerID)
 
     if (row) {
       const userNameText = row.textUserName
@@ -132,13 +130,14 @@ export default class Scoreboard {
       row.fillRow(this.#view.userPlayerRowFill)
     }
   }
-  
+
   #animateList = () => {
-    gsap.timeline()
+    gsap
+      .timeline()
       .fromTo([this.#view.list, this.#view.gapLine], {alpha: 0}, {alpha: 1, duration: 0.1, ease: 'none'})
       .set(this.#textLoading, {visible: false}, '<')
   }
-  
+
   #loadAvatar = async (row, avatarUrl) => {
     const avatarContainer = row.avatarContainer
 
@@ -151,19 +150,19 @@ export default class Scoreboard {
       }
 
       avatarTextures.push(texture)
-      
+
       const avatar = new Sprite(texture)
       avatar.anchor.set(0.5)
       avatar.width = ROW_SIZE.avatarSize - 10
       avatar.height = ROW_SIZE.avatarSize - 10
-      
+
       avatarContainer.addChild(avatar)
     } catch (error) {
       if (this.#view.destroyed || row.destroyed) return
       row.createFallBackTexture()
     }
   }
-  
+
   #addTopRankMedal = (row, i) => {
     if (i === 0) row.createMedal(row, 'leader-medal1')
     if (i === 1) row.createMedal(row, 'leader-medal2')
@@ -171,5 +170,4 @@ export default class Scoreboard {
     if (i === 3) row.createMedal(row, 'leader-medal4')
     if (i === 4) row.createMedal(row, 'leader-medal5')
   }
-
 }

@@ -14,9 +14,6 @@ export default class FadeOverlay extends Graphics {
   }
 
   update = ({width, height}: UiSize) => {
-    this
-      .clear()
-      .rect(0, 0, width, height)
-      .fill(this.#color)
+    this.clear().rect(0, 0, width, height).fill(this.#color)
   }
 }

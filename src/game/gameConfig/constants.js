@@ -9,18 +9,18 @@ const WORLD = Object.freeze({
   HEIGHT: height,
   HALF_W: width / 2,
   HALF_H: height / 2,
-  
+
   get CENTER() {
     return {x: width / 2, y: height / 2}
   },
-  
+
   get isLandscape() {
     return matchMedia('(orientation: landscape)').matches
   },
-  
+
   get isPortrait() {
     return matchMedia('(orientation: portrait)').matches
-  }
+  },
 })
 
 const GAME_STATES = Object.freeze({
@@ -30,7 +30,6 @@ const GAME_STATES = Object.freeze({
   levelState: 'levelState',
   levelPreload: 'levelPreload',
 })
-
 
 // ---------- platform settings ----------
 const GAME_NAMES = Object.freeze({
@@ -67,7 +66,7 @@ const PLATFORM_SCENARIOS = {
     enableStartStopOnFocusChange: true, // если true события старт/stop отправляются при смене фокуса игры
     cacheOff: false, // если true - игра не будет кешировать свои файлы
   },
-  
+
   // режим для сайтов, собирается из base адаптера
   BASE: {
     noStore: true,
@@ -120,7 +119,7 @@ const PLATFORM_SCENARIOS = {
 const LEVEL_TYPES = {
   DEFAULT: {name: 'default', difficulty: null},
   NEW_YEAR: {name: 'ny', difficulty: null},
-  
+
   SHADOWS: {name: 'shadows', difficulty: 'hard'},
   WORDS: {name: 'words', difficulty: 'veryHard'},
   ANAGRAMS: {name: 'anagrams', difficulty: 'veryHard'},
@@ -128,18 +127,16 @@ const LEVEL_TYPES = {
   IDENTICAL: {name: 'identical', difficulty: 'hard'},
 }
 
-
 // ---------- other settings ----------
 const DEFAULT_FLAGS = {
   DEFAULT_TEST: 'DEFAULT_TEST',
-  
+
   timerRewardDuration: '1800',
   levelAdDelay: '120',
   timerCompassDuration: '15',
 }
 
 const TIMER_REWARD_DURATION_IF_STORE_UNAVAILABLE = 600 // (60 * 10) = 10min
-
 
 // ---------- build settings ----------
 
@@ -151,13 +148,13 @@ const ASSETS_URL = URL_PRESET.LOCAL
 // const ASSETS_URL = URL_PRESET.YANDEX_BUILD
 
 export {
-  PLATFORM_ID,
-  PLATFORM_SCENARIOS,
+  ASSETS_URL,
+  DEFAULT_FLAGS,
   GAME_NAMES,
   GAME_STATES,
   LEVEL_TYPES,
-  DEFAULT_FLAGS,
+  PLATFORM_ID,
+  PLATFORM_SCENARIOS,
   TIMER_REWARD_DURATION_IF_STORE_UNAVAILABLE,
   WORLD,
-  ASSETS_URL,
 }

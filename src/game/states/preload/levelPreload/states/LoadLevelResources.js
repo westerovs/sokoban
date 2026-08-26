@@ -10,17 +10,17 @@ export default class LoadLevelResources {
   #preloadList
   #preloadText
   #isNeedUpdateProgress
-  
+
   constructor(levelEntity, isNeedUpdateProgress = true) {
     this.#levelEntity = levelEntity
     this.#preloadText = levelEntity.view.refs.preloadText
     this.#isNeedUpdateProgress = isNeedUpdateProgress
   }
-  
+
   execute = async (levelIndex) => {
     let attempts = 0
     const maxAttempts = 3
-    
+
     while (attempts < maxAttempts) {
       try {
         this.#preloadList = this.#getPreloadList(levelIndex)
@@ -34,29 +34,29 @@ export default class LoadLevelResources {
       }
     }
   }
-  
+
   #loadLevelAssets = async () => {
     const {levelList} = this.#preloadList
     const bundleName = 'levelBundle'
     this.#updateProgress(0)
     await Assets.addBundle(bundleName, levelList)
-    
+
     this.#updateProgress(20)
     await Assets.loadBundle(bundleName)
-    
+
     Logger.log(MODULES.LevelPreload, 'loadLevelAssets is loaded')
   }
 
   #getPreloadList = (levelIndex) => {
     return createPreloadList(this.#levelEntity.game, this.#levelEntity.storage, levelIndex)
   }
-  
+
   #updateProgress = (progress) => {
     if (!this.#isNeedUpdateProgress) return
     if (!this.#preloadText) return
-    
-    const {textLevel, userLevel, textPart, partIndex, textLoading,} = this.#levelEntity.textPreloadData
-    
+
+    const {textLevel, userLevel, textPart, partIndex, textLoading} = this.#levelEntity.textPreloadData
+
     const preloadText = this.#preloadText
     preloadText.text = `${textLevel} ${userLevel}\n${textPart} ${partIndex}\n${textLoading} ${progress}%`
   }

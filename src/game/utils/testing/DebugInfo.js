@@ -12,9 +12,9 @@ import {
   Text,
   TilingSprite,
 } from 'pixi.js'
+import Locator from '@/game/engine/Locator.ts'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
-import Locator from '@/game/engine/Locator.ts'
 
 const PANEL = {
   x: 10,
@@ -32,14 +32,14 @@ const TEXT_STYLE = {
   fontFamily: 'Arial',
   fontSize: 22,
   lineHeight: 27,
-  fill: 0x29E51F,
+  fill: 0x29e51f,
   stroke: {color: 0x000000, width: 2},
   tagStyles: {
     section: {
       fontSize: 18,
       fontWeight: 'bold',
       letterSpacing: 1,
-      fill: 0xFFFFFF,
+      fill: 0xffffff,
     },
   },
 }
@@ -79,42 +79,42 @@ export default class DebugInfo {
   #isOpened = false
   #isTickerActive = false
   #panelTargetX = this.#isOpened ? PANEL.x : -PANEL.width
-  
+
   constructor(game) {
     this.#game = game
     this.#init()
   }
-  
+
   #init() {
     if (!LocalStorage.isLog) return
-    
+
     this.#createPanel()
     this.#bindEvents()
-    
+
     Locator.uiLayer.globalUiLayer.addChild(this.#panel)
   }
-  
+
   #createPanel() {
     this.#panel = new Container({label: 'debugInfo'})
     this.#content = new Container({
       label: 'debugInfoContent',
       visible: this.#isOpened,
     })
-    
+
     this.#createDebugTexts()
     const panelHeight = this.#getPanelHeight()
-    
+
     this.#createBackground(panelHeight)
-    
+
     this.#createCloseButton()
     this.#handle = this.#createHandle(panelHeight)
-    
+
     this.#panel.position.set(this.#panelTargetX, PANEL.y)
-    
+
     this.#content.addChild(this.#debugText, this.#closeButton)
     this.#panel.addChild(this.#content, this.#handle)
   }
-  
+
   #createDebugTexts = () => {
     this.#debugText = new Text({
       text: DEBUG_TEXT_PLACEHOLDER,
@@ -123,36 +123,29 @@ export default class DebugInfo {
     this.#debugText.position.set(PANEL.padding)
     this.#debugText.eventMode = 'none'
   }
-  
+
   #getPanelHeight = () => {
-    return Math.ceil(
-      Math.max(
-        this.#debugText.height + PANEL.padding * 2,
-        PANEL.buttonSize + PANEL.padding * 2,
-      ),
-    )
+    return Math.ceil(Math.max(this.#debugText.height + PANEL.padding * 2, PANEL.buttonSize + PANEL.padding * 2))
   }
-  
+
   #createBackground = (panelHeight) => {
-    const background = new Graphics({eventMode: 'none'})
-      .roundRect(0, 0, PANEL.width, panelHeight, 8)
-      .fill({color: 0x000000, alpha: 0.6})
-    
+    const background = new Graphics({eventMode: 'none'}).roundRect(0, 0, PANEL.width, panelHeight, 8).fill({color: 0x000000, alpha: 0.6})
+
     // background.eventMode = 'none'
-    
+
     this.#content.addChild(background)
   }
-  
+
   #bindEvents() {
     this.#closeButton.on('pointertap', () => {
       this.#setOpened(false)
     })
-    
+
     this.#handle.on('pointertap', () => {
       this.#setOpened(true)
     })
   }
-  
+
   #setOpened(isOpened) {
     if (this.#isOpened === isOpened) return
 
@@ -181,19 +174,16 @@ export default class DebugInfo {
 
     this.#game.app.ticker.remove(this.#update, this)
   }
-  
+
   #update(ticker) {
-    const progress = Math.min(
-      1,
-      ticker.deltaMS * PANEL.animationSpeed,
-    )
-    
+    const progress = Math.min(1, ticker.deltaMS * PANEL.animationSpeed)
+
     this.#panel.x += (this.#panelTargetX - this.#panel.x) * progress
-    
+
     if (Math.abs(this.#panelTargetX - this.#panel.x) < 0.5) {
       this.#panel.x = this.#panelTargetX
     }
-    
+
     if (!this.#isOpened) {
       if (this.#panel.x === this.#panelTargetX) {
         this.#content.visible = false
@@ -205,14 +195,14 @@ export default class DebugInfo {
 
     this.#elapsed += ticker.deltaMS
     if (this.#elapsed < PANEL.updateInterval) return
-    
+
     this.#elapsed = 0
     this.#debugText.text = this.#getDebugText()
   }
-  
+
   #createCloseButton() {
     const size = PANEL.buttonSize
-    
+
     const button = new Graphics()
       .roundRect(0, 0, size, size, 8)
       .fill({color: 0x000000, alpha: 0.4})
@@ -221,25 +211,22 @@ export default class DebugInfo {
       .moveTo(33, 15)
       .lineTo(15, 33)
       .stroke({
-        color: 0xFFFFFF,
+        color: 0xffffff,
         width: 4,
         cap: 'round',
       })
-    
+
     button.position.set(PANEL.width - size - 8, 8)
     button.eventMode = 'static'
     button.cursor = 'pointer'
     button.hitArea = new Rectangle(0, 0, size, size)
-    
+
     this.#closeButton = button
   }
-  
+
   #createHandle(panelHeight) {
-    const {
-      handleWidth: width,
-      handleHeight: height,
-    } = PANEL
-    
+    const {handleWidth: width, handleHeight: height} = PANEL
+
     const handle = new Graphics()
       .roundRect(0, 0, width, height, 12)
       .fill({color: 0x000000, alpha: 0.6})
@@ -247,36 +234,28 @@ export default class DebugInfo {
       .lineTo(40, height / 2)
       .lineTo(23, height - 27)
       .stroke({
-        color: 0xFFFFFF,
+        color: 0xffffff,
         width: 5,
         cap: 'round',
         join: 'round',
       })
-    
-    handle.position.set(
-      PANEL.width,
-      (panelHeight - height) / 2,
-    )
-    
+
+    handle.position.set(PANEL.width, (panelHeight - height) / 2)
+
     handle.eventMode = 'static'
     handle.cursor = 'pointer'
     handle.hitArea = new Rectangle(0, 0, width, height)
     handle.visible = !this.#isOpened
-    
+
     return handle
   }
-  
+
   #getDebugText() {
     const {texturesCount, totalBytes} = this.#calcTextures()
     const scene = this.#calcSceneObjects(this.#game.app.stage)
-    
-    const {
-      totalFiles,
-      musicFiles,
-      totalDecodedBytes,
-      musicDecodedBytes,
-    } = Locator.soundManager.getAudioDebugStats()
-    
+
+    const {totalFiles, musicFiles, totalDecodedBytes, musicDecodedBytes} = Locator.soundManager.getAudioDebugStats()
+
     return [
       '<section>PERFORMANCE</section>',
       `FPS: ${Math.round(this.#game.app.ticker.FPS)}`,
@@ -301,38 +280,36 @@ export default class DebugInfo {
       `Text: ${scene.text}`,
     ].join('\n')
   }
-  
+
   #getAliveItems() {
     try {
       if (this.#game.stateName !== GAME_STATES.levelState) {
         return '-'
       }
-      
+
       return this.#game.level.aliveTargets.length ?? '-'
     } catch {
       return '-'
     }
   }
-  
+
   #formatMb(bytes) {
     return (bytes / 1024 / 1024).toFixed(1)
   }
-  
+
   #calcTextures() {
-    const sources = (
-      this.#game.app.renderer.texture?.managedTextures ?? []
-    ).filter(Boolean)
-    
+    const sources = (this.#game.app.renderer.texture?.managedTextures ?? []).filter(Boolean)
+
     const totalBytes = sources.reduce((sum, source) => {
       return sum + source.pixelWidth * source.pixelHeight * 4
     }, 0)
-    
+
     return {
       texturesCount: sources.length,
       totalBytes,
     }
   }
-  
+
   #calcSceneObjects(stage) {
     const stats = {
       total: 0,
@@ -342,26 +319,26 @@ export default class DebugInfo {
       graphics: 0,
       text: 0,
     }
-    
+
     const nodes = [stage]
-    
+
     while (nodes.length > 0) {
       const node = nodes.pop()
       if (!node) continue
-      
+
       stats.total += 1
-      
+
       const type = this.#getPixiType(node)
       if (type in stats) stats[type] += 1
-      
+
       if (node.children?.length) {
         nodes.push(...node.children)
       }
     }
-    
+
     return stats
   }
-  
+
   #getPixiType(node) {
     if (node instanceof BitmapText) return 'bitmapText'
     if (node instanceof HTMLText) return 'htmlText'
@@ -374,7 +351,7 @@ export default class DebugInfo {
     if (node instanceof Sprite) return 'sprite'
     if (node instanceof ParticleContainer) return 'particleContainer'
     if (node instanceof Container) return 'container'
-    
+
     return 'unknown'
   }
 }

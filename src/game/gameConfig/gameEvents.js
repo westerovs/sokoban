@@ -15,17 +15,17 @@ const GAME_EVENTS = {
   firstClick: 'firstClick',
   gameResize: 'gameResize',
   isDebug: 'isDebug', // сочетание горячих клавиш, посылает сигнал компоненту
-  
+
   startHit: 'startHit',
   endHit: 'endHit',
   missClick: 'missClick',
-  
+
   completePartLevel: 'completePartLevel', // common
   completeLevel: 'completeLevel', // common
   completeLevelWin: 'completeLevelWin',
   clearLevel: 'clearLevel', // посылает сигнал на который подписаны все модули, они самоочищаются
   botsWin: 'botsWin', // когда боты нашли раньше игрока
-  
+
   updateTargets: 'updateTargets',
   allItemsFound: 'allItemsFound', // [LevelCounter] когда найдены все предметы на уровне
   lvCounterStat: 'lvCounterStat', // посылает статистику, сколько предметов осталось найти и сколько уже найдено
@@ -44,7 +44,7 @@ const GAME_EVENTS = {
     checkboxZoom: 'options:checkboxZoom',
     checkboxSokobanDpad: 'options:checkboxSokobanDpad',
     btnCredits: 'options:btnCredits',
-    hide: 'options:hide'
+    hide: 'options:hide',
   },
   Timer: {
     tick: 'timer:timerTick',
@@ -77,16 +77,14 @@ const GAME_EVENTS = {
     endHint: 'hints.endHint',
     COMPASS: {
       destroy: 'hints:compass:destroy',
-    }
+    },
   },
   PROMO_CARD_CLICK: 'promoCardClick',
   HIDE_PROMO_CARD: 'hidePromoCard',
   DEBUG: {
     checkoutSkin: 'debug:checkoutSkin',
-    
   },
 }
-
 
 const ADAPTER_EVENTS = {
   PAUSE_EVENT: 'pause',
@@ -95,7 +93,4 @@ const ADAPTER_EVENTS = {
   AUDIO_OFF_EVENT: 'audio_off',
 }
 
-export {
-  ADAPTER_EVENTS,
-  GAME_EVENTS,
-}
+export {ADAPTER_EVENTS, GAME_EVENTS}

@@ -38,10 +38,7 @@ export default class SokobanBoard extends Container {
 
   showDeadlock(position) {
     this.#hideDeadlockHighlight()
-    this.#deadlockHighlight.position.set(
-      position.x * this.#tileSize,
-      position.y * this.#tileSize,
-    )
+    this.#deadlockHighlight.position.set(position.x * this.#tileSize, position.y * this.#tileSize)
     this.#deadlockHighlight.visible = true
     this.#deadlockTimeline = this.#createDeadlockTimeline()
   }
@@ -107,9 +104,7 @@ export default class SokobanBoard extends Container {
   }
 
   #shouldRotate() {
-    return SOKOBAN_SETTINGS.rotateTallBoardInLandscape
-      && this.#level.height > this.#level.width
-      && WORLD.isLandscape
+    return SOKOBAN_SETTINGS.rotateTallBoardInLandscape && this.#level.height > this.#level.width && WORLD.isLandscape
   }
 
   #getDisplayedSize(shouldRotate) {
@@ -124,17 +119,13 @@ export default class SokobanBoard extends Container {
     const visibleWidth = window.innerWidth / scaleFactor
     const horizontalPadding = this.#getHorizontalPadding(visibleWidth)
     const availableWidth = visibleWidth - horizontalPadding * 2
-    const availableHeight = WORLD.HEIGHT
-      - SOKOBAN_SETTINGS.boardTopPadding
-      - SOKOBAN_SETTINGS.boardBottomPadding
+    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.boardTopPadding - SOKOBAN_SETTINGS.boardBottomPadding
 
     return Math.min(availableWidth / displayedWidth, availableHeight / displayedHeight)
   }
 
   #getBoardCenterY() {
-    const availableHeight = WORLD.HEIGHT
-      - SOKOBAN_SETTINGS.boardTopPadding
-      - SOKOBAN_SETTINGS.boardBottomPadding
+    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.boardTopPadding - SOKOBAN_SETTINGS.boardBottomPadding
 
     return SOKOBAN_SETTINGS.boardTopPadding + availableHeight / 2
   }
@@ -259,9 +250,7 @@ export default class SokobanBoard extends Container {
 
   #findBoxView(position) {
     const pixelPosition = this.#getBoxPixelPosition(position)
-    return this.#boxViews.find((boxView) => (
-      boxView.x === pixelPosition.x && boxView.y === pixelPosition.y
-    ))
+    return this.#boxViews.find((boxView) => boxView.x === pixelPosition.x && boxView.y === pixelPosition.y)
   }
 
   #finishMovement(resolve) {
@@ -271,9 +260,10 @@ export default class SokobanBoard extends Container {
   }
 
   #createDeadlockTimeline() {
-    return gsap.timeline({
-      onComplete: () => this.#hideDeadlockHighlight(),
-    })
+    return gsap
+      .timeline({
+        onComplete: () => this.#hideDeadlockHighlight(),
+      })
       .fromTo(this.#deadlockHighlight, {alpha: 0}, {alpha: 1, duration: 0.14})
       .to(this.#deadlockHighlight, {
         alpha: 0.28,

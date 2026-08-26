@@ -9,35 +9,25 @@ export default class StateCompleteLevel {
   #stage
   #completeLevel
   #clearLevel
-  
+
   #isLevelCompleted = false
   #isWin = false
   #isFail = false
-  
+
   constructor(level) {
     this.#level = level
     this.#stage = this.#game.app.stage
-    
+
     this.init()
   }
-  
-  init = () => {
 
-  }
-  
-  #setEvents = (bool) => {
+  init = () => {}
 
-  }
-  
-  #runNextPart = async () => {
+  #setEvents = (bool) => {}
 
-  }
-  
-  #winAction = async () => {
- 
-  }
-  
-  exit = async () => {
+  #runNextPart = async () => {}
 
-  }
+  #winAction = async () => {}
+
+  exit = async () => {}
 }

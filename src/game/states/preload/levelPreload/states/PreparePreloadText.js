@@ -6,28 +6,28 @@ export default class PreparePreloadText {
   #game
   #storage
   #textPreloadData
-  
+
   constructor(levelEntity) {
     this.#levelEntity = levelEntity
     this.#game = levelEntity.game
     this.#storage = levelEntity.storage
   }
-  
+
   execute = async (levelIndex) => {
     await this.#initTextPreloadData(levelIndex)
   }
-  
+
   get textPreloadData() {
     return this.#textPreloadData
   }
-  
-  #initTextPreloadData  = () => {
+
+  #initTextPreloadData = () => {
     // уровень
     const textLevel = i18next.t('level')
     const userLevel = this.#storage.userLevel
     // этап
     const textPart = i18next.t('textLoadingSkinPart')
-    const partIndex =  this.#getPartIndex()
+    const partIndex = this.#getPartIndex()
     // загрузка
     const textLoading = i18next.t('textLoading')
 
@@ -39,7 +39,7 @@ export default class PreparePreloadText {
       textLoading,
     }
   }
-  
+
   #getPartIndex = () => {
     const {skinIndex, partIndex} = this.#levelEntity.playerData
 
@@ -49,7 +49,4 @@ export default class PreparePreloadText {
 
     return this.#levelEntity.playerData.partIndex
   }
-  
-
-  
 }

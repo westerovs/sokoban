@@ -47,7 +47,7 @@ export default class PromoCardsTestRenderer {
     const label = new Text({
       label: `${promoData.texture}PreviewLabel`,
       text: promoData.texture,
-      style: {fill: 0xFF0000},
+      style: {fill: 0xff0000},
     })
     label.anchor.set(0.5)
     label.y = -230

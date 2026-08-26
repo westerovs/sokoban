@@ -16,7 +16,7 @@ const fragment = `
 
 export default class DarkenFilter extends Filter {
   #darkness = 0
-  
+
   constructor(darkness = 0) {
     super({
       glProgram: GlProgram.from({
@@ -31,11 +31,11 @@ export default class DarkenFilter extends Filter {
     })
     this.#darkness = darkness
   }
-  
+
   get darkness() {
     return this.resources.darkenUniforms.uniforms.darkness
   }
-  
+
   set darkness(value) {
     this.#darkness = value
     this.resources.darkenUniforms.uniforms.darkness = value

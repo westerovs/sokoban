@@ -1,12 +1,12 @@
 import type UiLayer from '@/game/engine/uiLayer/UiLayer.ts'
-import type Game from '../Game.js'
 import type LiveOpsController from '../components/liveOpsController/LiveOpsController.js'
+import type Game from '../Game.js'
 import type GameConfig from '../gameConfig/GameConfig.js'
 import type PaymentManager from '../modules/PaymentManager.js'
-import type UIFader from '../ui/UIFader.js'
 import type Options from '../ui/common/options/Options.js'
-import type GameResize from './GameResize.js'
+import type UIFader from '../ui/UIFader.js'
 import type SoundManager from './audio/SoundManager.js'
+import type GameResize from './GameResize.js'
 import type Storage from './storage/Storage.js'
 
 type Service = {
@@ -82,5 +82,3 @@ export default class Locator {
     return Locator.get(SERVICES.LIVE_OPS) as LiveOpsController
   }
 }
-
-

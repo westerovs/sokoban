@@ -1,13 +1,12 @@
 import {Assets, Particle, ParticleContainer, Rectangle, Texture} from 'pixi.js'
+import {LIVE_OPS_ID} from '@/game/components/liveOpsController/LiveOpsController.js'
+import Locator from '@/game/engine/Locator.js'
+import {GAME_NAMES} from '@/game/gameConfig/constants.js'
+import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
+import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
+import {Logger} from '@/game/utils/Logger.js'
 import defaultConfig from './defaultConfig.json'
 import newYearConfig from './newYearConfig.json'
-import {Logger} from '../../../../utils/Logger.js'
-import {GAME_EVENTS} from '../../../../gameConfig/gameEvents.js'
-import Locator from '../../../../engine/Locator.ts'
-import {LIVE_OPS_ID} from '../../../../components/liveOpsController/LiveOpsController.js'
-import {GAME_NAME} from '../../../../generatedAssets/buildMeta.js'
-import {GAME_NAMES} from '../../../../gameConfig/constants.js'
-
 
 export default class MagicDust {
   #config
@@ -16,16 +15,16 @@ export default class MagicDust {
   #spawnElapsed = 0
   #game
   #parent
-  
+
   constructor(game, parent) {
     this.#game = game
     this.#parent = parent
   }
-  
+
   get container() {
     return this.#particleContainer
   }
-  
+
   init = () => {
     try {
       if (!this.#parent) {
@@ -41,29 +40,29 @@ export default class MagicDust {
       console.error('[MagicDust] Ошибка при инициализации MagicDust:', error)
     }
   }
-  
+
   destroy = () => {
     try {
       this.#game.app.ticker.remove(this.#update)
       this.#particles.length = 0
-      
+
       if (this.#particleContainer) {
         this.#particleContainer.destroy()
         this.#particleContainer = null
       }
-      
+
       this.#game.off(GAME_EVENTS.clearLevel, this.destroy)
       Logger.log('', '[MagicDust] destroy')
     } catch (e) {
       Logger.warn('', '[MagicDust]', e)
     }
   }
-  
+
   #initializeEmitter = () => {
     try {
       const texture = Assets.get('particle') ?? Texture.WHITE
       const bounds = this.#parent.getLocalBounds()
-      
+
       const isNewYear = Locator.liveOps.isActive(LIVE_OPS_ID.NEW_YEAR)
       const particleColor = isNewYear ? '#FFFFFF' : this.#getColorByGameName()
 
@@ -166,12 +165,11 @@ export default class MagicDust {
   #lerp = (start, end, progress) => start + (end - start) * progress
 
   #random = (min, max) => min + Math.random() * (max - min)
-  
+
   #getColorByGameName = () => {
     if (GAME_NAME === GAME_NAMES.detective) return '#ffdd00'
     if (GAME_NAME === GAME_NAMES.detectiveGirl) return '#FFFFFF'
-    
+
     return '#FFFFFF'
   }
-  
 }

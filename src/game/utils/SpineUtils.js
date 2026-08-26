@@ -1,5 +1,3 @@
-import {Assets, Container, Matrix, Mesh, MeshGeometry, Point} from 'pixi.js'
-import {gsap} from 'gsap'
 import {
   AtlasAttachmentLoader,
   MeshAttachment,
@@ -10,9 +8,11 @@ import {
   SpineTexture,
   TextureAtlas,
 } from '@esotericsoftware/spine-pixi-v8'
-import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
-import {ASSETS_URL, WORLD} from '@/game/gameConfig/constants.js'
+import {gsap} from 'gsap'
+import {Assets, Container, Matrix, Mesh, MeshGeometry, Point} from 'pixi.js'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
+import {ASSETS_URL, WORLD} from '@/game/gameConfig/constants.js'
+import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
 
 const slotViews = new WeakMap()
 
@@ -271,7 +271,7 @@ export default class SpineUtils {
   
   static spineParser = (spines, exists = 'webp') => {
     try {
-      ;[...spines].forEach(spine => {
+      [...spines].forEach(spine => {
         const {name, atlas, json} = spine
         
         // console.log(name, atlas, json)

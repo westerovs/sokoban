@@ -20,7 +20,7 @@ const COLORS = {
   [MODULES.SOUND_MANAGER]: '#08FE00',
   [MODULES.DestroyMessage]: '#FF0000',
   [MODULES.LOAD_ACTION]: '#08FE00',
-  
+
   // системные/общие
   default: '#44A0A3',
   warning: 'tomato',
@@ -31,7 +31,6 @@ const COLORS = {
 export const LOG_STATUS = {
   IS_DISABLED_LOG: true,
 }
-
 
 const setColor = (moduleName) => {
   return COLORS[moduleName] || COLORS.default
@@ -51,28 +50,27 @@ enabledModules.add(MODULES.Config)
 export class Logger {
   static log(moduleName, message, ...args) {
     if (LOG_STATUS.IS_DISABLED_LOG) return
-    
+
     if (enabledModules.has(moduleName)) {
       console.log(`%c[${moduleName}]`, `color: ${setColor(moduleName)}`, message, ...args)
       return
     }
-    
+
     if (Object.values(MODULES).includes(moduleName)) return
-    
+
     console.log(`%c[Logger]`, `color: ${setColor(moduleName)}`, moduleName ?? '', message, ...args)
   }
-  
+
   static warn(moduleName, message, ...args) {
     if (LOG_STATUS.IS_DISABLED_LOG) return
-    
+
     if (enabledModules.has(moduleName)) {
       console.warn(`[${moduleName}]`, message, ...args)
       return
     }
-    
+
     if (Object.values(MODULES).includes(moduleName)) return
-    
+
     console.log(`%c[Logger]`, `color: ${COLORS.warning}`, message, ...args)
   }
 }
-

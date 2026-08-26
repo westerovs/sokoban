@@ -5,22 +5,22 @@ export default class StateBadgeController {
   #game = Locator.game
   #userLevel
   #userCoins
-  
+
   constructor() {
     this.#init()
   }
-  
+
   #init = () => {
     this.#createBadges()
   }
-  
+
   #createBadges = () => {
     this.#createUserLevel()
     this.#createUserCoins()
-    
+
     Locator.uiLayer.stateUiLayer.addChild(this.#userLevel, this.#userCoins)
   }
-  
+
   #createUserLevel = () => {
     this.#userLevel = new StatBadge({
       label: 'userLevel',
@@ -30,7 +30,7 @@ export default class StateBadgeController {
     })
     this.#game.refs.userLevel = this.#userLevel
   }
-  
+
   #createUserCoins = () => {
     this.#userCoins = new StatBadge({
       label: 'userCoins',
@@ -39,6 +39,5 @@ export default class StateBadgeController {
       basePosition: {x: 0, y: 150},
     })
     this.#game.refs.userCoins = this.#userCoins
-    
   }
 }

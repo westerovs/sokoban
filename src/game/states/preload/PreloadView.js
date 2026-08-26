@@ -1,8 +1,7 @@
-import {Container} from 'pixi.js'
 import i18next from 'i18next'
+import {Container} from 'pixi.js'
 import {WORLD} from '../../gameConfig/constants.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
-
 
 export default class PreloadView extends Container {
   constructor() {
@@ -22,10 +21,10 @@ export default class PreloadView extends Container {
     const preloadText = GameUtils.createText(`${i18next.t('textLoading')}...`, {
       style: {
         fontSize: 40,
-        fill: 0xFFFFFF,
+        fill: 0xffffff,
         fontFamily: 'BloggerSans',
         align: 'center',
-      }
+      },
     })
     preloadText.position.set(WORLD.HALF_W, WORLD.HALF_H)
 

@@ -1,6 +1,6 @@
-import System from './System.js'
-import BackgroundComponent from '../components/BackgroundComponent.js'
 import Locator from '../../engine/Locator.ts'
+import BackgroundComponent from '../components/BackgroundComponent.js'
+import System from './System.js'
 
 export default class RenderSystem extends System {
   #view = Locator.game.view
@@ -10,7 +10,7 @@ export default class RenderSystem extends System {
   }
 
   init() {
-    this.entities.forEach(entity => {
+    this.entities.forEach((entity) => {
       this.#initializeBackground(entity)
     })
   }

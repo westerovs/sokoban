@@ -1,9 +1,9 @@
-import {Container, Text} from 'pixi.js'
-import GameUtils from '../utils/gameUtils/GameUtils.js'
 import {gsap} from 'gsap'
-import {primaryFontStyle} from '../styles.js'
+import {Container, Text} from 'pixi.js'
 import {rewardsCatalog} from '../gameConfig/rewardsCatalog.js'
+import {primaryFontStyle} from '../styles.js'
 import {destroyTimeLine} from '../utils/animations/gsapUtils.js'
+import GameUtils from '../utils/gameUtils/GameUtils.js'
 
 export default class PaymentAnimation extends Container {
   #parent
@@ -12,38 +12,38 @@ export default class PaymentAnimation extends Container {
   #textRewardCounter
   #timeline = gsap.timeline()
   #isPromo
-  
+
   constructor({parent, parentElements, productID, isPromo = false} = {}) {
     super()
-    
+
     this.#parent = parent
     this.#parentElements = parentElements
     this.#productID = productID
     this.#isPromo = isPromo
-    
+
     this.sortableChildren = true
-    
+
     console.warn('---productID', productID)
   }
-  
+
   init = async () => {
     await this.#animate()
     this.destroy()
   }
-  
+
   destroy(_options) {
     destroyTimeLine(this.#timeline)
-    super.destroy({..._options, children: true,})
+    super.destroy({..._options, children: true})
   }
-  
+
   #animate = async () => {
     const shine = this.#createShineIcon()
     this.#textRewardCounter = this.#createRewardCounter()
     const paymentIcon = this.#createPaymentIcon()
     this.#parent.addChild(this)
-    
-   this.#setPositionCenter(shine)
-    
+
+    this.#setPositionCenter(shine)
+
     await this.#timeline
       .set([this.#parentElements], {visible: false})
       .set(shine.scale, {x: 0, y: 0})
@@ -58,33 +58,36 @@ export default class PaymentAnimation extends Container {
       .to([paymentIcon, this.#textRewardCounter], {alpha: 0}, '<')
       .set([this.#parentElements], {visible: !this.#isPromo})
   }
-  
+
   #setPositionCenter = (shine) => {
     this.pivot.set(shine.texture.width / 2, shine.texture.height / 2)
     const frameSize = this.#parent.frameSize
-    this.position.set(
-      frameSize.halfW + (shine.texture.width / 2),
-      frameSize.halfH + 180
-    )
+    this.position.set(frameSize.halfW + shine.texture.width / 2, frameSize.halfH + 180)
   }
-  
+
   #createShineIcon = () => {
     const shine = GameUtils.createSprite('glow-type1')
     this.addChild(shine)
-    
+
     return shine
   }
-  
+
   #createPaymentIcon = () => {
     let textureKey = null
-    
+
     // store
     const storeCatalog = rewardsCatalog.store
-    const magnifiers = [storeCatalog.free.id, storeCatalog.smallPack.id, storeCatalog.mediumPack.id, storeCatalog.largePack.id, storeCatalog.extraLargePack.id]
-    
+    const magnifiers = [
+      storeCatalog.free.id,
+      storeCatalog.smallPack.id,
+      storeCatalog.mediumPack.id,
+      storeCatalog.largePack.id,
+      storeCatalog.extraLargePack.id,
+    ]
+
     if (magnifiers.includes(this.#productID)) {
       textureKey = 'store-loupe-big'
-      const product = Object.values(storeCatalog).find(item => item.id === this.#productID)
+      const product = Object.values(storeCatalog).find((item) => item.id === this.#productID)
       this.#textRewardCounter.text = `+${product.amount}`
     }
     if (this.#productID === storeCatalog.dartsHint.id) {
@@ -107,7 +110,7 @@ export default class PaymentAnimation extends Container {
       textureKey = 'icon-noAd'
       this.#textRewardCounter.text = ''
     }
-    
+
     // promo
     const promoCatalog = rewardsCatalog.promo
     if (this.#productID === promoCatalog.promoStartedPack.id) {
@@ -122,18 +125,20 @@ export default class PaymentAnimation extends Container {
       textureKey = 'promoMegaHintsPack'
       this.#textRewardCounter.text = `+${promoCatalog.promoMegaHintsPack.amount}`
     }
-    
+
     const icon = GameUtils.createSprite(textureKey)
     this.addChild(icon)
-    
+
     return icon
   }
-  
+
   #createRewardCounter = () => {
     const textRewardCounter = new Text({
       text: '',
       style: {
-        ...primaryFontStyle, fontSize: 100, fill: 0xFFFFFF,
+        ...primaryFontStyle,
+        fontSize: 100,
+        fill: 0xffffff,
         dropShadow: {color: 0x000000},
         stroke: {color: 0x000000, width: 1},
       },
@@ -141,9 +146,9 @@ export default class PaymentAnimation extends Container {
     textRewardCounter.alpha = 0
     textRewardCounter.zIndex = 1
     textRewardCounter.anchor.set(0.5)
-    
+
     this.addChild(textRewardCounter)
-    
+
     return textRewardCounter
   }
 }

@@ -3,7 +3,7 @@ import {WORLD} from '../../gameConfig/constants.js'
 
 export default class BackgroundComponent extends Sprite {
   #view = this
-  
+
   constructor(_entity, textureName) {
     super(Texture.from(textureName))
     this.label = 'level-background'
@@ -11,7 +11,7 @@ export default class BackgroundComponent extends Sprite {
     this.position.set(WORLD.HALF_W, WORLD.HALF_H)
     this.height = WORLD.HEIGHT
   }
-  
+
   get view() {
     return this.#view
   }

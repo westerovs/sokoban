@@ -31,8 +31,8 @@ const BUTTONS_DATA = {
     textureOFF: 'icon-sfx-off',
     position: {
       x: -VIEW_SIZE.buttonsGap,
-      y: -(VIEW_SIZE.buttonsGap) - BUTTONS_GAP - 30,
-    }
+      y: -VIEW_SIZE.buttonsGap - BUTTONS_GAP - 30,
+    },
   },
   musicBtn: {
     name: 'musicBtn',
@@ -40,8 +40,8 @@ const BUTTONS_DATA = {
     textureOFF: 'icon-music-off',
     position: {
       x: VIEW_SIZE.buttonsGap,
-      y: -(VIEW_SIZE.buttonsGap) - BUTTONS_GAP - 30,
-    }
+      y: -VIEW_SIZE.buttonsGap - BUTTONS_GAP - 30,
+    },
   },
   btnMainScreen: {
     name: 'btnMainScreen',
@@ -50,8 +50,8 @@ const BUTTONS_DATA = {
     position: {
       x: 0,
       y: 10,
-    }
-  }
+    },
+  },
 }
 
 const isNeedCreditsField = () => {
@@ -62,7 +62,7 @@ const isNeedCreditsField = () => {
 export default class OptionsView extends BaseModal {
   #game = Locator.game
   #optionsToggleBtn
-  
+
   #sfxBtn
   #musicBtn
   #btnMainScreen
@@ -71,7 +71,7 @@ export default class OptionsView extends BaseModal {
   #buttons = []
   #timeLine = null
   #credits
-  
+
   constructor() {
     super({
       ...VIEW_SIZE,
@@ -79,31 +79,31 @@ export default class OptionsView extends BaseModal {
       label: 'OptionsView',
       forceUpdateAdaptive: true,
     })
-    
+
     this.eventMode = 'static'
     this.label = 'optionView'
     this.zIndex = 10
     this.visible = false
-    
+
     this.#init()
   }
-  
+
   get optionsToggleBtn() {
     return this.#optionsToggleBtn
   }
-  
+
   get buttons() {
     return this.#buttons
   }
-  
+
   get sfxBtn() {
     return this.#sfxBtn
   }
-  
+
   get musicBtn() {
     return this.#musicBtn
   }
-  
+
   get checkboxZoom() {
     return this.#checkboxZoom
   }
@@ -111,7 +111,7 @@ export default class OptionsView extends BaseModal {
   get checkboxSokobanDpad() {
     return this.#checkboxSokobanDpad
   }
-  
+
   get btnMainScreen() {
     return this.#btnMainScreen
   }
@@ -119,38 +119,39 @@ export default class OptionsView extends BaseModal {
   async hide() {
     await this.toggleVisibility()
   }
-  
+
   toggleVisibility = async () => {
     if (this.#timeLine?.isActive()) return
-    
+
     const isVisible = !this.visible
     if (isVisible && !Locator.uiLayer.openModal(this)) return
 
     this.visible = isVisible
-    
+
     if (isVisible) SdkManager.gameplayStop()
     else SdkManager.gameplayStart()
-    
+
     if (!isVisible) {
       this.#game.emit(GAME_EVENTS.Options.hide)
     }
-    
-    this.#timeLine = await gsap.timeline({ease: 'linear'})
+
+    this.#timeLine = await gsap
+      .timeline({ease: 'linear'})
       .to(this.#optionsToggleBtn, {angle: isVisible ? 90 : 0, duration: 0.1})
       .eventCallback('onComplete', () => {
         if (!isVisible) Locator.uiLayer.closeModal(this)
         destroyTimeLine(this.#timeLine)
       })
   }
-  
+
   #init = () => {
     this.#createWheel()
     this.#createButtons()
     this.#createCheckboxRows()
     this.#checkFlagVisibleSoundButtons()
-    
+
     this.#buttons = [this.#sfxBtn, this.#musicBtn, this.#btnMainScreen]
-    
+
     this.#initCredits()
   }
 
@@ -160,52 +161,52 @@ export default class OptionsView extends BaseModal {
       interactive: true,
     })
     ButtonAnimator.initOverHandler(this.#optionsToggleBtn)
-    
+
     this.#optionsToggleBtn.visible = false
     this.#optionsToggleBtn.position.set(50, 60)
     this.#optionsToggleBtn._initPosition = {x: 50, y: 60}
-    
+
     Locator.uiLayer.globalUiLayer.addChild(this.#optionsToggleBtn)
   }
-  
+
   #createButtons = () => {
     const map = Object.values(BUTTONS_DATA).map((data) => {
       return this.#createButton(data)
     })
-    
-    this.#sfxBtn = map.find(item => item.label === BUTTONS_DATA.sfxBtn.name)
-    this.#musicBtn = map.find(item => item.label === BUTTONS_DATA.musicBtn.name)
-    this.#btnMainScreen = map.find(item => item.label === BUTTONS_DATA.btnMainScreen.name)
+
+    this.#sfxBtn = map.find((item) => item.label === BUTTONS_DATA.sfxBtn.name)
+    this.#musicBtn = map.find((item) => item.label === BUTTONS_DATA.musicBtn.name)
+    this.#btnMainScreen = map.find((item) => item.label === BUTTONS_DATA.btnMainScreen.name)
   }
-  
+
   #createButton = ({name, textureON, textureOFF, position} = {}) => {
     const container = new Container({label: name})
     container.audioData = {
       textureON,
-      textureOFF
+      textureOFF,
     }
     container.position.copyFrom(position)
-    
+
     if (isNeedCreditsField()) {
       container.y -= 40
     }
-    
+
     applyInteractive(container)
-    
+
     const wrapper = GameUtils.createSprite('btn-ui-1')
-    const icon =  GameUtils.createSprite(textureON, {label: 'icon'})
-    
+    const icon = GameUtils.createSprite(textureON, {label: 'icon'})
+
     container.addChild(wrapper, icon)
     this.addChild(container)
-    
+
     ButtonAnimator.initOverHandler([container])
     return container
   }
-  
+
   #createCheckboxRows = () => {
     const checkboxes = new Container({label: 'option-checkboxes'})
     checkboxes.position.set(-VIEW_SIZE.w / 2 + 70, isNeedCreditsField() ? 140 : 148)
-    
+
     this.#checkboxZoom = GameUtils.createCheckbox({
       text: `${i18next.t('option.checkboxZoom')}`,
       name: 'checkboxZoom',
@@ -230,7 +231,7 @@ export default class OptionsView extends BaseModal {
     checkbox.getChildByLabel('checkbox').tint = 0xf4edc5
     checkbox.getChildByLabel('checkboxMark').tint = 0xf4edc5
   }
-  
+
   #checkFlagVisibleSoundButtons = () => {
     if (SdkManager.flags.hideSoundButtons) {
       this.#musicBtn.visible = false
@@ -238,15 +239,13 @@ export default class OptionsView extends BaseModal {
       this.#btnMainScreen.y = 0
     }
   }
-  
+
   // ----------------- credits
   #initCredits = () => {
     if (!isNeedCreditsField()) return
-    
+
     this.#credits = new Credits(this)
   }
 }
 
-export {
-  VIEW_SIZE,
-}
+export {VIEW_SIZE}

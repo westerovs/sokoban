@@ -90,14 +90,7 @@ export default class SokobanHud extends Container {
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
-    this.addChild(
-      this.#panel,
-      this.#stepsView,
-      this.#backButton,
-      this.#levelText,
-      this.#restartButton,
-      this.#deadlockWarning,
-    )
+    this.addChild(this.#panel, this.#stepsView, this.#backButton, this.#levelText, this.#restartButton, this.#deadlockWarning)
     this.setSteps(0)
   }
 
@@ -207,10 +200,7 @@ export default class SokobanHud extends Container {
   #alignRight(view, width) {
     const bounds = view.getLocalBounds()
 
-    view.x = width / 2
-      - SOKOBAN_HUD_SETTINGS.horizontalPadding
-      - bounds.x
-      - bounds.width
+    view.x = width / 2 - SOKOBAN_HUD_SETTINGS.horizontalPadding - bounds.x - bounds.width
   }
 
   #positionStepsAfterBack() {
@@ -251,12 +241,9 @@ export default class SokobanHud extends Container {
   }
 
   #createDeadlockTimeline() {
-    return gsap.timeline({onComplete: () => this.#finishDeadlockFeedback()})
-      .fromTo(
-        this.#deadlockWarning,
-        {alpha: 0, y: this.#deadlockWarningY + 10},
-        {alpha: 1, y: this.#deadlockWarningY, duration: 0.2},
-      )
+    return gsap
+      .timeline({onComplete: () => this.#finishDeadlockFeedback()})
+      .fromTo(this.#deadlockWarning, {alpha: 0, y: this.#deadlockWarningY + 10}, {alpha: 1, y: this.#deadlockWarningY, duration: 0.2})
       .to(this.#deadlockWarning, {
         alpha: 0,
         y: this.#deadlockWarningY - 6,

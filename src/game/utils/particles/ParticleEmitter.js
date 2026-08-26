@@ -99,7 +99,7 @@ class Emitter {
     const startScale = (this.config.scale?.start ?? 1) * scaleMultiplier
     const startRotation = random(this.config.startRotation?.min, this.config.startRotation?.max)
     const speed = (this.config.speed?.start ?? 0) * speedMultiplier
-    const angle = startRotation * Math.PI / 180
+    const angle = (startRotation * Math.PI) / 180
     const position = this.#getSpawnPosition()
     const view = new Sprite({
       texture,
@@ -121,7 +121,7 @@ class Emitter {
       endScale: (this.config.scale?.end ?? startScale) * scaleMultiplier,
       velocityX: Math.cos(angle) * speed,
       velocityY: Math.sin(angle) * speed,
-      rotationSpeed: random(this.config.rotationSpeed?.min, this.config.rotationSpeed?.max) * Math.PI / 180,
+      rotationSpeed: (random(this.config.rotationSpeed?.min, this.config.rotationSpeed?.max) * Math.PI) / 180,
     })
   }
 

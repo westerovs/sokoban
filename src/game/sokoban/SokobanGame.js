@@ -107,9 +107,7 @@ export default class SokobanGame extends Container {
   }
 
   #canUseControls() {
-    return this.#isInputEnabled
-      && !this.#isAnimatingMove
-      && this.#canMove?.() !== false
+    return this.#isInputEnabled && !this.#isAnimatingMove && this.#canMove?.() !== false
   }
 
   #finishMove(result) {

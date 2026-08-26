@@ -48,7 +48,7 @@ export default class AdaptiveLayout {
     if (contentWidth > uiWidth) view.scale.set(uiWidth / contentWidth)
 
     const scaledWidth = contentWidth * view.scale.x
-    view.position.set(widthWithPadding - (scaledWidth / 2) + x, y)
+    view.position.set(widthWithPadding - scaledWidth / 2 + x, y)
   }
 
   // делает элемент адаптивным, ставит либо в центр, либо в кастомную позицию
@@ -63,7 +63,6 @@ export default class AdaptiveLayout {
 
       this.#setAdaptivePosition(view, uiData)
       this.#setAdaptiveScale(view, uiData)
-
     } catch (err) {
       console.error('[resizeStateUiLayer]', err)
     }
@@ -82,7 +81,7 @@ export default class AdaptiveLayout {
 
   #setAdaptiveScale = (view: AdaptiveView, uiData: UiData) => {
     const uiWidth = uiData.width
-    const availableWidth = uiWidth - (this.#uiPadding * 2)
+    const availableWidth = uiWidth - this.#uiPadding * 2
 
     // Сбрасывает масштаб
     view.scale.set(1)
@@ -96,8 +95,4 @@ export default class AdaptiveLayout {
   }
 }
 
-export type {
-  AdaptiveView,
-  AlignRightOptions,
-  UiData,
-}
+export type {AdaptiveView, AlignRightOptions, UiData}

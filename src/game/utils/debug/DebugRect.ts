@@ -16,11 +16,7 @@ export default class DebugRect extends Graphics {
   #color: number
   #borderSize: number
 
-  constructor({
-    color = 0x00FF00,
-    label = 'debugRect',
-    borderSize = 4,
-  }: DebugRectOptions = {}) {
+  constructor({color = 0x00ff00, label = 'debugRect', borderSize = 4}: DebugRectOptions = {}) {
     super({label, eventMode: 'none'})
 
     this.#color = color
@@ -31,17 +27,11 @@ export default class DebugRect extends Graphics {
     const borderSize = this.#borderSize / scale
     const offset = borderSize / 2
 
-    this
-      .clear()
-      .rect(
-        offset,
-        offset,
-        width - borderSize,
-        height - borderSize
-      )
+    this.clear()
+      .rect(offset, offset, width - borderSize, height - borderSize)
       .stroke({
         width: borderSize,
-        color: this.#color
+        color: this.#color,
       })
   }
 }

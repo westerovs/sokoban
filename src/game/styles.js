@@ -7,17 +7,17 @@ const GAME_STYLES = {
 }
 
 const FONT_COLORS = {
-  mainFont: 0xF4D884,
+  mainFont: 0xf4d884,
   secondFont: 0x373751,
-  accentFont: 0x6E7F80,
+  accentFont: 0x6e7f80,
   blackColor: 0x000000,
-  
+
   getIntroSpeechBubbleColor: () => {
     if (GAME_NAME === GAME_NAMES.adventure) return 0x000000
-    if (GAME_NAME === GAME_NAMES.detectiveGirl) return 0xFFFFFF
-    
+    if (GAME_NAME === GAME_NAMES.detectiveGirl) return 0xffffff
+
     return FONT_COLORS.mainFont
-  }
+  },
 }
 
 const primaryFontStyle = {
@@ -28,49 +28,49 @@ const primaryFontStyle = {
 }
 
 const COMPASS_TIMER_TEXT_COLOR = () => {
-  return 0x471F1F
+  return 0x471f1f
 }
 
 const getPopupColors = () => {
   return {
     body: 0x005462,
-    border: 0x8DA399
+    border: 0x8da399,
   }
 }
 const popupColors = getPopupColors()
 
 const getLeaderAndStoreColors = () => {
   return {
-    body: 0x2E1313,
-    border: 0x8B814F
+    body: 0x2e1313,
+    border: 0x8b814f,
   }
 }
 const leaderAndStoreColors = getLeaderAndStoreColors()
 
 const getSKinStoreColors = () => {
   return {
-    body: 0x2E1313,
-    border: 0xE7C091
+    body: 0x2e1313,
+    border: 0xe7c091,
   }
 }
 const skinStoreColors = getSKinStoreColors()
 
 const getRewardWindowStyles = () => {
   return {
-    rowTextColor: 0x5A2713,
-    headerTextColor: 0x5A2713,
+    rowTextColor: 0x5a2713,
+    headerTextColor: 0x5a2713,
     headerTextOffsetY: -5,
   }
 }
 const rewardWindowStyles = getRewardWindowStyles()
 
 export {
+  COMPASS_TIMER_TEXT_COLOR,
   FONT_COLORS,
-  popupColors,
+  GAME_STYLES,
   leaderAndStoreColors,
+  popupColors,
+  primaryFontStyle,
   rewardWindowStyles,
   skinStoreColors,
-  COMPASS_TIMER_TEXT_COLOR,
-  primaryFontStyle,
-  GAME_STYLES,
 }

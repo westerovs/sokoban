@@ -1,20 +1,14 @@
 import i18next from 'i18next'
-import {primaryFontStyle, popupColors} from '@/game/styles.js'
+import {popupColors, primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
 import BaseModal from './BaseModal.js'
-
 
 export default class DialogWindow extends BaseModal {
   #innerText
   #size
 
-  constructor({
-                innerText = '',
-                bodyColor = popupColors.body,
-                borderColor = popupColors.border,
-                size = {w: 400, h: 130},
-              } = {}) {
+  constructor({innerText = '', bodyColor = popupColors.body, borderColor = popupColors.border, size = {w: 400, h: 130}} = {}) {
     super({
       w: size.w,
       h: size.h,
@@ -48,7 +42,7 @@ export default class DialogWindow extends BaseModal {
         wordWrap: true,
         wordWrapWidth: this.#size.w,
         align: 'center',
-      }
+      },
     })
     dialogText.y = -10
 
@@ -79,7 +73,7 @@ export default class DialogWindow extends BaseModal {
 
   #createButton({name, textureKey, text, x}) {
     const button = new ButtonContainer({
-      props: {name, x, y: this.#size.h / 2,},
+      props: {name, x, y: this.#size.h / 2},
       spriteKeys: [{key: textureKey, scale: 0.5}],
       overHandler: false,
     })
@@ -89,7 +83,7 @@ export default class DialogWindow extends BaseModal {
       style: {
         ...primaryFontStyle,
         fontSize: 26,
-      }
+      },
     })
 
     return button

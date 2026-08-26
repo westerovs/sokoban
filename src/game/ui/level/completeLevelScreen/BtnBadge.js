@@ -1,17 +1,15 @@
-import {Container} from 'pixi.js'
 import i18next from 'i18next'
+import {Container} from 'pixi.js'
 import {LEVEL_TYPES} from '@/game/gameConfig/constants.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
-
 const COLORS = {
-  white: 0xFFFFFF,
-  red: 0xFF2B3E,
-  black: 0x2F2F2F,
-  orange: 0xFFA500,
+  white: 0xffffff,
+  red: 0xff2b3e,
+  black: 0x2f2f2f,
+  orange: 0xffa500,
 }
-
 
 export default class BtnBadge extends Container {
   #type
@@ -45,7 +43,7 @@ export default class BtnBadge extends Container {
         ...primaryFontStyle,
         fontSize: 23,
         fill: textFill,
-      }
+      },
     })
     text.x = 10
     text.angle = -1
@@ -57,7 +55,7 @@ export default class BtnBadge extends Container {
     const data = {
       badgeTint: COLORS.white,
       message: '',
-      textFill: 0xFFFFFF,
+      textFill: 0xffffff,
     }
 
     if (this.#type === LEVEL_TYPES.SHADOWS.name) {

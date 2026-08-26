@@ -1,7 +1,6 @@
 import {Container} from 'pixi.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
 
-
 export default class GameView extends Container {
   constructor() {
     super()

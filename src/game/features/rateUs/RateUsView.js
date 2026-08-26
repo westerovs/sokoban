@@ -1,10 +1,9 @@
-import {Container} from 'pixi.js'
 import i18next from 'i18next'
-import BaseModal from '@/game/ui/common/modal/BaseModal.js'
+import {Container} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import {primaryFontStyle} from '@/game/styles.js'
+import BaseModal from '@/game/ui/common/modal/BaseModal.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
-
 
 export default class RateUsView extends BaseModal {
   #refs
@@ -46,10 +45,7 @@ export default class RateUsView extends BaseModal {
     innerContainer.addChild(...this.#createStars())
     innerContainer.addChild(this.#createTitle())
     innerContainer.addChild(this.#createReward())
-    innerContainer.addChild(
-      this.#createButtonLater(),
-      this.#createButtonEnter(),
-    )
+    innerContainer.addChild(this.#createButtonLater(), this.#createButtonEnter())
 
     this.addChild(innerContainer)
   }
@@ -79,7 +75,7 @@ export default class RateUsView extends BaseModal {
         ...primaryFontStyle,
         fontSize: 26,
         align: 'center',
-      }
+      },
     })
     title.y = -40
 
@@ -94,7 +90,7 @@ export default class RateUsView extends BaseModal {
       style: {
         ...primaryFontStyle,
         fontSize: 40,
-      }
+      },
     })
     text.position.set(-30, -4)
 
@@ -139,7 +135,7 @@ export default class RateUsView extends BaseModal {
       style: {
         ...primaryFontStyle,
         fontSize: 30,
-      }
+      },
     })
 
     return button

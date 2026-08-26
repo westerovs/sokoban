@@ -1,7 +1,7 @@
 import {Text} from 'pixi.js'
+import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.js'
 import BaseModal from '@/game/ui/common/modal/BaseModal.js'
-import Locator from '@/game/engine/Locator.ts'
 
 export default class PurchaseError extends BaseModal {
   #message
@@ -14,22 +14,22 @@ export default class PurchaseError extends BaseModal {
     align: 'center',
     fontFamily: 'primaryFont',
   }
-  
+
   constructor(message) {
     super({h: 300, forceUpdateAdaptive: true})
-    
+
     this.label = 'purchaseError'
     this.#message = message
-    this.rect.tint = 0xA9261B
+    this.rect.tint = 0xa9261b
     this.#create()
   }
-  
+
   #create() {
     this.zIndex = 999
     Locator.uiLayer.stateUiLayer.addChild(this)
     this.#setText()
   }
-  
+
   #setText() {
     if (!this.#message) return
     const text = new Text({text: this.#message, style: this.#style})

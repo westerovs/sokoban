@@ -15,5 +15,3 @@ export default class System {
     throw new Error('System update method not implemented')
   }
 }
-
-

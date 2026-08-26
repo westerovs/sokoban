@@ -1,12 +1,11 @@
 import {Container} from 'pixi.js'
-import {primaryFontStyle} from '@/game/styles.js'
-import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
-import {GAME_NAMES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
-import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
-
+import {GAME_NAMES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
+import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
+import {primaryFontStyle} from '@/game/styles.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
 export default class ButtonsHintView extends Container {
   #refs
@@ -122,7 +121,7 @@ export default class ButtonsHintView extends Container {
       {x: 0, y: -17, angle: 40},
       {x: -5, y: -7, angle: 0},
     ]
-    const darts = dartsData.map(data => this.#createDart(data))
+    const darts = dartsData.map((data) => this.#createDart(data))
 
     icon.addChild(iconSprite, ...darts)
     return icon
@@ -154,7 +153,7 @@ export default class ButtonsHintView extends Container {
         ...primaryFontStyle,
         fill: '#FFFFFF',
         fontSize: 32,
-      }
+      },
     })
     iconCompassText.position.set(2, -3)
     iconCompassText.alpha = 0
@@ -179,7 +178,7 @@ export default class ButtonsHintView extends Container {
       style: {
         ...primaryFontStyle,
         fontSize: 25,
-      }
+      },
     })
     valueText.y = -2
 

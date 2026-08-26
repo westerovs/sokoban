@@ -1,7 +1,6 @@
 import {Container} from 'pixi.js'
 import CompleteLevelView from '@/game/ui/level/completeLevelScreen/CompleteLevelView.js'
 
-
 export default class LevelView extends Container {
   #game
 
@@ -16,7 +15,7 @@ export default class LevelView extends Container {
     if (this.refs.completeLevelView) return this.refs.completeLevelView
 
     const completeLevelView = new CompleteLevelView({
-      refs: this.refs
+      refs: this.refs,
     })
     completeLevelView.visible = false
 

@@ -11,7 +11,7 @@ const SOKOBAN_SETTINGS = Object.freeze({
   maxHorizontalPaddingRatio: 0.1, // Предельная доля ширины для одного бокового отступа
   boardTopPadding: 48, // Верхний отступ доски в координатах игрового мира
   boardBottomPadding: 110, // Нижняя область, зарезервированная под компактный HUD
-  rotateTallBoardInLandscape: true, // Сохраняет исходную ориентацию структуры уровня
+  rotateTallBoardInLandscape: false, // Сохраняет исходную ориентацию структуры уровня
 })
 
 const SOKOBAN_HUD_SETTINGS = Object.freeze({
@@ -40,7 +40,4 @@ const SOKOBAN_HUD_SETTINGS = Object.freeze({
   disabledAlpha: 0.55, // Прозрачность недоступной кнопки
 })
 
-export {
-  SOKOBAN_HUD_SETTINGS,
-  SOKOBAN_SETTINGS,
-}
+export {SOKOBAN_HUD_SETTINGS, SOKOBAN_SETTINGS}

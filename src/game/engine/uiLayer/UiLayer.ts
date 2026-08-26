@@ -1,10 +1,10 @@
 import {Container, Rectangle} from 'pixi.js'
+import FadeOverlay from '@/game/engine/uiLayer/FadeOverlay.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
 import DebugRect from '@/game/utils/debug/DebugRect.js'
-import FadeOverlay from '@/game/engine/uiLayer/FadeOverlay.js'
+import type {AdaptiveView, AlignRightOptions, UiData} from './AdaptiveLayout.js'
 import AdaptiveLayout from './AdaptiveLayout.js'
 import ModalLayer from './ModalLayer.js'
-import type {AdaptiveView, AlignRightOptions, UiData} from './AdaptiveLayout.js'
 
 /**
  * Создаёт контейнер для UI элементов
@@ -77,7 +77,7 @@ export default class UiLayer extends Container {
     this.destroyFade()
     const children = this.#stateUiLayer.removeChildren()
 
-    children.forEach(child => {
+    children.forEach((child) => {
       child.destroy({children: true})
     })
   }
@@ -86,7 +86,7 @@ export default class UiLayer extends Container {
     this.#setUiData()
     this.#updateBoundsArea()
 
-    this.pivot.set((this.#uiData.width / 2), (this.#uiData.height / 2))
+    this.pivot.set(this.#uiData.width / 2, this.#uiData.height / 2)
     this.position.set(WORLD.HALF_W, WORLD.HALF_H)
 
     this.#resizeUiChildren()
@@ -157,7 +157,7 @@ export default class UiLayer extends Container {
       widthWithPadding: width - this.#uiPadding,
       height,
       heightWithPadding: height - this.#uiPadding,
-      center: {x: width / 2, y: height / 2}
+      center: {x: width / 2, y: height / 2},
     }
   }
 
@@ -187,7 +187,7 @@ export default class UiLayer extends Container {
   #createStateUiLayer = () => {
     this.#stateUiLayer = new Container({
       label: 'stateUiLayer',
-      sortableChildren: true
+      sortableChildren: true,
     })
     this.addChild(this.#stateUiLayer)
   }
@@ -205,11 +205,7 @@ export default class UiLayer extends Container {
     const modalView = this.#modalLayer.view
     const modalLayerChildren = modalView ? [modalView] : []
 
-    const children = [
-      ...globalUiLayerChildren,
-      ...stateUiLayerChildren,
-      ...modalLayerChildren
-    ]
+    const children = [...globalUiLayerChildren, ...stateUiLayerChildren, ...modalLayerChildren]
 
     children.forEach(this.resizeAdaptive)
   }

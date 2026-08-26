@@ -1,5 +1,5 @@
-import {Assets} from 'pixi.js'
 import type {Sprite, Texture} from 'pixi.js'
+import {Assets} from 'pixi.js'
 import Locator from '@/game/engine/Locator'
 import SdkManager from '@/game/engine/SdkManager.js'
 import {ASSETS_URL, GAME_NAMES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
@@ -9,7 +9,7 @@ type GameLogoView = Sprite & {
   label: string
   updateAdaptive: () => void
   _customPosition?: {
-    x?: number,
+    x?: number
     y?: number
   }
 }
@@ -50,11 +50,8 @@ export default class GameLogo {
 
   #getLogoUrl = (): string => {
     const currentGameName = String(GAME_NAMES.currentName)
-    const isYoutubeLogo = SdkManager.isPlatform(PLATFORM_ID.youtube)
-      && currentGameName === GAME_NAMES.detective
-    const fileName = isYoutubeLogo
-      ? 'youtube-logo.png'
-      : `game-logo-${Locator.gameConfig.locale}.png`
+    const isYoutubeLogo = SdkManager.isPlatform(PLATFORM_ID.youtube) && currentGameName === GAME_NAMES.detective
+    const fileName = isYoutubeLogo ? 'youtube-logo.png' : `game-logo-${Locator.gameConfig.locale}.png`
 
     return `${ASSETS_URL.local}assets/images/${fileName}`
   }

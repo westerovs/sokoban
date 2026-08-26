@@ -86,9 +86,13 @@ export default class LevelConfig {
 
     Logger.log(
       MODULES.Config,
-      '\n      level: ' + this.#config.id
-      + '\n      levelType: ' + this.#config.levelType
-      + '\n      level index in levels: ' + levelIndex + '\n    ',
+      '\n      level: ' +
+        this.#config.id +
+        '\n      levelType: ' +
+        this.#config.levelType +
+        '\n      level index in levels: ' +
+        levelIndex +
+        '\n    ',
     )
 
     YaMetrika.startLevel(this.#config, this.#storage)

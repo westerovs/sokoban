@@ -44,14 +44,11 @@ export default class SokobanDpad extends Container {
     const scale = displaySize / DPAD_SIZE
 
     this.scale.set(scale)
-    this.position.set(
-      width - DPAD_SIDE_PADDING - displaySize / 2,
-      height - DPAD_BOTTOM_PADDING - displaySize / 2,
-    )
+    this.position.set(width - DPAD_SIDE_PADDING - displaySize / 2, height - DPAD_BOTTOM_PADDING - displaySize / 2)
   }
 
   destroy(options) {
-    this.#pressTimelines.forEach(timeline => timeline.kill())
+    this.#pressTimelines.forEach((timeline) => timeline.kill())
     this.#pressTimelines.clear()
     super.destroy(options)
   }
@@ -74,9 +71,7 @@ export default class SokobanDpad extends Container {
 
   #createButton(direction, {x, y, angle}) {
     const button = new Container({label: `sokoban-dpad-${direction}`})
-    const highlight = new Graphics({label: `sokoban-dpad-${direction}-highlight`})
-      .circle(0, 0, 34)
-      .fill(0xf2b632)
+    const highlight = new Graphics({label: `sokoban-dpad-${direction}-highlight`}).circle(0, 0, 34).fill(0xf2b632)
     const arrow = new Graphics({label: `sokoban-dpad-${direction}-arrow`})
       .roundRect(-13, -3, 26, 31, 8)
       .fill(0xffffff)
@@ -89,7 +84,7 @@ export default class SokobanDpad extends Container {
     button.rotation = angle
     button.hitArea = new Circle(0, 0, BUTTON_HIT_RADIUS)
     button.cursor = 'pointer'
-    button.on('pointerdown', event => this.#handlePress(event, button, highlight, arrow, direction))
+    button.on('pointerdown', (event) => this.#handlePress(event, button, highlight, arrow, direction))
     button.addChild(highlight, arrow)
     return button
   }
@@ -106,7 +101,8 @@ export default class SokobanDpad extends Container {
     arrow.tint = 0xffffff
     button.scale.set(1.12)
 
-    const timeline = gsap.timeline({onComplete: () => this.#pressTimelines.delete(button)})
+    const timeline = gsap
+      .timeline({onComplete: () => this.#pressTimelines.delete(button)})
       .to(button.scale, {x: 1, y: 1, duration: 0.2, ease: 'power2.out'})
       .set(arrow, {tint: ARROW_COLOR}, 0.22)
       .to(highlight, {alpha: 0, duration: 0.42}, 0.04)
@@ -118,7 +114,7 @@ export default class SokobanDpad extends Container {
     const eventMode = this.visible && this.#isEnabled ? 'static' : 'none'
 
     this.alpha = this.#isEnabled ? 1 : 0.55
-    this.#buttons.forEach(button => {
+    this.#buttons.forEach((button) => {
       button.eventMode = eventMode
     })
   }

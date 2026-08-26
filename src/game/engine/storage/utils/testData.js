@@ -69,7 +69,7 @@ const freshVersion1 = {
   isTutorial_shadows: false,
   isTutorial_words: false,
   playerId: 'j+UJYGMJEgVdGO9clWRRnyOXY93+dEe9tgKORJdcG2Y=',
-  savedAt: '2025-06-23T02:12:12.753Z'
+  savedAt: '2025-06-23T02:12:12.753Z',
 }
 
 const freshVersion2 = {
@@ -90,7 +90,7 @@ const freshVersion2 = {
   isTutorial_shadows: false,
   isTutorial_words: false,
   playerId: 'j+UJYGMJEgVdGO9clWRRnyOXY93+dEe9tgKORJdcG2Y=',
-  savedAt: '2035-06-23T02:12:12.753Z'
+  savedAt: '2035-06-23T02:12:12.753Z',
 }
 
 const stringVersion = {
@@ -111,17 +111,10 @@ const stringVersion = {
   isTutorial_shadows: 'false',
   isTutorial_words: 'false',
   playerId: 'j+UJYGMJEgVdGO9clWRRnyOXY93+dEe9tgKORJdcG2Y=',
-  savedAt: '2026-06-23T02:15:12.753Z'
+  savedAt: '2026-06-23T02:15:12.753Z',
 }
 
 export const TEST_DATA = {
-  serverData: [
-    null,
-    {...versionUndefined},
-  ],
-  localData: [
-    {...stringVersion},
-    {...versionNull},
-    {...freshVersion2},
-  ],
+  serverData: [null, {...versionUndefined}],
+  localData: [{...stringVersion}, {...versionNull}, {...freshVersion2}],
 }

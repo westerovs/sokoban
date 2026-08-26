@@ -1,5 +1,5 @@
-import {Container, Graphics} from 'pixi.js'
 import {gsap} from 'gsap'
+import {Container, Graphics} from 'pixi.js'
 import {popupColors} from '../../../styles.js'
 
 const SHOW_DELAY = 0.15
@@ -24,7 +24,7 @@ export default class LoadingSpinner extends Container {
       delay: SHOW_DELAY,
       ease: 'none',
       repeat: -1,
-      onStart: () => this.visible = true,
+      onStart: () => (this.visible = true),
     })
   }
 

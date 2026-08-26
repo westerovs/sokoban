@@ -210,10 +210,12 @@ export default class SokobanLevel {
   }
 
   #isStaticCorner(position) {
-    const verticalBlocked = this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.up))
-      || this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.down))
-    const horizontalBlocked = this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.left))
-      || this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.right))
+    const verticalBlocked =
+      this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.up)) ||
+      this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.down))
+    const horizontalBlocked =
+      this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.left)) ||
+      this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.right))
 
     return verticalBlocked && horizontalBlocked
   }

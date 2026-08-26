@@ -40,9 +40,10 @@ export default class SokobanHudButton extends Container {
 
   pulse() {
     this.stopPulse()
-    this.#pulseTimeline = gsap.timeline({
-      onComplete: () => this.stopPulse(),
-    })
+    this.#pulseTimeline = gsap
+      .timeline({
+        onComplete: () => this.stopPulse(),
+      })
       .to(this.scale, {
         x: 1.14,
         y: 1.14,
@@ -75,12 +76,7 @@ export default class SokobanHudButton extends Container {
   }
 
   #setHitArea() {
-    this.hitArea = new Rectangle(
-      -this.#size / 2,
-      -this.#size / 2,
-      this.#size,
-      this.#size,
-    )
+    this.hitArea = new Rectangle(-this.#size / 2, -this.#size / 2, this.#size, this.#size)
   }
 
   #setIconSize(iconSize) {
@@ -100,13 +96,7 @@ export default class SokobanHudButton extends Container {
 
     this.#background
       .clear()
-      .roundRect(
-        -this.#size / 2,
-        -this.#size / 2,
-        this.#size,
-        this.#size,
-        cornerRadius,
-      )
+      .roundRect(-this.#size / 2, -this.#size / 2, this.#size, this.#size, cornerRadius)
       .fill(color)
       .stroke({color: settings.buttonBorderColor, width: borderWidth})
   }

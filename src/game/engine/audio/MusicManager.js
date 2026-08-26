@@ -14,18 +14,18 @@ export default class MusicManager {
   #soundManager
   #levelMusicRequestId = 0
   #currentLevelTrack = null
-  
+
   constructor(soundManager) {
     this.#game = Locator.game
     this.#soundManager = soundManager
   }
-  
+
   // Ждёт первый клик
   init() {
     this.#setEvents()
     this.#loadStartMusic()
   }
-  
+
   #setEvents = () => {
     this.#game.on(GAME_EVENTS.checkoutState, this.#play)
     this.#game.once(GAME_EVENTS.firstClick, this.#onFirstClick)
@@ -33,12 +33,12 @@ export default class MusicManager {
       if (type === STORAGE_KEYS.option_isPlayMusic && !isMute) this.#play()
     })
   }
-  
+
   #loadStartMusic() {
     const {START_MUSIC} = this.#soundManager.preloadAudioList
     this.#soundManager.preload(this.#soundManager.musicList, START_MUSIC)
   }
-  
+
   #onFirstClick = () => {
     this.#play()
   }
@@ -76,27 +76,27 @@ export default class MusicManager {
 
     return trackName
   }
-  
+
   #play = () => {
     const stateName = this.#game.currentStateName
     if (!stateName) return
-    
+
     Logger.log(MODULES.SOUND_MANAGER, `[MusicManager state]: ${stateName}`)
-    
+
     const musicMap = {
       [GAME_STATES.gameState]: 'm_start-screen',
       [GAME_STATES.levelState]: this.#currentLevelTrack,
     }
-    
+
     const musicName = musicMap[stateName]
     if (!musicName) return
-    
+
     try {
       if (this.#soundManager.isPlaying(musicName)) return
-      
+
       const sound = this.#soundManager.musicList[musicName]
       if (!sound) return
-      
+
       if (sound.state() === 'loaded' || sound.state() === 'loading') {
         this.#soundManager.play(musicName, {loop: true, isMusic: true})
       } else {

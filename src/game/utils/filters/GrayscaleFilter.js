@@ -17,7 +17,7 @@ const fragment = `
 
 export default class GrayscaleFilter extends Filter {
   #amount = 1
-  
+
   constructor(amount = 1) {
     super({
       glProgram: GlProgram.from({
@@ -33,11 +33,11 @@ export default class GrayscaleFilter extends Filter {
     this.name = 'grayscaleFilter'
     this.#amount = amount
   }
-  
+
   get amount() {
     return this.resources.grayscaleUniforms.uniforms.amount
   }
-  
+
   set amount(value) {
     this.#amount = value
     this.resources.grayscaleUniforms.uniforms.amount = value

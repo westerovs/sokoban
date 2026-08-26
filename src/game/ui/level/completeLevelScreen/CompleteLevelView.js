@@ -8,7 +8,6 @@ import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
-
 const STYLES = {
   btnNext: {
     ...primaryFontStyle,
@@ -17,10 +16,9 @@ const STYLES = {
   arrow: {
     ...primaryFontStyle,
     fontSize: 22,
-    fill: 0xFFFFFF,
-  }
+    fill: 0xffffff,
+  },
 }
-
 
 export default class CompleteLevelView extends Container {
   #refs
@@ -49,11 +47,7 @@ export default class CompleteLevelView extends Container {
     if (SdkManager.flags?.noStore) {
       buttonsContainer.addChild(this.#createButtonHome())
     } else {
-      buttonsContainer.addChild(
-        this.#createButtonStore(),
-        this.#createButtonHome(),
-        this.#createButtonByeAd(),
-      )
+      buttonsContainer.addChild(this.#createButtonStore(), this.#createButtonHome(), this.#createButtonByeAd())
     }
 
     this.addChild(buttonsContainer)
@@ -67,7 +61,7 @@ export default class CompleteLevelView extends Container {
     const textureKey = GAME_NAME === GAME_NAMES.hotel ? 'btn-start' : 'btn-next'
     const background = GameUtils.createSprite(textureKey)
     const text = GameUtils.createText(`${i18next.t('btnNextText')}`, {
-      style: STYLES.btnNext
+      style: STYLES.btnNext,
     })
     const arrow = this.#createButtonNextArrow()
 
@@ -83,7 +77,7 @@ export default class CompleteLevelView extends Container {
     const background = GameUtils.createSprite('btn-next-arrow')
     const text = GameUtils.createText('', {
       name: 'arrowText',
-      style: STYLES.arrow
+      style: STYLES.arrow,
     })
 
     arrow.addChild(background, text)
@@ -97,10 +91,7 @@ export default class CompleteLevelView extends Container {
         x: -155,
         y: 195,
       },
-      spriteKeys: [
-        'btn-ui-2',
-        {key: 'icon-loupe-plus', scale: 0.6}
-      ],
+      spriteKeys: ['btn-ui-2', {key: 'icon-loupe-plus', scale: 0.6}],
       overHandler: false,
     })
   }
@@ -135,10 +126,10 @@ export default class CompleteLevelView extends Container {
         ...primaryFontStyle,
         fontSize: 22,
         lineHeight: 21,
-        fill: 0xFFFFFF,
+        fill: 0xffffff,
         stroke: {color: '#000000', width: 2},
-        align: 'right'
-      }
+        align: 'right',
+      },
     })
     text.position.set(50, 10)
 

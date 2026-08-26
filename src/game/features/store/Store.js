@@ -1,24 +1,23 @@
-import {Container} from 'pixi.js'
 import {gsap} from 'gsap'
-import Locator from '../../engine/Locator.ts'
-import {clearTimeLine} from '../../utils/animations/gsapUtils.js'
-import ButtonAnimator from '../../utils/animations/ButtonAnimator.js'
-import BtnRewardTimer from '../../components/rewardTimer/BtnRewardTimer.js'
-import SdkManager from '../../engine/SdkManager.js'
-import GameUtils from '../../utils/gameUtils/GameUtils.js'
-import LoadUtils from '../../utils/gameUtils/LoadUtils.js'
-import PaymentAnimation from '../../components/PaymentAnimation.js'
+import {Container} from 'pixi.js'
 import {GrayscaleFilter} from 'pixi-filters'
+import PaymentAnimation from '../../components/PaymentAnimation.js'
+import BtnRewardTimer from '../../components/rewardTimer/BtnRewardTimer.js'
+import Locator from '../../engine/Locator.ts'
+import SdkManager from '../../engine/SdkManager.js'
 import {STORAGE_KEYS} from '../../engine/storage/defaultData.js'
-import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
 import {GAME_NAMES, GAME_STATES} from '../../gameConfig/constants.js'
-import {HINT_BUTTON_NAMES} from '../../modules/hints/HintsController.js'
+import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
 import {rewardsCatalog} from '../../gameConfig/rewardsCatalog.js'
 import {GAME_NAME} from '../../generatedAssets/buildMeta.js'
+import {HINT_BUTTON_NAMES} from '../../modules/hints/HintsController.js'
+import ButtonAnimator from '../../utils/animations/ButtonAnimator.js'
+import {clearTimeLine} from '../../utils/animations/gsapUtils.js'
+import GameUtils from '../../utils/gameUtils/GameUtils.js'
+import LoadUtils from '../../utils/gameUtils/LoadUtils.js'
 import StoreCard from './StoreCard.js'
 
-export default class Store  {
-  
+export default class Store {
   #game = Locator.game
   #refs = this.#game.refs
   #view = this.#refs.storeView
@@ -30,13 +29,13 @@ export default class Store  {
   #paymentManager = Locator.paymentManager
   #paymentAnimation
   #productID
-  
+
   constructor(view) {
     this.#view = view
-    
+
     this.#init()
   }
-  
+
   // async hide() {
   //   if (GAME_NAME === GAME_NAMES.hotel) return
   //
@@ -56,7 +55,7 @@ export default class Store  {
   //     this.#paymentAnimation = null
   //   }
   // }
-  
+
   #init = async () => {
     const showPromise = this.#view.show()
     const spriteSheetLoaded = await this.#loadSpritesheet()
@@ -69,7 +68,7 @@ export default class Store  {
     this.#cardsContainer = this.#view.cardsContainer
     // this.#setEvents(true)
 
-    this.#buttons = this.#view.cards.map(card => card.button)
+    this.#buttons = this.#view.cards.map((card) => card.button)
     // this.#btnTimer = new BtnRewardTimer()
 
     // this.#view.interactiveChildren = false
@@ -80,17 +79,13 @@ export default class Store  {
     // await this.#cardsAnimation()
     // this.#setInteractive(true)
     // this.#view.interactiveChildren = true
-    
   }
 
   #loadSpritesheet = async () => {
     this.#view.animateLoadingStart()
 
     try {
-      await Promise.all([
-        LoadUtils.loadSpriteSheet({spriteSheetName: 'purchases'}),
-        LoadUtils.loadSpriteSheet({spriteSheetName: 'store'}),
-      ])
+      await Promise.all([LoadUtils.loadSpriteSheet({spriteSheetName: 'purchases'}), LoadUtils.loadSpriteSheet({spriteSheetName: 'store'})])
       return true
     } catch (error) {
       console.error('[Store] Не удалось загрузить ресурсы магазина', error)
@@ -100,13 +95,13 @@ export default class Store  {
       if (!this.#view.destroyed) this.#view.animateLoadingEnd()
     }
   }
-  
+
   // #setEvents = (bool) => {
   //   const status = bool ? 'on' : 'off'
   //   this.#game[status](GAME_EVENTS.STORAGE.hintsUpdated, this.#onPurchase)
   //   this.#game[status](GAME_EVENTS.paymentManager.hasNoAdsPass, this.#onPurchase)
   // }
-  
+
   // получает из sdk цену и записывает её в карточку товара
   // #setPricesToCards = async () => {
   //   const catalog = await SdkManager.purchase.getCatalog()
@@ -132,7 +127,7 @@ export default class Store  {
   //     priceText.text = `${price} ${currency}`
   //   })
   // }
-  
+
   // проверяет куплен ли пропуск рекламы
   // #checkAdPassPurchased = () => {
   //   if (this.#storage.playerData.hasAdPass) {
@@ -149,12 +144,12 @@ export default class Store  {
   //     card.filters = [grayscale]
   //   }
   // }
-  
+
   // #initBtnTimer = () => {
   //   const btnFree = this.#buttons.find(button => button.parent.name === 'free')
   //   this.#btnTimer.init(btnFree, 'store', HINT_BUTTON_NAMES.hints)
   // }
-  
+
   // #cardsAnimation = () => {
   //   clearTimeLine(this.#cardsTimeLine, true)
   //
@@ -163,7 +158,7 @@ export default class Store  {
   //       {x: 0, y: 0},
   //       {x: 1, y: 1, stagger: 0.05, ease: 'back.out(1.3)'}, '<')
   // }
-  
+
   // #updateStoreCounters = () => {
   //   const counterCoins = this.#view.getChildByLabel('counterCoins')
   //   const counterMagnifier = this.#view.getChildByLabel('counterMagnifier')
@@ -186,12 +181,12 @@ export default class Store  {
   //     userCoinsText.text = this.#storage.playerData.coins
   //   }
   // }
-  
+
   // #setCounterValue = (counter, storageValue) => {
   //   const textCounter = counter.getChildByLabel('textCounter')
   //   textCounter.text = storageValue
   // }
-  
+
   // #setInteractive = (bool) => {
   //   const action = bool ? 'on' : 'off'
   //   const eventMode = bool ? 'static' : 'none'
@@ -199,7 +194,7 @@ export default class Store  {
   //   this.#cardsContainer.eventMode = eventMode
   //   this.#cardsContainer[action]('pointerup', this.#onPointerDownHandler)
   // }
-  
+
   // #onPointerDownHandler = async ({target: button}) => {
   //   if (button.typeName !== 'button') return
   //
@@ -211,7 +206,7 @@ export default class Store  {
   //
   //   await this.#paymentManager.onPurchase(itemId)
   // }
-  
+
   // #onPurchase = async () => {
   //   gsap.to({}, {delay: 0.1, onComplete: () => {
   //       Locator.soundManager.play('sfx_victory')
