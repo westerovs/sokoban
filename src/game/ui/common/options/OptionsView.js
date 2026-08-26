@@ -177,7 +177,7 @@ export default class OptionsView extends BaseModal {
       interactive: true,
       visible: false,
     })
-    
+
     ButtonAnimator.initOverHandler(this.#optionsToggleBtn)
     Locator.uiLayer.globalUiLayer.addChild(this.#optionsToggleBtn)
   }
@@ -189,10 +189,10 @@ export default class OptionsView extends BaseModal {
         y: 60,
       })
     }
-    
+
     this.#optionsToggleBtn.alignRight()
   }
-  
+
   #createButtons = () => {
     const map = Object.values(BUTTONS_DATA).map((data) => {
       return this.#createButton(data)

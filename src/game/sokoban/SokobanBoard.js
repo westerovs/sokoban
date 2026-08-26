@@ -1,8 +1,9 @@
 import {gsap} from 'gsap'
-import {Container, Graphics} from 'pixi.js'
+import {Container, Graphics, Rectangle} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '../engine/Locator.ts'
 import {WORLD} from '../gameConfig/constants.js'
+import {applyTileVisualScale} from './applyTileVisualScale.js'
 import {ROTATED_DIRECTIONS, SOKOBAN_TEXTURES} from './config.js'
 import {SOKOBAN_SETTINGS} from './settings.js'
 import SokobanBoxView from './SokobanBoxView.js'
@@ -26,6 +27,7 @@ export default class SokobanBoard extends Container {
     this.#level = level
     this.#boardWidth = level.width * this.#tileSize
     this.#boardHeight = level.height * this.#tileSize
+    this.boundsArea = new Rectangle(0, 0, this.#boardWidth, this.#boardHeight)
     this.#init()
   }
 
@@ -168,12 +170,11 @@ export default class SokobanBoard extends Container {
   #createTileSprite(textureName, position, type) {
     const tile = GameUtils.createSprite(textureName, {
       label: `sokoban-${type}-${position.x}-${position.y}`,
-      anchorX: 0,
-      anchorY: 0,
+      anchorY: 1,
     })
 
-    tile.position.set(position.x * this.#tileSize, position.y * this.#tileSize)
-    tile.setSize(this.#tileSize, this.#tileSize)
+    tile.position.copyFrom(this.#getTileVisualPosition(position))
+    applyTileVisualScale(tile, this.#tileSize)
     return tile
   }
 
@@ -188,9 +189,10 @@ export default class SokobanBoard extends Container {
   #createPlayer() {
     const player = GameUtils.createSprite(SOKOBAN_TEXTURES.player, {
       label: 'sokoban-player',
+      anchorY: 1,
     })
 
-    player.setSize(this.#tileSize, this.#tileSize)
+    applyTileVisualScale(player, this.#tileSize)
     return player
   }
 
@@ -234,17 +236,20 @@ export default class SokobanBoard extends Container {
   }
 
   #getPlayerPixelPosition() {
-    const {x, y} = this.#level.playerPosition
-    return {
-      x: (x + 0.5) * this.#tileSize,
-      y: (y + 0.5) * this.#tileSize,
-    }
+    return this.#getTileVisualPosition(this.#level.playerPosition)
   }
 
   #getBoxPixelPosition(position) {
     return {
       x: position.x * this.#tileSize,
       y: position.y * this.#tileSize,
+    }
+  }
+
+  #getTileVisualPosition(position) {
+    return {
+      x: (position.x + 0.5) * this.#tileSize,
+      y: (position.y + 1) * this.#tileSize,
     }
   }
 

@@ -134,7 +134,9 @@ export default class StartScreen {
     this.#startSelectedLevel()
   }
 
-  #playSelectedLevel = () => {
+  #playSelectedLevel = (levelId) => {
+    if (!this.#progress.selectLevel(levelId)) return
+
     YaMetrika.btnStart()
     this.#startSelectedLevel()
   }

@@ -71,7 +71,7 @@ export default class ButtonContainer extends Container {
     const sprite = GameUtils.createSprite(key)
 
     Object.assign(sprite, spriteProps)
-    
+
     if (scale !== undefined) {
       if (typeof scale === 'number') sprite.scale.set(scale)
       else sprite.scale.set(scale.x, scale.y)

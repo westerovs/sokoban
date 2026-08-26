@@ -1,5 +1,6 @@
 import {Container} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+import {applyTileVisualScale} from './applyTileVisualScale.js'
 import {SOKOBAN_TEXTURES} from './config.js'
 import {SOKOBAN_SETTINGS} from './settings.js'
 
@@ -26,11 +27,11 @@ export default class SokobanBoxView extends Container {
   #createBox(index) {
     const box = GameUtils.createSprite(SOKOBAN_TEXTURES.box, {
       label: 'sokoban-box-sprite-' + index,
-      anchorX: 0,
-      anchorY: 0,
+      anchorY: 1,
     })
 
-    box.setSize(this.#tileSize, this.#tileSize)
+    box.position.set(this.#tileSize / 2, this.#tileSize)
+    applyTileVisualScale(box, this.#tileSize)
 
     return box
   }

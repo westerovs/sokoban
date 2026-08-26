@@ -30,14 +30,13 @@ export default class StateBadgeController {
     })
     this.#game.refs.userCoins = this.#userCoins
   }
-  
+
   #createUserLevel = () => {
     this.#userLevel = new StatBadge({
       label: 'userLevel',
       iconTexture: 'stat-badge-level-icon',
-      basePosition: {x: (this.#badgeWidth * 2) + 50, y: 60},
+      basePosition: {x: this.#badgeWidth * 2 + 50, y: 60},
     })
     this.#game.refs.userLevel = this.#userLevel
   }
-  
 }

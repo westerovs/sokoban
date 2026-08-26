@@ -252,7 +252,7 @@ export default class SpineUtils {
 
   static spineParser = (spines, exists = 'webp') => {
     try {
-      [...spines].forEach((spine) => {
+      ;[...spines].forEach((spine) => {
         const {name, atlas, json} = spine
 
         // console.log(name, atlas, json)

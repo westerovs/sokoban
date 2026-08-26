@@ -394,7 +394,9 @@ export default class AdminPanel {
 
   #applyLevelSelection = (levelIndex) => {
     const entry = getLevelEntryByIndex(levelIndex)
-    const unlockedIds = getLocations().slice(0, entry.locationIndex + 1).map(({id}) => id)
+    const unlockedIds = getLocations()
+      .slice(0, entry.locationIndex + 1)
+      .map(({id}) => id)
     this.#storage.playerData.unlockedLocationIds = [...new Set([...this.#storage.playerData.unlockedLocationIds, ...unlockedIds])]
     this.#storage.playerData.lastPlayedLevelId = entry.level.id
     new LevelProgress(this.#storage).selectLevel(entry.level.id, {ignoreLock: true, save: false})

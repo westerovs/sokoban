@@ -6,7 +6,16 @@ import {primaryFontStyle} from '../../../../styles.js'
 import LevelPreview from './LevelPreview.js'
 import LevelSelectButton from './LevelSelectButton.js'
 
+const ACTION_BUTTON_GAP = 24
+const ACTION_BUTTONS_Y = 445
+const BACK_BUTTON_SCALE = 0.75
+const LEVELS_PANEL_HEIGHT = 320
+const LEVELS_PANEL_WIDTH = 600
+const PREVIEW_HEIGHT = 390
+const PREVIEW_WIDTH = 500
+
 export default class LocationLevelSelectView extends Container {
+  #backButton
   #levelButtons = []
   #levelsContainer
   #onLevelSelect
@@ -47,35 +56,34 @@ export default class LocationLevelSelectView extends Container {
     this.scale.set(Math.min((width - 28) / 560, 1))
     this.#layoutPreview()
     this.#layoutLevels()
-    this.#playButton.position.set(0, 445)
+    this.#layoutActionButtons()
   }
 
   #init = (onBack, onPlay) => {
-    this.#createHeader(onBack)
+    this.#createHeader()
     this.#preview = new LevelPreview()
     this.#levelsContainer = new Container({label: 'level-select-buttons'})
     this.#createLevelsPanel()
+    this.#backButton = this.#createBackButton(onBack)
     this.#playButton = this.#createPlayButton(onPlay)
-    this.addChild(this.#preview, this.#levelsContainer, this.#playButton)
+    this.addChild(this.#preview, this.#levelsContainer, this.#backButton, this.#playButton)
   }
 
-  #createHeader = (onBack) => {
-    const back = new ButtonContainer({props: {name: 'btnLocationBack'}, spriteKeys: ['btn-back'], initScale: 0.72})
-    back.position.set(-760, -430)
-    back.on('pointertap', onBack)
+  #createHeader = () => {
     this.#title = new Text({
       label: 'location-level-title',
       text: '',
       style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 64, stroke: {color: 0x19251d, width: 7}},
     })
     this.#title.anchor.set(0.5)
-    this.#title.y = -430
-    this.addChild(back, this.#title)
+    this.addChild(this.#title)
   }
 
   #createLevelsPanel = () => {
     const panel = new Graphics({label: 'level-select-panel'})
-    panel.roundRect(-300, -230, 600, 460, 28).fill({color: 0x132319, alpha: 0.92})
+    panel
+      .roundRect(-LEVELS_PANEL_WIDTH / 2, -LEVELS_PANEL_HEIGHT / 2, LEVELS_PANEL_WIDTH, LEVELS_PANEL_HEIGHT, 28)
+      .fill({color: 0x132319, alpha: 0.92})
     panel.stroke({color: 0xa98c48, width: 5})
     this.#record = new Text({
       label: 'level-preview-record',
@@ -83,8 +91,18 @@ export default class LocationLevelSelectView extends Container {
       style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 25},
     })
     this.#record.anchor.set(0.5)
-    this.#record.y = -178
+    this.#record.y = -125
     this.#levelsContainer.addChild(panel, this.#record)
+  }
+
+  #createBackButton = (onBack) => {
+    const button = new ButtonContainer({
+      props: {name: 'btnLocationBack'},
+      spriteKeys: ['btn-ui-1', {key: 'icon-skin-back', scale: 0.8}],
+      initScale: BACK_BUTTON_SCALE,
+    })
+    button.on('pointertap', onBack)
+    return button
   }
 
   #createPlayButton = (onPlay) => {
@@ -97,7 +115,7 @@ export default class LocationLevelSelectView extends Container {
       text: i18next.t('levelSelect.play'),
       style: {...primaryFontStyle, fill: 0x303b12, fontSize: 42},
     })
-    button.on('pointertap', onPlay)
+    button.on('pointertap', () => onPlay(this.#selectedEntry.level.id))
     return button
   }
 
@@ -112,21 +130,26 @@ export default class LocationLevelSelectView extends Container {
   }
 
   #layoutPreview = () => {
-    const back = this.getChildByLabel('btnLocationBack')
-    this.#title.position.set(0, -400)
-    back.position.set(235, -400)
-    this.#preview.position.set(0, -145)
-    this.#preview.resize(500, 430)
+    this.#title.position.set(0, -420)
+    this.#preview.position.set(0, -165)
+    this.#preview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
   }
 
   #layoutLevels = () => {
-    this.#levelsContainer.position.set(0, 235)
+    this.#levelsContainer.position.set(0, 205)
     this.#levelsContainer.scale.set(0.8)
     this.#levelButtons.forEach((button, index) => {
       const column = index % 4
       const row = Math.floor(index / 4)
-      button.position.set((column - 1.5) * 135, -75 + row * 105)
+      button.position.set((column - 1.5) * 135, -35 + row * 105)
     })
+  }
+
+  #layoutActionButtons = () => {
+    const rowWidth = this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width
+    const rowLeft = -rowWidth / 2
+    this.#backButton.position.set(rowLeft + this.#backButton.width / 2, ACTION_BUTTONS_Y)
+    this.#playButton.position.set(rowLeft + this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width / 2, ACTION_BUTTONS_Y)
   }
 
   #setRecord = (level) => {

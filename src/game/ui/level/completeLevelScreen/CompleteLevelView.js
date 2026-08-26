@@ -59,12 +59,7 @@ export default class CompleteLevelView extends Container {
     if (SdkManager.flags?.noStore) {
       buttonsContainer.addChild(this.#createButtonBack(), this.#createButtonHome())
     } else {
-      buttonsContainer.addChild(
-        this.#createButtonStore(),
-        this.#createButtonBack(),
-        this.#createButtonHome(),
-        this.#createButtonByeAd(),
-      )
+      buttonsContainer.addChild(this.#createButtonStore(), this.#createButtonBack(), this.#createButtonHome(), this.#createButtonByeAd())
     }
 
     this.addChild(buttonsContainer)
