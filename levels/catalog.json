@@ -1,0 +1,20 @@
+{
+  "packs": [
+    {
+      "id": "project",
+      "file": "packs/project.xsb",
+      "idPrefix": "sokoban",
+      "expectedLevels": 11,
+      "order": "source",
+      "difficulty": "custom"
+    },
+    {
+      "id": "xsokoban-90",
+      "file": "packs/xsokoban-90.xsb",
+      "statsFile": "metadata/xsokoban-90-solver-stats.json",
+      "idPrefix": "xsokoban",
+      "expectedLevels": 90,
+      "order": "difficulty"
+    }
+  ]
+}

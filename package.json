@@ -14,11 +14,13 @@
     "url": "#"
   },
   "scripts": {
+    "levels": "node tools/sokoban-levels/build.mjs",
+    "levels:check": "node tools/sokoban-levels/build.mjs --check",
     "generate_game_meta": "node bundler/generateGameMeta.mjs",
     "assets": "node bundler/buildAssets.mjs",
-    "prebuild": "npm run assets && npm run generate_game_meta",
+    "prebuild": "npm run levels && npm run assets && npm run generate_game_meta",
     "build": "node bundler/build.mjs",
-    "prestart": "npm run assets && npm run generate_game_meta",
+    "prestart": "npm run levels && npm run assets && npm run generate_game_meta",
     "start": "vite",
     "typecheck": "tsc --noEmit",
     "eslint": "eslint src",

@@ -10,6 +10,7 @@ import SokobanLevel from './SokobanLevel.js'
 export default class SokobanGame extends Container {
   #map
   #levelNumber
+  #pushRecord
   #onComplete
   #onMove
   #canMove
@@ -22,11 +23,12 @@ export default class SokobanGame extends Container {
   #isInputEnabled = false
   #isAnimatingMove = false
 
-  constructor({map, levelNumber, onComplete, onMove, canMove}) {
+  constructor({map, levelNumber, pushRecord, onComplete, onMove, canMove}) {
     super({label: 'sokoban-game'})
 
     this.#map = map
     this.#levelNumber = levelNumber
+    this.#pushRecord = pushRecord
     this.#onComplete = onComplete
     this.#onMove = onMove
     this.#canMove = canMove
@@ -97,6 +99,7 @@ export default class SokobanGame extends Container {
     this.#board = new SokobanBoard(this.#level)
     this.#hud = new SokobanHud({
       levelNumber: this.#levelNumber,
+      pushRecord: this.#pushRecord,
       onUndo: () => this.undo(),
       onRestart: () => this.restart(),
     })

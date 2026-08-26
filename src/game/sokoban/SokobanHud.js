@@ -7,12 +7,14 @@ import SokobanHudButton from './SokobanHudButton.js'
 
 export default class SokobanHud extends Container {
   #levelNumber
+  #pushRecord
   #onUndo
   #onRestart
   #stepsText
   #stepsIcon
   #stepsView
   #levelText
+  #recordText
   #panel
   #backButton
   #restartButton
@@ -23,10 +25,11 @@ export default class SokobanHud extends Container {
   #isEnabled = false
   #steps = 0
 
-  constructor({levelNumber, onUndo, onRestart}) {
+  constructor({levelNumber, pushRecord, onUndo, onRestart}) {
     super({label: 'sokoban-hud'})
 
     this.#levelNumber = levelNumber
+    this.#pushRecord = pushRecord
     this.#onUndo = onUndo
     this.#onRestart = onRestart
     this.updateAdaptive = true
@@ -85,12 +88,21 @@ export default class SokobanHud extends Container {
     this.#panel = new Graphics({label: 'sokoban-hud-panel'})
     this.#stepsView = this.#createStepsView()
     this.#levelText = this.#createLevelText()
+    this.#recordText = this.#createRecordText()
     this.#deadlockWarning = this.#createDeadlockWarning()
 
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
-    this.addChild(this.#panel, this.#stepsView, this.#backButton, this.#levelText, this.#restartButton, this.#deadlockWarning)
+    this.addChild(
+      this.#panel,
+      this.#stepsView,
+      this.#backButton,
+      this.#levelText,
+      this.#recordText,
+      this.#restartButton,
+      this.#deadlockWarning,
+    )
     this.setSteps(0)
   }
 
@@ -147,6 +159,18 @@ export default class SokobanHud extends Container {
     return levelText
   }
 
+  #createRecordText() {
+    const recordText = new Text({
+      label: 'sokoban-record-text',
+      text: this.#pushRecord ? i18next.t('sokoban.record', {record: this.#pushRecord}) : '',
+      style: this.#createTextStyle(1),
+      visible: Number.isInteger(this.#pushRecord),
+    })
+
+    recordText.anchor.set(0.5)
+    return recordText
+  }
+
   #drawPanel(width, height) {
     const settings = SOKOBAN_HUD_SETTINGS
 
@@ -163,11 +187,21 @@ export default class SokobanHud extends Container {
 
     this.#stepsText.x = height * settings.stepsGapRatio
     this.#stepsText.style.fontSize = height * settings.stepsFontSizeRatio
-    this.#levelText.style.fontSize = height * settings.levelFontSizeRatio
+    this.#layoutCenterTexts(height)
     this.#setStepsIconSize(height * settings.stepsIconSizeRatio)
     this.#backButton.setLayoutSize(buttonSize, height * settings.buttonIconSizeRatio)
     this.#restartButton.setLayoutSize(buttonSize, height * settings.buttonIconSizeRatio)
     this.#positionContent(width)
+  }
+
+  #layoutCenterTexts(height) {
+    const settings = SOKOBAN_HUD_SETTINGS
+    const hasRecord = this.#recordText.visible
+
+    this.#levelText.style.fontSize = height * settings.levelFontSizeRatio
+    this.#levelText.y = hasRecord ? -height * settings.levelWithRecordOffsetRatio : 0
+    this.#recordText.style.fontSize = height * settings.recordFontSizeRatio
+    this.#recordText.y = height * settings.recordOffsetRatio
   }
 
   #layoutDeadlockWarning(width, hudHeight) {
@@ -189,6 +223,7 @@ export default class SokobanHud extends Container {
     this.#alignRight(this.#restartButton, width)
     this.#positionStepsAfterBack()
     this.#levelText.x = 0
+    this.#recordText.x = 0
   }
 
   #alignLeft(view, width) {

@@ -4,7 +4,7 @@ const SOKOBAN_SETTINGS = Object.freeze({
   moveEase: 'power2.out', // Плавность перемещения игрока и ящика
   boxOnTargetTint: 0xaaaaaa, // Затемнение ящика, установленного на точку
   maxBoardColumns: 20, // Максимальное количество столбцов игровой доски
-  maxBoardRows: 14, // Максимальное количество строк игровой доски
+  maxBoardRows: 17, // Максимальное количество строк игровой доски
   minHorizontalPadding: 32, // Минимальный боковой отступ в координатах игрового мира
   maxHorizontalPadding: 96, // Максимальный боковой отступ в координатах игрового мира
   horizontalPaddingRatio: 0.06, // Доля видимой ширины для бокового отступа
@@ -36,6 +36,9 @@ const SOKOBAN_HUD_SETTINGS = Object.freeze({
   stepsGapRatio: 0.5, // Расстояние от иконки шагов до счётчика относительно высоты HUD
   stepsFontSizeRatio: 0.35, // Размер счётчика шагов относительно высоты HUD
   levelFontSizeRatio: 0.32, // Размер названия уровня относительно высоты HUD
+  recordFontSizeRatio: 0.23, // Размер текста рекорда относительно высоты HUD
+  levelWithRecordOffsetRatio: 0.16, // Смещение номера уровня вверх при показе рекорда
+  recordOffsetRatio: 0.18, // Смещение текста рекорда вниз от центра HUD
   textColor: 0x172b38, // Цвет текста HUD
   disabledAlpha: 0.55, // Прозрачность недоступной кнопки
 })
