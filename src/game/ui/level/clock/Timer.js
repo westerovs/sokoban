@@ -1,6 +1,5 @@
 import {gsap} from 'gsap'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
-import {Logger, MODULES} from '../../../utils/Logger.js'
 
 // just IDs to create unique timers.
 export const TIMER_LABELS = {
@@ -46,8 +45,6 @@ export default class Timer {
 
   kill() {
     if (this.timerTween) {
-      // console.log(MODULES.DestroyMessage,`[Timer] ${this.label} kill`)
-
       this.timerTween.kill()
       this.timerTween = null
 

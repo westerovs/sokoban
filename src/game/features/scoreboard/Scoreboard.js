@@ -160,6 +160,7 @@ export default class Scoreboard {
     } catch (error) {
       if (this.#view.destroyed || row.destroyed) return
       row.createFallBackTexture()
+      console.error('Scoreboard loadAvatar:', error)
     }
   }
 

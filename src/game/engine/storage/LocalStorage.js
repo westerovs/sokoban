@@ -7,7 +7,7 @@ export default class LocalStorage {
   static _storage = null
 
   static get isDebug() {
-    if (!LocalStorage._storage) return
+    if (!LocalStorage._storage) return false
 
     const key = `${GAME_NAME}-isDebug`
     return LocalStorage._storage.getItem(key) === 'true'
@@ -21,7 +21,7 @@ export default class LocalStorage {
   }
 
   static get forceNewYear() {
-    if (!LocalStorage._storage) return
+    if (!LocalStorage._storage) return false
 
     const key = `${GAME_NAME}-forceNewYear`
     return LocalStorage._storage.getItem(key) === 'true'
@@ -35,7 +35,7 @@ export default class LocalStorage {
   }
 
   static get isLog() {
-    if (!LocalStorage._storage) return
+    if (!LocalStorage._storage) return false
 
     const key = `${GAME_NAME}-isLog`
     return LocalStorage._storage.getItem(key) === 'true'
@@ -49,7 +49,7 @@ export default class LocalStorage {
   }
 
   static get isItemRects() {
-    if (!LocalStorage._storage) return
+    if (!LocalStorage._storage) return false
 
     const key = `${GAME_NAME}-isItemRects`
     return LocalStorage._storage.getItem(key) === 'true'
@@ -63,7 +63,7 @@ export default class LocalStorage {
   }
 
   static get testPromo() {
-    if (!LocalStorage._storage) return
+    if (!LocalStorage._storage) return false
 
     const key = `${GAME_NAME}-testPromo`
     return LocalStorage._storage.getItem(key) === 'true'
@@ -77,7 +77,7 @@ export default class LocalStorage {
   }
 
   static get testLoad() {
-    if (!LocalStorage._storage) return
+    if (!LocalStorage._storage) return false
 
     const key = `${GAME_NAME}-testLoad`
     return LocalStorage._storage.getItem(key) === 'true'

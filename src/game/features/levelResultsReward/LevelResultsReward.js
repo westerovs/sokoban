@@ -97,7 +97,7 @@ export default class LevelResultsReward extends Container {
       this.#onHandlerOkClick()
     }
 
-    return new Promise(async (res) => {
+    return new Promise((res) => {
       this.#resolve = res
     })
   }

@@ -1,5 +1,4 @@
 import {gsap} from 'gsap'
-import Locator from '../../engine/Locator.ts'
 import {GAME_STYLES} from '../../styles.js'
 import MathTools from '../MathTools.js'
 

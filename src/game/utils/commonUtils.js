@@ -1,5 +1,4 @@
 import {Graphics} from 'pixi.js'
-import {WORLD} from '@/game/gameConfig/constants.js'
 /**
  * Различные часто-используемые методы, не влияющие на логику игры
  * */

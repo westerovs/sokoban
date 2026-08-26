@@ -55,6 +55,7 @@ const parseJsonKey = (data, key) => {
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed : []
   } catch (e) {
+    console.error(e)
     return []
   }
 }
@@ -66,6 +67,7 @@ const stringifyJsonKey = (storageObject) => {
   try {
     return JSON.stringify(storageObject)
   } catch (e) {
+    console.error(e)
     return '[]'
   }
 }

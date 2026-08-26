@@ -33,11 +33,13 @@ export default class BtnRewardTimer extends RewardTimer {
     this.#initializeTextProperties()
     this.#checkTime()
   }
-
+  
   get dataTimerKey() {
-    if (this.btnHintName === HINT_BUTTON_NAMES.hints) return STORAGE_KEYS.timer_RewardMagnifier
-    if (this.btnHintName === HINT_BUTTON_NAMES.hintDarts) return STORAGE_KEYS.timer_RewardDarts
-    if (this.btnHintName === HINT_BUTTON_NAMES.hintCompass) return STORAGE_KEYS.timer_RewardCompass
+    return {
+      [HINT_BUTTON_NAMES.hints]: STORAGE_KEYS.timer_RewardMagnifier,
+      [HINT_BUTTON_NAMES.hintDarts]: STORAGE_KEYS.timer_RewardDarts,
+      [HINT_BUTTON_NAMES.hintCompass]: STORAGE_KEYS.timer_RewardCompass
+    }[this.btnHintName]
   }
 
   get timerLabel() {

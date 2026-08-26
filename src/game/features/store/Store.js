@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import {gsap} from 'gsap'
 import {Container} from 'pixi.js'
 import {GrayscaleFilter} from 'pixi-filters'

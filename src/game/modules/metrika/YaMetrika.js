@@ -2,6 +2,8 @@ import {GAME_NAMES} from '../../gameConfig/constants.js'
 import {GAME_NAME} from '../../generatedAssets/buildMeta.js'
 import {Logger, MODULES} from '../../utils/Logger.js'
 
+/* global ym */
+
 const getId = () => {
   if (GAME_NAME === GAME_NAMES.detective) return 99603095
   if (GAME_NAME === GAME_NAMES.hotel) return 103542034

@@ -1,7 +1,6 @@
 import Locator from '../engine/Locator.ts'
 import {GAME_STATES} from '../gameConfig/constants.js'
 import {GAME_EVENTS} from '../gameConfig/gameEvents.js'
-import {Logger} from '../utils/Logger.js'
 
 export default class BaseState {
   isInitialized = false

@@ -1,7 +1,5 @@
 import i18next from 'i18next'
-import {Assets} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
-import {ASSETS_URL, GAME_NAMES} from '@/game/gameConfig/constants.js'
 import PreloadView from '@/game/states/preload/PreloadView.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'

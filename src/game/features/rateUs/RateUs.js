@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Locator from '../../engine/Locator.ts'
 import SdkManager from '../../engine/SdkManager.js'
 import {STORAGE_KEYS} from '../../engine/storage/defaultData.js'

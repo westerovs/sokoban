@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const versionNull = {
   version: null,
   userLevel: null,
