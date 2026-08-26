@@ -114,7 +114,7 @@ export default class Game extends EventEmitter {
     this.#gameContainer.addChild(Locator.uiLayer)
   }
 
-  #registerServices = (adapter) => {
+  #registerServices = () => {
     Locator.register(SERVICES.GAME, this)
     Locator.register(SERVICES.UI_LAYER, new UiLayer())
     Locator.register(SERVICES.STORAGE, new Storage(this))

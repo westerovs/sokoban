@@ -2,7 +2,6 @@ import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
 import CrazyGames from '@/game/engine/special/CrazyGames.js'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
-import LevelResultsReward from '@/game/features/levelResultsReward/LevelResultsReward.js'
 import PromoManager from '@/game/features/promotionCards/PromoManager.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import LevelConfig from '@/game/gameConfig/LevelConfig.js'
@@ -12,6 +11,7 @@ import ClearLevel from '@/game/modules/ClearLevel.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import ModulesInitializer from '@/game/modules/ModulesInitializer.js'
 import SokobanGame from '@/game/sokoban/SokobanGame.js'
+import Confetti from '@/game/ui/common/emitters/confetti/Confetti.js'
 import {STOPWATCH_LABELS} from '@/game/ui/level/clock/Stopwatch.js'
 import CompleteLevel from '@/game/ui/level/completeLevelScreen/CompleteLevel.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
@@ -39,8 +39,8 @@ export default class Level {
 
   async init() {
     this.#prepareScene()
-    this.#setEvents(true)
     this.#initComponents()
+    this.#setEvents(true)
     this.#initConfig()
 
     await this.#initEntityManager()
@@ -91,6 +91,7 @@ export default class Level {
     // this.#hintsController = new HintsController(this)
     this.#clearLevel = new ClearLevel(this)
     this.#completeLevel = new CompleteLevel(this)
+    new Confetti().init()
     this.modulesInitializer = new ModulesInitializer()
     this.levelConfig = new LevelConfig()
   }
@@ -162,10 +163,10 @@ export default class Level {
 
     this.#isLevelCompleted = true
     this.sokobanGame.setInputEnabled(false)
+    this.sokobanGame.hideInterface()
     SdkManager.gameplayStop()
     this.game.emit(GAME_EVENTS.completeLevel)
     this.systemManager.removeAllSystems()
-    this.#destroySokobanGame()
 
     await GameUtils.showVkOkAdAfterLevelStart()
 

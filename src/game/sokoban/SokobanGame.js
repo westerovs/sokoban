@@ -59,6 +59,11 @@ export default class SokobanGame extends Container {
     this.#resizeUi()
   }
 
+  hideInterface() {
+    this.#hud.visible = false
+    this.#dpad.visible = false
+  }
+
   undo() {
     if (!this.#canUseControls() || !this.#level.undo()) return false
 
@@ -146,6 +151,7 @@ export default class SokobanGame extends Container {
 
   #complete() {
     this.setInputEnabled(false)
+    this.hideInterface()
     this.#onComplete?.()
   }
 }
