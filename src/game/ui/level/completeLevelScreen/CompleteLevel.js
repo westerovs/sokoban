@@ -36,8 +36,6 @@ export default class CompleteLevel {
   init = async () => {
     try {
       this.#storage = Locator.storage
-      this.#storage.updateUserRecord()
-
       this.#soundManager = Locator.soundManager
 
       this.#initViewElements()
@@ -135,8 +133,8 @@ export default class CompleteLevel {
     const btnNextArrow = this.#btnNext.getChildByLabel('btnNextArrow')
     const arrowText = btnNextArrow.getChildByLabel('arrowText')
 
-    const nextLevelIndex = this.#storage.userLevel
-    arrowText.text = `${i18next.t('level')} ${nextLevelIndex}`
+    const nextLevel = LevelConfig.getGameLevelData(this.#storage.playerData.levelIndex)
+    arrowText.text = `${i18next.t('level')} ${nextLevel.locationLevelNumber}`
   }
 
   #createBtnBadge = () => {

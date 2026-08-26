@@ -32,23 +32,31 @@ export default class ABTest {
 
   // получает отфильтрованный список уровней, исключая уровни под флагом
   static getFilteredLevels = () => {
+    const levels = ABTest.getFilteredLocations().flatMap((location) => location.levels)
+    return Object.fromEntries(levels.map((level) => [level.levelName, level]))
+  }
+
+  static getFilteredLocations = () => {
+    const disabledModes = ABTest.#getDisabledModes()
+    const locations = Locator.gameConfig.levels?.locations ?? []
+
+    return locations.map((location) => ({
+      ...location,
+      levels: location.levels.filter((level) => !ABTest.#isDisabledLevel(level, disabledModes)),
+    }))
+  }
+
+  static #getDisabledModes = () => {
     const MODES = {
       [LEVEL_TYPES.NEW_YEAR.name]: LiveOpsController.newYearIsActiveAndPurchased,
     }
 
-    // Получаем список отключённых типов
-    const disabledModes = Object.entries(MODES)
+    return Object.entries(MODES)
       .filter(([, flag]) => !GameUtils.isStringTrue(flag))
       .map(([mode]) => mode.toLowerCase())
+  }
 
-    const levels = Locator.gameConfig.levels
-    // Фильтрует уровни, исключая levelName с disabled-модами в названии
-    const filteredLevels = Object.fromEntries(
-      Object.entries(levels).filter(([, {levelName}]) => {
-        return !disabledModes.some((mode) => levelName.toLowerCase().includes(mode))
-      }),
-    )
-
-    return filteredLevels
+  static #isDisabledLevel = (level, disabledModes) => {
+    return disabledModes.some((mode) => level.levelName.toLowerCase().includes(mode))
   }
 }

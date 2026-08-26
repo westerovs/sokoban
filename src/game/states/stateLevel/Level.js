@@ -114,7 +114,7 @@ export default class Level {
   #createSokobanGame() {
     this.sokobanGame = new SokobanGame({
       map: this.config.map,
-      levelNumber: this.config.levelIndex + 1,
+      levelNumber: this.config.locationLevelNumber,
       pushRecord: this.config.pushRecord,
       canMove: this.#canMove,
       onMove: this.#notifyMove,
@@ -175,8 +175,8 @@ export default class Level {
     // await new LevelResultsReward().init()
 
     this.game.view.createCompleteLevelView()
-    this.#completeLevel.init()
     this.levelConfig.updateSavedLevel()
+    this.#completeLevel.init()
   }
 
   #sendEarlyExitMetrika() {

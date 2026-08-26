@@ -1,9 +1,10 @@
 import Locator from '../engine/Locator.ts'
-import ABTest from '../modules/ABTest.js'
 import YaMetrika from '../modules/metrika/YaMetrika.js'
 import LoadUtils from '../utils/gameUtils/LoadUtils.js'
 import {Logger, MODULES} from '../utils/Logger.js'
 import {ASSETS_URL} from './constants.js'
+import LevelProgress from './LevelProgress.js'
+import {getLevelEntries, getLevelEntryByIndex} from './locationCatalog.js'
 
 export default class LevelConfig {
   #storage = Locator.storage
@@ -11,21 +12,19 @@ export default class LevelConfig {
   static maxLevels = 0
 
   static getMaxLevels() {
-    const levels = ABTest.getFilteredLevels()
-    return Math.max(Object.keys(levels).length - 1, 0)
+    return Math.max(getLevelEntries().length - 1, 0)
   }
 
   static getGameLevelData(levelIndex) {
-    const levels = ABTest.getFilteredLevels()
     const maxLevels = LevelConfig.getMaxLevels()
     const safeLevelIndex = Math.min(Math.max(levelIndex, 0), maxLevels)
-    const levelData = Object.values(levels)[safeLevelIndex]
+    const entry = getLevelEntryByIndex(safeLevelIndex)
 
     LevelConfig.maxLevels = maxLevels
-    if (!levelData) throw new Error('Sokoban level ' + safeLevelIndex + ' not found')
+    if (!entry) throw new Error('Sokoban level ' + safeLevelIndex + ' not found')
     if (safeLevelIndex !== levelIndex) Locator.storage.playerData.levelIndex = safeLevelIndex
 
-    return LevelConfig.#createLevelData(levelData, safeLevelIndex)
+    return LevelConfig.#createLevelData(entry)
   }
 
   static get levelType() {
@@ -47,37 +46,39 @@ export default class LevelConfig {
   }
 
   updateSavedLevel() {
-    const nextLevelIndex = this.#storage.playerData.levelIndex + 1
+    const progress = new LevelProgress(this.#storage)
+    const result = progress.completeLevel(this.#config.id)
 
-    if (nextLevelIndex > LevelConfig.maxLevels) {
-      this.#completeLevelsCycle()
-    } else {
-      this.#storage.playerData.levelIndex = nextLevelIndex
-    }
-
-    this.#storage.save()
+    if (result.isGameCompleted && result.isFirstCompletion) this.#completeGame()
+    return result
   }
 
-  static #createLevelData(levelData, levelIndex) {
-    const backgroundName = levelData.back ?? 'back_lv' + levelIndex
-    const hybridPath = levelData.isRemote ? ASSETS_URL.remote : ASSETS_URL.local
+  static #createLevelData(entry) {
+    const {globalIndex, level, location, locationIndex, locationLevelIndex} = entry
+    const hybridPath = level.isRemote ? ASSETS_URL.remote : ASSETS_URL.local
 
     return {
-      ...levelData,
-      levelData,
-      levelIndex,
+      ...level,
+      levelData: level,
+      levelIndex: globalIndex,
+      locationId: location.id,
+      locationIndex,
+      locationLevelIndex,
+      locationLevelNumber: locationLevelIndex + 1,
+      locationTitleKey: location.titleKey,
       levelType: 'sokoban',
-      backgroundName,
+      amb: location.ambience,
+      music: location.music,
+      backgroundName: location.background,
       background: {
-        alias: backgroundName,
-        src: LoadUtils.forceFreshCache(hybridPath + 'assets/levels/backgrounds/' + backgroundName + '.webp'),
+        alias: location.background,
+        src: LoadUtils.forceFreshCache(hybridPath + 'assets/levels/backgrounds/' + location.background + '.webp'),
       },
     }
   }
 
-  #completeLevelsCycle() {
-    Logger.log(MODULES.Config, 'круг всех уровней Sokoban пройден')
-    this.#storage.playerData.levelIndex = 0
+  #completeGame() {
+    Logger.log(MODULES.Config, 'все уровни Sokoban пройдены')
     YaMetrika.completeGame()
   }
 

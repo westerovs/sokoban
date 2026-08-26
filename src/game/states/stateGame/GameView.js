@@ -2,14 +2,27 @@ import {Container} from 'pixi.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
 
 export default class GameView extends Container {
+  #background
+  #backgroundName
+
   constructor() {
-    super()
+    super({label: 'game-view', sortableChildren: true})
 
     this.refs = {}
-    this.sortableChildren = true
-    this.label = 'gameView'
-
     this.#init()
+  }
+
+  setBackground = (textureName) => {
+    if (textureName === this.#backgroundName) return
+
+    this.#background?.destroy()
+    this.#background = GameUtils.createSprite(textureName, {label: `game-background-${textureName}`})
+    this.#background.anchor.set(0)
+    this.#background.width = 2560
+    this.#background.height = 1080
+    this.#background.zIndex = -1
+    this.#backgroundName = textureName
+    this.addChildAt(this.#background, 0)
   }
 
   #init = () => {
@@ -17,11 +30,6 @@ export default class GameView extends Container {
   }
 
   #createBackground() {
-    const background = GameUtils.createSprite('startScreen')
-    background.anchor.set(0)
-    background.width = 2560
-    background.height = 1080
-
-    this.addChild(background)
+    this.setBackground('startScreen')
   }
 }

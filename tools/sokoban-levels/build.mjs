@@ -14,16 +14,12 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(scriptDirectory, '..', '..')
 const levelsDirectory = path.resolve(projectRoot, 'levels')
 const levelsSourcePath = path.resolve(levelsDirectory, 'levels.xsb')
+const locationsSourcePath = path.resolve(levelsDirectory, 'locations.json')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
 const gameOutputPath = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels.json')
 const isCheckMode = process.argv.includes('--check')
 const standardRowPattern = /^[ #.$@*+]+$/
 const metadataKeys = Object.freeze({id: 'id'})
-const themes = Object.freeze([
-  Object.freeze({back: 'garden', amb: 'amb_garden', music: 'm_garden'}),
-  Object.freeze({back: 'antarctica', amb: 'amb_antarctica', music: 'm_antarctica'}),
-  Object.freeze({back: 'forest', amb: 'amb_forest', music: 'm_forest'}),
-])
 const lurdDirections = Object.freeze({
   u: Object.freeze({x: 0, y: -1}),
   d: Object.freeze({x: 0, y: 1}),
@@ -211,6 +207,39 @@ const loadLevels = () => {
   return assignDifficulty(levels)
 }
 
+const getLocationLevels = (location, levelsById, assignedIds) => {
+  if (!Array.isArray(location.levelIds) || location.levelIds.length === 0) throw new Error(`${location.id}: в локации нет уровней`)
+
+  return location.levelIds.map((levelId) => {
+    if (assignedIds.has(levelId)) throw new Error(`${levelId}: уровень добавлен более чем в одну локацию`)
+    const level = levelsById.get(levelId)
+    if (!level) throw new Error(`${location.id}: уровень ${levelId} не найден в levels.xsb`)
+    assignedIds.add(levelId)
+    return level
+  })
+}
+
+const createLocation = (location, index, levelsById, assignedIds) => {
+  const requiredKeys = ['id', 'titleKey', 'cardTexture', 'background', 'ambience', 'music']
+  requiredKeys.forEach((key) => {
+    if (!location[key]) throw new Error(`Локация ${index + 1}: не заполнено поле ${key}`)
+  })
+
+  return {...location, levels: getLocationLevels(location, levelsById, assignedIds)}
+}
+
+const loadLocations = (levels) => {
+  const {locations: sourceLocations} = readJson(locationsSourcePath)
+  if (!Array.isArray(sourceLocations) || sourceLocations.length === 0) throw new Error('Файл levels/locations.json не содержит локаций')
+
+  const levelsById = new Map(levels.map((level) => [level.id, level]))
+  const assignedIds = new Set()
+  const locations = sourceLocations.map((location, index) => createLocation(location, index, levelsById, assignedIds))
+  if (assignedIds.size !== levels.length) throw new Error('Не все карты из levels.xsb распределены по локациям')
+
+  return locations
+}
+
 const validateDifficultyOrder = (levels) => {
   const verifiedLevels = levels.filter((level) => level.stats)
 
@@ -328,13 +357,25 @@ const createRuntimeLevel = (level, index) => {
     ...(level.difficultyScore && {difficultyScore: level.difficultyScore}),
     ...(solver && {solver}),
     ...(pushRecord && {pushRecord}),
-    ...themes[index % themes.length],
     map: toRuntimeMap(level.map),
   }
 }
 
-const createRuntimeCatalog = (levels) => {
-  return Object.fromEntries(levels.map((level, index) => [`level${index}`, createRuntimeLevel(level, index)]))
+const createRuntimeLocation = (location, levelIndexes) => {
+  return {
+    id: location.id,
+    titleKey: location.titleKey,
+    cardTexture: location.cardTexture,
+    background: location.background,
+    ambience: location.ambience,
+    music: location.music,
+    levels: location.levels.map((level) => createRuntimeLevel(level, levelIndexes.get(level.id))),
+  }
+}
+
+const createRuntimeCatalog = (levels, locations) => {
+  const levelIndexes = new Map(levels.map((level, index) => [level.id, index]))
+  return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes))}
 }
 
 const validateUniqueIds = (levels) => {
@@ -359,12 +400,13 @@ const writeOutput = (filePath, content) => {
 const buildLevels = async () => {
   const levels = loadLevels()
   validateUniqueIds(levels)
+  const locations = loadLocations(levels)
 
-  const gameCatalog = createRuntimeCatalog(levels)
+  const gameCatalog = createRuntimeCatalog(levels, locations)
   const prettierConfig = await prettier.resolveConfig(gameOutputPath)
   const gameJson = await prettier.format(JSON.stringify(gameCatalog), {...prettierConfig, parser: 'json'})
   writeOutput(gameOutputPath, gameJson)
-  console.log(`Уровни собраны: ${levels.length}; levels/levels.xsb проверен и игровой JSON обновлён.`)
+  console.log(`Уровни собраны: ${levels.length} карт в ${locations.length} локациях; игровой JSON обновлён.`)
 }
 
 await buildLevels()

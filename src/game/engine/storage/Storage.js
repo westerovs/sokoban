@@ -7,7 +7,7 @@ import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import OfflineBadge from '@/game/utils/gameUtils/OfflineBadge.js'
 import {Logger} from '@/game/utils/Logger.js'
 import MathTools from '@/game/utils/MathTools.js'
-import {DEFAULT_DATA_VALUES, STORAGE_KEYS} from './defaultData.js'
+import {DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS} from './defaultData.js'
 import GameSettings from './GameSettings.js'
 import LocalStorage from './LocalStorage.js'
 import {createProfileProxy, getMaxFreshData, getMaxUserLevelData, parseJsonKey, stringifyJsonKey} from './utils/utils.js'
@@ -155,7 +155,9 @@ export default class Storage {
 
       this.#handleSpecialRulesIfFirstInit(maxFreshData)
       const validateData = Validation.validate(maxFreshData)
-      validateData[STORAGE_KEYS.skins] = parseJsonKey(validateData, STORAGE_KEYS.skins)
+      SERIALIZED_ARRAY_KEYS.forEach((key) => {
+        validateData[key] = parseJsonKey(validateData, key)
+      })
 
       this.#setProxyData(validateData)
     } catch (err) {
@@ -183,9 +185,9 @@ export default class Storage {
     this.#rawData = {...this.#playerData}
     this.#rawData.playerId = SdkManager.getPlayerId()
     this.#rawData.savedAt = new Date().toISOString()
-    if (this.#rawData.skins) {
-      this.#rawData.skins = stringifyJsonKey(this.#rawData.skins)
-    }
+    SERIALIZED_ARRAY_KEYS.forEach((key) => {
+      this.#rawData[key] = stringifyJsonKey(this.#rawData[key])
+    })
 
     Logger.log('[save]', this.#rawData)
 

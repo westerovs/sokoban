@@ -14,6 +14,13 @@ const STORAGE_KEYS = {
 
   // default
   levelIndex: 'levelIndex',
+  levelProgressVersion: 'levelProgressVersion',
+  selectedLevelId: 'selectedLevelId',
+  lastPlayedLevelId: 'lastPlayedLevelId',
+  selectedLocationId: 'selectedLocationId',
+  completedLevelIds: 'completedLevelIds',
+  unlockedLocationIds: 'unlockedLocationIds',
+  locationPageIndex: 'locationPageIndex',
   skinIndex: 'skinIndex',
   partIndex: 'partIndex',
 
@@ -55,6 +62,13 @@ const DEFAULT_DATA = {
   [STORAGE_KEYS.eventPurchasedNewYear]: {type: 'bool', value: false},
 
   [STORAGE_KEYS.levelIndex]: {type: 'number', value: 0},
+  [STORAGE_KEYS.levelProgressVersion]: {type: 'number', value: 0},
+  [STORAGE_KEYS.selectedLevelId]: {type: 'string', value: null},
+  [STORAGE_KEYS.lastPlayedLevelId]: {type: 'string', value: null},
+  [STORAGE_KEYS.selectedLocationId]: {type: 'string', value: null},
+  [STORAGE_KEYS.completedLevelIds]: {type: 'array', value: []},
+  [STORAGE_KEYS.unlockedLocationIds]: {type: 'array', value: []},
+  [STORAGE_KEYS.locationPageIndex]: {type: 'number', value: 0},
   [STORAGE_KEYS.skinIndex]: {type: 'number', value: 1},
   [STORAGE_KEYS.partIndex]: {type: 'number', value: 1},
 
@@ -86,4 +100,6 @@ const DEFAULT_DATA = {
 
 const DEFAULT_DATA_VALUES = Object.fromEntries(Object.entries(DEFAULT_DATA).map(([key, val]) => [key, val?.value]))
 
-export {DEFAULT_DATA, DEFAULT_DATA_VALUES, STORAGE_KEYS}
+const SERIALIZED_ARRAY_KEYS = Object.freeze([STORAGE_KEYS.completedLevelIds, STORAGE_KEYS.skins, STORAGE_KEYS.unlockedLocationIds])
+
+export {DEFAULT_DATA, DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS}

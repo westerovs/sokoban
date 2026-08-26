@@ -1,13 +1,14 @@
+import i18next from 'i18next'
 import {promoTooltipFromAdminPanel} from '@/game/features/promotionCards/PromoManager.js'
 import LiveOpsController from '../../../components/liveOpsController/LiveOpsController.js'
 import Locator from '../../../engine/Locator.ts'
 import SdkManager from '../../../engine/SdkManager.js'
 import {STORAGE_KEYS} from '../../../engine/storage/defaultData.js'
 import LocalStorage from '../../../engine/storage/LocalStorage.js'
-import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import LevelConfig from '../../../gameConfig/LevelConfig.js'
-import ABTest from '../../../modules/ABTest.js'
-import GameUtils, {eventToggle} from '../../gameUtils/GameUtils.js'
+import LevelProgress from '../../../gameConfig/LevelProgress.js'
+import {getLevelEntries, getLevelEntryByIndex, getLocations} from '../../../gameConfig/locationCatalog.js'
+import GameUtils from '../../gameUtils/GameUtils.js'
 import {
   createButton,
   createCheckboxItem,
@@ -23,9 +24,9 @@ export default class AdminPanel {
   #state = {}
   #config
   #panel
+  #footer
   #adminPanelWindow
   #storage
-  #gameConfig
 
   #learningKeys = [
     STORAGE_KEYS.isTutorial_shadows,
@@ -48,20 +49,20 @@ export default class AdminPanel {
   ]
 
   constructor() {
+    this.#init()
+  }
+
+  #init() {
     this.#storage = Locator.storage
-    this.#gameConfig = Locator.gameConfig
     this.#config = this.#getConfig()
 
     this.#initState()
     this.#renderPanel()
     this.#renderComponents()
-    this.#resize()
-    this.#setEvents(true)
   }
 
   #getConfig = () => {
     const {playerData} = this.#storage
-    const maxLevels = LevelConfig.getMaxLevels()
 
     return {
       checkboxes: [
@@ -139,16 +140,7 @@ export default class AdminPanel {
         },
       ],
 
-      selects: [
-        {
-          key: STORAGE_KEYS.levelIndex,
-          label: `levels(${maxLevels + 1})`,
-          max: maxLevels,
-          value: playerData.levelIndex,
-          tooltip: 'выбор уровня',
-        },
-        {key: STORAGE_KEYS.skinIndex, label: 'skin', min: 1, max: 5, value: playerData.skinIndex, tooltip: 'выбор скина'},
-      ],
+      selects: [{key: STORAGE_KEYS.skinIndex, label: 'skin', min: 1, max: 5, value: playerData.skinIndex, tooltip: 'выбор скина'}],
 
       numberInputs: [
         {
@@ -181,25 +173,31 @@ export default class AdminPanel {
     this.#config.checkboxes.forEach((cb) => (this.#state[cb.key] = cb.value))
     this.#config.selects.forEach((sel) => (this.#state[sel.key] = sel.value))
     this.#config.numberInputs.forEach((inp) => (this.#state[inp.key] = inp.value))
+    this.#state[STORAGE_KEYS.levelIndex] = this.#storage.playerData.levelIndex
+    this.#state.adminLocationId = getLevelEntryByIndex(this.#state[STORAGE_KEYS.levelIndex]).location.id
   }
 
   #renderPanel = () => {
     this.#adminPanelWindow = document.createElement('div')
     this.#adminPanelWindow.className = 'admin-panel__bg'
-    this.#adminPanelWindow.innerHTML = `<div class="admin-panel__window"></div>`
+    this.#adminPanelWindow.innerHTML = `
+      <section class="admin-panel__window" role="dialog" aria-modal="true" aria-label="Панель разработчика">
+        <header class="admin-panel__header">
+          <div><h2>Панель разработчика</h2><p>Локации, прогресс и тестовые параметры</p></div>
+          <button class="admin-panel__close" type="button" aria-label="Закрыть">&times;</button>
+        </header>
+        <div class="admin-panel__content"></div>
+        <footer class="admin-panel__footer"></footer>
+      </section>`
     document.body.append(this.#adminPanelWindow)
 
-    this.#panel = this.#adminPanelWindow.querySelector('.admin-panel__window')
-
-    const closeBtn = document.createElement('button')
-    closeBtn.className = 'admin-panel__close'
-    closeBtn.innerHTML = '&times;'
-    closeBtn.addEventListener('click', () => this.#destroy())
-
-    this.#panel.append(closeBtn)
+    this.#panel = this.#adminPanelWindow.querySelector('.admin-panel__content')
+    this.#footer = this.#adminPanelWindow.querySelector('.admin-panel__footer')
+    this.#adminPanelWindow.querySelector('.admin-panel__close').addEventListener('click', this.#destroy)
   }
 
   #renderComponents = () => {
+    this.#renderLevelNavigation()
     this.#renderCheckboxes()
     this.#renderLearningGroup()
     this.#renderStoreGroup()
@@ -210,11 +208,34 @@ export default class AdminPanel {
   }
 
   #renderCheckboxes() {
+    const grid = createFieldsetGrid(this.#panel, 'Debug')
     this.#config.checkboxes
       .filter((cb) => !this.#learningKeys.includes(cb.key) && !this.#storeKeys.includes(cb.key))
       .forEach((cb) => {
-        this.#panel.append(createCheckboxRow(cb, this.#onCheckboxChange))
+        grid.append(createCheckboxRow(cb, this.#onCheckboxChange))
       })
+  }
+
+  #renderLevelNavigation() {
+    const grid = createFieldsetGrid(this.#panel, `Уровни (${LevelConfig.getMaxLevels() + 1})`)
+    grid.classList.add('admin-panel__fieldset-container--levels')
+
+    const locationData = {key: 'adminLocationId', label: 'Локация', value: this.#state.adminLocationId}
+    const locationOptions = getLocations().map(({id, titleKey}) => ({label: i18next.t(titleKey), value: id}))
+    grid.append(createSelectRow(locationData, locationOptions, this.#onSelectChange))
+
+    const levelData = {key: STORAGE_KEYS.levelIndex, label: 'Уровень', value: this.#state[STORAGE_KEYS.levelIndex]}
+    grid.append(createSelectRow(levelData, this.#getLevelOptions(), this.#onSelectChange))
+  }
+
+  #getLevelOptions() {
+    return getLevelEntries()
+      .map((entry, globalIndex) => ({...entry, globalIndex}))
+      .filter(({location}) => location.id === this.#state.adminLocationId)
+      .map(({globalIndex, level, locationLevelIndex}) => ({
+        label: `${globalIndex + 1}. ${i18next.t('level')} ${locationLevelIndex + 1} · ${level.id}`,
+        value: globalIndex,
+      }))
   }
 
   #renderLearningGroup() {
@@ -265,19 +286,12 @@ export default class AdminPanel {
   }
 
   #renderSelects() {
-    const levels = Object.values(ABTest.getFilteredLevels())
-
     this.#config.selects.forEach((data) => {
       const opts = []
 
       const min = data.min ?? 0
       for (let i = min; i <= data.max; i++) {
         let label = i
-
-        if (data.key === 'levelIndex') {
-          const lvl = levels[i]
-          label = `[${i}] spine ${lvl.levelName}`
-        }
 
         opts.push({value: i, label})
       }
@@ -303,7 +317,7 @@ export default class AdminPanel {
     const resetSkins = createButton('Reset Skins', 'admin-panel__btn', this.#resetSkins)
 
     row.append(saveBtn, resetSkins, resetBtn)
-    this.#panel.append(row)
+    this.#footer.append(row)
   }
 
   #onCheckboxChange = (e) => {
@@ -322,7 +336,22 @@ export default class AdminPanel {
 
   #onSelectChange = (e) => {
     const key = e.target.dataset.key
-    this.#state[key] = Number(e.target.value)
+    this.#state[key] = key === 'adminLocationId' ? e.target.value : Number(e.target.value)
+    if (key === 'adminLocationId') this.#updateLevelSelect()
+  }
+
+  #updateLevelSelect() {
+    const select = this.#panel.querySelector(`select[data-key="${STORAGE_KEYS.levelIndex}"]`)
+    const options = this.#getLevelOptions()
+    select.replaceChildren(...options.map(this.#createOption))
+    this.#state[STORAGE_KEYS.levelIndex] = Number(select.value)
+  }
+
+  #createOption = ({label, value}) => {
+    const option = document.createElement('option')
+    option.value = value
+    option.textContent = label
+    return option
   }
 
   #onNumberChange = (e) => {
@@ -343,9 +372,13 @@ export default class AdminPanel {
   #applySettings = (data) => {
     const exclude = ['isDebug', 'isItemRects', 'isLog', 'forceNewYear', 'testPromo', 'testLoad']
     exclude.forEach((key) => delete data[key])
+    delete data.adminLocationId
 
     const playerData = this.#storage.playerData
+    const levelIndex = data[STORAGE_KEYS.levelIndex]
+    delete data[STORAGE_KEYS.levelIndex]
     Object.assign(playerData, data)
+    this.#applyLevelSelection(levelIndex)
 
     this.#destroy()
 
@@ -357,6 +390,14 @@ export default class AdminPanel {
 
     Locator.game.app.stage.visible = false
     setTimeout(() => location.reload(), 500)
+  }
+
+  #applyLevelSelection = (levelIndex) => {
+    const entry = getLevelEntryByIndex(levelIndex)
+    const unlockedIds = getLocations().slice(0, entry.locationIndex + 1).map(({id}) => id)
+    this.#storage.playerData.unlockedLocationIds = [...new Set([...this.#storage.playerData.unlockedLocationIds, ...unlockedIds])]
+    this.#storage.playerData.lastPlayedLevelId = entry.level.id
+    new LevelProgress(this.#storage).selectLevel(entry.level.id, {ignoreLock: true, save: false})
   }
 
   #onHardReset = () => {
@@ -388,21 +429,7 @@ export default class AdminPanel {
     this.#panel.append(wrap)
   }
 
-  #setEvents = (bool) => {
-    const {gameOnOff} = eventToggle(bool)
-
-    Locator.game[gameOnOff](GAME_EVENTS.gameResize, this.#resize)
-  }
-
-  // todo ресайз на css
-  #resize = () => {
-    const {scaleFactor} = Locator.gameResize.resizeData
-    const panel = document.querySelector('.admin-panel__window')
-    panel.style.transform = `scale(${scaleFactor + 0.1})`
-  }
-
   #destroy = () => {
-    this.#setEvents(false)
     this.#adminPanelWindow?.remove()
   }
 }

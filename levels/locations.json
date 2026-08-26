@@ -1,0 +1,148 @@
+{
+  "locations": [
+    {
+      "id": "garden-1",
+      "titleKey": "locations.garden",
+      "cardTexture": "card-garden",
+      "background": "garden",
+      "ambience": "amb_garden",
+      "music": "m_garden",
+      "levelIds": ["sokoban-001", "sokoban-002", "sokoban-003", "sokoban-004", "sokoban-005", "sokoban-006", "sokoban-007"]
+    },
+    {
+      "id": "antarctica-1",
+      "titleKey": "locations.antarctica",
+      "cardTexture": "card-antarctica",
+      "background": "antarctica",
+      "ambience": "amb_antarctica",
+      "music": "m_antarctica",
+      "levelIds": ["sokoban-008", "sokoban-009", "sokoban-010", "sokoban-011", "sokoban-012", "sokoban-013", "sokoban-014"]
+    },
+    {
+      "id": "forest-1",
+      "titleKey": "locations.forest",
+      "cardTexture": "card-forest",
+      "background": "forest",
+      "ambience": "amb_forest",
+      "music": "m_forest",
+      "levelIds": ["sokoban-015", "sokoban-016", "sokoban-017", "sokoban-018", "sokoban-019", "sokoban-020", "sokoban-021"]
+    },
+    {
+      "id": "garden-2",
+      "titleKey": "locations.garden2",
+      "cardTexture": "card-garden2",
+      "background": "garden2",
+      "ambience": "amb_garden",
+      "music": "m_garden",
+      "levelIds": ["sokoban-022", "sokoban-023", "sokoban-024", "sokoban-025", "sokoban-026", "sokoban-027", "sokoban-028"]
+    },
+    {
+      "id": "mine-1",
+      "titleKey": "locations.mine",
+      "cardTexture": "card-mine",
+      "background": "mine",
+      "ambience": "amb_forest",
+      "music": "m_forest",
+      "levelIds": ["sokoban-029", "sokoban-030", "sokoban-031", "sokoban-032", "sokoban-033", "sokoban-034", "sokoban-035"]
+    },
+    {
+      "id": "factory-1",
+      "titleKey": "locations.factory",
+      "cardTexture": "card-factory",
+      "background": "factory",
+      "ambience": "amb_garden",
+      "music": "m_garden",
+      "levelIds": ["sokoban-036", "sokoban-037", "sokoban-038", "sokoban-039", "sokoban-040", "sokoban-041"]
+    },
+    {
+      "id": "antarctica-2",
+      "titleKey": "locations.antarctica2",
+      "cardTexture": "card-antarctica",
+      "background": "antarctica",
+      "ambience": "amb_antarctica",
+      "music": "m_antarctica",
+      "levelIds": ["sokoban-042", "sokoban-043", "sokoban-044", "sokoban-045", "sokoban-046", "sokoban-047"]
+    },
+    {
+      "id": "forest-2",
+      "titleKey": "locations.forest2",
+      "cardTexture": "card-forest",
+      "background": "forest",
+      "ambience": "amb_forest",
+      "music": "m_forest",
+      "levelIds": ["sokoban-048", "sokoban-049", "sokoban-050", "sokoban-051", "sokoban-052", "sokoban-053"]
+    },
+    {
+      "id": "garden-3",
+      "titleKey": "locations.garden3",
+      "cardTexture": "card-garden2",
+      "background": "garden2",
+      "ambience": "amb_garden",
+      "music": "m_garden",
+      "levelIds": ["sokoban-054", "sokoban-055", "sokoban-056", "sokoban-057", "sokoban-058", "sokoban-059"]
+    },
+    {
+      "id": "mine-2",
+      "titleKey": "locations.mine2",
+      "cardTexture": "card-mine",
+      "background": "mine",
+      "ambience": "amb_forest",
+      "music": "m_forest",
+      "levelIds": ["sokoban-060", "sokoban-061", "sokoban-062", "sokoban-063", "sokoban-064", "sokoban-065"]
+    },
+    {
+      "id": "factory-2",
+      "titleKey": "locations.factory2",
+      "cardTexture": "card-factory",
+      "background": "factory",
+      "ambience": "amb_garden",
+      "music": "m_garden",
+      "levelIds": ["sokoban-066", "sokoban-067", "sokoban-068", "sokoban-069", "sokoban-070", "sokoban-071"]
+    },
+    {
+      "id": "antarctica-3",
+      "titleKey": "locations.antarctica3",
+      "cardTexture": "card-antarctica",
+      "background": "antarctica",
+      "ambience": "amb_antarctica",
+      "music": "m_antarctica",
+      "levelIds": ["sokoban-072", "sokoban-073", "sokoban-074", "sokoban-075", "sokoban-076", "sokoban-077"]
+    },
+    {
+      "id": "forest-3",
+      "titleKey": "locations.forest3",
+      "cardTexture": "card-forest",
+      "background": "forest",
+      "ambience": "amb_forest",
+      "music": "m_forest",
+      "levelIds": ["sokoban-078", "sokoban-079", "sokoban-080", "sokoban-081", "sokoban-082", "sokoban-083"]
+    },
+    {
+      "id": "garden-4",
+      "titleKey": "locations.garden4",
+      "cardTexture": "card-garden2",
+      "background": "garden2",
+      "ambience": "amb_garden",
+      "music": "m_garden",
+      "levelIds": ["sokoban-084", "sokoban-085", "sokoban-086", "sokoban-087", "sokoban-088", "sokoban-089"]
+    },
+    {
+      "id": "mine-3",
+      "titleKey": "locations.mine3",
+      "cardTexture": "card-mine",
+      "background": "mine",
+      "ambience": "amb_forest",
+      "music": "m_forest",
+      "levelIds": ["sokoban-090", "sokoban-091", "sokoban-092", "sokoban-093", "sokoban-094", "sokoban-095"]
+    },
+    {
+      "id": "factory-3",
+      "titleKey": "locations.factory3",
+      "cardTexture": "card-factory",
+      "background": "factory",
+      "ambience": "amb_garden",
+      "music": "m_garden",
+      "levelIds": ["sokoban-096", "sokoban-097", "sokoban-098", "sokoban-099", "sokoban-100", "sokoban-101"]
+    }
+  ]
+}

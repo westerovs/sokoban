@@ -6,33 +6,41 @@ import Store from '@/game/features/store/Store.js'
 import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
+import LevelProgress from '@/game/gameConfig/LevelProgress.js'
+import {getLocationById} from '@/game/gameConfig/locationCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import GameMenuView from './GameMenuView.js'
 import StateBadgeController from './statBadge/StateBadgeController.js'
 
 export default class StartScreen {
+  #backTimeLine = gsap.timeline()
   #game = Locator.game
+  #gameMenu
+  #progress
   #refs = this.#game.refs
-  #storage = Locator.storage
+  #selectedLocationId
   #soundManager = Locator.soundManager
   #stage = this.#game.app.stage
-  #gameMenu
-
-  #buttons
-  #backTimeLine = gsap.timeline()
+  #storage = Locator.storage
 
   constructor(state) {
     this.state = state
-
-    // setTimeout(() => this.#createStore(), 500)
   }
 
-  init = () => {
+  init = async () => {
+    await Locator.gameConfig.loadLevelConfiguration()
+    this.#progress = new LevelProgress(this.#storage)
+    this.#progress.initialize()
     new StateBadgeController()
     this.#prepare()
     this.#createGameMenu()
     this.#setUserStats()
+    this.#showLocations(false)
+  }
+
+  setInteractive = (isInteractive) => {
+    this.#stage.interactiveChildren = isInteractive
   }
 
   #prepare = () => {
@@ -40,86 +48,110 @@ export default class StartScreen {
     Locator.options.setVisibleToggle(true)
     this.#stage.interactiveChildren = true
     this.#game.on(GAME_EVENTS.clearLevel, this.#clear)
+    this.#game.on(GAME_EVENTS.gameResize, this.#resize)
   }
 
   #createGameMenu = () => {
-    this.#gameMenu = new GameMenuView()
-    this.#refs.gameMenuView = this.#gameMenu
-
-    this.#buttons = this.#gameMenu.buttons
-  }
-
-  // todo пересмотреть. Похоже на костыль
-  setInteractive = (bool) => {
-    const action = bool ? 'on' : 'off'
-    const eventMode = bool ? 'static' : 'none'
-
-    this.#buttons.forEach((button) => {
-      button.eventMode = eventMode
-      button[action]('pointertap', this.#handleMainMenuClick)
+    this.#gameMenu = new GameMenuView({
+      onBack: this.#showLocations,
+      onContinue: this.#continueGame,
+      onLeaderboard: this.#openLeaderboard,
+      onLevelSelect: this.#selectLevel,
+      onLocationSelect: this.#openLocation,
+      onPageSelect: this.#selectPage,
+      onPlay: this.#playSelectedLevel,
+      onStore: this.#openStore,
     })
-
-    Locator.options.optionsToggleBtn.eventMode = eventMode
+    this.#refs.gameMenuView = this.#gameMenu
   }
 
-  #setUserStats = () => {
-    const {userLevel, userCoins} = this.#refs
-
-    const userLevelText = userLevel.getChildByLabel('badgeText')
-    userLevelText.text = this.#storage.userLevel
-
-    const userCoinsText = userCoins.getChildByLabel('badgeText')
-    userCoinsText.text = this.#storage.playerData.coins
+  #showLocations = (playSound = true) => {
+    this.#selectedLocationId = null
+    this.#game.view.setBackground('startScreen')
+    this.#gameMenu.showLocations(this.#progress.getLocationStates(), this.#progress.locationPageIndex, this.#progress.getLastPlayedEntry())
+    if (playSound) this.#playClickSound()
   }
 
-  // -------- handlers
-  #handleMainMenuClick = ({target}) => {
-    if (Locator.options.isVisible) return
+  #openLocation = (locationId) => {
+    if (!this.#progress.selectLocation(locationId)) return
 
-    if (target.label === 'btnStart') this.#onBtnStartHandler()
-    if (target.label === 'btnStore') this.#onBtnStoreHandler()
-    if (target.label === 'btnLeaders') this.#onBtnLeaderboardHandler()
-
-    if (target.type === 'button') this.#soundManager.play('sfx_btnClick')
+    this.#selectedLocationId = locationId
+    const location = getLocationById(locationId)
+    const selectedEntry = this.#progress.getSelectedEntry(locationId)
+    this.#game.view.setBackground(location.background)
+    this.#gameMenu.showLevels(location, this.#progress.getLevelStates(locationId), selectedEntry)
+    this.#playClickSound()
   }
 
-  #onBtnStartHandler = () => {
+  #selectPage = (pageIndex) => {
+    this.#progress.selectPage(pageIndex)
+    this.#gameMenu.showLocations(this.#progress.getLocationStates(), this.#progress.locationPageIndex, this.#progress.getLastPlayedEntry())
+    this.#playClickSound()
+  }
+
+  #selectLevel = (levelId) => {
+    if (!this.#progress.selectLevel(levelId)) return
+
+    const entry = this.#progress.getSelectedEntry(this.#selectedLocationId)
+    const states = this.#progress.getLevelStates(this.#selectedLocationId)
+    this.#gameMenu.updateSelectedLevel(states, entry)
+    this.#playClickSound()
+  }
+
+  #continueGame = () => {
+    const entry = this.#progress.getLastPlayedEntry()
+    if (!entry || !this.#progress.selectLevel(entry.level.id)) return
+
     YaMetrika.btnStart()
+    this.#startSelectedLevel()
+  }
 
+  #playSelectedLevel = () => {
+    YaMetrika.btnStart()
+    this.#startSelectedLevel()
+  }
+
+  #startSelectedLevel = () => {
+    const entry = this.#progress.getSelectedEntry()
+    if (!entry || !this.#progress.markLevelPlayed(entry.level.id)) return
+
+    this.#playClickSound()
     this.#game.emit(GAME_EVENTS.clearLevel)
     this.state.checkoutState(GAME_STATES.levelPreload)
   }
 
-  #onBtnStoreHandler = async () => {
-    YaMetrika.mainScreenBtnStore()
-    this.#createStore()
+  #setUserStats = () => {
+    const userLevelText = this.#refs.userLevel.getChildByLabel('badgeText')
+    userLevelText.text = this.#storage.userLevel
+    const userCoinsText = this.#refs.userCoins.getChildByLabel('badgeText')
+    userCoinsText.text = this.#storage.playerData.coins
   }
 
-  #onBtnLeaderboardHandler = async () => {
+  #openStore = () => {
+    if (Locator.options.isVisible) return
+    YaMetrika.mainScreenBtnStore()
+    this.#playClickSound()
+    new Store(new StoreView())
+  }
+
+  #openLeaderboard = () => {
+    if (Locator.options.isVisible) return
     YaMetrika.btnLeaders()
-    this.#createScoreBoard()
+    this.#playClickSound()
+    new Scoreboard(new ScoreboardView())
+  }
 
-    // if (SdkManager.isUserAuth) {
-    //   Logger.log('', 'Игрок авторизован.')
-    //   // this.#uiManager.showModule(MODULE_NAMES.SCOREBOARD.moduleName)
-    //   return
-    // }
+  #resize = () => {
+    this.#gameMenu?.updateAdaptive()
+  }
 
-    // new Authorization()
+  #playClickSound = () => {
+    this.#soundManager.play('sfx_btnClick')
   }
 
   #clear = () => {
     this.#game.off(GAME_EVENTS.clearLevel, this.#clear)
+    this.#game.off(GAME_EVENTS.gameResize, this.#resize)
     clearTimeLine(this.#backTimeLine, true)
-  }
-
-  #createStore = () => {
-    const view = new StoreView()
-    new Store(view)
-  }
-
-  #createScoreBoard = () => {
-    const view = new ScoreboardView()
-    new Scoreboard(view)
   }
 }

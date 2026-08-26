@@ -1,86 +1,83 @@
-import i18next from 'i18next'
 import {Container} from 'pixi.js'
-import ButtonContainer from '../../../components/buttons/ButtonContainer'
+import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../engine/Locator.ts'
-import {FONT_COLORS, primaryFontStyle} from '../../../styles.js'
+import LocationLevelSelectView from './levelSelect/LocationLevelSelectView.js'
+import LocationSelectView from './locationSelect/LocationSelectView.js'
+
+const TOP_BAR_BASE_WIDTH = 640
+const TOP_BAR_MIN_SCALE = 0.72
 
 export default class GameMenuView extends Container {
-  #buttons = []
-  #textStyle = {
-    ...primaryFontStyle,
-    fontSize: 36,
-    align: 'center',
-    fill: FONT_COLORS.secondFont,
+  #levelSelectView
+  #locationSelectView
+  #toolButtons = []
+
+  constructor(callbacks) {
+    super({label: 'game-menu-view'})
+
+    this.#init(callbacks)
   }
 
-  constructor() {
-    super()
-
-    this.label = 'GameMenuView'
-    this.#init()
+  get toolButtons() {
+    return this.#toolButtons
   }
 
-  get buttons() {
-    return this.#buttons
+  showLocations = (locations, pageIndex, continueEntry) => {
+    this.#locationSelectView.visible = true
+    this.#levelSelectView.visible = false
+    this.#locationSelectView.setData(locations, pageIndex, continueEntry)
+  }
+
+  showLevels = (location, levels, selectedEntry) => {
+    this.#locationSelectView.visible = false
+    this.#levelSelectView.visible = true
+    this.#levelSelectView.setData(location, levels, selectedEntry)
+  }
+
+  updateSelectedLevel = (levels, selectedEntry) => {
+    this.#levelSelectView.updateSelectedLevel(levels, selectedEntry)
   }
 
   updateAdaptive = () => {
-    const {x, y} = Locator.uiLayer.uiData.center
-    this.position.set(x, y)
+    const {center} = Locator.uiLayer.uiData
+    this.position.copyFrom(center)
+    this.scale.set(1)
+    this.#locationSelectView.updateAdaptive()
+    this.#levelSelectView.updateAdaptive()
+    this.#toolButtons.forEach((button) => button.alignRight())
   }
 
-  #init = () => {
-    this.#createBtnStart()
-    this.#createBtnStore()
-    this.#createBtnLeaders()
-
+  #init = (callbacks) => {
+    this.#locationSelectView = new LocationSelectView(callbacks)
+    this.#levelSelectView = new LocationLevelSelectView(callbacks)
+    this.#levelSelectView.visible = false
+    this.addChild(this.#locationSelectView, this.#levelSelectView)
     Locator.uiLayer.stateUiLayer.addChild(this)
-    this.updateAdaptive()
+    this.#createToolButtons(callbacks)
   }
 
-  #createBtnStart = () => {
-    const button = new ButtonContainer({
-      props: {name: 'btnStart', x: 0, y: 420},
-      spriteKeys: ['btn-primary'],
-    })
-    button.addCenterText({
-      text: `${i18next.t('btnStart')}`,
-      style: {...this.#textStyle, fontSize: 46},
-    })
-
-    this.#buttons.push(button)
-    this.addChild(button)
+  #createToolButtons = ({onLeaderboard, onStore}) => {
+    this.#createToolButton('btnLeaders', 'icon-cup', -140, onLeaderboard)
+    this.#createToolButton('btnStore', 'icon-store', -70, onStore)
   }
 
-  #createBtnStore = () => {
+  #createToolButton = (name, icon, x, onPress) => {
     const button = new ButtonContainer({
-      props: {name: 'btnStore', x: 0, y: 0},
-      spriteKeys: ['btn-ui-3', 'icon-cup'],
+      props: {name},
+      spriteKeys: ['btn-ui-3', icon],
     })
-
     button.alignRight = () => {
-      Locator.uiLayer.alignRight(button, {x: -70, y: 60})
+      Locator.uiLayer.alignRight(button, {x, y: 60})
+      button.scale.set(this.#getTopBarScale())
     }
     button.alignRight()
-    this.#buttons.push(button)
+    button.on('pointertap', onPress)
+    this.#toolButtons.push(button)
     Locator.uiLayer.stateUiLayer.addChild(button)
   }
 
-  #createBtnLeaders = () => {
-    const button = new ButtonContainer({
-      props: {name: 'btnLeaders', x: 0, y: 0},
-      spriteKeys: ['btn-ui-3', 'icon-store'],
-    })
-
-    button.alignRight = () => {
-      Locator.uiLayer.alignRight(button, {
-        x: -140,
-        y: 60,
-      })
-    }
-
-    button.alignRight()
-    this.#buttons.push(button)
-    Locator.uiLayer.stateUiLayer.addChild(button)
+  #getTopBarScale = () => {
+    const {width} = Locator.uiLayer.uiData
+    return Math.min(1, Math.max(TOP_BAR_MIN_SCALE, (width - 40) / TOP_BAR_BASE_WIDTH))
   }
 }
