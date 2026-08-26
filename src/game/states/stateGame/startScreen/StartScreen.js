@@ -6,8 +6,8 @@ import Store from '@/game/features/store/Store.js'
 import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
-import LevelProgress from '@/game/gameConfig/LevelProgress.js'
-import {getLocationById} from '@/game/gameConfig/locationCatalog.js'
+import LevelProgress from '@/game/gameConfig/levels/LevelProgress.js'
+import {getLocationById, getLocationPageIndex} from '@/game/gameConfig/levels/locationCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import GameMenuView from './GameMenuView.js'
@@ -36,11 +36,20 @@ export default class StartScreen {
     this.#prepare()
     this.#createGameMenu()
     this.#setUserStats()
-    this.#showLocations(false)
+    this.#showInitialScreen()
   }
 
   setInteractive = (isInteractive) => {
     this.#stage.interactiveChildren = isInteractive
+  }
+
+  showLocations = (playSound = true) => {
+    this.#selectedLocationId = null
+    this.#game.view.setBackground('startScreen')
+    const unlockedLocation = this.#progress.consumeUnlockCelebration()
+    const pageIndex = unlockedLocation ? getLocationPageIndex(unlockedLocation.id) : this.#progress.locationPageIndex
+    this.#gameMenu.showLocations(this.#progress.getLocationStates(), pageIndex, this.#progress.getContinueTargetEntry(), unlockedLocation)
+    if (playSound) this.#playClickSound()
   }
 
   #prepare = () => {
@@ -53,7 +62,7 @@ export default class StartScreen {
 
   #createGameMenu = () => {
     this.#gameMenu = new GameMenuView({
-      onBack: this.#showLocations,
+      onBack: this.showLocations,
       onContinue: this.#continueGame,
       onLeaderboard: this.#openLeaderboard,
       onLevelSelect: this.#selectLevel,
@@ -65,11 +74,26 @@ export default class StartScreen {
     this.#refs.gameMenuView = this.#gameMenu
   }
 
-  #showLocations = (playSound = true) => {
-    this.#selectedLocationId = null
-    this.#game.view.setBackground('startScreen')
-    this.#gameMenu.showLocations(this.#progress.getLocationStates(), this.#progress.locationPageIndex, this.#progress.getLastPlayedEntry())
-    if (playSound) this.#playClickSound()
+  #showInitialScreen = () => {
+    if (this.#game.consumeSelectedLocationRequest()) {
+      this.#showSelectedLocation()
+      return
+    }
+
+    this.showLocations(false)
+  }
+
+  #showSelectedLocation = () => {
+    const locationId = this.#progress.selectedLocationId
+    const location = getLocationById(locationId)
+    if (!location || !this.#progress.isLocationUnlocked(locationId)) {
+      this.showLocations(false)
+      return
+    }
+
+    this.#selectedLocationId = locationId
+    this.#game.view.setBackground(location.background)
+    this.#gameMenu.showLevels(location, this.#progress.getLevelStates(locationId), this.#progress.getSelectedEntry(locationId))
   }
 
   #openLocation = (locationId) => {
@@ -85,7 +109,11 @@ export default class StartScreen {
 
   #selectPage = (pageIndex) => {
     this.#progress.selectPage(pageIndex)
-    this.#gameMenu.showLocations(this.#progress.getLocationStates(), this.#progress.locationPageIndex, this.#progress.getLastPlayedEntry())
+    this.#gameMenu.showLocations(
+      this.#progress.getLocationStates(),
+      this.#progress.locationPageIndex,
+      this.#progress.getContinueTargetEntry(),
+    )
     this.#playClickSound()
   }
 
@@ -99,7 +127,7 @@ export default class StartScreen {
   }
 
   #continueGame = () => {
-    const entry = this.#progress.getLastPlayedEntry()
+    const entry = this.#progress.getContinueTargetEntry()
     if (!entry || !this.#progress.selectLevel(entry.level.id)) return
 
     YaMetrika.btnStart()

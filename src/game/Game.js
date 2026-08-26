@@ -31,6 +31,7 @@ export default class Game extends EventEmitter {
   #currentStateName
   #adapter
   #view // у каждого стейта есть view-контейнер
+  #shouldOpenSelectedLocation = false
 
   constructor(adapter) {
     super()
@@ -73,6 +74,16 @@ export default class Game extends EventEmitter {
 
   set view(view) {
     this.#view = view
+  }
+
+  requestSelectedLocationOnStart = () => {
+    this.#shouldOpenSelectedLocation = true
+  }
+
+  consumeSelectedLocationRequest = () => {
+    const shouldOpen = this.#shouldOpenSelectedLocation
+    this.#shouldOpenSelectedLocation = false
+    return shouldOpen
   }
 
   init = async () => {

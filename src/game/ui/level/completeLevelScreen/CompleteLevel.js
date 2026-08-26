@@ -8,7 +8,7 @@ import Store from '@/game/features/store/Store.js'
 import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
-import LevelConfig from '@/game/gameConfig/LevelConfig.js'
+import LevelConfig from '@/game/gameConfig/levels/LevelConfig.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
@@ -33,7 +33,7 @@ export default class CompleteLevel {
     this.state = levelEntity.state
   }
 
-  init = async () => {
+  init = async (completionResult = {}) => {
     try {
       this.#storage = Locator.storage
       this.#soundManager = Locator.soundManager
@@ -51,6 +51,7 @@ export default class CompleteLevel {
       await RateUs.checkAndShowRateUs(this.#storage, this.levelEntity)
 
       await this.#showAndAnimate()
+      this.#view.showLocationUnlock(completionResult.unlockedLocation)
       SdkManager.gameplayStop()
     } catch (err) {
       console.error('CompleteLevel', err)
@@ -62,9 +63,10 @@ export default class CompleteLevel {
     this.#btnNext = this.#view.getChildByLabel('btnNext', true)
 
     this.btnBuyLoupe = this.#view.getChildByLabel('btnBuyLoupe', true)
+    this.btnBackToLevels = this.#view.getChildByLabel('btnBackToLevels', true)
     this.btnHome = this.#view.getChildByLabel('btnHome', true)
     this.btnByeAd = this.#view.getChildByLabel('btnByeAd', true)
-    this.btns = [this.#btnNext, this.btnBuyLoupe, this.btnHome, this.btnByeAd]
+    this.btns = [this.#btnNext, this.btnBuyLoupe, this.btnBackToLevels, this.btnHome, this.btnByeAd]
 
     ButtonAnimator.initOverHandler(this.btns)
   }
@@ -74,6 +76,7 @@ export default class CompleteLevel {
     const statusOnce = bool ? 'once' : 'off'
 
     this.#btnNext[statusOnce]('pointerdown', this.#btnNextHandler)
+    this.btnBackToLevels[statusOnce]('pointerdown', this.#btnBackToLevelsHandler)
     this.btnHome[statusOnce]('pointerdown', this.#btnHomeHandler)
 
     this.#game[status](GAME_EVENTS.clearLevel, this.#setEvents.bind(this, false))
@@ -132,9 +135,11 @@ export default class CompleteLevel {
   #setBtnNextValue = () => {
     const btnNextArrow = this.#btnNext.getChildByLabel('btnNextArrow')
     const arrowText = btnNextArrow.getChildByLabel('arrowText')
+    const levelText = this.#btnNext.getChildByLabel('btnNextLevelText')
 
     const nextLevel = LevelConfig.getGameLevelData(this.#storage.playerData.levelIndex)
-    arrowText.text = `${i18next.t('level')} ${nextLevel.locationLevelNumber}`
+    arrowText.text = i18next.t(nextLevel.locationTitleKey)
+    levelText.text = `${i18next.t('level')} ${nextLevel.locationLevelNumber}`
   }
 
   #createBtnBadge = () => {
@@ -177,6 +182,14 @@ export default class CompleteLevel {
     this.#setEvents(false)
     this.#soundManager.play('sfx_btnClick')
     await ButtonAnimator.click(this.btnHome)
+    this.state.checkoutState(GAME_STATES.gameState)
+  }
+
+  #btnBackToLevelsHandler = async () => {
+    this.#setEvents(false)
+    this.#soundManager.play('sfx_btnClick')
+    await ButtonAnimator.click(this.btnBackToLevels)
+    this.#game.requestSelectedLocationOnStart()
     this.state.checkoutState(GAME_STATES.gameState)
   }
 

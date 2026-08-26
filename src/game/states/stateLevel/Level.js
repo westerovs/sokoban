@@ -4,7 +4,7 @@ import CrazyGames from '@/game/engine/special/CrazyGames.js'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 import PromoManager from '@/game/features/promotionCards/PromoManager.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
-import LevelConfig from '@/game/gameConfig/LevelConfig.js'
+import LevelConfig from '@/game/gameConfig/levels/LevelConfig.js'
 import EntityManager from '@/game/levelRuntime/entities/EntityManager.js'
 import SystemManager from '@/game/levelRuntime/systems/SystemManager.js'
 import ClearLevel from '@/game/modules/ClearLevel.js'
@@ -175,8 +175,8 @@ export default class Level {
     // await new LevelResultsReward().init()
 
     this.game.view.createCompleteLevelView()
-    this.levelConfig.updateSavedLevel()
-    this.#completeLevel.init()
+    const completionResult = this.levelConfig.updateSavedLevel()
+    this.#completeLevel.init(completionResult)
   }
 
   #sendEarlyExitMetrika() {

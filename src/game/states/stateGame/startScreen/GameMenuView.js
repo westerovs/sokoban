@@ -22,14 +22,14 @@ export default class GameMenuView extends Container {
     return this.#toolButtons
   }
 
-  showLocations = (locations, pageIndex, continueEntry) => {
+  showLocations = (locations, pageIndex, continueEntry, unlockedLocation) => {
     this.#locationSelectView.visible = true
     this.#levelSelectView.visible = false
-    this.#locationSelectView.setData(locations, pageIndex, continueEntry)
+    this.#locationSelectView.setData(locations, pageIndex, continueEntry, unlockedLocation)
   }
 
   showLevels = (location, levels, selectedEntry) => {
-    this.#locationSelectView.visible = false
+    this.#locationSelectView.hide()
     this.#levelSelectView.visible = true
     this.#levelSelectView.setData(location, levels, selectedEntry)
   }

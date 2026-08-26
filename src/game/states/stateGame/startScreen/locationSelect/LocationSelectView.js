@@ -4,6 +4,7 @@ import Locator from '../../../../engine/Locator.ts'
 import {primaryFontStyle} from '../../../../styles.js'
 import LocationCard from './LocationCard.js'
 import LocationTab from './LocationTab.js'
+import LocationUnlockCelebration from './LocationUnlockCelebration.js'
 
 const PAGE_SIZE = 4
 const NARROW_LAYOUT_WIDTH = 1200
@@ -17,6 +18,7 @@ export default class LocationSelectView extends Container {
   #onLocationSelect
   #pageIndex = 0
   #tabs = []
+  #unlockCelebration
 
   constructor({onContinue, onLocationSelect, onPageSelect}) {
     super({label: 'location-select-view'})
@@ -25,12 +27,19 @@ export default class LocationSelectView extends Container {
     this.#init(onContinue, onPageSelect)
   }
 
-  setData = (locations, pageIndex, continueEntry) => {
+  setData = (locations, pageIndex, continueEntry, unlockedLocation) => {
+    this.#unlockCelebration.stop()
     this.#pageIndex = pageIndex
     this.#replaceCards(locations.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE))
     this.#tabs.forEach((tab, index) => tab.setActive(index === pageIndex))
     this.#setContinueEntry(continueEntry)
     this.updateAdaptive()
+    this.#showUnlockCelebration(unlockedLocation)
+  }
+
+  hide = () => {
+    this.visible = false
+    this.#unlockCelebration.stop()
   }
 
   updateAdaptive = () => {
@@ -41,6 +50,13 @@ export default class LocationSelectView extends Container {
     this.#layoutTabs(isNarrow)
     this.#layoutCards(isNarrow)
     this.#continueButton.position.set(0, isNarrow ? 445 : 410)
+    this.#unlockCelebration.resize({
+      cardScale: isNarrow ? 0.82 : 1,
+      height: Locator.uiLayer.uiData.height,
+      isNarrow,
+      scale: this.scale.x,
+      width,
+    })
   }
 
   #init = (onContinue, onPageSelect) => {
@@ -49,7 +65,8 @@ export default class LocationSelectView extends Container {
     this.#cardsContainer = new Container({label: 'location-cards'})
     this.addChild(this.#cardsContainer)
     this.#continueButton = this.#createContinueButton(onContinue)
-    this.addChild(this.#continueButton)
+    this.#unlockCelebration = new LocationUnlockCelebration()
+    this.addChild(this.#continueButton, this.#unlockCelebration)
   }
 
   #createTitle = () => {
@@ -108,7 +125,25 @@ export default class LocationSelectView extends Container {
     if (!entry) return
 
     this.#continueSubtitle.text = i18next.t('locationSelect.continueLocation', {
+      level: entry.locationLevelIndex + 1,
       location: i18next.t(entry.location.titleKey),
+    })
+  }
+
+  #showUnlockCelebration = (location) => {
+    if (!location) return this.#unlockCelebration.stop()
+
+    const card = this.#cards.find(({locationId}) => locationId === location.id)
+    const {height, width} = Locator.uiLayer.uiData
+    const isNarrow = width < NARROW_LAYOUT_WIDTH
+    this.#unlockCelebration.start({
+      card,
+      cardScale: card?.scale.x,
+      height,
+      isNarrow,
+      locationName: i18next.t(location.titleKey),
+      scale: this.scale.x,
+      width,
     })
   }
 

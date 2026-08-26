@@ -1,6 +1,6 @@
 import LoadUtils from '../utils/gameUtils/LoadUtils.js'
 import {ASSETS_URL} from './constants.js'
-import levels from './levels.json'
+import levels from './levels/levels.json'
 
 export default class GameConfig {
   #basePath = ASSETS_URL.local

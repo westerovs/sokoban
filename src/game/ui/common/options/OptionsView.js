@@ -48,7 +48,17 @@ const BUTTONS_DATA = {
     textureON: 'icon-home',
     textureOFF: null,
     position: {
-      x: 0,
+      x: VIEW_SIZE.buttonsGap,
+      y: 10,
+    },
+  },
+  btnBackToLevels: {
+    name: 'btnBackToLevels',
+    textureON: 'icon-skin-back',
+    textureOFF: null,
+    iconScale: 0.8,
+    position: {
+      x: -VIEW_SIZE.buttonsGap,
       y: 10,
     },
   },
@@ -65,6 +75,7 @@ export default class OptionsView extends BaseModal {
 
   #sfxBtn
   #musicBtn
+  #btnBackToLevels
   #btnMainScreen
   #checkboxZoom
   #checkboxSokobanDpad
@@ -116,6 +127,10 @@ export default class OptionsView extends BaseModal {
     return this.#btnMainScreen
   }
 
+  get btnBackToLevels() {
+    return this.#btnBackToLevels
+  }
+
   async hide() {
     await this.toggleVisibility()
   }
@@ -151,7 +166,7 @@ export default class OptionsView extends BaseModal {
     this.#createCheckboxRows()
     this.#checkFlagVisibleSoundButtons()
 
-    this.#buttons = [this.#sfxBtn, this.#musicBtn, this.#btnMainScreen]
+    this.#buttons = [this.#sfxBtn, this.#musicBtn, this.#btnBackToLevels, this.#btnMainScreen]
 
     this.#initCredits()
   }
@@ -185,10 +200,11 @@ export default class OptionsView extends BaseModal {
 
     this.#sfxBtn = map.find((item) => item.label === BUTTONS_DATA.sfxBtn.name)
     this.#musicBtn = map.find((item) => item.label === BUTTONS_DATA.musicBtn.name)
+    this.#btnBackToLevels = map.find((item) => item.label === BUTTONS_DATA.btnBackToLevels.name)
     this.#btnMainScreen = map.find((item) => item.label === BUTTONS_DATA.btnMainScreen.name)
   }
 
-  #createButton = ({name, textureON, textureOFF, position} = {}) => {
+  #createButton = ({name, textureON, textureOFF, iconScale = 1, position} = {}) => {
     const container = new Container({label: name})
     container.audioData = {
       textureON,
@@ -203,7 +219,7 @@ export default class OptionsView extends BaseModal {
     applyInteractive(container)
 
     const wrapper = GameUtils.createSprite('btn-ui-1')
-    const icon = GameUtils.createSprite(textureON, {label: 'icon'})
+    const icon = GameUtils.createSprite(textureON, {label: 'icon', scale: iconScale})
 
     container.addChild(wrapper, icon)
     this.addChild(container)
@@ -245,6 +261,7 @@ export default class OptionsView extends BaseModal {
     if (SdkManager.flags.hideSoundButtons) {
       this.#musicBtn.visible = false
       this.#sfxBtn.visible = false
+      this.#btnBackToLevels.y = 0
       this.#btnMainScreen.y = 0
     }
   }

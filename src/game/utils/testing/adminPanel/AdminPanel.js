@@ -5,9 +5,9 @@ import Locator from '../../../engine/Locator.ts'
 import SdkManager from '../../../engine/SdkManager.js'
 import {STORAGE_KEYS} from '../../../engine/storage/defaultData.js'
 import LocalStorage from '../../../engine/storage/LocalStorage.js'
-import LevelConfig from '../../../gameConfig/LevelConfig.js'
-import LevelProgress from '../../../gameConfig/LevelProgress.js'
-import {getLevelEntries, getLevelEntryByIndex, getLocations} from '../../../gameConfig/locationCatalog.js'
+import LevelConfig from '../../../gameConfig/levels/LevelConfig.js'
+import LevelProgress from '../../../gameConfig/levels/LevelProgress.js'
+import {getLevelEntries, getLevelEntryByIndex, getLocations} from '../../../gameConfig/levels/locationCatalog.js'
 import GameUtils from '../../gameUtils/GameUtils.js'
 import {
   createButton,

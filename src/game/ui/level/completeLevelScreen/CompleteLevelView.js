@@ -7,11 +7,16 @@ import {GAME_NAMES, WORLD} from '@/game/gameConfig/constants.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+import CompleteLocationUnlockCelebration from './CompleteLocationUnlockCelebration.js'
 
 const STYLES = {
   btnNext: {
     ...primaryFontStyle,
     fontSize: 36,
+  },
+  btnNextLevel: {
+    ...primaryFontStyle,
+    fontSize: 22,
   },
   arrow: {
     ...primaryFontStyle,
@@ -21,6 +26,7 @@ const STYLES = {
 }
 
 export default class CompleteLevelView extends Container {
+  #locationUnlockCelebration
   #refs
 
   constructor({refs} = {}) {
@@ -32,9 +38,15 @@ export default class CompleteLevelView extends Container {
     this.#init()
   }
 
+  showLocationUnlock = (location) => {
+    this.#locationUnlockCelebration.show(location)
+  }
+
   #init = () => {
     this.#refs.completeLevelView = this
     this.#createButtonsContainer()
+    this.#locationUnlockCelebration = new CompleteLocationUnlockCelebration()
+    this.addChild(this.#locationUnlockCelebration)
   }
 
   #createButtonsContainer() {
@@ -45,9 +57,14 @@ export default class CompleteLevelView extends Container {
     buttonsContainer.addChild(this.#createButtonNext())
 
     if (SdkManager.flags?.noStore) {
-      buttonsContainer.addChild(this.#createButtonHome())
+      buttonsContainer.addChild(this.#createButtonBack(), this.#createButtonHome())
     } else {
-      buttonsContainer.addChild(this.#createButtonStore(), this.#createButtonHome(), this.#createButtonByeAd())
+      buttonsContainer.addChild(
+        this.#createButtonStore(),
+        this.#createButtonBack(),
+        this.#createButtonHome(),
+        this.#createButtonByeAd(),
+      )
     }
 
     this.addChild(buttonsContainer)
@@ -61,11 +78,18 @@ export default class CompleteLevelView extends Container {
     const textureKey = GAME_NAME === GAME_NAMES.hotel ? 'btn-start' : 'btn-next'
     const background = GameUtils.createSprite(textureKey)
     const text = GameUtils.createText(`${i18next.t('btnNextText')}`, {
+      name: 'btnNextText',
       style: STYLES.btnNext,
     })
+    text.y = -16
+    const levelText = GameUtils.createText('', {
+      name: 'btnNextLevelText',
+      style: STYLES.btnNextLevel,
+    })
+    levelText.y = 28
     const arrow = this.#createButtonNextArrow()
 
-    button.addChild(background, text, arrow)
+    button.addChild(background, text, levelText, arrow)
     return button
   }
 
@@ -88,7 +112,7 @@ export default class CompleteLevelView extends Container {
     return new ButtonContainer({
       props: {
         name: 'btnBuyLoupe',
-        x: -155,
+        x: -195,
         y: 195,
       },
       spriteKeys: ['btn-ui-2', {key: 'icon-loupe-plus', scale: 0.6}],
@@ -100,9 +124,22 @@ export default class CompleteLevelView extends Container {
     return new ButtonContainer({
       props: {
         name: 'btnHome',
+        x: 65,
         y: 199,
       },
       spriteKeys: ['btn-ui-1', 'icon-home'],
+      overHandler: false,
+    })
+  }
+
+  #createButtonBack() {
+    return new ButtonContainer({
+      props: {
+        name: 'btnBackToLevels',
+        x: -65,
+        y: 199,
+      },
+      spriteKeys: ['btn-ui-1', {key: 'icon-skin-back', scale: 0.8}],
       overHandler: false,
     })
   }
@@ -111,7 +148,7 @@ export default class CompleteLevelView extends Container {
     const button = new ButtonContainer({
       props: {
         name: 'btnByeAd',
-        x: 155,
+        x: 195,
         y: 199,
       },
       spriteKeys: ['btn-ui-2', 'icon-noAd'],

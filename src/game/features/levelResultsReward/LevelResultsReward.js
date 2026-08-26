@@ -6,7 +6,7 @@ import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
 import LevelRewardAnimator from '@/game/features/levelResultsReward/LevelRewardAnimator.js'
 import {LEVEL_TYPES, WORLD} from '@/game/gameConfig/constants.js'
-import LevelConfig from '@/game/gameConfig/LevelConfig.js'
+import LevelConfig from '@/game/gameConfig/levels/LevelConfig.js'
 import {primaryFontStyle, rewardWindowStyles} from '@/game/styles.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
 

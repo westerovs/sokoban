@@ -25,6 +25,10 @@ export default class LocationCard extends Container {
     this.#init()
   }
 
+  get locationId() {
+    return this.#location.id
+  }
+
   setState = (state) => {
     this.#drawFrame(state)
     this.#drawStatus(state)

@@ -20,6 +20,7 @@ const STORAGE_KEYS = {
   selectedLocationId: 'selectedLocationId',
   completedLevelIds: 'completedLevelIds',
   unlockedLocationIds: 'unlockedLocationIds',
+  celebratedLocationIds: 'celebratedLocationIds',
   locationPageIndex: 'locationPageIndex',
   skinIndex: 'skinIndex',
   partIndex: 'partIndex',
@@ -68,6 +69,7 @@ const DEFAULT_DATA = {
   [STORAGE_KEYS.selectedLocationId]: {type: 'string', value: null},
   [STORAGE_KEYS.completedLevelIds]: {type: 'array', value: []},
   [STORAGE_KEYS.unlockedLocationIds]: {type: 'array', value: []},
+  [STORAGE_KEYS.celebratedLocationIds]: {type: 'array', value: []},
   [STORAGE_KEYS.locationPageIndex]: {type: 'number', value: 0},
   [STORAGE_KEYS.skinIndex]: {type: 'number', value: 1},
   [STORAGE_KEYS.partIndex]: {type: 'number', value: 1},
@@ -100,6 +102,11 @@ const DEFAULT_DATA = {
 
 const DEFAULT_DATA_VALUES = Object.fromEntries(Object.entries(DEFAULT_DATA).map(([key, val]) => [key, val?.value]))
 
-const SERIALIZED_ARRAY_KEYS = Object.freeze([STORAGE_KEYS.completedLevelIds, STORAGE_KEYS.skins, STORAGE_KEYS.unlockedLocationIds])
+const SERIALIZED_ARRAY_KEYS = Object.freeze([
+  STORAGE_KEYS.celebratedLocationIds,
+  STORAGE_KEYS.completedLevelIds,
+  STORAGE_KEYS.skins,
+  STORAGE_KEYS.unlockedLocationIds,
+])
 
 export {DEFAULT_DATA, DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS}

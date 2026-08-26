@@ -12,6 +12,7 @@ export default class Options {
   #playerData
   #view
   #optionsToggleBtn
+  #btnBackToLevels
   #btnMainScreen
   #musicBtn
   #sfxBtn
@@ -72,6 +73,7 @@ export default class Options {
     this.#view = new OptionsView()
 
     this.#optionsToggleBtn = this.#view.optionsToggleBtn
+    this.#btnBackToLevels = this.#view.btnBackToLevels
     this.#btnMainScreen = this.#view.btnMainScreen
     this.#musicBtn = this.#view.musicBtn
     this.#sfxBtn = this.#view.sfxBtn
@@ -130,6 +132,10 @@ export default class Options {
       }
     }
 
+    if (target.label === this.#btnBackToLevels.label) {
+      this.#navigateBack()
+    }
+
     if (target.label === this.#musicBtn.label) {
       this.#storage.gameSettings.toggleMusic()
       this.#setAudioStatus(target, STORAGE_KEYS.option_isPlayMusic)
@@ -143,6 +149,20 @@ export default class Options {
     }
 
     this.#checkboxHandler(target)
+  }
+
+  #navigateBack = () => {
+    this.#toggleVisibility()
+
+    if (this.#game.stateName === GAME_STATES.gameState) {
+      this.#game.currentState.stateStartScreen.showLocations()
+      return
+    }
+
+    if (this.#game.stateName !== GAME_STATES.levelState) return
+
+    this.#game.requestSelectedLocationOnStart()
+    this.#game.currentState.checkoutState(GAME_STATES.gameState)
   }
 
   #checkboxHandler = (target) => {
