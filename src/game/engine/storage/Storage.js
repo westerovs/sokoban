@@ -47,8 +47,45 @@ export default class Storage {
   get levelIndex() {
     return this.#playerData.levelIndex
   }
-
-  // -------- hints
+  
+  load = async () => {
+    try {
+      this.#localStorage.init()
+      
+      const saves = await this.#loadSaves()
+      const freshestData = this.#selectFreshestData(saves)
+      const playerData = this.#preparePlayerData(freshestData)
+      
+      this.#setProxyData(playerData)
+    } catch (err) {
+      console.error('[load]', err)
+    }
+  }
+  
+  save = (force) => {
+    if (this.#isDebug) {
+      console.error('[Storage] save off!')
+      return
+    }
+    
+    OfflineBadge.checkAndShow()
+    
+    this.#rawData = {...this.#playerData}
+    this.#rawData.playerId = SdkManager.getPlayerId()
+    this.#rawData.savedAt = new Date().toISOString()
+    SERIALIZED_ARRAY_KEYS.forEach((key) => {
+      this.#rawData[key] = stringifyJsonKey(this.#rawData[key])
+    })
+    
+    Logger.log('[save]', this.#rawData)
+    
+    this.#localStorage.save(this.#rawData)
+    
+    if (!SdkManager.isPlatform(PLATFORM_ID.base)) {
+      SdkManager.adapter.storage.set(this.#rawData, force).catch((err) => console.error('[save]', err))
+    }
+  }
+  
   get hints() {
     return this.#playerData.hints
   }
@@ -139,32 +176,41 @@ export default class Storage {
   }
 
   // ------------- save / load
-  load = async () => {
-    try {
-      this.#localStorage.init()
-
-      const [serverData, localData] = await Promise.all([SdkManager.getData(), this.#localStorage.getData()])
-
-      let saves = []
-      if (Array.isArray(serverData)) saves.push(...serverData.flat(1))
-      if (Array.isArray(localData)) saves.push(...localData.flat(1))
-      setTimeout(() => Logger.log('[LoadSaveManager.saves]', saves), 1000)
-
-      let maxFreshData = getMaxFreshData(saves)
-      if (maxFreshData === null) maxFreshData = getMaxUserLevelData(saves)
-
-      this.#handleSpecialRulesIfFirstInit(maxFreshData)
-      const validateData = Validation.validate(maxFreshData)
-      SERIALIZED_ARRAY_KEYS.forEach((key) => {
-        validateData[key] = parseJsonKey(validateData, key)
-      })
-
-      this.#setProxyData(validateData)
-    } catch (err) {
-      console.error('[load]', err)
-    }
+  #loadSaves = async () => {
+    const [serverData, localData] = await Promise.all([
+      SdkManager.getData(),
+      this.#localStorage.getData()
+    ])
+    
+    const saves = []
+    if (Array.isArray(serverData)) saves.push(...serverData.flat(1))
+    if (Array.isArray(localData)) saves.push(...localData.flat(1))
+    
+    setTimeout(() => Logger.log('[LoadSaveManager.saves]', saves), 1000)
+    
+    return saves
   }
-
+  
+  #selectFreshestData = (saves) => {
+    const freshestData = getMaxFreshData(saves)
+    
+    if (freshestData === null) return getMaxUserLevelData(saves)
+    
+    return freshestData
+  }
+  
+  #preparePlayerData = (data) => {
+    this.#handleSpecialRulesIfFirstInit(data)
+    
+    const validatedData = Validation.validate(data)
+    
+    SERIALIZED_ARRAY_KEYS.forEach((key) => {
+      validatedData[key] = parseJsonKey(validatedData, key)
+    })
+    
+    return validatedData
+  }
+  
   #setProxyData = (freshestData) => {
     freshestData.version = PACKAGE_VERSION
     freshestData.playerId = SdkManager.getPlayerId()
@@ -172,30 +218,6 @@ export default class Storage {
 
     this.#playerData = createProfileProxy(freshestData, 'PlayerProfile')
     Logger.log('[LoadSaveManager.setProxyData]', freshestData)
-  }
-
-  save = (force) => {
-    if (this.#isDebug) {
-      console.error('[Storage] save off!')
-      return
-    }
-
-    OfflineBadge.checkAndShow()
-
-    this.#rawData = {...this.#playerData}
-    this.#rawData.playerId = SdkManager.getPlayerId()
-    this.#rawData.savedAt = new Date().toISOString()
-    SERIALIZED_ARRAY_KEYS.forEach((key) => {
-      this.#rawData[key] = stringifyJsonKey(this.#rawData[key])
-    })
-
-    Logger.log('[save]', this.#rawData)
-
-    this.#localStorage.save(this.#rawData)
-
-    if (!SdkManager.isPlatform(PLATFORM_ID.base)) {
-      SdkManager.adapter.storage.set(this.#rawData, force).catch((err) => console.error('[save]', err))
-    }
   }
 
   #handleSpecialRulesIfFirstInit = (data) => {
