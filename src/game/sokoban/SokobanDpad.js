@@ -16,25 +16,29 @@ const BUTTON_DIRECTIONS = Object.freeze({
 })
 
 export default class SokobanDpad extends Container {
-  #onMove
+  #onHeldDirectionChange
   #buttons = []
   #pressTimelines = new Map()
+  #activePointerId = null
+  #activeButtonVisuals = null
   #isEnabled = false
 
-  constructor(onMove) {
+  constructor(onHeldDirectionChange) {
     super({label: 'sokoban-dpad', zIndex: 5})
 
-    this.#onMove = onMove
+    this.#onHeldDirectionChange = onHeldDirectionChange
     this.#init()
   }
 
   setEnabled(isEnabled) {
     this.#isEnabled = isEnabled
+    if (!isEnabled) this.#releaseActiveDirection()
     this.#updateInteraction()
   }
 
   setVisible(isVisible) {
     this.visible = isVisible
+    if (!isVisible) this.#releaseActiveDirection()
     this.#updateInteraction()
   }
 
@@ -48,6 +52,7 @@ export default class SokobanDpad extends Container {
   }
 
   destroy(options) {
+    this.#releaseActiveDirection()
     this.#pressTimelines.forEach((timeline) => timeline.kill())
     this.#pressTimelines.clear()
     super.destroy(options)
@@ -85,14 +90,38 @@ export default class SokobanDpad extends Container {
     button.hitArea = new Circle(0, 0, BUTTON_HIT_RADIUS)
     button.cursor = 'pointer'
     button.on('pointerdown', (event) => this.#handlePress(event, button, highlight, arrow, direction))
+    button.on('pointerup', (event) => this.#handleRelease(event))
+    button.on('pointerupoutside', (event) => this.#handleRelease(event))
+    button.on('pointercancel', (event) => this.#handleRelease(event))
     button.addChild(highlight, arrow)
     return button
   }
 
   #handlePress(event, button, highlight, arrow, direction) {
     event.stopPropagation()
+    if (this.#activePointerId !== null) return
+
+    this.#activePointerId = event.pointerId
+    this.#activeButtonVisuals = {button, highlight, arrow}
     this.#animatePress(button, highlight, arrow)
-    this.#onMove(direction)
+    this.#onHeldDirectionChange(direction)
+  }
+
+  #handleRelease(event) {
+    event.stopPropagation()
+    if (event.pointerId !== this.#activePointerId) return
+
+    this.#releaseActiveDirection()
+  }
+
+  #releaseActiveDirection() {
+    if (this.#activePointerId === null) return
+
+    const activeButtonVisuals = this.#activeButtonVisuals
+    this.#activePointerId = null
+    this.#activeButtonVisuals = null
+    this.#animateRelease(activeButtonVisuals)
+    this.#onHeldDirectionChange(null)
   }
 
   #animatePress(button, highlight, arrow) {
@@ -104,8 +133,21 @@ export default class SokobanDpad extends Container {
     const timeline = gsap
       .timeline({onComplete: () => this.#pressTimelines.delete(button)})
       .to(button.scale, {x: 1, y: 1, duration: 0.2, ease: 'power2.out'})
-      .set(arrow, {tint: ARROW_COLOR}, 0.22)
-      .to(highlight, {alpha: 0, duration: 0.42}, 0.04)
+
+    this.#pressTimelines.set(button, timeline)
+  }
+
+  #animateRelease(activeButtonVisuals) {
+    if (!activeButtonVisuals) return
+
+    const {button, highlight, arrow} = activeButtonVisuals
+    this.#pressTimelines.get(button)?.kill()
+    arrow.tint = ARROW_COLOR
+
+    const timeline = gsap
+      .timeline({onComplete: () => this.#pressTimelines.delete(button)})
+      .to(button.scale, {x: 1, y: 1, duration: 0.12, ease: 'power2.out'}, 0)
+      .to(highlight, {alpha: 0, duration: 0.18, ease: 'power2.out'}, 0)
 
     this.#pressTimelines.set(button, timeline)
   }

@@ -53,10 +53,10 @@ export default class SokobanBoard extends Container {
     this.#deadlockTimeline = this.#createDeadlockTimeline()
   }
 
-  animateMove(moveResult) {
+  animateMove(moveResult, {isContinuous = false} = {}) {
     return new Promise((resolve) => {
       this.#updatePlayerDepth()
-      this.#movementTimeline = this.#createMovementTimeline(moveResult, resolve)
+      this.#movementTimeline = this.#createMovementTimeline(moveResult, isContinuous, resolve)
     })
   }
 
@@ -224,31 +224,31 @@ export default class SokobanBoard extends Container {
       .stroke({color: 0xff6b75, width: this.#tileSize * 0.05})
   }
 
-  #createMovementTimeline(moveResult, resolve) {
+  #createMovementTimeline(moveResult, isContinuous, resolve) {
     const timeline = gsap.timeline({
       onComplete: () => this.#finishMovement(resolve),
     })
     const playerPosition = this.#getPlayerPixelPosition()
 
-    timeline.to(this.#player.position, this.#getMovementVars(playerPosition))
-    this.#addBoxMovement(timeline, moveResult.pushedBox)
+    timeline.to(this.#player.position, this.#getMovementVars(playerPosition, isContinuous))
+    this.#addBoxMovement(timeline, moveResult.pushedBox, isContinuous)
     return timeline
   }
 
-  #addBoxMovement(timeline, pushedBox) {
+  #addBoxMovement(timeline, pushedBox, isContinuous) {
     if (!pushedBox) return
 
     const boxView = this.#findBoxView(pushedBox.from)
     if (!boxView) return
 
-    timeline.to(boxView.position, this.#getMovementVars(this.#getBoxPixelPosition(pushedBox.to)), '<')
+    timeline.to(boxView.position, this.#getMovementVars(this.#getBoxPixelPosition(pushedBox.to), isContinuous), '<')
   }
 
-  #getMovementVars(position) {
+  #getMovementVars(position, isContinuous) {
     return {
       ...position,
       duration: SOKOBAN_SETTINGS.moveDuration,
-      ease: SOKOBAN_SETTINGS.moveEase,
+      ease: isContinuous ? SOKOBAN_SETTINGS.continuousMoveEase : SOKOBAN_SETTINGS.moveEase,
     }
   }
 

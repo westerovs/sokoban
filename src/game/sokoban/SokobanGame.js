@@ -22,6 +22,7 @@ export default class SokobanGame extends Container {
   #dpadVisibilityHandler
   #isInputEnabled = false
   #isAnimatingMove = false
+  #heldDirection = null
 
   constructor({map, levelNumber, pushRecord, onComplete, onMove, canMove}) {
     super({label: 'sokoban-game'})
@@ -36,17 +37,7 @@ export default class SokobanGame extends Container {
   }
 
   move(direction) {
-    if (!this.#canUseControls()) return false
-
-    const levelDirection = this.#board.getLevelDirection(direction)
-    const result = this.#level.move(levelDirection)
-    if (!result.moved) return false
-
-    this.#isAnimatingMove = true
-    this.#hud.setSteps(this.#level.steps)
-    this.#onMove?.()
-    this.#board.animateMove(result).then(() => this.#finishMove(result))
-    return true
+    return this.#startMove(direction, null)
   }
 
   setInputEnabled(isEnabled) {
@@ -94,6 +85,21 @@ export default class SokobanGame extends Container {
     super.destroy(options)
   }
 
+  #startMove(direction, heldDirection) {
+    if (!this.#canUseControls()) return false
+
+    const levelDirection = this.#board.getLevelDirection(direction)
+    const result = this.#level.move(levelDirection)
+    if (!result.moved) return false
+
+    this.#isAnimatingMove = true
+    this.#hud.setSteps(this.#level.steps)
+    this.#onMove?.()
+    const isContinuous = Boolean(heldDirection)
+    this.#board.animateMove(result, {isContinuous}).then(() => this.#finishMove(result))
+    return true
+  }
+
   #init() {
     this.#level = new SokobanLevel(this.#map)
     this.#board = new SokobanBoard(this.#level)
@@ -103,9 +109,10 @@ export default class SokobanGame extends Container {
       onUndo: () => this.undo(),
       onRestart: () => this.restart(),
     })
-    this.#dpad = new SokobanDpad((direction) => this.move(direction))
+    this.#dpad = new SokobanDpad((direction) => this.#setHeldDirection(direction))
     this.#input = new SokobanInput({
       onMove: (direction) => this.move(direction),
+      onHeldDirectionChange: (direction) => this.#setHeldDirection(direction),
       pointerTarget: Locator.game.app.canvas,
     })
     this.#dpadVisibilityHandler = this.#setDpadVisible.bind(this)
@@ -118,13 +125,30 @@ export default class SokobanGame extends Container {
     return this.#isInputEnabled && !this.#isAnimatingMove && this.#canMove?.() !== false
   }
 
+  #setHeldDirection(direction) {
+    if (direction === this.#heldDirection) return
+
+    this.#heldDirection = direction
+    this.#continueHeldMovement()
+  }
+
+  #continueHeldMovement() {
+    if (!this.#heldDirection) return
+    this.#startMove(this.#heldDirection, this.#heldDirection)
+  }
+
   #finishMove(result) {
     this.#isAnimatingMove = false
     if (result.deadlockedBox) {
       this.#board.showDeadlock(result.deadlockedBox)
       this.#hud.showDeadlockFeedback()
     }
-    if (result.completed) this.#complete()
+    if (result.completed) {
+      this.#complete()
+      return
+    }
+
+    this.#continueHeldMovement()
   }
 
   #updateViews() {
