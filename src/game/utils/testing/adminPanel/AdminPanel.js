@@ -13,11 +13,15 @@ import {
   createButton,
   createCheckboxItem,
   createCheckboxRow,
+  createFieldsetCheckbox,
   createFieldsetGrid,
   createNumberItem,
   createNumberRow,
   createSelectRow,
 } from './templates.js'
+
+const DEBUG_KEY = 'isDebug'
+const LEARNING_TOGGLE_KEY = 'completeLearning'
 
 // todo переусложнённая генерация. Изначально было пара параметров и разрослось.
 export default class AdminPanel {
@@ -67,7 +71,7 @@ export default class AdminPanel {
     return {
       checkboxes: [
         {
-          key: 'isDebug',
+          key: DEBUG_KEY,
           label: 'debug:',
           value: LocalStorage.isDebug,
           tooltip: 'режим дебага, если он выключен то игнорируются остальные параметры дебага',
@@ -140,18 +144,7 @@ export default class AdminPanel {
         },
       ],
 
-      selects: [{key: STORAGE_KEYS.skinIndex, label: 'skin', min: 1, max: 5, value: playerData.skinIndex, tooltip: 'выбор скина'}],
-
       numberInputs: [
-        {
-          key: STORAGE_KEYS.partIndex,
-          label: 'part',
-          min: 1,
-          max: 99999,
-          value: playerData.partIndex,
-          tooltip:
-            'выбор ни на что не влияет, нужен если хочется накрутить для экрана загрузки. Может быть выше skinIndex. Обновляется когда пройден круг уровней',
-        },
         {
           key: STORAGE_KEYS.userLevel,
           label: 'userLevel',
@@ -171,7 +164,6 @@ export default class AdminPanel {
 
   #initState() {
     this.#config.checkboxes.forEach((cb) => (this.#state[cb.key] = cb.value))
-    this.#config.selects.forEach((sel) => (this.#state[sel.key] = sel.value))
     this.#config.numberInputs.forEach((inp) => (this.#state[inp.key] = inp.value))
     this.#state[STORAGE_KEYS.levelIndex] = this.#storage.playerData.levelIndex
     this.#state.adminLocationId = getLevelEntryByIndex(this.#state[STORAGE_KEYS.levelIndex]).location.id
@@ -183,7 +175,7 @@ export default class AdminPanel {
     this.#adminPanelWindow.innerHTML = `
       <section class="admin-panel__window" role="dialog" aria-modal="true" aria-label="Панель разработчика">
         <header class="admin-panel__header">
-          <div><h2>Панель разработчика</h2><p>Локации, прогресс и тестовые параметры</p></div>
+          <h2>Панель разработчика</h2>
           <button class="admin-panel__close" type="button" aria-label="Закрыть">&times;</button>
         </header>
         <div class="admin-panel__content"></div>
@@ -198,21 +190,39 @@ export default class AdminPanel {
 
   #renderComponents = () => {
     this.#renderLevelNavigation()
-    this.#renderCheckboxes()
+    this.#renderDebugGroup()
     this.#renderLearningGroup()
     this.#renderStoreGroup()
-    this.#renderSelects()
-    this.#renderNumberInputs()
+    this.#renderPlayerGroup()
     this.#renderButtons()
     this.#renderInfoSection()
   }
 
-  #renderCheckboxes() {
+  #renderDebugGroup() {
     const grid = createFieldsetGrid(this.#panel, 'Debug')
-    this.#config.checkboxes
-      .filter((cb) => !this.#learningKeys.includes(cb.key) && !this.#storeKeys.includes(cb.key))
-      .forEach((cb) => {
-        grid.append(createCheckboxRow(cb, this.#onCheckboxChange))
+    const debugCheckboxes = this.#getDebugCheckboxes()
+    const debugToggle = debugCheckboxes.find(({key}) => key === DEBUG_KEY)
+
+    createFieldsetCheckbox(grid, {...debugToggle, ariaLabel: 'Включить режим отладки'}, this.#onCheckboxChange)
+    debugCheckboxes
+      .filter(({key}) => key !== DEBUG_KEY)
+      .forEach((checkbox) => grid.append(createCheckboxRow(checkbox, this.#onCheckboxChange)))
+
+    this.#updateDebugInputsAvailability()
+  }
+
+  #getDebugCheckboxes() {
+    return this.#config.checkboxes.filter(({key}) => !this.#learningKeys.includes(key) && !this.#storeKeys.includes(key))
+  }
+
+  #updateDebugInputsAvailability() {
+    const isDebugEnabled = !!this.#state[DEBUG_KEY]
+
+    this.#getDebugCheckboxes()
+      .filter(({key}) => key !== DEBUG_KEY)
+      .forEach(({key, disabled}) => {
+        const input = this.#panel.querySelector(`input[data-key="${key}"]`)
+        if (input) input.disabled = !isDebugEnabled || !!disabled
       })
   }
 
@@ -240,13 +250,16 @@ export default class AdminPanel {
 
   #renderLearningGroup() {
     const grid = createFieldsetGrid(this.#panel, 'Learning')
-
-    const fieldset = grid.closest('fieldset')
-    const legend = fieldset?.querySelector('legend')
-
-    fieldset?.classList.add('admin-panel__fieldset--clickable')
-
-    legend?.addEventListener('click', () => this.#toggleLearningGroup())
+    createFieldsetCheckbox(
+      grid,
+      {
+        key: LEARNING_TOGGLE_KEY,
+        value: false,
+        ariaLabel: 'Отметить всё обучение выполненным',
+        tooltip: 'Отметить все этапы обучения выполненными',
+      },
+      this.#onLearningToggle,
+    )
 
     this.#config.checkboxes
       .filter((cb) => this.#learningKeys.includes(cb.key))
@@ -255,16 +268,22 @@ export default class AdminPanel {
       })
   }
 
-  #toggleLearningGroup() {
-    const values = this.#learningKeys.map((k) => this.#state[k])
-    const enable = !values.every(Boolean)
-
+  #setLearningValues(checked) {
     this.#learningKeys.forEach((key) => {
-      this.#state[key] = enable
+      this.#state[key] = checked
 
       const input = this.#panel.querySelector(`input[data-key="${key}"]`)
-      if (input) input.checked = enable
+      if (input) input.checked = checked
     })
+  }
+
+  #onLearningToggle = (event) => {
+    this.#setLearningValues(event.target.checked)
+  }
+
+  #updateLearningToggle() {
+    const input = this.#panel.querySelector(`input[data-key="${LEARNING_TOGGLE_KEY}"]`)
+    if (input) input.checked = this.#learningKeys.every((key) => !!this.#state[key])
   }
 
   #renderStoreGroup() {
@@ -285,26 +304,13 @@ export default class AdminPanel {
       })
   }
 
-  #renderSelects() {
-    this.#config.selects.forEach((data) => {
-      const opts = []
+  #renderPlayerGroup() {
+    const grid = createFieldsetGrid(this.#panel, 'Игрок')
 
-      const min = data.min ?? 0
-      for (let i = min; i <= data.max; i++) {
-        let label = i
-
-        opts.push({value: i, label})
-      }
-
-      this.#panel.append(createSelectRow(data, opts, this.#onSelectChange))
-    })
-  }
-
-  #renderNumberInputs() {
     this.#config.numberInputs
       .filter((inp) => !this.#storeKeys.includes(inp.key))
       .forEach((inp) => {
-        this.#panel.append(createNumberRow(inp, this.#onNumberChange))
+        grid.append(createNumberRow(inp, this.#onNumberChange))
       })
   }
 
@@ -326,7 +332,11 @@ export default class AdminPanel {
 
     this.#state[key] = checked
 
-    if (key === 'isDebug') LocalStorage.isDebug = checked
+    if (key === DEBUG_KEY) {
+      LocalStorage.isDebug = checked
+      this.#updateDebugInputsAvailability()
+    }
+    if (this.#learningKeys.includes(key)) this.#updateLearningToggle()
     if (key === 'isLog') LocalStorage.isLog = checked
     if (key === 'forceNewYear') LocalStorage.forceNewYear = checked
     if (key === 'isItemRects') LocalStorage.isItemRects = checked

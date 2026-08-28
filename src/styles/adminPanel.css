@@ -39,19 +39,12 @@
   border-bottom: 1px solid #34415a;
 }
 
-.admin-panel__header h2,
-.admin-panel__header p {
+.admin-panel__header h2 {
   margin: 0;
 }
 
 .admin-panel__header h2 {
   font-size: 20px;
-}
-
-.admin-panel__header p {
-  margin-top: 3px;
-  color: #93a1b9;
-  font-size: 12px;
 }
 
 .admin-panel__content {
@@ -83,12 +76,10 @@
   grid-column: 1 / -1;
 }
 
-.admin-panel__fieldset--clickable legend {
-  cursor: pointer;
-}
-
-.admin-panel__fieldset--clickable legend:hover {
-  color: #d6e2ff;
+.admin-panel__fieldset-legend--with-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .admin-panel__fieldset-container {

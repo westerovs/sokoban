@@ -15,6 +15,25 @@ const createFieldsetGrid = (panel, title) => {
   return grid
 }
 
+const createFieldsetCheckbox = (grid, data, onChange) => {
+  const legend = grid.closest('fieldset')?.querySelector('legend')
+  const input = document.createElement('input')
+
+  input.id = `cb_${data.key}`
+  input.type = 'checkbox'
+  input.checked = !!data.value
+  input.disabled = !!data.disabled
+  input.dataset.key = data.key
+  input.setAttribute('aria-label', data.ariaLabel)
+  if (data.tooltip) input.title = data.tooltip
+  input.addEventListener('change', onChange)
+
+  legend?.classList.add('admin-panel__fieldset-legend--with-checkbox')
+  legend?.append(input)
+
+  return input
+}
+
 const createCheckboxRow = (data, onChange) => {
   const row = document.createElement('div')
   row.className = 'admin-panel__row'
@@ -123,4 +142,13 @@ const createButton = (text, className, onClick) => {
   return btn
 }
 
-export {createButton, createCheckboxItem, createCheckboxRow, createFieldsetGrid, createNumberItem, createNumberRow, createSelectRow}
+export {
+  createButton,
+  createCheckboxItem,
+  createCheckboxRow,
+  createFieldsetCheckbox,
+  createFieldsetGrid,
+  createNumberItem,
+  createNumberRow,
+  createSelectRow,
+}
