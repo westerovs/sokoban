@@ -216,4 +216,6 @@ Production-сборка ориентирована на современные �
 - [Устройство и управление UiLayer](docs/ui-layer.md)
 - [Адаптивность, центрирование и привязка к краям](docs/adaptive-ui.md)
 - [Модальные окна, fade и очистка](docs/modals.md)
-- [Уровни Sokoban: XSB, добавление и проверка решателем](docs/sokoban-levels.md)
+- [Уровни Sokoban: устройство, XSB и проверка](docs/levels/overview.md)
+- [Добавление уровня в существующую карточку](docs/levels/add-level-to-existing-card.md)
+- [Создание карточки локации и добавление в главы](docs/levels/create-location-card.md)
