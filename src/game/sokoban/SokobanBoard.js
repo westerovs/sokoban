@@ -8,6 +8,14 @@ import {ROTATED_DIRECTIONS, SOKOBAN_TEXTURES} from './config.js'
 import {SOKOBAN_SETTINGS} from './settings.js'
 import SokobanBoxView from './SokobanBoxView.js'
 
+const BOARD_Z_INDEX = {
+  ground: 0,
+  boxes: 1,
+  walls: 2,
+  player: 3,
+  deadlockHighlight: 4,
+}
+
 export default class SokobanBoard extends Container {
   #level
   #tileSize = SOKOBAN_SETTINGS.tileSize
@@ -89,17 +97,18 @@ export default class SokobanBoard extends Container {
   }
 
   #init() {
-    const staticTiles = this.#createStaticTiles()
+    const {groundTiles, wallTiles} = this.#createTileLayers()
     this.#boxesContainer = new Container({label: 'sokoban-boxes'})
     this.#player = this.#createPlayer()
     this.#deadlockHighlight = this.#createDeadlockHighlight()
-    staticTiles.zIndex = 0
-    this.#boxesContainer.zIndex = 1
-    this.#player.zIndex = 2
-    this.#deadlockHighlight.zIndex = 3
+    groundTiles.zIndex = BOARD_Z_INDEX.ground
+    this.#boxesContainer.zIndex = BOARD_Z_INDEX.boxes
+    wallTiles.zIndex = BOARD_Z_INDEX.walls
+    this.#player.zIndex = BOARD_Z_INDEX.player
+    this.#deadlockHighlight.zIndex = BOARD_Z_INDEX.deadlockHighlight
 
     this.#createBoxes()
-    this.addChild(staticTiles, this.#boxesContainer, this.#player, this.#deadlockHighlight)
+    this.addChild(groundTiles, this.#boxesContainer, wallTiles, this.#player, this.#deadlockHighlight)
     this.pivot.set(this.#boardWidth / 2, this.#boardHeight / 2)
     this.update()
     this.resize()
@@ -141,29 +150,30 @@ export default class SokobanBoard extends Container {
     return Math.min(preferredPadding, visibleWidth * SOKOBAN_SETTINGS.maxHorizontalPaddingRatio)
   }
 
-  #createStaticTiles() {
-    const tiles = new Container({label: 'sokoban-static-tiles'})
+  #createTileLayers() {
+    const groundTiles = new Container({label: 'sokoban-ground-tiles'})
+    const wallTiles = new Container({label: 'sokoban-wall-tiles'})
 
     for (let y = 0; y < this.#level.height; y++) {
       for (let x = 0; x < this.#level.width; x++) {
-        this.#addTileViews(tiles, {x, y})
+        this.#addTileViews(groundTiles, wallTiles, {x, y})
       }
     }
 
-    return tiles
+    return {groundTiles, wallTiles}
   }
 
-  #addTileViews(tiles, position) {
+  #addTileViews(groundTiles, wallTiles, position) {
     if (this.#level.isVoid(position)) return
 
     if (this.#level.isWall(position)) {
-      tiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.wall, position, 'wall'))
+      wallTiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.wall, position, 'wall'))
       return
     }
 
-    tiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.floor, position, 'floor'))
+    groundTiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.floor, position, 'floor'))
     if (this.#level.isTarget(position)) {
-      tiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.target, position, 'target'))
+      groundTiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.target, position, 'target'))
     }
   }
 
