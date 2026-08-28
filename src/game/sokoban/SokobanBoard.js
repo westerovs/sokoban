@@ -11,9 +11,9 @@ import SokobanBoxView from './SokobanBoxView.js'
 const BOARD_Z_INDEX = {
   ground: 0,
   boxes: 1,
-  walls: 2,
-  player: 3,
-  deadlockHighlight: 4,
+  firstDepthRow: 2,
+  playerRowOffset: 1,
+  deadlockHighlight: SOKOBAN_SETTINGS.maxBoardRows * 2 + 2,
 }
 
 export default class SokobanBoard extends Container {
@@ -55,6 +55,7 @@ export default class SokobanBoard extends Container {
 
   animateMove(moveResult) {
     return new Promise((resolve) => {
+      this.#updatePlayerDepth()
       this.#movementTimeline = this.#createMovementTimeline(moveResult, resolve)
     })
   }
@@ -97,18 +98,16 @@ export default class SokobanBoard extends Container {
   }
 
   #init() {
-    const {groundTiles, wallTiles} = this.#createTileLayers()
+    const {groundTiles, wallRows} = this.#createTileLayers()
     this.#boxesContainer = new Container({label: 'sokoban-boxes'})
     this.#player = this.#createPlayer()
     this.#deadlockHighlight = this.#createDeadlockHighlight()
     groundTiles.zIndex = BOARD_Z_INDEX.ground
     this.#boxesContainer.zIndex = BOARD_Z_INDEX.boxes
-    wallTiles.zIndex = BOARD_Z_INDEX.walls
-    this.#player.zIndex = BOARD_Z_INDEX.player
     this.#deadlockHighlight.zIndex = BOARD_Z_INDEX.deadlockHighlight
 
     this.#createBoxes()
-    this.addChild(groundTiles, this.#boxesContainer, wallTiles, this.#player, this.#deadlockHighlight)
+    this.addChild(groundTiles, this.#boxesContainer, ...wallRows, this.#player, this.#deadlockHighlight)
     this.pivot.set(this.#boardWidth / 2, this.#boardHeight / 2)
     this.update()
     this.resize()
@@ -152,15 +151,23 @@ export default class SokobanBoard extends Container {
 
   #createTileLayers() {
     const groundTiles = new Container({label: 'sokoban-ground-tiles'})
-    const wallTiles = new Container({label: 'sokoban-wall-tiles'})
+    const wallRows = this.#createWallRows()
 
     for (let y = 0; y < this.#level.height; y++) {
       for (let x = 0; x < this.#level.width; x++) {
-        this.#addTileViews(groundTiles, wallTiles, {x, y})
+        this.#addTileViews(groundTiles, wallRows[y], {x, y})
       }
     }
 
-    return {groundTiles, wallTiles}
+    return {groundTiles, wallRows}
+  }
+
+  #createWallRows() {
+    return Array.from({length: this.#level.height}, (_, rowIndex) => {
+      const wallRow = new Container({label: `sokoban-wall-row-${rowIndex}`})
+      wallRow.zIndex = this.#getWallRowDepth(rowIndex)
+      return wallRow
+    })
   }
 
   #addTileViews(groundTiles, wallTiles, position) {
@@ -314,6 +321,18 @@ export default class SokobanBoard extends Container {
   #updatePlayer() {
     const {x, y} = this.#getPlayerPixelPosition()
     this.#player.position.set(x, y)
+    this.#updatePlayerDepth()
+  }
+
+  // zIndex обновляется динамически на каждом ходу. Это нужно, что бы корректно "ходить между стен",
+  // т.к чем ниже ряд стен, тем выше у них zIndex
+  #updatePlayerDepth() {
+    this.#player.zIndex = this.#getWallRowDepth(this.#level.playerPosition.y) + BOARD_Z_INDEX.playerRowOffset
+  }
+
+  #getWallRowDepth(rowIndex) {
+    // Шаг в два слоя оставляет место игроку между соседними рядами кустов.
+    return BOARD_Z_INDEX.firstDepthRow + rowIndex * 2
   }
 
   #updateBoxTargetStates() {
