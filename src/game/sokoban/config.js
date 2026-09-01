@@ -24,10 +24,10 @@ const ROTATED_DIRECTIONS = Object.freeze({
 })
 
 const SOKOBAN_TEXTURES = Object.freeze({
-  floor: 'tile-floor',
-  wall: 'tile-bush',
+  floor: 'floor1',
+  wall: 'wall1',
   target: 'tile-dot',
-  box: 'tile-pumpkin',
+  box: 'box1',
   player: 'tile-player',
 })
 
