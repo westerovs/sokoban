@@ -1,0 +1,147 @@
+{
+  "id": "antarctica-2",
+  "titleKey": "locations.antarctica2",
+  "cardTexture": "card-antarctica",
+  "background": "antarctica",
+  "ambience": "amb_antarctica",
+  "music": "m_antarctica",
+  "levels": [
+    {
+      "id": "sokoban-042",
+      "levelName": "level41",
+      "difficulty": "medium",
+      "difficultyRank": 31,
+      "difficultyScore": 407.2,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 668, "pushes": 259, "bestPushes": 231, "timeSeconds": 0},
+      "map": [
+        "__#################",
+        "###@##         ...#",
+        "#    #         ...#",
+        "# $  #         ...#",
+        "# $$ #         ...#",
+        "## $ ###$##########",
+        "_# ###  $ #________",
+        "##   $  $ #________",
+        "#  $ #  $ #________",
+        "# $  #    #________",
+        "#  $ #    #________",
+        "#    #    #________",
+        "###########________"
+      ]
+    },
+    {
+      "id": "sokoban-043",
+      "levelName": "level42",
+      "difficulty": "medium",
+      "difficultyRank": 32,
+      "difficultyScore": 408.9,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 666, "pushes": 225, "bestPushes": 203, "timeSeconds": 1},
+      "map": [
+        "####################",
+        "#  #  ##    #   @###",
+        "##    $    # $###  #",
+        "##$# $ ##$# $ $    #",
+        "#   $#    $      ###",
+        "# ##   $ ###  #....#",
+        "# # $# # # # #....##",
+        "#    $ $ #  #....###",
+        "##$ ###  $ #....####",
+        "#  # $        ######",
+        "#      # #    ######",
+        "####################"
+      ]
+    },
+    {
+      "id": "sokoban-044",
+      "levelName": "level43",
+      "difficulty": "medium",
+      "difficultyRank": 33,
+      "difficultyScore": 410.45,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 843, "pushes": 204, "bestPushes": 174, "timeSeconds": 1},
+      "map": [
+        "_###########",
+        "_#     ##  #",
+        "_#   $   $ #",
+        "#### ## $$ #",
+        "#   $ #    #",
+        "# $$$ # ####",
+        "#   # # $ ##",
+        "#  #  #  $ #",
+        "# $# $#    #",
+        "#   ..# ####",
+        "####.. $ #@#",
+        "#.....# $# #",
+        "##....#  $ #",
+        "_##..##    #",
+        "__##########"
+      ]
+    },
+    {
+      "id": "sokoban-045",
+      "levelName": "level44",
+      "difficulty": "medium",
+      "difficultyRank": 34,
+      "difficultyScore": 422.45,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 683, "pushes": 236, "bestPushes": 212, "timeSeconds": 1},
+      "map": [
+        "####################",
+        "#     #   #####    #",
+        "## $  #   ####  $  #",
+        "#### $$   #..#  #  #",
+        "#  $  $  ##..#### ##",
+        "# $   ###....   $$ #",
+        "#  #$#   ....# # $ #",
+        "# #  # $ ..###$#   #",
+        "# #   $ #..#   ##  #",
+        "#   $#  ####   # $##",
+        "# #  #    @#      ##",
+        "####################"
+      ]
+    },
+    {
+      "id": "sokoban-046",
+      "levelName": "level45",
+      "difficulty": "medium",
+      "difficultyRank": 35,
+      "difficultyScore": 426.25,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 815, "pushes": 224, "bestPushes": 212, "timeSeconds": 1},
+      "map": [
+        "################_",
+        "#              #_",
+        "# # ######     #_",
+        "# #  $ $ $ $#  #_",
+        "# #   $@$   ## ##",
+        "# #  $ $ $###...#",
+        "# #   $ $  ##...#",
+        "# ###$$$ $ ##...#",
+        "#     # ## ##...#",
+        "#####   ## ##...#",
+        "____#####     ###",
+        "________#     #__",
+        "________#######__"
+      ]
+    },
+    {
+      "id": "sokoban-047",
+      "levelName": "level46",
+      "difficulty": "medium",
+      "difficultyRank": 36,
+      "difficultyScore": 427.2,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 748, "pushes": 231, "bestPushes": 187, "timeSeconds": 1},
+      "map": [
+        "####################",
+        "#   #    #   #   #@#",
+        "# $      $   $   # #",
+        "## ###..## ###     #",
+        "#   #....#$#  $### #",
+        "# $ #....#  $  $ $ #",
+        "#   #....# # # $ $ #",
+        "#   ##..##   #$#   #",
+        "##$##    ##  #  #$##",
+        "#   $  $     #  #  #",
+        "#   #    #   #     #",
+        "####################"
+      ]
+    }
+  ]
+}

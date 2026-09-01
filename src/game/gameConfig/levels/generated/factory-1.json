@@ -1,0 +1,150 @@
+{
+  "id": "factory-1",
+  "titleKey": "locations.factory",
+  "cardTexture": "card-factory",
+  "background": "factory",
+  "ambience": "amb_garden",
+  "music": "m_garden",
+  "levels": [
+    {
+      "id": "sokoban-036",
+      "levelName": "level35",
+      "difficulty": "easy",
+      "difficultyRank": 25,
+      "difficultyScore": 358.05,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 507, "pushes": 202, "bestPushes": 194, "timeSeconds": 3},
+      "map": [
+        "#######_#########",
+        "#     #_#   ##  #",
+        "# ### #_#   $   #",
+        "# # $ ###   $   #",
+        "#   $$      ##$ #",
+        "#    ####   ##  #",
+        "#@############ ##",
+        "###..    #####$ #",
+        "__#..    ####   #",
+        "__#..       $$  #",
+        "__#..    #### $ #",
+        "__#..    #__#   #",
+        "__########__#####"
+      ]
+    },
+    {
+      "id": "sokoban-037",
+      "levelName": "level36",
+      "difficulty": "easy",
+      "difficultyRank": 26,
+      "difficultyScore": 361.5,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 650, "pushes": 188, "bestPushes": 168, "timeSeconds": 1},
+      "map": [
+        "_#########____",
+        "_#....   ##___",
+        "_#.#.#  $ ##__",
+        "##....# # @##_",
+        "# ....#  #  ##",
+        "#     #$ ##$ #",
+        "## ###  $    #",
+        "_#$  $ $ $#  #",
+        "_# #  $ $ ## #",
+        "_#  ###  ##  #",
+        "_#    ## ## ##",
+        "_#  $ #  $  #_",
+        "_###$ $   ###_",
+        "___#  #####___",
+        "___####_______"
+      ]
+    },
+    {
+      "id": "sokoban-038",
+      "levelName": "level37",
+      "difficulty": "easy",
+      "difficultyRank": 27,
+      "difficultyScore": 379.65,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 631, "pushes": 185, "bestPushes": 139, "timeSeconds": 3},
+      "map": [
+        "______####___",
+        "__#####  #___",
+        "_##     $#___",
+        "## $  ## ###_",
+        "#@$ $ # $  #_",
+        "#### ##   $#_",
+        "_#....#$ $ #_",
+        "_#....#   $#_",
+        "_#....  $$ ##",
+        "_#... # $   #",
+        "_######$ $  #",
+        "______#   ###",
+        "______#$ ###_",
+        "______#  #___",
+        "______####___"
+      ]
+    },
+    {
+      "id": "sokoban-039",
+      "levelName": "level38",
+      "difficulty": "easy",
+      "difficultyRank": 28,
+      "difficultyScore": 388.1,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 634, "pushes": 209, "bestPushes": 209, "timeSeconds": 1},
+      "map": [
+        "_________####_____",
+        "_#########  ##____",
+        "##  $      $ #####",
+        "#   ## ##   ##...#",
+        "# #$$ $ $$#$##...#",
+        "# #   @   #   ...#",
+        "#  $# ###$$   ...#",
+        "# $  $$  $ ##....#",
+        "###$       #######",
+        "__#  #######______",
+        "__####____________"
+      ]
+    },
+    {
+      "id": "sokoban-040",
+      "levelName": "level39",
+      "difficulty": "easy",
+      "difficultyRank": 29,
+      "difficultyScore": 401.5,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 590, "pushes": 237, "bestPushes": 237, "timeSeconds": 1},
+      "map": [
+        "__________#######",
+        "__________#  ...#",
+        "______#####  ...#",
+        "______#      . .#",
+        "______#  ##  ...#",
+        "______## ##  ...#",
+        "_____### ########",
+        "_____# $$$ ##____",
+        "_#####  $ $ #####",
+        "##   #$ $   #   #",
+        "#@ $  $    $  $ #",
+        "###### $$ $ #####",
+        "_____#      #____",
+        "_____########____"
+      ]
+    },
+    {
+      "id": "sokoban-041",
+      "levelName": "level40",
+      "difficulty": "easy",
+      "difficultyRank": 30,
+      "difficultyScore": 405.75,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 685, "pushes": 223, "bestPushes": 211, "timeSeconds": 1},
+      "map": [
+        "####################",
+        "#     #     @#...###",
+        "#     #      ##...##",
+        "# # # ##$## ## ....#",
+        "#   $ #   $$$  ....#",
+        "###$### $$  ### ##.#",
+        "#     $  #    # ####",
+        "#  $  #  ###  # #  #",
+        "## #$##    $  $$   #",
+        "#   $ ##   #  # #  #",
+        "#     #    #  #    #",
+        "####################"
+      ]
+    }
+  ]
+}
