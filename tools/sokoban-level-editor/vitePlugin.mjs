@@ -43,8 +43,18 @@ const createEditorLocations = (catalog) => {
   }))
 }
 
+const readRuntimeCatalog = (paths) => {
+  const locationOrder = JSON.parse(fs.readFileSync(paths.locationsSource, 'utf8')).locations
+  const locations = locationOrder.map(({id}) => {
+    const filePath = path.resolve(paths.locationsOutputDirectory, `${id}.json`)
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  })
+
+  return {locations}
+}
+
 const readEditorData = (paths) => {
-  const catalog = JSON.parse(fs.readFileSync(paths.levelsOutput, 'utf8'))
+  const catalog = readRuntimeCatalog(paths)
   const appearance = JSON.parse(fs.readFileSync(paths.appearance, 'utf8'))
   return {locations: createEditorLocations(catalog), appearance}
 }
@@ -89,7 +99,8 @@ const createPaths = (projectRoot) => ({
   projectRoot,
   appearance: path.resolve(projectRoot, 'levels', 'appearance.json'),
   levelsBuild: path.resolve(projectRoot, 'tools', 'sokoban-levels', 'build.mjs'),
-  levelsOutput: path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'levels.json'),
+  locationsSource: path.resolve(projectRoot, 'levels', 'locations.json'),
+  locationsOutputDirectory: path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'generated'),
 })
 
 const handleRequest = async (request, response, paths) => {
@@ -122,7 +133,7 @@ const createSokobanLevelEditorPlugin = (projectRoot) => {
     name: 'sokoban-level-editor',
     apply: 'serve',
     configureServer(server) {
-      server.watcher.add([paths.appearance, paths.levelsOutput])
+      server.watcher.add([paths.appearance, paths.locationsSource, paths.locationsOutputDirectory])
       server.middlewares.use(async (request, response, next) => {
         if (tryServeTile(request, response, projectRoot)) return
         if (request.url?.split('?')[0] !== API_PATH) return next()

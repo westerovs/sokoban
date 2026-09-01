@@ -7,7 +7,7 @@ import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 
 /**
- * Собирает единый канонический XSB-файл в игровой JSON.
+ * Собирает единый канонический XSB-файл в отдельные игровые JSON по локациям.
  * Внешние пробелы карт превращаются во внутренний символ пустоты `_`.
  */
 
@@ -18,7 +18,10 @@ const levelsSourcePath = path.resolve(levelsDirectory, 'levels.xsb')
 const locationsSourcePath = path.resolve(levelsDirectory, 'locations.json')
 const appearanceSourcePath = path.resolve(levelsDirectory, 'appearance.json')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
-const gameOutputPath = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'levels.json')
+const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels')
+const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
+const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.js')
+const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
 const standardRowPattern = /^[ #.$@*+]+$/
 const metadataKeys = Object.freeze({id: 'id'})
@@ -461,6 +464,63 @@ const writeOutput = (filePath, content) => {
   return true
 }
 
+const removeGeneratedFile = (filePath) => {
+  if (!fs.existsSync(filePath)) return
+  if (isCheckMode) throw new Error(`Требуется удалить устаревший файл: ${path.relative(projectRoot, filePath)}`)
+
+  fs.unlinkSync(filePath)
+}
+
+const getLocationVariableName = (locationId) => {
+  const camelCaseId = locationId.replace(/-([a-z0-9])/g, (_, character) => character.toUpperCase())
+  return `${camelCaseId}Location`
+}
+
+const createGameIndexSource = (locations) => {
+  const imports = [...locations]
+    .sort((first, second) => first.id.localeCompare(second.id, 'en', {numeric: true}))
+    .map((location) => `import ${getLocationVariableName(location.id)} from './generated/${location.id}.json'`)
+    .join('\n')
+  const locationNames = locations.map((location) => `    ${getLocationVariableName(location.id)},`).join('\n')
+
+  return `${imports}
+
+/** Автоматически созданный индекс игровых локаций. Не редактировать вручную. */
+const levels = {
+  locations: [
+${locationNames}
+  ],
+}
+
+export {
+  levels,
+}
+`
+}
+
+const removeStaleLocationFiles = (locations) => {
+  if (!fs.existsSync(gameLocationsDirectory)) return
+
+  const expectedNames = new Set(locations.map((location) => `${location.id}.json`))
+  fs.readdirSync(gameLocationsDirectory, {withFileTypes: true})
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.json') && !expectedNames.has(entry.name))
+    .forEach((entry) => removeGeneratedFile(path.resolve(gameLocationsDirectory, entry.name)))
+}
+
+const writeLocationFiles = async (locations, prettierConfig) => {
+  for (const location of locations) {
+    const filePath = path.resolve(gameLocationsDirectory, `${location.id}.json`)
+    const content = await prettier.format(JSON.stringify(location), {...prettierConfig, parser: 'json'})
+    writeOutput(filePath, content)
+  }
+}
+
+const writeGameIndex = async (locations, prettierConfig) => {
+  const formattedContent = await prettier.format(createGameIndexSource(locations), {...prettierConfig, parser: 'babel'})
+  const content = formattedContent.replace('export {levels}', 'export {\n  levels,\n}')
+  writeOutput(gameIndexOutputPath, content)
+}
+
 const buildLevels = async () => {
   const levels = loadLevels()
   validateUniqueIds(levels)
@@ -468,10 +528,12 @@ const buildLevels = async () => {
   const appearances = loadAppearances(levels)
 
   const gameCatalog = createRuntimeCatalog(levels, locations, appearances)
-  const prettierConfig = await prettier.resolveConfig(gameOutputPath)
-  const gameJson = await prettier.format(JSON.stringify(gameCatalog), {...prettierConfig, parser: 'json'})
-  writeOutput(gameOutputPath, gameJson)
-  console.log(`Уровни собраны: ${levels.length} карт в ${locations.length} локациях; игровой JSON обновлён.`)
+  const prettierConfig = await prettier.resolveConfig(gameIndexOutputPath)
+  await writeLocationFiles(gameCatalog.locations, prettierConfig)
+  await writeGameIndex(gameCatalog.locations, prettierConfig)
+  removeStaleLocationFiles(gameCatalog.locations)
+  removeGeneratedFile(obsoleteGameOutputPath)
+  console.log(`Уровни собраны: ${levels.length} карт в ${locations.length} отдельных файлах локаций.`)
 }
 
 await buildLevels()

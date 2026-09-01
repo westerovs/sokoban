@@ -64,7 +64,7 @@ const save = async () => {
     const data = await saveEditorAppearance(appearance)
     appearance = data.appearance
     isDirty = false
-    showStatus('Оформление сохранено, игровой levels.json обновлён')
+    showStatus('Оформление сохранено, игровые файлы локаций обновлены')
     return true
   } catch (error) {
     showStatus(error.message, 'error')

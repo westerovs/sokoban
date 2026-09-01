@@ -10,7 +10,7 @@
  *
  * Если платформа описана в remoteAssetsPlatforms, копирование работает по правилам:
  * - общие ассеты копируются в assets без папки levels
- * - levels наполняется динамически по src/game/gameConfig/levels/levels.json
+ * - levels наполняется динамически по JSON-файлам локаций из src/game/gameConfig/levels/generated
  * - уровни с isRemote: false копируются в assets/levels
  * - уровни с isRemote: true копируются в remote-assets/assets/levels
  *
@@ -25,7 +25,7 @@ const projectRoot = path.resolve(__dirname, '..', '..')
 const assetsSourceDir = path.resolve(projectRoot, 'public', 'assets')
 const distDir = path.resolve(projectRoot, 'dist')
 
-const levelsConfigPath = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'levels.json')
+const levelsConfigDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'generated')
 const levelsSourceDir = path.resolve(assetsSourceDir, 'levels')
 const remoteAssetsDirName = 'remote-assets'
 
@@ -71,7 +71,7 @@ const copyAssetsWithoutLevels = (assetsOutputDir) => {
   const entries = fs.readdirSync(assetsSourceDir, {withFileTypes: true})
   
   for (const entry of entries) {
-    // levels собирается отдельно по levels.json, чтобы разделить local и remote уровни.
+    // levels собирается отдельно по файлам локаций, чтобы разделить local и remote уровни.
     if (entry.name === 'levels') {
       continue
     }
@@ -116,13 +116,24 @@ const copyLevelAssets = (levelName, levelData, levelsOutputDir) => {
   )
 }
 
-// Копирует уровни по levels.json и разделяет их на local и remote.
-const copyDynamicLevels = (assetsOutputDir, remoteAssetsOutputDir) => {
-  if (!fs.existsSync(levelsConfigPath)) {
-    throw new Error(`Levels config not found: ${levelsConfigPath}`)
+// Загружает уровни из отдельных JSON-файлов локаций.
+const readLevelConfigs = () => {
+  if (!fs.existsSync(levelsConfigDirectory)) {
+    throw new Error(`Levels config directory not found: ${levelsConfigDirectory}`)
   }
-  
-  const levelsConfig = JSON.parse(fs.readFileSync(levelsConfigPath, 'utf8'))
+
+  return fs.readdirSync(levelsConfigDirectory, {withFileTypes: true})
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+    .flatMap((entry) => {
+      const location = JSON.parse(fs.readFileSync(path.resolve(levelsConfigDirectory, entry.name), 'utf8'))
+      if (!Array.isArray(location.levels)) throw new Error(`Invalid location config: ${entry.name}`)
+      return location.levels
+    })
+}
+
+// Копирует уровни по файлам локаций и разделяет их на local и remote.
+const copyDynamicLevels = (assetsOutputDir, remoteAssetsOutputDir) => {
+  const levelsConfig = readLevelConfigs()
   const levelsOutputDir = path.resolve(assetsOutputDir, 'levels')
   const remoteLevelsOutputDir = path.resolve(remoteAssetsOutputDir, 'levels')
   
@@ -130,8 +141,8 @@ const copyDynamicLevels = (assetsOutputDir, remoteAssetsOutputDir) => {
   
   let remoteLevelsCount = 0
   
-  for (const levelName in levelsConfig) {
-    const levelData = levelsConfig[levelName]
+  for (const levelData of levelsConfig) {
+    const levelName = levelData.id
     
     // isRemote: true выносит уровень в remote-assets, чтобы не класть его в основной билд.
     if (levelData.isRemote) {
