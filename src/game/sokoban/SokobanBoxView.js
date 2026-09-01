@@ -1,32 +1,31 @@
 import {Container} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {applyTileVisualScale} from './applyTileVisualScale.js'
-import {SOKOBAN_TEXTURES} from './config.js'
 import {SOKOBAN_SETTINGS} from './settings.js'
 
 export default class SokobanBoxView extends Container {
   #tileSize
   #box
 
-  constructor(index, tileSize) {
-    super({label: 'sokoban-box-' + index})
+  constructor(id, tileSize, textureName) {
+    super({label: 'sokoban-' + id})
 
     this.#tileSize = tileSize
-    this.#init(index)
+    this.#init(id, textureName)
   }
 
   setOnTarget(isOnTarget) {
     this.#box.tint = isOnTarget ? SOKOBAN_SETTINGS.boxOnTargetTint : 0xffffff
   }
 
-  #init(index) {
-    this.#box = this.#createBox(index)
+  #init(id, textureName) {
+    this.#box = this.#createBox(id, textureName)
     this.addChild(this.#box)
   }
 
-  #createBox(index) {
-    const box = GameUtils.createSprite(SOKOBAN_TEXTURES.box, {
-      label: 'sokoban-box-sprite-' + index,
+  #createBox(id, textureName) {
+    const box = GameUtils.createSprite(textureName, {
+      label: 'sokoban-box-sprite-' + id,
       anchorY: 1,
     })
 

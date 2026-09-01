@@ -4,6 +4,7 @@ import path from 'node:path'
 import process from 'node:process'
 import {fileURLToPath} from 'node:url'
 import prettier from 'prettier'
+import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 
 /**
  * Собирает единый канонический XSB-файл в игровой JSON.
@@ -15,11 +16,14 @@ const projectRoot = path.resolve(scriptDirectory, '..', '..')
 const levelsDirectory = path.resolve(projectRoot, 'levels')
 const levelsSourcePath = path.resolve(levelsDirectory, 'levels.xsb')
 const locationsSourcePath = path.resolve(levelsDirectory, 'locations.json')
+const appearanceSourcePath = path.resolve(levelsDirectory, 'appearance.json')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
 const gameOutputPath = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'levels.json')
 const isCheckMode = process.argv.includes('--check')
 const standardRowPattern = /^[ #.$@*+]+$/
 const metadataKeys = Object.freeze({id: 'id'})
+const appearanceRoles = Object.freeze(['wall', 'floor', 'box'])
+const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
 const lurdDirections = Object.freeze({
   u: Object.freeze({x: 0, y: -1}),
   d: Object.freeze({x: 0, y: 1}),
@@ -324,6 +328,65 @@ const toRuntimeMap = (standardMap) => {
   })
 }
 
+const isAppearanceRoleCell = (role, symbol) => {
+  if (role === 'wall') return symbol === '#'
+  if (role === 'floor') return Boolean(symbol) && symbol !== '_' && symbol !== '#'
+  if (role === 'box') return '$-'.includes(symbol)
+  return false
+}
+
+const validateAppearancePosition = (level, role, positionKey) => {
+  if (!positionKeyPattern.test(positionKey)) throw new Error(`${level.id}: недопустимая координата оформления ${positionKey}`)
+
+  const [x, y] = positionKey.split(':').map(Number)
+  const symbol = toRuntimeMap(level.map)[y]?.[x]
+  if (!isAppearanceRoleCell(role, symbol)) {
+    throw new Error(`${level.id}: оформление ${role} нельзя применить к клетке ${positionKey}`)
+  }
+}
+
+const validateAppearanceRole = (level, role, overrides, tileCatalog) => {
+  if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides)) {
+    throw new Error(`${level.id}: оформление ${role} должно быть объектом`)
+  }
+
+  Object.entries(overrides).forEach(([positionKey, texture]) => {
+    validateAppearancePosition(level, role, positionKey)
+    if (!tileCatalog.groups[role].includes(texture)) {
+      throw new Error(`${level.id}: текстура ${texture} не входит в каталог ${role}`)
+    }
+  })
+}
+
+const validateLevelAppearance = (level, appearance, tileCatalog) => {
+  if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
+    throw new Error(`${level.id}: оформление уровня должно быть объектом`)
+  }
+
+  const unknownRoles = Object.keys(appearance).filter((role) => !appearanceRoles.includes(role))
+  if (unknownRoles.length > 0) throw new Error(`${level.id}: неизвестный слой оформления ${unknownRoles[0]}`)
+  appearanceRoles.forEach((role) => {
+    if (appearance[role] !== undefined) validateAppearanceRole(level, role, appearance[role], tileCatalog)
+  })
+}
+
+const loadAppearances = (levels) => {
+  const source = readJson(appearanceSourcePath)
+  if (source.version !== 1 || !source.levels || typeof source.levels !== 'object' || Array.isArray(source.levels)) {
+    throw new Error('Файл levels/appearance.json имеет неподдерживаемый формат')
+  }
+
+  const levelsById = new Map(levels.map((level) => [level.id, level]))
+  const tileCatalog = getSokobanTileCatalog(projectRoot)
+  Object.entries(source.levels).forEach(([levelId, appearance]) => {
+    const level = levelsById.get(levelId)
+    if (!level) throw new Error(`Оформление ссылается на неизвестный уровень ${levelId}`)
+    validateLevelAppearance(level, appearance, tileCatalog)
+  })
+
+  return new Map(Object.entries(source.levels))
+}
+
 const createSolverMetadata = (level) => {
   if (!level.stats) return undefined
 
@@ -345,7 +408,7 @@ const getProvenPushRecord = (level) => {
   return level.stats.bestPushes
 }
 
-const createRuntimeLevel = (level, index) => {
+const createRuntimeLevel = (level, index, appearance) => {
   const solver = createSolverMetadata(level)
   const pushRecord = getProvenPushRecord(level)
 
@@ -357,11 +420,12 @@ const createRuntimeLevel = (level, index) => {
     ...(level.difficultyScore && {difficultyScore: level.difficultyScore}),
     ...(solver && {solver}),
     ...(pushRecord && {pushRecord}),
+    ...(appearance && {appearance}),
     map: toRuntimeMap(level.map),
   }
 }
 
-const createRuntimeLocation = (location, levelIndexes) => {
+const createRuntimeLocation = (location, levelIndexes, appearances) => {
   return {
     id: location.id,
     titleKey: location.titleKey,
@@ -369,13 +433,13 @@ const createRuntimeLocation = (location, levelIndexes) => {
     background: location.background,
     ambience: location.ambience,
     music: location.music,
-    levels: location.levels.map((level) => createRuntimeLevel(level, levelIndexes.get(level.id))),
+    levels: location.levels.map((level) => createRuntimeLevel(level, levelIndexes.get(level.id), appearances.get(level.id))),
   }
 }
 
-const createRuntimeCatalog = (levels, locations) => {
+const createRuntimeCatalog = (levels, locations, appearances) => {
   const levelIndexes = new Map(levels.map((level, index) => [level.id, index]))
-  return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes))}
+  return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes, appearances))}
 }
 
 const validateUniqueIds = (levels) => {
@@ -401,8 +465,9 @@ const buildLevels = async () => {
   const levels = loadLevels()
   validateUniqueIds(levels)
   const locations = loadLocations(levels)
+  const appearances = loadAppearances(levels)
 
-  const gameCatalog = createRuntimeCatalog(levels, locations)
+  const gameCatalog = createRuntimeCatalog(levels, locations, appearances)
   const prettierConfig = await prettier.resolveConfig(gameOutputPath)
   const gameJson = await prettier.format(JSON.stringify(gameCatalog), {...prettierConfig, parser: 'json'})
   writeOutput(gameOutputPath, gameJson)

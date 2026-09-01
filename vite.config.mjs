@@ -2,9 +2,9 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
-import {defineConfig, normalizePath} from 'vite'
-import basicSsl from '@vitejs/plugin-basic-ssl'
 import {AssetPack} from '@assetpack/core'
+import basicSsl from '@vitejs/plugin-basic-ssl'
+import {defineConfig, normalizePath} from 'vite'
 import assetPackConfig from './.assetpack.mjs'
 import {
   DEFAULT_DEV_PLATFORM,
@@ -12,6 +12,7 @@ import {
   PLATFORMS_TO_BUILD,
   resolvePlatform
 } from './bundler/platformConfig.mjs'
+import {createSokobanLevelEditorPlugin} from './tools/sokoban-level-editor/vitePlugin.mjs'
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url))
 const viteEntry = '/src/viteEntry.js'
@@ -70,9 +71,11 @@ const createPlatformHtmlPlugin = (platform) => {
     },
     transformIndexHtml: {
       order: 'pre',
-      handler() {
-        const html = fs.readFileSync(htmlPath, 'utf8')
-        return injectViteEntry(html)
+      handler(html, context) {
+        if (!['/', '/index.html'].includes(context.path)) return html
+
+        const platformHtml = fs.readFileSync(htmlPath, 'utf8')
+        return injectViteEntry(platformHtml)
       }
     }
   }
@@ -122,6 +125,7 @@ export const createViteConfig = ({platformName, command = 'build'} = {}) => {
     plugins: [
       ...(platform.https ? [basicSsl({name: 'localhost', ttlDays: 365})] : []),
       ...(!isBuild ? [createAssetPackWatchPlugin()] : []),
+      ...(!isBuild ? [createSokobanLevelEditorPlugin(projectRoot)] : []),
       createPlatformHtmlPlugin(platform)
     ],
     resolve: {

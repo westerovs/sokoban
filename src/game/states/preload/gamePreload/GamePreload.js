@@ -10,6 +10,7 @@ import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import LocaleManager from '../../../modules/LocaleManager.js'
 import GameTimeTrackerCounter from '../../../modules/metrika/GameTimeTrackerCounter.js'
 import YaMetrika, {ERROR_TYPES} from '../../../modules/metrika/YaMetrika.js'
+import {trySelectRequestedSokobanLevel} from '../../../sokoban/trySelectRequestedSokobanLevel.js'
 import GameUtils from '../../../utils/gameUtils/GameUtils.js'
 import LoadUtils from '../../../utils/gameUtils/LoadUtils.js'
 import {LOG_STATUS, Logger, MODULES} from '../../../utils/Logger.js'
@@ -177,6 +178,11 @@ export default class GamePreload extends BaseState {
     new AdminPanelButton(this.game, Locator.storage, Locator.gameConfig)
 
     Locator.options.init()
+
+    if (trySelectRequestedSokobanLevel(Locator.storage)) {
+      this.game.emit(GAME_STATES.levelPreload)
+      return
+    }
 
     if (SdkManager.flags?.skipFirstScreen) {
       this.game.emit(GAME_STATES.levelPreload)

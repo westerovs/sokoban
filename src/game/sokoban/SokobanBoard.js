@@ -18,21 +18,23 @@ const BOARD_Z_INDEX = {
 
 export default class SokobanBoard extends Container {
   #level
+  #appearance
   #tileSize = SOKOBAN_SETTINGS.tileSize
   #boardWidth
   #boardHeight
   #boxesContainer
-  #boxViews = []
+  #boxViews = new Map()
   #player
   #movementTimeline = null
   #deadlockHighlight
   #deadlockTimeline = null
   #isRotated = false
 
-  constructor(level) {
+  constructor(level, appearance = {}) {
     super({label: 'sokoban-board', sortableChildren: true})
 
     this.#level = level
+    this.#appearance = appearance
     this.#boardWidth = level.width * this.#tileSize
     this.#boardHeight = level.height * this.#tileSize
     this.boundsArea = new Rectangle(0, 0, this.#boardWidth, this.#boardHeight)
@@ -174,11 +176,11 @@ export default class SokobanBoard extends Container {
     if (this.#level.isVoid(position)) return
 
     if (this.#level.isWall(position)) {
-      wallTiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.wall, position, 'wall'))
+      wallTiles.addChild(this.#createTileSprite(this.#getTextureName('wall', position), position, 'wall'))
       return
     }
 
-    groundTiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.floor, position, 'floor'))
+    groundTiles.addChild(this.#createTileSprite(this.#getTextureName('floor', position), position, 'floor'))
     if (this.#level.isTarget(position)) {
       groundTiles.addChild(this.#createTileSprite(SOKOBAN_TEXTURES.target, position, 'target'))
     }
@@ -196,11 +198,17 @@ export default class SokobanBoard extends Container {
   }
 
   #createBoxes() {
-    this.#level.boxes.forEach((position, index) => {
-      const boxView = new SokobanBoxView(index, this.#tileSize)
-      this.#boxViews.push(boxView)
+    this.#level.boxes.forEach((box) => {
+      const textureName = this.#getTextureName('box', box)
+      const boxView = new SokobanBoxView(box.id, this.#tileSize, textureName)
+      this.#boxViews.set(box.id, boxView)
       this.#boxesContainer.addChild(boxView)
     })
+  }
+
+  #getTextureName(type, position) {
+    const positionKey = `${position.x}:${position.y}`
+    return this.#appearance[type]?.[positionKey] ?? SOKOBAN_TEXTURES[type]
   }
 
   #createPlayer() {
@@ -238,7 +246,7 @@ export default class SokobanBoard extends Container {
   #addBoxMovement(timeline, pushedBox, isContinuous) {
     if (!pushedBox) return
 
-    const boxView = this.#findBoxView(pushedBox.from)
+    const boxView = this.#boxViews.get(pushedBox.id)
     if (!boxView) return
 
     timeline.to(boxView.position, this.#getMovementVars(this.#getBoxPixelPosition(pushedBox.to), isContinuous), '<')
@@ -268,11 +276,6 @@ export default class SokobanBoard extends Container {
       x: (position.x + 0.5) * this.#tileSize,
       y: (position.y + 1) * this.#tileSize,
     }
-  }
-
-  #findBoxView(position) {
-    const pixelPosition = this.#getBoxPixelPosition(position)
-    return this.#boxViews.find((boxView) => boxView.x === pixelPosition.x && boxView.y === pixelPosition.y)
   }
 
   #finishMovement(resolve) {
@@ -311,9 +314,9 @@ export default class SokobanBoard extends Container {
   }
 
   #updateBoxes() {
-    this.#level.boxes.forEach((position, index) => {
-      const boxView = this.#boxViews[index]
-      boxView.position.set(position.x * this.#tileSize, position.y * this.#tileSize)
+    this.#level.boxes.forEach((box) => {
+      const boxView = this.#boxViews.get(box.id)
+      boxView.position.set(box.x * this.#tileSize, box.y * this.#tileSize)
     })
     this.#updateBoxTargetStates()
   }

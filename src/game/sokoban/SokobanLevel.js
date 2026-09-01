@@ -7,7 +7,8 @@ export default class SokobanLevel {
   #voids = new Set()
   #walls = new Set()
   #targets = new Set()
-  #boxes = new Set()
+  #boxes = new Map()
+  #nextBoxId = 0
   #playerPosition = null
   #isCompleted = false
   #initialState = null
@@ -34,7 +35,7 @@ export default class SokobanLevel {
   }
 
   get boxes() {
-    return this.#getPositions(this.#boxes)
+    return Array.from(this.#boxes, ([id, positionKey]) => ({id, ...this.#parsePositionKey(positionKey)}))
   }
 
   get playerPosition() {
@@ -136,12 +137,12 @@ export default class SokobanLevel {
     if (symbol === SOKOBAN_SYMBOLS.floor) return
     if (symbol === SOKOBAN_SYMBOLS.wall) return this.#addPosition(this.#walls, position)
     if (symbol === SOKOBAN_SYMBOLS.target) return this.#addPosition(this.#targets, position)
-    if (symbol === SOKOBAN_SYMBOLS.box) return this.#addPosition(this.#boxes, position)
+    if (symbol === SOKOBAN_SYMBOLS.box) return this.#addBox(position)
     if (symbol === SOKOBAN_SYMBOLS.player) return this.#setPlayerPosition(position)
 
     if (symbol === SOKOBAN_SYMBOLS.boxOnTarget) {
       this.#addPosition(this.#targets, position)
-      this.#addPosition(this.#boxes, position)
+      this.#addBox(position)
       return
     }
 
@@ -169,22 +170,22 @@ export default class SokobanLevel {
 
   #tryMoveBox(position, offset) {
     const positionKey = this.#getPositionKey(position)
-    if (!this.#boxes.has(positionKey)) return {canMove: true, pushedBox: null}
+    const boxId = this.#getBoxIdAt(positionKey)
+    if (!boxId) return {canMove: true, pushedBox: null}
 
     const boxNextPosition = this.#addPositions(position, offset)
     if (this.#isBlocked(boxNextPosition)) return {canMove: false, pushedBox: null}
 
-    this.#boxes.delete(positionKey)
-    this.#boxes.add(this.#getPositionKey(boxNextPosition))
+    this.#boxes.set(boxId, this.#getPositionKey(boxNextPosition))
     return {
       canMove: true,
-      pushedBox: {from: position, to: boxNextPosition},
+      pushedBox: {id: boxId, from: position, to: boxNextPosition},
     }
   }
 
   #isBlocked(position) {
     if (this.#isWallOrOutside(position)) return true
-    return this.#boxes.has(this.#getPositionKey(position))
+    return Boolean(this.#getBoxIdAt(this.#getPositionKey(position)))
   }
 
   #isWallOrOutside(position) {
@@ -199,7 +200,7 @@ export default class SokobanLevel {
   }
 
   #checkCompleted() {
-    return this.#boxes.size > 0 && Array.from(this.#boxes).every((positionKey) => this.#targets.has(positionKey))
+    return this.#boxes.size > 0 && Array.from(this.#boxes.values()).every((positionKey) => this.#targets.has(positionKey))
   }
 
   #getDeadlockedBox(pushedBox) {
@@ -226,20 +227,30 @@ export default class SokobanLevel {
 
   #createStateSnapshot() {
     return {
-      boxes: new Set(this.#boxes),
+      boxes: new Map(this.#boxes),
       playerPosition: {...this.#playerPosition},
       isCompleted: this.#isCompleted,
     }
   }
 
   #restoreState(state) {
-    this.#boxes = new Set(state.boxes)
+    this.#boxes = new Map(state.boxes)
     this.#playerPosition = {...state.playerPosition}
     this.#isCompleted = state.isCompleted
   }
 
   #addPosition(collection, position) {
     collection.add(this.#getPositionKey(position))
+  }
+
+  #addBox(position) {
+    const boxId = `box-${this.#nextBoxId}`
+    this.#nextBoxId++
+    this.#boxes.set(boxId, this.#getPositionKey(position))
+  }
+
+  #getBoxIdAt(positionKey) {
+    return Array.from(this.#boxes).find(([, boxPositionKey]) => boxPositionKey === positionKey)?.[0] ?? null
   }
 
   #getPositions(collection) {

@@ -2,6 +2,8 @@ import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import ButtonContainer from '../../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../../engine/Locator.ts'
+import LocalStorage from '../../../../engine/storage/LocalStorage.js'
+import {openSokobanLevelEditor} from '../../../../sokoban/openSokobanLevelEditor.js'
 import {primaryFontStyle} from '../../../../styles.js'
 import LevelPreview from './LevelPreview.js'
 import LevelSelectButton from './LevelSelectButton.js'
@@ -62,6 +64,8 @@ export default class LocationLevelSelectView extends Container {
   #init = (onBack, onPlay) => {
     this.#createHeader()
     this.#preview = new LevelPreview()
+    this.#preview.eventMode = 'static'
+    this.#preview.on('pointertap', this.#openLevelEditor)
     this.#levelsContainer = new Container({label: 'level-select-buttons'})
     this.#createLevelsPanel()
     this.#backButton = this.#createBackButton(onBack)
@@ -154,5 +158,12 @@ export default class LocationLevelSelectView extends Container {
 
   #setRecord = (level) => {
     this.#record.text = level.pushRecord ? i18next.t('sokoban.record', {record: level.pushRecord}) : ''
+  }
+
+  #openLevelEditor = (event) => {
+    if (!LocalStorage.isDebug || !event.ctrlKey || !this.#selectedEntry) return
+
+    event.stopPropagation()
+    openSokobanLevelEditor(this.#selectedEntry.level.id)
   }
 }

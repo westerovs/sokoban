@@ -9,3 +9,4 @@
 /dist/
 /src/game/generatedAssets/buildMeta.js
 /src/game/generatedAssets/soundList.js
+/src/game/generatedAssets/sokobanTileCatalog.js

@@ -114,6 +114,7 @@ export default class Level {
   #createSokobanGame() {
     this.sokobanGame = new SokobanGame({
       map: this.config.map,
+      appearance: this.config.appearance,
       levelNumber: this.config.locationLevelNumber,
       pushRecord: this.config.pushRecord,
       canMove: this.#canMove,

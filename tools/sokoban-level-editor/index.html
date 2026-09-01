@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Редактор уровней Sokoban</title>
+    <link rel="stylesheet" href="./src/editor.css" />
+  </head>
+  <body>
+    <div class="editor-shell">
+      <header class="editor-header">
+        <div class="editor-title">
+          <span class="editor-title__eyebrow">Sokoban tools</span>
+          <h1>Оформление уровней</h1>
+        </div>
+        <label class="editor-field">
+          <span>Локация</span>
+          <select id="location-select"></select>
+        </label>
+        <label class="editor-field editor-field--level">
+          <span>Уровень</span>
+          <select id="level-select"></select>
+        </label>
+        <div class="editor-actions">
+          <button id="launch-button" class="editor-button editor-button--launch" type="button">Запустить уровень</button>
+          <button id="copy-button" class="editor-button editor-button--secondary" type="button">Копировать JSON</button>
+          <button id="save-button" class="editor-button editor-button--primary" type="button">Сохранить</button>
+        </div>
+      </header>
+
+      <aside class="editor-sidebar">
+        <div class="editor-sidebar__heading">
+          <span class="editor-sidebar__caption">Кисти</span>
+          <strong id="brush-label">Выберите тайл</strong>
+        </div>
+        <div id="palette" class="editor-palette"></div>
+        <div class="editor-help">
+          <p>Кисть меняет только внешний вид. Стены остаются стенами, а ящики — ящиками.</p>
+          <p>Проведите мышью с зажатой левой кнопкой, чтобы покрасить несколько клеток.</p>
+        </div>
+      </aside>
+
+      <main class="editor-workspace">
+        <div id="canvas-host" class="editor-canvas-host"></div>
+        <div id="empty-state" class="editor-empty-state" hidden>В локации нет уровней</div>
+        <output id="status" class="editor-status" aria-live="polite"></output>
+      </main>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

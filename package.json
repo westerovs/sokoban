@@ -16,6 +16,8 @@
   "scripts": {
     "levels": "node tools/sokoban-levels/build.mjs",
     "levels:check": "node tools/sokoban-levels/build.mjs --check",
+    "prelevel-editor": "npm run levels && npm run assets && npm run generate_game_meta",
+    "level-editor": "vite --open /tools/sokoban-level-editor/",
     "generate_game_meta": "node bundler/generateGameMeta.mjs",
     "assets": "node bundler/buildAssets.mjs",
     "prebuild": "npm run levels && npm run assets && npm run generate_game_meta",
