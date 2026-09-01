@@ -30,7 +30,7 @@ const ROTATED_DIRECTIONS = Object.freeze({
 const SOKOBAN_TEXTURES = Object.freeze({
   floor: 'floor1', // Текстура пола по умолчанию
   wall: 'wall1', // Текстура стены по умолчанию
-  target: 'tile-dot', // Текстура цели
+  target: 'target1', // Текстура цели
   box: 'box1', // Текстура ящика по умолчанию
   player: 'tile-player', // Текстура игрока
 })
