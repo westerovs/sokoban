@@ -1,11 +1,15 @@
 import {Container} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
-import SokobanBoard from './SokobanBoard.js'
-import SokobanDpad from './SokobanDpad.js'
-import SokobanHud from './SokobanHud.js'
-import SokobanInput from './SokobanInput.js'
+import SokobanDpad from '../input/SokobanDpad.js'
+import SokobanInput from '../input/SokobanInput.js'
+import SokobanBoard from '../rendering/SokobanBoard.js'
+import SokobanHud from '../ui/SokobanHud.js'
 import SokobanLevel from './SokobanLevel.js'
+
+/**
+ * Координирует модель, ввод и представление одной игровой сессии Sokoban.
+ */
 
 export default class SokobanGame extends Container {
   #map
@@ -25,6 +29,7 @@ export default class SokobanGame extends Container {
   #isAnimatingMove = false
   #heldDirection = null
 
+  // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({map, appearance, levelNumber, pushRecord, onComplete, onMove, canMove}) {
     super({label: 'sokoban-game'})
 
@@ -38,10 +43,12 @@ export default class SokobanGame extends Container {
     this.#init()
   }
 
+  // Пытается выполнить перемещение в заданном направлении.
   move(direction) {
     return this.#startMove(direction, null)
   }
 
+  // Включает или отключает все способы управления уровнем.
   setInputEnabled(isEnabled) {
     this.#isInputEnabled = isEnabled
     this.#input.setEnabled(isEnabled)
@@ -49,16 +56,19 @@ export default class SokobanGame extends Container {
     this.#dpad.setEnabled(isEnabled)
   }
 
+  // Добавляет HUD и крестовину в интерфейсный слой игры.
   attachHud() {
     Locator.uiLayer.stateUiLayer.addChild(this.#hud, this.#dpad)
     this.#resizeUi()
   }
 
+  // Скрывает HUD и экранную крестовину.
   hideInterface() {
     this.#hud.visible = false
     this.#dpad.visible = false
   }
 
+  // Возвращает состояние на один шаг назад.
   undo() {
     if (!this.#canUseControls() || !this.#level.undo()) return false
 
@@ -66,6 +76,7 @@ export default class SokobanGame extends Container {
     return true
   }
 
+  // Возвращает уровень в исходное состояние.
   restart() {
     if (!this.#canUseControls() || !this.#level.restart()) return false
 
@@ -73,11 +84,13 @@ export default class SokobanGame extends Container {
     return true
   }
 
+  // Пересчитывает размеры и расположение представления.
   resize() {
     this.#board.resize()
     this.#resizeUi()
   }
 
+  // Освобождает обработчики, анимации и ресурсы экземпляра.
   destroy(options) {
     Locator.game.off(GAME_EVENTS.Options.checkboxSokobanDpad, this.#dpadVisibilityHandler)
     this.#input?.destroy()
@@ -87,6 +100,7 @@ export default class SokobanGame extends Container {
     super.destroy(options)
   }
 
+  // Запускает игровой ход и его визуальную анимацию.
   #startMove(direction, heldDirection) {
     if (!this.#canUseControls()) return false
 
@@ -102,6 +116,7 @@ export default class SokobanGame extends Container {
     return true
   }
 
+  // Инициализирует внутреннее состояние и зависимости.
   #init() {
     this.#level = new SokobanLevel(this.#map)
     this.#board = new SokobanBoard(this.#level, this.#appearance)
@@ -123,10 +138,12 @@ export default class SokobanGame extends Container {
     this.addChild(this.#board)
   }
 
+  // Проверяет, разрешён ли новый ход в текущем состоянии игры.
   #canUseControls() {
     return this.#isInputEnabled && !this.#isAnimatingMove && this.#canMove?.() !== false
   }
 
+  // Сохраняет удерживаемое направление и запускает движение.
   #setHeldDirection(direction) {
     if (direction === this.#heldDirection) return
 
@@ -134,11 +151,13 @@ export default class SokobanGame extends Container {
     this.#continueHeldMovement()
   }
 
+  // Продолжает движение в удерживаемом направлении.
   #continueHeldMovement() {
     if (!this.#heldDirection) return
     this.#startMove(this.#heldDirection, this.#heldDirection)
   }
 
+  // Завершает ход, обновляет тупик и проверяет победу.
   #finishMove(result) {
     this.#isAnimatingMove = false
     if (result.deadlockedBox) {
@@ -153,12 +172,14 @@ export default class SokobanGame extends Container {
     this.#continueHeldMovement()
   }
 
+  // Синхронизирует доску и HUD после изменения модели.
   #updateViews() {
     this.#hud.clearDeadlockFeedback()
     this.#board.update()
     this.#hud.setSteps(this.#level.steps)
   }
 
+  // Пересчитывает расположение HUD и экранной крестовины.
   #resizeUi() {
     if (!this.#hud.parent) return
 
@@ -174,10 +195,12 @@ export default class SokobanGame extends Container {
     this.#dpad.layout({width, height})
   }
 
+  // Применяет настройку видимости экранной крестовины.
   #setDpadVisible(isVisible) {
     this.#dpad.setVisible(isVisible)
   }
 
+  // Блокирует управление и сообщает о завершении уровня.
   #complete() {
     this.setInputEnabled(false)
     this.hideInterface()

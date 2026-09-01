@@ -2,7 +2,11 @@ import {gsap} from 'gsap'
 import {Container, Graphics, Rectangle} from 'pixi.js'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
-import {SOKOBAN_HUD_SETTINGS} from './settings.js'
+import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
+
+/**
+ * Отображает интерактивную кнопку панели управления Sokoban.
+ */
 
 export default class SokobanHudButton extends Container {
   #iconName
@@ -13,6 +17,7 @@ export default class SokobanHudButton extends Container {
   #isEnabled = null
   #pulseTimeline = null
 
+  // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({iconName, label, onPress}) {
     super({label})
 
@@ -21,6 +26,7 @@ export default class SokobanHudButton extends Container {
     this.#init()
   }
 
+  // Включает или отключает взаимодействие с элементом.
   setEnabled(isEnabled) {
     if (this.#isEnabled === isEnabled) return
 
@@ -31,6 +37,7 @@ export default class SokobanHudButton extends Container {
     this.#drawBackground()
   }
 
+  // Применяет размер кнопки и её иконки.
   setLayoutSize(size, iconSize) {
     this.#size = size
     this.#setHitArea()
@@ -38,6 +45,7 @@ export default class SokobanHudButton extends Container {
     this.#drawBackground()
   }
 
+  // Запускает привлекающую внимание пульсацию кнопки.
   pulse() {
     this.stopPulse()
     this.#pulseTimeline = gsap
@@ -54,17 +62,20 @@ export default class SokobanHudButton extends Container {
       })
   }
 
+  // Останавливает пульсацию и восстанавливает масштаб кнопки.
   stopPulse() {
     this.#pulseTimeline?.kill()
     this.#pulseTimeline = null
     this.scale.set(1)
   }
 
+  // Освобождает обработчики, анимации и ресурсы экземпляра.
   destroy(options) {
     this.stopPulse()
     super.destroy(options)
   }
 
+  // Инициализирует внутреннее состояние и зависимости.
   #init() {
     this.#background = new Graphics({label: this.label + '-background'})
     this.#icon = GameUtils.createSprite(this.#iconName, {label: this.label + '-icon'})
@@ -75,10 +86,12 @@ export default class SokobanHudButton extends Container {
     this.setEnabled(true)
   }
 
+  // Обновляет интерактивную область кнопки.
   #setHitArea() {
     this.hitArea = new Rectangle(-this.#size / 2, -this.#size / 2, this.#size, this.#size)
   }
 
+  // Масштабирует иконку до заданного размера.
   #setIconSize(iconSize) {
     this.#icon.scale.set(1)
     const iconScale = iconSize / Math.max(this.#icon.width, this.#icon.height)
@@ -86,6 +99,7 @@ export default class SokobanHudButton extends Container {
     this.#icon.scale.set(iconScale)
   }
 
+  // Перерисовывает подложку кнопки для текущего состояния.
   #drawBackground() {
     if (!this.#size) return
 
@@ -101,6 +115,7 @@ export default class SokobanHudButton extends Container {
       .stroke({color: settings.buttonBorderColor, width: borderWidth})
   }
 
+  // Активирует направление выбранной кнопки крестовины.
   #handlePress = () => {
     if (!this.#isEnabled) return
     this.#onPress()

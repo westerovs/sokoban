@@ -5,26 +5,25 @@ import process from 'node:process'
 import {fileURLToPath} from 'node:url'
 import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
+import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
- * Собирает единый канонический XSB-файл в отдельные игровые JSON по локациям.
+ * Собирает канонические XSB-файлы локаций в отдельные игровые JSON.
  * Внешние пробелы карт превращаются во внутренний символ пустоты `_`.
  */
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(scriptDirectory, '..', '..')
 const levelsDirectory = path.resolve(projectRoot, 'levels')
-const levelsSourcePath = path.resolve(levelsDirectory, 'levels.xsb')
+const mapsSourceDirectory = path.resolve(levelsDirectory, 'maps')
 const locationsSourcePath = path.resolve(levelsDirectory, 'locations.json')
-const appearanceSourcePath = path.resolve(levelsDirectory, 'appearance.json')
+const appearanceSourceDirectory = path.resolve(levelsDirectory, 'appearance')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
 const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels')
 const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.js')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
-const standardRowPattern = /^[ #.$@*+]+$/
-const metadataKeys = Object.freeze({id: 'id'})
 const appearanceRoles = Object.freeze(['wall', 'floor', 'box'])
 const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
 const lurdDirections = Object.freeze({
@@ -34,10 +33,13 @@ const lurdDirections = Object.freeze({
   r: Object.freeze({x: 1, y: 0}),
 })
 
+// Возвращает данные, за которые отвечает операция `readText`.
 const readText = (filePath) => fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n')
 
+// Возвращает данные, за которые отвечает операция `readJson`.
 const readJson = (filePath) => JSON.parse(readText(filePath))
 
+// Выполняет отдельную операцию `normalizeMapForHash`.
 const normalizeMapForHash = (map) => {
   const rows = map.map((row) => row.trimEnd()).filter((row) => row.trim())
   const indent = Math.min(...rows.map((row) => row.search(/\S/)))
@@ -45,42 +47,10 @@ const normalizeMapForHash = (map) => {
   return rows.map((row) => row.slice(indent).trimEnd()).join('\n')
 }
 
+// Создаёт данные или представление для операции `createMapHash`.
 const createMapHash = (map) => crypto.createHash('sha256').update(normalizeMapForHash(map)).digest('hex')
 
-const parseMetadata = (line, metadata) => {
-  const match = /^;\s*([^:]+):\s*(.+)$/.exec(line)
-  if (!match) return
-
-  const key = metadataKeys[match[1].trim().toLowerCase()]
-  if (key) metadata[key] = match[2].trim()
-}
-
-const addParsedLevel = (levels, rows, metadata) => {
-  if (rows.length === 0) return
-
-  levels.push({map: [...rows], metadata: {...metadata}})
-  rows.length = 0
-  Object.keys(metadata).forEach((key) => delete metadata[key])
-}
-
-const parseXsb = (text) => {
-  const levels = []
-  const rows = []
-  const metadata = {}
-
-  text.split('\n').forEach((line) => parseXsbLine(line, levels, rows, metadata))
-  addParsedLevel(levels, rows, metadata)
-  return levels
-}
-
-const parseXsbLine = (line, levels, rows, metadata) => {
-  if (!line.trim()) return addParsedLevel(levels, rows, metadata)
-  if (line.trimStart().startsWith(';')) return parseMetadata(line.trimStart(), metadata)
-  if (!standardRowPattern.test(line)) throw new Error(`Недопустимая строка в levels/levels.xsb: ${line}`)
-
-  rows.push(line.trimEnd())
-}
-
+// Возвращает данные, за которые отвечает операция `getStandardMetrics`.
 const getStandardMetrics = (map) => {
   const symbols = map.join('')
 
@@ -93,6 +63,7 @@ const getStandardMetrics = (map) => {
   }
 }
 
+// Проверяет условие, описанное операцией `validateStandardMap`.
 const validateStandardMap = (level) => {
   const metrics = getStandardMetrics(level.map)
   if (metrics.playerCount !== 1) throw new Error(`${level.id}: требуется ровно один игрок`)
@@ -103,6 +74,7 @@ const validateStandardMap = (level) => {
   return metrics
 }
 
+// Возвращает данные, за которые отвечает операция `getStatsById`.
 const getStatsById = () => {
   const stats = readJson(solverStatsPath)
   return {
@@ -111,6 +83,7 @@ const getStatsById = () => {
   }
 }
 
+// Выполняет отдельную операцию `calculateDifficultyScore`.
 const calculateDifficultyScore = (stats) => {
   const timeWeight = Math.log2(stats.timeSeconds + 1) * 20
   const score = stats.pushes + stats.moves * 0.15 + stats.boxCount * 4 + timeWeight
@@ -118,19 +91,23 @@ const calculateDifficultyScore = (stats) => {
   return Number(score.toFixed(2))
 }
 
+// Создаёт данные или представление для операции `createLevel`.
 const createLevel = (parsedLevel, index, statsData) => {
   const id = parsedLevel.metadata.id || `sokoban-${String(index + 1).padStart(3, '0')}`
-  const stats = statsData.levels.get(id) || null
+  const isCustom = parsedLevel.metadata.custom === 'true'
+  const stats = isCustom ? null : statsData.levels.get(id) || null
 
   return {
     id,
     map: parsedLevel.map,
+    isCustom,
     stats,
     solver: stats ? {name: statsData.solver.name, version: stats.solverVersion} : null,
     difficultyScore: stats ? calculateDifficultyScore(stats) : null,
   }
 }
 
+// Проверяет условие, описанное операцией `validateStats`.
 const validateStats = (level, metrics) => {
   if (!level.stats) return
   if (createMapHash(level.map) !== level.stats.mapHash) throw new Error(`${level.id}: карта не совпадает с проверенной решателем`)
@@ -142,8 +119,10 @@ const validateStats = (level, metrics) => {
   validateLurdSolution(level)
 }
 
+// Возвращает данные, за которые отвечает операция `getPositionKey`.
 const getPositionKey = (position) => `${position.x}:${position.y}`
 
+// Разбирает входные данные через операцию `parseSolutionState`.
 const parseSolutionState = (standardMap) => {
   const map = toRuntimeMap(standardMap)
   const boxes = new Set()
@@ -156,6 +135,7 @@ const parseSolutionState = (standardMap) => {
   return {map, boxes, targets, player}
 }
 
+// Добавляет данные или представление через операцию `addSolutionSymbol`.
 const addSolutionSymbol = (symbol, position, boxes, targets, setPlayer) => {
   const key = getPositionKey(position)
   if ('$-'.includes(symbol)) boxes.add(key)
@@ -163,11 +143,13 @@ const addSolutionSymbol = (symbol, position, boxes, targets, setPlayer) => {
   if ('@*'.includes(symbol)) setPlayer(position)
 }
 
+// Проверяет условие, описанное операцией `isBlockedSolutionCell`.
 const isBlockedSolutionCell = (state, position) => {
   const symbol = state.map[position.y]?.[position.x]
   return !symbol || symbol === '_' || symbol === '#'
 }
 
+// Обновляет состояние через операцию `applyLurdMove`.
 const applyLurdMove = (state, move, levelId) => {
   const direction = lurdDirections[move.toLowerCase()]
   if (!direction) throw new Error(`${levelId}: недопустимый символ решения ${move}`)
@@ -181,6 +163,7 @@ const applyLurdMove = (state, move, levelId) => {
   state.player = next
 }
 
+// Выполняет отдельную операцию `moveSolutionBox`.
 const moveSolutionBox = (state, box, direction, levelId) => {
   const boxKey = getPositionKey(box)
   if (!state.boxes.has(boxKey)) return
@@ -193,6 +176,7 @@ const moveSolutionBox = (state, box, direction, levelId) => {
   state.boxes.add(destinationKey)
 }
 
+// Проверяет условие, описанное операцией `validateLurdSolution`.
 const validateLurdSolution = (level) => {
   if (!level.stats.solution) return
 
@@ -202,30 +186,55 @@ const validateLurdSolution = (level) => {
   if (!isSolved) throw new Error(`${level.id}: сохранённое решение не завершает карту`)
 }
 
-const loadLevels = () => {
-  const parsedLevels = parseXsb(readText(levelsSourcePath))
+// Возвращает данные, за которые отвечает операция `loadLocationDefinitions`.
+const loadLocationDefinitions = () => {
+  const {locations} = readJson(locationsSourcePath)
+  if (!Array.isArray(locations) || locations.length === 0) throw new Error('Файл levels/locations.json не содержит локаций')
+  return locations
+}
+
+// Возвращает данные, за которые отвечает операция `loadParsedLevels`.
+const loadParsedLevels = (sourceLocations) => {
+  return sourceLocations.flatMap((location) => {
+    const filePath = path.resolve(mapsSourceDirectory, `${location.id}.xsb`)
+    return parseXsb(readText(filePath), path.relative(projectRoot, filePath))
+  })
+}
+
+// Проверяет условие, описанное операцией `validateStatsLinks`.
+const validateStatsLinks = (levels, statsData) => {
+  const levelIds = new Set(levels.map((level) => level.id))
+  const unknownStatsIds = Array.from(statsData.levels.keys()).filter((levelId) => !levelIds.has(levelId))
+  if (unknownStatsIds.length > 0) throw new Error(`Статистика ссылается на неизвестный уровень ${unknownStatsIds[0]}`)
+}
+
+// Возвращает данные, за которые отвечает операция `loadLevels`.
+const loadLevels = (sourceLocations) => {
+  const parsedLevels = loadParsedLevels(sourceLocations)
   const statsData = getStatsById()
   const levels = parsedLevels.map((level, index) => createLevel(level, index, statsData))
 
-  if (levels.length === 0) throw new Error('Файл levels/levels.xsb не содержит карт')
+  if (levels.length === 0) throw new Error('Папка levels/maps не содержит карт')
   levels.forEach((level) => validateStats(level, validateStandardMap(level)))
-  if (levels.filter((level) => level.stats).length !== statsData.levels.size) throw new Error('Не все записи статистики связаны с картами')
+  validateStatsLinks(levels, statsData)
 
   return assignDifficulty(levels)
 }
 
+// Возвращает данные, за которые отвечает операция `getLocationLevels`.
 const getLocationLevels = (location, levelsById, assignedIds) => {
   if (!Array.isArray(location.levelIds) || location.levelIds.length === 0) throw new Error(`${location.id}: в локации нет уровней`)
 
   return location.levelIds.map((levelId) => {
     if (assignedIds.has(levelId)) throw new Error(`${levelId}: уровень добавлен более чем в одну локацию`)
     const level = levelsById.get(levelId)
-    if (!level) throw new Error(`${location.id}: уровень ${levelId} не найден в levels.xsb`)
+    if (!level) throw new Error(`${location.id}: уровень ${levelId} не найден в levels/maps/${location.id}.xsb`)
     assignedIds.add(levelId)
     return level
   })
 }
 
+// Создаёт данные или представление для операции `createLocation`.
 const createLocation = (location, index, levelsById, assignedIds) => {
   const requiredKeys = ['id', 'titleKey', 'cardTexture', 'background', 'ambience', 'music']
   requiredKeys.forEach((key) => {
@@ -235,18 +244,17 @@ const createLocation = (location, index, levelsById, assignedIds) => {
   return {...location, levels: getLocationLevels(location, levelsById, assignedIds)}
 }
 
-const loadLocations = (levels) => {
-  const {locations: sourceLocations} = readJson(locationsSourcePath)
-  if (!Array.isArray(sourceLocations) || sourceLocations.length === 0) throw new Error('Файл levels/locations.json не содержит локаций')
-
+// Возвращает данные, за которые отвечает операция `loadLocations`.
+const loadLocations = (levels, sourceLocations) => {
   const levelsById = new Map(levels.map((level) => [level.id, level]))
   const assignedIds = new Set()
   const locations = sourceLocations.map((location, index) => createLocation(location, index, levelsById, assignedIds))
-  if (assignedIds.size !== levels.length) throw new Error('Не все карты из levels.xsb распределены по локациям')
+  if (assignedIds.size !== levels.length) throw new Error('Не все карты из levels/maps распределены по локациям')
 
   return locations
 }
 
+// Проверяет условие, описанное операцией `validateDifficultyOrder`.
 const validateDifficultyOrder = (levels) => {
   const verifiedLevels = levels.filter((level) => level.stats)
 
@@ -255,12 +263,14 @@ const validateDifficultyOrder = (levels) => {
   })
 }
 
+// Возвращает данные, за которые отвечает операция `getDifficulty`.
 const getDifficulty = (rank, total) => {
   if (rank <= total / 3) return 'easy'
   if (rank <= (total * 2) / 3) return 'medium'
   return 'hard'
 }
 
+// Выполняет отдельную операцию `assignDifficulty`.
 const assignDifficulty = (levels) => {
   validateDifficultyOrder(levels)
   const verifiedCount = levels.filter((level) => level.stats).length
@@ -273,64 +283,7 @@ const assignDifficulty = (levels) => {
   })
 }
 
-const getBoundaryPositions = (width, height) => {
-  const horizontal = Array.from({length: width}, (_, x) => [x, 0, x, height - 1])
-  const vertical = Array.from({length: height}, (_, y) => [0, y, width - 1, y])
-
-  return [...horizontal, ...vertical].flatMap(([x1, y1, x2, y2]) => [
-    {x: x1, y: y1},
-    {x: x2, y: y2},
-  ])
-}
-
-const tryAddExteriorSpace = (map, position, exterior, queue) => {
-  const {x, y} = position
-  if (y < 0 || y >= map.length || x < 0 || x >= map[0].length || map[y][x] !== ' ') return
-
-  const key = `${x}:${y}`
-  if (exterior.has(key)) return
-
-  exterior.add(key)
-  queue.push(position)
-}
-
-const findExteriorSpaces = (map) => {
-  const exterior = new Set()
-  const queue = []
-  const boundary = getBoundaryPositions(map[0].length, map.length)
-  boundary.forEach((position) => tryAddExteriorSpace(map, position, exterior, queue))
-
-  for (let index = 0; index < queue.length; index++) {
-    const {x, y} = queue[index]
-    const neighbors = [
-      {x: x - 1, y},
-      {x: x + 1, y},
-      {x, y: y - 1},
-      {x, y: y + 1},
-    ]
-    neighbors.forEach((position) => tryAddExteriorSpace(map, position, exterior, queue))
-  }
-
-  return exterior
-}
-
-const toRuntimeSymbol = (symbol, positionKey, exterior) => {
-  if (symbol === ' ' && exterior.has(positionKey)) return '_'
-  if (symbol === '*') return '-'
-  if (symbol === '+') return '*'
-  return symbol
-}
-
-const toRuntimeMap = (standardMap) => {
-  const width = Math.max(...standardMap.map((row) => row.length))
-  const paddedMap = standardMap.map((row) => row.padEnd(width, ' '))
-  const exterior = findExteriorSpaces(paddedMap)
-
-  return paddedMap.map((row, y) => {
-    return Array.from(row, (symbol, x) => toRuntimeSymbol(symbol, `${x}:${y}`, exterior)).join('')
-  })
-}
-
+// Проверяет условие, описанное операцией `isAppearanceRoleCell`.
 const isAppearanceRoleCell = (role, symbol) => {
   if (role === 'wall') return symbol === '#'
   if (role === 'floor') return Boolean(symbol) && symbol !== '_' && symbol !== '#'
@@ -338,6 +291,7 @@ const isAppearanceRoleCell = (role, symbol) => {
   return false
 }
 
+// Проверяет условие, описанное операцией `validateAppearancePosition`.
 const validateAppearancePosition = (level, role, positionKey) => {
   if (!positionKeyPattern.test(positionKey)) throw new Error(`${level.id}: недопустимая координата оформления ${positionKey}`)
 
@@ -348,6 +302,7 @@ const validateAppearancePosition = (level, role, positionKey) => {
   }
 }
 
+// Проверяет условие, описанное операцией `validateAppearanceRole`.
 const validateAppearanceRole = (level, role, overrides, tileCatalog) => {
   if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides)) {
     throw new Error(`${level.id}: оформление ${role} должно быть объектом`)
@@ -361,6 +316,7 @@ const validateAppearanceRole = (level, role, overrides, tileCatalog) => {
   })
 }
 
+// Проверяет условие, описанное операцией `validateLevelAppearance`.
 const validateLevelAppearance = (level, appearance, tileCatalog) => {
   if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
     throw new Error(`${level.id}: оформление уровня должно быть объектом`)
@@ -373,23 +329,39 @@ const validateLevelAppearance = (level, appearance, tileCatalog) => {
   })
 }
 
-const loadAppearances = (levels) => {
-  const source = readJson(appearanceSourcePath)
+// Возвращает данные, за которые отвечает операция `readLocationAppearance`.
+const readLocationAppearance = (location) => {
+  const filePath = path.resolve(appearanceSourceDirectory, `${location.id}.json`)
+  const source = readJson(filePath)
   if (source.version !== 1 || !source.levels || typeof source.levels !== 'object' || Array.isArray(source.levels)) {
-    throw new Error('Файл levels/appearance.json имеет неподдерживаемый формат')
+    throw new Error(`Файл levels/appearance/${location.id}.json имеет неподдерживаемый формат`)
   }
-
-  const levelsById = new Map(levels.map((level) => [level.id, level]))
-  const tileCatalog = getSokobanTileCatalog(projectRoot)
-  Object.entries(source.levels).forEach(([levelId, appearance]) => {
-    const level = levelsById.get(levelId)
-    if (!level) throw new Error(`Оформление ссылается на неизвестный уровень ${levelId}`)
-    validateLevelAppearance(level, appearance, tileCatalog)
-  })
-
-  return new Map(Object.entries(source.levels))
+  return source.levels
 }
 
+// Добавляет данные или представление через операцию `addLocationAppearances`.
+const addLocationAppearances = (result, location, levelsById, tileCatalog) => {
+  const locationLevelIds = new Set(location.levels.map((level) => level.id))
+  Object.entries(readLocationAppearance(location)).forEach(([levelId, appearance]) => {
+    if (!locationLevelIds.has(levelId)) throw new Error(`${levelId}: оформление находится не в своей локации ${location.id}`)
+
+    const level = levelsById.get(levelId)
+    validateLevelAppearance(level, appearance, tileCatalog)
+    result.set(levelId, appearance)
+  })
+}
+
+// Возвращает данные, за которые отвечает операция `loadAppearances`.
+const loadAppearances = (levels, locations) => {
+  const result = new Map()
+  const levelsById = new Map(levels.map((level) => [level.id, level]))
+  const tileCatalog = getSokobanTileCatalog(projectRoot)
+  locations.forEach((location) => addLocationAppearances(result, location, levelsById, tileCatalog))
+
+  return result
+}
+
+// Создаёт данные или представление для операции `createSolverMetadata`.
 const createSolverMetadata = (level) => {
   if (!level.stats) return undefined
 
@@ -404,6 +376,7 @@ const createSolverMetadata = (level) => {
   }
 }
 
+// Возвращает данные, за которые отвечает операция `getProvenPushRecord`.
 const getProvenPushRecord = (level) => {
   if (!level.stats || level.stats.lowerBound === null) return null
   if (level.stats.lowerBound !== level.stats.bestPushes) return null
@@ -411,6 +384,7 @@ const getProvenPushRecord = (level) => {
   return level.stats.bestPushes
 }
 
+// Создаёт данные или представление для операции `createRuntimeLevel`.
 const createRuntimeLevel = (level, index, appearance) => {
   const solver = createSolverMetadata(level)
   const pushRecord = getProvenPushRecord(level)
@@ -428,6 +402,7 @@ const createRuntimeLevel = (level, index, appearance) => {
   }
 }
 
+// Создаёт данные или представление для операции `createRuntimeLocation`.
 const createRuntimeLocation = (location, levelIndexes, appearances) => {
   return {
     id: location.id,
@@ -440,11 +415,13 @@ const createRuntimeLocation = (location, levelIndexes, appearances) => {
   }
 }
 
+// Создаёт данные или представление для операции `createRuntimeCatalog`.
 const createRuntimeCatalog = (levels, locations, appearances) => {
   const levelIndexes = new Map(levels.map((level, index) => [level.id, index]))
   return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes, appearances))}
 }
 
+// Проверяет условие, описанное операцией `validateUniqueIds`.
 const validateUniqueIds = (levels) => {
   const ids = new Set()
 
@@ -454,6 +431,7 @@ const validateUniqueIds = (levels) => {
   })
 }
 
+// Записывает данные через операцию `writeOutput`.
 const writeOutput = (filePath, content) => {
   const current = fs.existsSync(filePath) ? readText(filePath) : null
   if (current === content) return false
@@ -464,6 +442,7 @@ const writeOutput = (filePath, content) => {
   return true
 }
 
+// Удаляет или очищает состояние через операцию `removeGeneratedFile`.
 const removeGeneratedFile = (filePath) => {
   if (!fs.existsSync(filePath)) return
   if (isCheckMode) throw new Error(`Требуется удалить устаревший файл: ${path.relative(projectRoot, filePath)}`)
@@ -471,11 +450,13 @@ const removeGeneratedFile = (filePath) => {
   fs.unlinkSync(filePath)
 }
 
+// Возвращает данные, за которые отвечает операция `getLocationVariableName`.
 const getLocationVariableName = (locationId) => {
   const camelCaseId = locationId.replace(/-([a-z0-9])/g, (_, character) => character.toUpperCase())
   return `${camelCaseId}Location`
 }
 
+// Создаёт данные или представление для операции `createGameIndexSource`.
 const createGameIndexSource = (locations) => {
   const imports = [...locations]
     .sort((first, second) => first.id.localeCompare(second.id, 'en', {numeric: true}))
@@ -498,6 +479,7 @@ export {
 `
 }
 
+// Удаляет или очищает состояние через операцию `removeStaleLocationFiles`.
 const removeStaleLocationFiles = (locations) => {
   if (!fs.existsSync(gameLocationsDirectory)) return
 
@@ -507,6 +489,7 @@ const removeStaleLocationFiles = (locations) => {
     .forEach((entry) => removeGeneratedFile(path.resolve(gameLocationsDirectory, entry.name)))
 }
 
+// Записывает данные через операцию `writeLocationFiles`.
 const writeLocationFiles = async (locations, prettierConfig) => {
   for (const location of locations) {
     const filePath = path.resolve(gameLocationsDirectory, `${location.id}.json`)
@@ -515,17 +498,20 @@ const writeLocationFiles = async (locations, prettierConfig) => {
   }
 }
 
+// Записывает данные через операцию `writeGameIndex`.
 const writeGameIndex = async (locations, prettierConfig) => {
   const formattedContent = await prettier.format(createGameIndexSource(locations), {...prettierConfig, parser: 'babel'})
   const content = formattedContent.replace('export {levels}', 'export {\n  levels,\n}')
   writeOutput(gameIndexOutputPath, content)
 }
 
+// Собирает и записывает все игровые файлы уровней.
 const buildLevels = async () => {
-  const levels = loadLevels()
+  const sourceLocations = loadLocationDefinitions()
+  const levels = loadLevels(sourceLocations)
   validateUniqueIds(levels)
-  const locations = loadLocations(levels)
-  const appearances = loadAppearances(levels)
+  const locations = loadLocations(levels, sourceLocations)
+  const appearances = loadAppearances(levels, locations)
 
   const gameCatalog = createRuntimeCatalog(levels, locations, appearances)
   const prettierConfig = await prettier.resolveConfig(gameIndexOutputPath)

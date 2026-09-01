@@ -1,5 +1,5 @@
-import i18next from 'i18next'
 import {gsap} from 'gsap'
+import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import {primaryFontStyle} from '../../../../styles.js'
 import GameUtils from '../../../../utils/gameUtils/GameUtils.js'

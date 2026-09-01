@@ -3,18 +3,22 @@ import {Container, Graphics, Text} from 'pixi.js'
 import ButtonContainer from '../../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../../engine/Locator.ts'
 import LocalStorage from '../../../../engine/storage/LocalStorage.js'
-import {openSokobanLevelEditor} from '../../../../sokoban/openSokobanLevelEditor.js'
+import {openSokobanLevelEditor} from '../../../../sokoban/editor/openSokobanLevelEditor.js'
 import {primaryFontStyle} from '../../../../styles.js'
 import LevelPreview from './LevelPreview.js'
 import LevelSelectButton from './LevelSelectButton.js'
 
-const ACTION_BUTTON_GAP = 24
-const ACTION_BUTTONS_Y = 445
-const BACK_BUTTON_SCALE = 0.75
-const LEVELS_PANEL_HEIGHT = 320
-const LEVELS_PANEL_WIDTH = 600
-const PREVIEW_HEIGHT = 390
-const PREVIEW_WIDTH = 500
+/**
+ * Отображает выбор уровня локации и отладочный переход в редактор.
+ */
+
+const ACTION_BUTTON_GAP = 24 // Расстояние между кнопками действий
+const ACTION_BUTTONS_Y = 445 // Вертикальная позиция кнопок действий
+const BACK_BUTTON_SCALE = 0.75 // Масштаб кнопки возврата
+const LEVELS_PANEL_HEIGHT = 320 // Высота панели списка уровней
+const LEVELS_PANEL_WIDTH = 600 // Ширина панели списка уровней
+const PREVIEW_HEIGHT = 390 // Высота области предпросмотра
+const PREVIEW_WIDTH = 500 // Ширина области предпросмотра
 
 export default class LocationLevelSelectView extends Container {
   #backButton
@@ -27,6 +31,7 @@ export default class LocationLevelSelectView extends Container {
   #selectedEntry
   #title
 
+  // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({onBack, onLevelSelect, onPlay}) {
     super({label: 'location-level-select-view'})
 
@@ -34,6 +39,7 @@ export default class LocationLevelSelectView extends Container {
     this.#init(onBack, onPlay)
   }
 
+  // Обновляет состояние через операцию `setData`.
   setData = (location, levels, selectedEntry) => {
     this.#selectedEntry = selectedEntry
     this.#title.text = i18next.t(location.titleKey)
@@ -43,6 +49,7 @@ export default class LocationLevelSelectView extends Container {
     this.updateAdaptive()
   }
 
+  // Обновляет состояние через операцию `updateSelectedLevel`.
   updateSelectedLevel = (levels, selectedEntry) => {
     this.#selectedEntry = selectedEntry
     this.#preview.setLevel(selectedEntry.level)
@@ -52,6 +59,7 @@ export default class LocationLevelSelectView extends Container {
     })
   }
 
+  // Обновляет состояние через операцию `updateAdaptive`.
   updateAdaptive = () => {
     const {width} = Locator.uiLayer.uiData
     this.position.set(0)
@@ -61,6 +69,7 @@ export default class LocationLevelSelectView extends Container {
     this.#layoutActionButtons()
   }
 
+  // Инициализирует внутреннее состояние и зависимости.
   #init = (onBack, onPlay) => {
     this.#createHeader()
     this.#preview = new LevelPreview()
@@ -73,6 +82,7 @@ export default class LocationLevelSelectView extends Container {
     this.addChild(this.#preview, this.#levelsContainer, this.#backButton, this.#playButton)
   }
 
+  // Создаёт данные или представление для операции `createHeader`.
   #createHeader = () => {
     this.#title = new Text({
       label: 'location-level-title',
@@ -83,6 +93,7 @@ export default class LocationLevelSelectView extends Container {
     this.addChild(this.#title)
   }
 
+  // Создаёт данные или представление для операции `createLevelsPanel`.
   #createLevelsPanel = () => {
     const panel = new Graphics({label: 'level-select-panel'})
     panel
@@ -99,6 +110,7 @@ export default class LocationLevelSelectView extends Container {
     this.#levelsContainer.addChild(panel, this.#record)
   }
 
+  // Создаёт данные или представление для операции `createBackButton`.
   #createBackButton = (onBack) => {
     const button = new ButtonContainer({
       props: {name: 'btnLocationBack'},
@@ -109,6 +121,7 @@ export default class LocationLevelSelectView extends Container {
     return button
   }
 
+  // Создаёт данные или представление для операции `createPlayButton`.
   #createPlayButton = (onPlay) => {
     const button = new ButtonContainer({
       props: {name: 'btnPlaySelectedLevel'},
@@ -123,6 +136,7 @@ export default class LocationLevelSelectView extends Container {
     return button
   }
 
+  // Выполняет отдельную операцию `replaceLevelButtons`.
   #replaceLevelButtons = (levels, selectedLevelId) => {
     this.#levelButtons.forEach((button) => button.destroy({children: true}))
     this.#levelButtons = levels.map((level) => {
@@ -133,12 +147,14 @@ export default class LocationLevelSelectView extends Container {
     })
   }
 
+  // Рассчитывает расположение через операцию `layoutPreview`.
   #layoutPreview = () => {
     this.#title.position.set(0, -420)
     this.#preview.position.set(0, -165)
     this.#preview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
   }
 
+  // Рассчитывает расположение через операцию `layoutLevels`.
   #layoutLevels = () => {
     this.#levelsContainer.position.set(0, 205)
     this.#levelsContainer.scale.set(0.8)
@@ -149,6 +165,7 @@ export default class LocationLevelSelectView extends Container {
     })
   }
 
+  // Рассчитывает расположение через операцию `layoutActionButtons`.
   #layoutActionButtons = () => {
     const rowWidth = this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width
     const rowLeft = -rowWidth / 2
@@ -156,10 +173,12 @@ export default class LocationLevelSelectView extends Container {
     this.#playButton.position.set(rowLeft + this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width / 2, ACTION_BUTTONS_Y)
   }
 
+  // Обновляет состояние через операцию `setRecord`.
   #setRecord = (level) => {
     this.#record.text = level.pushRecord ? i18next.t('sokoban.record', {record: level.pushRecord}) : ''
   }
 
+  // Выполняет отдельную операцию `openLevelEditor`.
   #openLevelEditor = (event) => {
     if (!LocalStorage.isDebug || !event.ctrlKey || !this.#selectedEntry) return
 

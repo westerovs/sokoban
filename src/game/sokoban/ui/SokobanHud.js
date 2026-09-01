@@ -2,8 +2,12 @@ import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
-import {SOKOBAN_HUD_SETTINGS} from './settings.js'
+import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
 import SokobanHudButton from './SokobanHudButton.js'
+
+/**
+ * Отображает панель шагов, рекорда и действий уровня Sokoban.
+ */
 
 export default class SokobanHud extends Container {
   #levelNumber
@@ -25,6 +29,7 @@ export default class SokobanHud extends Container {
   #isEnabled = false
   #steps = 0
 
+  // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({levelNumber, pushRecord, onUndo, onRestart}) {
     super({label: 'sokoban-hud'})
 
@@ -37,17 +42,20 @@ export default class SokobanHud extends Container {
     this.#init()
   }
 
+  // Обновляет отображаемое количество шагов.
   setSteps(steps) {
     this.#steps = steps
     this.#stepsText.text = String(steps)
     this.#updateButtons()
   }
 
+  // Включает или отключает взаимодействие с элементом.
   setEnabled(isEnabled) {
     this.#isEnabled = isEnabled
     this.#updateButtons()
   }
 
+  // Показывает анимированное предупреждение о тупике.
   showDeadlockFeedback() {
     this.clearDeadlockFeedback()
     this.#deadlockWarning.visible = true
@@ -55,6 +63,7 @@ export default class SokobanHud extends Container {
     this.#deadlockTimeline = this.#createDeadlockTimeline()
   }
 
+  // Останавливает и скрывает предупреждение о тупике.
   clearDeadlockFeedback() {
     this.#deadlockTimeline?.kill()
     this.#deadlockTimeline = null
@@ -66,6 +75,7 @@ export default class SokobanHud extends Container {
     this.#deadlockWarning.y = this.#deadlockWarningY
   }
 
+  // Рассчитывает и применяет расположение представления.
   layout({boardWidth, tileSize, availableWidth, centerX, availableHeight}) {
     const settings = SOKOBAN_HUD_SETTINGS
     const height = tileSize * settings.heightInTiles
@@ -79,11 +89,13 @@ export default class SokobanHud extends Container {
     this.#positionHud(centerX, availableHeight, height)
   }
 
+  // Освобождает обработчики, анимации и ресурсы экземпляра.
   destroy(options) {
     this.clearDeadlockFeedback()
     super.destroy(options)
   }
 
+  // Инициализирует внутреннее состояние и зависимости.
   #init() {
     this.#panel = new Graphics({label: 'sokoban-hud-panel'})
     this.#stepsView = this.#createStepsView()
@@ -106,6 +118,7 @@ export default class SokobanHud extends Container {
     this.setSteps(0)
   }
 
+  // Создаёт контейнер предупреждения о тупике.
   #createDeadlockWarning() {
     const warning = new Container({
       label: 'sokoban-deadlock-warning',
@@ -119,6 +132,7 @@ export default class SokobanHud extends Container {
     return warning
   }
 
+  // Создаёт текст предупреждения о тупике.
   #createDeadlockWarningText() {
     const text = new Text({
       label: 'sokoban-deadlock-warning-text',
@@ -133,6 +147,7 @@ export default class SokobanHud extends Container {
     return text
   }
 
+  // Создаёт блок иконки и счётчика шагов.
   #createStepsView() {
     const stepsView = new Container({label: 'sokoban-steps-view'})
     this.#stepsIcon = GameUtils.createSprite('icon-steps', {label: 'sokoban-steps-icon'})
@@ -148,6 +163,7 @@ export default class SokobanHud extends Container {
     return stepsView
   }
 
+  // Создаёт подпись номера уровня.
   #createLevelText() {
     const levelText = new Text({
       label: 'sokoban-level-text',
@@ -159,6 +175,7 @@ export default class SokobanHud extends Container {
     return levelText
   }
 
+  // Создаёт подпись рекорда по толчкам.
   #createRecordText() {
     const recordText = new Text({
       label: 'sokoban-record-text',
@@ -171,6 +188,7 @@ export default class SokobanHud extends Container {
     return recordText
   }
 
+  // Перерисовывает фон и рамку панели HUD.
   #drawPanel(width, height) {
     const settings = SOKOBAN_HUD_SETTINGS
 
@@ -181,6 +199,7 @@ export default class SokobanHud extends Container {
       .stroke({color: settings.borderColor, width: height * settings.borderWidthRatio})
   }
 
+  // Рассчитывает размеры и положение всего содержимого HUD.
   #layoutContent(width, height) {
     const settings = SOKOBAN_HUD_SETTINGS
     const buttonSize = height * settings.buttonSizeRatio
@@ -194,6 +213,7 @@ export default class SokobanHud extends Container {
     this.#positionContent(width)
   }
 
+  // Размещает подписи уровня и рекорда по центру HUD.
   #layoutCenterTexts(height) {
     const settings = SOKOBAN_HUD_SETTINGS
     const hasRecord = this.#recordText.visible
@@ -204,6 +224,7 @@ export default class SokobanHud extends Container {
     this.#recordText.y = height * settings.recordOffsetRatio
   }
 
+  // Размещает предупреждение о тупике над HUD.
   #layoutDeadlockWarning(width, hudHeight) {
     const warningHeight = Math.max(hudHeight, 44)
     const warningWidth = Math.min(width, 520)
@@ -218,6 +239,7 @@ export default class SokobanHud extends Container {
     this.#deadlockWarning.y = this.#deadlockWarningY
   }
 
+  // Выравнивает крайние элементы и блок шагов внутри HUD.
   #positionContent(width) {
     this.#alignLeft(this.#backButton, width)
     this.#alignRight(this.#restartButton, width)
@@ -226,18 +248,21 @@ export default class SokobanHud extends Container {
     this.#recordText.x = 0
   }
 
+  // Выравнивает элемент по левому краю панели.
   #alignLeft(view, width) {
     const bounds = view.getLocalBounds()
 
     view.x = -width / 2 + SOKOBAN_HUD_SETTINGS.horizontalPadding - bounds.x
   }
 
+  // Выравнивает элемент по правому краю панели.
   #alignRight(view, width) {
     const bounds = view.getLocalBounds()
 
     view.x = width / 2 - SOKOBAN_HUD_SETTINGS.horizontalPadding - bounds.x - bounds.width
   }
 
+  // Размещает счётчик шагов рядом с кнопкой отмены.
   #positionStepsAfterBack() {
     const backBounds = this.#backButton.getLocalBounds()
     const stepsBounds = this.#stepsView.getLocalBounds()
@@ -246,6 +271,7 @@ export default class SokobanHud extends Container {
     this.#stepsView.x = backRight + SOKOBAN_HUD_SETTINGS.controlsGap - stepsBounds.x
   }
 
+  // Масштабирует иконку счётчика шагов.
   #setStepsIconSize(iconSize) {
     this.#stepsIcon.scale.set(1)
     const iconScale = iconSize / Math.max(this.#stepsIcon.width, this.#stepsIcon.height)
@@ -253,6 +279,7 @@ export default class SokobanHud extends Container {
     this.#stepsIcon.scale.set(iconScale)
   }
 
+  // Размещает HUD относительно доски и доступной высоты.
   #positionHud(centerX, availableHeight, height) {
     const y = availableHeight - SOKOBAN_HUD_SETTINGS.bottomPadding - height / 2
 
@@ -262,6 +289,7 @@ export default class SokobanHud extends Container {
     this.scale.set(1)
   }
 
+  // Создаёт единый стиль текста заданного размера.
   #createTextStyle(fontSize) {
     return {
       fill: SOKOBAN_HUD_SETTINGS.textColor,
@@ -271,10 +299,12 @@ export default class SokobanHud extends Container {
     }
   }
 
+  // Создаёт интерактивную кнопку с заданной иконкой.
   #createButton(iconName, label, onPress) {
     return new SokobanHudButton({iconName, label, onPress})
   }
 
+  // Создаёт анимацию предупреждения о тупике.
   #createDeadlockTimeline() {
     return gsap
       .timeline({onComplete: () => this.#finishDeadlockFeedback()})
@@ -287,12 +317,14 @@ export default class SokobanHud extends Container {
       })
   }
 
+  // Завершает показ предупреждения и освобождает таймлайн.
   #finishDeadlockFeedback() {
     this.#deadlockTimeline = null
     this.#backButton.stopPulse()
     this.#deadlockWarning.visible = false
   }
 
+  // Обновляет доступность кнопок HUD.
   #updateButtons() {
     this.#backButton?.setEnabled(this.#isEnabled && this.#steps > 0)
     this.#restartButton?.setEnabled(this.#isEnabled)

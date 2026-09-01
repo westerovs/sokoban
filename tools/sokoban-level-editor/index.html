@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Содержит полноэкранную HTML-оболочку редактора уровней Sokoban. -->
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
@@ -11,7 +12,7 @@
       <header class="editor-header">
         <div class="editor-title">
           <span class="editor-title__eyebrow">Sokoban tools</span>
-          <h1>Оформление уровней</h1>
+          <h1>Редактор уровней</h1>
         </div>
         <label class="editor-field">
           <span>Локация</span>
@@ -22,7 +23,10 @@
           <select id="level-select"></select>
         </label>
         <div class="editor-actions">
-          <button id="launch-button" class="editor-button editor-button--launch" type="button">Запустить уровень</button>
+          <button id="undo-button" class="editor-button editor-button--compact" type="button" title="Отменить (Ctrl+Z)">↶</button>
+          <button id="redo-button" class="editor-button editor-button--compact" type="button" title="Повторить (Ctrl+Shift+Z)">↷</button>
+          <button id="validate-button" class="editor-button editor-button--secondary" type="button">Проверить</button>
+          <button id="launch-button" class="editor-button editor-button--launch" type="button">Запустить черновик</button>
           <button id="copy-button" class="editor-button editor-button--secondary" type="button">Копировать JSON</button>
           <button id="save-button" class="editor-button editor-button--primary" type="button">Сохранить</button>
         </div>
@@ -30,13 +34,18 @@
 
       <aside class="editor-sidebar">
         <div class="editor-sidebar__heading">
-          <span class="editor-sidebar__caption">Кисти</span>
-          <strong id="brush-label">Выберите тайл</strong>
+          <span class="editor-sidebar__caption">Инструмент</span>
+          <strong id="brush-label">Выберите кисть</strong>
         </div>
+        <div id="mode-tabs" class="editor-mode-tabs"></div>
         <div id="palette" class="editor-palette"></div>
+        <section class="editor-validation">
+          <div class="editor-sidebar__caption">Проверка структуры</div>
+          <div id="validation-summary" class="editor-validation__summary"></div>
+        </section>
         <div class="editor-help">
-          <p>Кисть меняет только внешний вид. Стены остаются стенами, а ящики — ящиками.</p>
-          <p>Проведите мышью с зажатой левой кнопкой, чтобы покрасить несколько клеток.</p>
+          <p>Геометрия меняет стены, пол и цели. Объекты управляют игроком и ящиками.</p>
+          <p>Оформление влияет только на внешний вид. Проведите мышью с зажатой левой кнопкой для рисования.</p>
         </div>
       </aside>
 

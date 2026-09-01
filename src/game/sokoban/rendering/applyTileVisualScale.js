@@ -1,5 +1,5 @@
-import {ATLAS_RESOLUTIONS} from '../gameConfig/resolutionConfig.mjs'
-import {SOKOBAN_SETTINGS} from './settings.js'
+import {ATLAS_RESOLUTIONS} from '../../gameConfig/resolutionConfig.mjs'
+import {SOKOBAN_SETTINGS} from '../config/settings.js'
 
 /**
  * Масштабирует визуал тайла независимо от логического размера клетки, сохраняя пропорции исходной текстуры.
@@ -8,6 +8,7 @@ import {SOKOBAN_SETTINGS} from './settings.js'
 
 const SOURCE_ASSET_RESOLUTION = Math.max(...Object.values(ATLAS_RESOLUTIONS)) // Плотность исходников до генерации вариантов атласа
 
+// Устанавливает визуальный масштаб спрайта относительно клетки.
 const applyTileVisualScale = (sprite, tileSize) => {
   const scale = (tileSize / SOKOBAN_SETTINGS.textureTileSize) * SOURCE_ASSET_RESOLUTION
   sprite.scale.set(scale)
