@@ -1,13 +1,12 @@
 import {removeTileAppearances, setTileAppearance} from './appearanceState.js'
 
 /**
- * Применяет инструменты геометрии, объектов и оформления к состоянию уровня.
+ * Сразу изменяет тип клетки и назначает выбранную пользователем текстуру.
  */
 
-const APPEARANCE_ROLES = Object.freeze(['wall', 'floor', 'box'])
-const WALKABLE_SYMBOLS = new Set([' ', '.', '$', '@', '-', '*'])
+const APPEARANCE_ROLES = Object.freeze(['wall', 'floor', 'box', 'target'])
 
-// Возвращает данные, за которые отвечает операция `getTerrain`.
+// Возвращает тип основания клетки по символу карты.
 const getTerrain = (symbol) => {
   if (symbol === '_') return 'void'
   if (symbol === '#') return 'wall'
@@ -15,14 +14,14 @@ const getTerrain = (symbol) => {
   return 'floor'
 }
 
-// Возвращает данные, за которые отвечает операция `getOccupant`.
+// Возвращает объект, занимающий клетку карты.
 const getOccupant = (symbol) => {
   if ('$-'.includes(symbol)) return 'box'
   if ('@*'.includes(symbol)) return 'player'
   return null
 }
 
-// Выполняет отдельную операцию `composeSymbol`.
+// Собирает символ карты из основания и находящегося на нём объекта.
 const composeSymbol = (terrain, occupant) => {
   if (terrain === 'void') return '_'
   if (terrain === 'wall') return '#'
@@ -34,7 +33,7 @@ const composeSymbol = (terrain, occupant) => {
   return ' '
 }
 
-// Обновляет состояние через операцию `setMapSymbol`.
+// Возвращает новую карту с изменённым символом одной клетки.
 const setMapSymbol = (map, position, symbol) => {
   const nextMap = [...map]
   const row = Array.from(nextMap[position.y])
@@ -43,90 +42,83 @@ const setMapSymbol = (map, position, symbol) => {
   return nextMap
 }
 
-// Удаляет или очищает состояние через операцию `removePlayer`.
+// Убирает прежнюю позицию игрока, сохраняя основание клетки.
 const removePlayer = (map) => {
-  return map.map((row) => {
-    return Array.from(row, (symbol) => {
-      if (getOccupant(symbol) !== 'player') return symbol
-      return composeSymbol(getTerrain(symbol), null)
-    }).join('')
-  })
+  return map.map((row) =>
+    Array.from(row, (symbol) => {
+      return getOccupant(symbol) === 'player' ? composeSymbol(getTerrain(symbol), null) : symbol
+    }).join(''),
+  )
 }
 
-// Возвращает данные, за которые отвечает операция `getAppearanceRolesToRemove`.
-const getAppearanceRolesToRemove = (oldSymbol, nextSymbol) => {
-  const roles = []
-  if (getTerrain(nextSymbol) !== 'wall') roles.push('wall')
-  if (!WALKABLE_SYMBOLS.has(nextSymbol)) roles.push('floor')
-  if (getOccupant(nextSymbol) !== 'box') roles.push('box')
-  if (getTerrain(oldSymbol) !== getTerrain(nextSymbol)) {
-    if (getTerrain(nextSymbol) === 'wall') roles.push('wall')
-    if (WALKABLE_SYMBOLS.has(nextSymbol) && !WALKABLE_SYMBOLS.has(oldSymbol)) roles.push('floor')
-  }
-  return [...new Set(roles)]
+// Удаляет устаревшие слои и назначает выбранную текстуру клетки.
+const replaceAppearance = (state, brush, positionKey, roles, defaults) => {
+  const cleared = removeTileAppearances(state.appearance, positionKey, roles)
+  return setTileAppearance(cleared, brush, positionKey, defaults)
 }
 
-// Обновляет состояние через операцию `applyStructureBrush`.
-const applyStructureBrush = (state, brush, position, positionKey) => {
-  const oldSymbol = state.map[position.y][position.x]
-  const occupant = ['floor', 'target'].includes(brush.tool) ? getOccupant(oldSymbol) : null
-  const nextSymbol = composeSymbol(brush.tool, occupant)
-  if (nextSymbol === oldSymbol) return {state}
-
-  const map = setMapSymbol(state.map, position, nextSymbol)
-  const roles = brush.tool === 'void' ? APPEARANCE_ROLES : getAppearanceRolesToRemove(oldSymbol, nextSymbol)
-  const appearance = removeTileAppearances(state.appearance, state.levelId, positionKey, roles)
+// Ставит стену и полностью очищает прежнее содержимое клетки.
+const applyWallBrush = (state, brush, position, positionKey, defaults) => {
+  const map = setMapSymbol(state.map, position, '#')
+  const appearance = replaceAppearance(state, brush, positionKey, APPEARANCE_ROLES, defaults)
   return {state: {...state, map, appearance}}
 }
 
-// Обновляет состояние через операцию `applyObjectBrush`.
-const applyObjectBrush = (state, brush, position, positionKey) => {
-  const oldSymbol = state.map[position.y][position.x]
-  const terrain = getTerrain(oldSymbol)
-  if (!['floor', 'target'].includes(terrain)) return {state, error: 'Объекты можно ставить только на пол или цель'}
-
-  const oldOccupant = getOccupant(oldSymbol)
-  const occupant = brush.tool === 'erase' ? null : brush.tool
-  let map = brush.tool === 'player' ? removePlayer(state.map) : state.map
-  const currentSymbol = map[position.y][position.x]
-  map = setMapSymbol(map, position, composeSymbol(getTerrain(currentSymbol), occupant))
-  const roles = oldOccupant === 'box' && occupant !== 'box' ? ['box'] : []
-  const appearance = removeTileAppearances(state.appearance, state.levelId, positionKey, roles)
+// Ставит выбранный пол, сохраняя находящийся на клетке объект.
+const applyFloorBrush = (state, brush, position, positionKey, defaults) => {
+  const occupant = getOccupant(state.map[position.y][position.x])
+  const roles = occupant === 'box' ? ['wall', 'target'] : ['wall', 'target', 'box']
+  const map = setMapSymbol(state.map, position, composeSymbol('floor', occupant))
+  const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
   return {state: {...state, map, appearance}}
 }
 
-// Проверяет условие, описанное операцией `isAppearanceValid`.
-const isAppearanceValid = (role, symbol) => {
-  if (role === 'wall') return symbol === '#'
-  if (role === 'floor') return WALKABLE_SYMBOLS.has(symbol)
-  if (role === 'box') return getOccupant(symbol) === 'box'
-  return false
+// Ставит выбранную цель, сохраняя находящийся на клетке объект.
+const applyTargetBrush = (state, brush, position, positionKey, defaults) => {
+  const occupant = getOccupant(state.map[position.y][position.x])
+  const roles = occupant === 'box' ? ['wall'] : ['wall', 'box']
+  const map = setMapSymbol(state.map, position, composeSymbol('target', occupant))
+  const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
+  return {state: {...state, map, appearance}}
 }
 
-// Обновляет состояние через операцию `applyAppearanceBrush`.
-const applyAppearanceBrush = (state, brush, position, positionKey, defaults) => {
-  if (brush.tool === 'erase') {
-    const appearance = removeTileAppearances(state.appearance, state.levelId, positionKey, APPEARANCE_ROLES)
-    return {state: {...state, appearance}}
-  }
-
-  const symbol = state.map[position.y][position.x]
-  if (!isAppearanceValid(brush.role, symbol)) return {state, error: 'Эту текстуру нельзя применить к выбранной клетке'}
-  const appearance = setTileAppearance(state.appearance, state.levelId, brush, positionKey, defaults)
-  return {state: {...state, appearance}}
+// Ставит выбранный ящик на существующее основание или новый обычный пол.
+const applyBoxBrush = (state, brush, position, positionKey, defaults) => {
+  const oldTerrain = getTerrain(state.map[position.y][position.x])
+  const terrain = oldTerrain === 'target' ? 'target' : 'floor'
+  const roles = terrain === 'target' ? ['wall'] : ['wall', 'target']
+  const map = setMapSymbol(state.map, position, composeSymbol(terrain, 'box'))
+  const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
+  return {state: {...state, map, appearance}}
 }
 
-// Обновляет состояние через операцию `applyEditorBrush`.
+// Перемещает единственного игрока на выбранную клетку.
+const applyPlayerBrush = (state, position, positionKey) => {
+  let map = removePlayer(state.map)
+  const oldSymbol = map[position.y][position.x]
+  const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'floor'
+  map = setMapSymbol(map, position, composeSymbol(terrain, 'player'))
+  const roles = terrain === 'target' ? ['wall', 'box'] : ['wall', 'box', 'target']
+  const appearance = removeTileAppearances(state.appearance, positionKey, roles)
+  return {state: {...state, map, appearance}}
+}
+
+// Превращает клетку в пустоту и удаляет все её визуальные слои.
+const applyVoidBrush = (state, position, positionKey) => {
+  const map = setMapSymbol(state.map, position, '_')
+  const appearance = removeTileAppearances(state.appearance, positionKey, APPEARANCE_ROLES)
+  return {state: {...state, map, appearance}}
+}
+
+// Применяет выбранную прямую кисть к одной клетке редактора.
 const applyEditorBrush = (state, brush, position, defaults) => {
   const positionKey = `${position.x}:${position.y}`
-  if (brush.mode === 'structure') return applyStructureBrush(state, brush, position, positionKey)
-  if (brush.mode === 'objects') return applyObjectBrush(state, brush, position, positionKey)
-  return applyAppearanceBrush(state, brush, position, positionKey, defaults)
+  if (brush.mode === 'void') return applyVoidBrush(state, position, positionKey)
+  if (brush.mode === 'player') return applyPlayerBrush(state, position, positionKey)
+  if (brush.role === 'wall') return applyWallBrush(state, brush, position, positionKey, defaults)
+  if (brush.role === 'floor') return applyFloorBrush(state, brush, position, positionKey, defaults)
+  if (brush.role === 'target') return applyTargetBrush(state, brush, position, positionKey, defaults)
+  return applyBoxBrush(state, brush, position, positionKey, defaults)
 }
 
-export {
-  applyEditorBrush,
-  composeSymbol,
-  getOccupant,
-  getTerrain,
-}
+export {applyEditorBrush, composeSymbol, getOccupant, getTerrain}

@@ -5,42 +5,35 @@
 // Выполняет отдельную операцию `cloneAppearance`.
 const cloneAppearance = (appearance) => structuredClone(appearance)
 
-// Возвращает данные, за которые отвечает операция `getLevelAppearance`.
+// Возвращает оформление выбранного уровня из общего каталога.
 const getLevelAppearance = (appearance, levelId) => {
   return appearance.levels[levelId] ?? {}
 }
 
-// Удаляет или очищает состояние через операцию `removeEmptyObjects`.
-const removeEmptyObjects = (appearance, levelId, role) => {
-  if (!appearance.levels[levelId]?.[role]) return
-  if (Object.keys(appearance.levels[levelId][role]).length === 0) delete appearance.levels[levelId][role]
-  if (Object.keys(appearance.levels[levelId]).length === 0) delete appearance.levels[levelId]
+// Удаляет опустевший визуальный слой из оформления уровня.
+const removeEmptyRole = (appearance, role) => {
+  if (appearance[role] && Object.keys(appearance[role]).length === 0) delete appearance[role]
 }
 
-// Обновляет состояние через операцию `setTileAppearance`.
-const setTileAppearance = (appearance, levelId, brush, positionKey, defaults) => {
+// Назначает выбранную текстуру клетке или убирает избыточное значение по умолчанию.
+const setTileAppearance = (appearance, brush, positionKey, defaults) => {
   const nextAppearance = cloneAppearance(appearance)
-  const levelAppearance = (nextAppearance.levels[levelId] ??= {})
-  const roleAppearance = (levelAppearance[brush.role] ??= {})
+  const roleAppearance = (nextAppearance[brush.role] ??= {})
 
   if (brush.texture === defaults[brush.role]) delete roleAppearance[positionKey]
   else roleAppearance[positionKey] = brush.texture
-  removeEmptyObjects(nextAppearance, levelId, brush.role)
+  removeEmptyRole(nextAppearance, brush.role)
   return nextAppearance
 }
 
-// Удаляет или очищает состояние через операцию `removeTileAppearances`.
-const removeTileAppearances = (appearance, levelId, positionKey, roles) => {
+// Удаляет визуальные переопределения указанных слоёв в одной клетке.
+const removeTileAppearances = (appearance, positionKey, roles) => {
   const nextAppearance = cloneAppearance(appearance)
   roles.forEach((role) => {
-    delete nextAppearance.levels[levelId]?.[role]?.[positionKey]
-    removeEmptyObjects(nextAppearance, levelId, role)
+    delete nextAppearance[role]?.[positionKey]
+    removeEmptyRole(nextAppearance, role)
   })
   return nextAppearance
 }
 
-export {
-  getLevelAppearance,
-  removeTileAppearances,
-  setTileAppearance,
-}
+export {getLevelAppearance, removeTileAppearances, setTileAppearance}

@@ -5,6 +5,7 @@ import process from 'node:process'
 import {fileURLToPath} from 'node:url'
 import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
+import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.js'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
@@ -24,7 +25,7 @@ const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.js')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
-const appearanceRoles = Object.freeze(['wall', 'floor', 'box'])
+const appearanceRoles = Object.freeze(['wall', 'floor', 'box', 'target'])
 const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
 const lurdDirections = Object.freeze({
   u: Object.freeze({x: 0, y: -1}),
@@ -69,7 +70,9 @@ const validateStandardMap = (level) => {
   if (metrics.playerCount !== 1) throw new Error(`${level.id}: требуется ровно один игрок`)
   if (metrics.boxCount === 0) throw new Error(`${level.id}: требуется хотя бы один ящик`)
   if (metrics.boxCount !== metrics.targetCount) throw new Error(`${level.id}: число ящиков и целей не совпадает`)
-  if (metrics.width > 20 || metrics.height > 17) throw new Error(`${level.id}: карта превышает ограничение 20×17`)
+  if (metrics.width > SOKOBAN_SETTINGS.maxBoardColumns || metrics.height > SOKOBAN_SETTINGS.maxBoardRows) {
+    throw new Error(`${level.id}: карта превышает ограничение ${SOKOBAN_SETTINGS.maxBoardColumns}×${SOKOBAN_SETTINGS.maxBoardRows}`)
+  }
 
   return metrics
 }
@@ -288,6 +291,7 @@ const isAppearanceRoleCell = (role, symbol) => {
   if (role === 'wall') return symbol === '#'
   if (role === 'floor') return Boolean(symbol) && symbol !== '_' && symbol !== '#'
   if (role === 'box') return '$-'.includes(symbol)
+  if (role === 'target') return '.-*'.includes(symbol)
   return false
 }
 

@@ -1,3 +1,4 @@
+import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
 import {getOccupant} from './levelEditing.js'
 
 /**
@@ -5,8 +6,6 @@ import {getOccupant} from './levelEditing.js'
  */
 
 const ALLOWED_SYMBOLS = new Set(['_', '#', ' ', '.', '$', '@', '-', '*'])
-const MAX_COLUMNS = 20 // Максимальная ширина карты в клетках
-const MAX_ROWS = 17 // Максимальная высота карты в клетках
 const DIRECTIONS = Object.freeze([
   {x: 0, y: -1},
   {x: 1, y: 0},
@@ -31,8 +30,11 @@ const createIssue = (type, message, positions = []) => ({type, message, position
 const validateDimensions = (map) => {
   const issues = []
   if (!Array.isArray(map) || map.length === 0 || !map[0]?.length) return [createIssue('error', 'Карта не должна быть пустой')]
-  if (map.some((row) => typeof row !== 'string' || row.length !== map[0].length)) issues.push(createIssue('error', 'Строки карты имеют разную длину'))
-  if (map[0].length > MAX_COLUMNS || map.length > MAX_ROWS) issues.push(createIssue('error', 'Максимальный размер карты — 20×17'))
+  if (map.some((row) => typeof row !== 'string' || row.length !== map[0].length))
+    issues.push(createIssue('error', 'Строки карты имеют разную длину'))
+  if (map[0].length > SOKOBAN_SETTINGS.maxBoardColumns || map.length > SOKOBAN_SETTINGS.maxBoardRows) {
+    issues.push(createIssue('error', `Максимальный размер карты — ${SOKOBAN_SETTINGS.maxBoardColumns}×${SOKOBAN_SETTINGS.maxBoardRows}`))
+  }
   return issues
 }
 
@@ -51,7 +53,8 @@ const validateEntities = (map) => {
 
   if (players.length !== 1) issues.push(createIssue('error', 'На уровне должен быть ровно один игрок', players))
   if (boxes.length === 0) issues.push(createIssue('error', 'На уровне должен быть хотя бы один ящик'))
-  if (boxes.length !== targets.length) issues.push(createIssue('error', `Ящиков: ${boxes.length}, целей: ${targets.length}`, [...boxes, ...targets]))
+  if (boxes.length !== targets.length)
+    issues.push(createIssue('error', `Ящиков: ${boxes.length}, целей: ${targets.length}`, [...boxes, ...targets]))
   return issues
 }
 
@@ -116,6 +119,4 @@ const validateLevelMap = (map) => {
   return {isValid: !issues.some((issue) => issue.type === 'error'), issues, invalidPositions}
 }
 
-export {
-  validateLevelMap,
-}
+export {validateLevelMap}

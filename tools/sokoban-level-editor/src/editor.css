@@ -122,7 +122,7 @@ select:focus-visible {
 }
 
 .editor-button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   filter: grayscale(0.45);
   opacity: 0.65;
 }
@@ -144,6 +144,13 @@ select:focus-visible {
   background: #26372c;
   border-color: #486150;
   font-size: 21px;
+}
+
+.editor-button--danger {
+  color: #ffd8d2;
+  background: #492923;
+  border-color: #7f493f;
+  font-size: 18px;
 }
 
 .editor-button--secondary {
@@ -175,7 +182,7 @@ select:focus-visible {
 
 .editor-mode-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 5px;
   margin-bottom: 20px;
   padding: 4px;
@@ -209,6 +216,31 @@ select:focus-visible {
 
 .editor-palette {
   min-height: 120px;
+}
+
+.editor-utility-palette {
+  margin-bottom: 16px;
+}
+
+.editor-utility-palette .editor-palette__tiles {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.editor-utility-palette .editor-palette__section {
+  gap: 8px;
+}
+
+.editor-utility-palette .editor-tool-button {
+  display: flex;
+  min-height: 34px;
+  justify-content: center;
+  gap: 7px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.editor-utility-palette .editor-tool-button__icon {
+  font-size: 16px;
 }
 
 .editor-palette__mode {
@@ -396,26 +428,29 @@ select:focus-visible {
 
 .editor-status {
   position: absolute;
-  right: 18px;
-  bottom: 18px;
-  max-width: min(520px, calc(100% - 36px));
-  min-height: 38px;
-  padding: 10px 14px;
+  z-index: 10;
+  top: 18px;
+  left: 50%;
+  width: max-content;
+  max-width: min(680px, calc(100% - 36px));
+  min-height: 48px;
+  padding: 13px 19px;
   color: #dfeadf;
   background: rgb(20 31 24 / 88%);
   border: 1px solid #405448;
   border-radius: 10px;
   box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
-  font-size: 13px;
+  font-size: 16px;
+  font-weight: 650;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(6px);
+  transform: translate(-50%, -8px);
   transition: 160ms ease;
 }
 
 .editor-status[data-visible='true'] {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(-50%, 0);
 }
 
 .editor-status[data-kind='error'] {
@@ -474,6 +509,6 @@ select:focus-visible {
   }
 
   .editor-mode-tabs {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

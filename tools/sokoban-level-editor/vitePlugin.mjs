@@ -14,7 +14,7 @@ import {solveSokoban} from './solver.mjs'
 
 const DATA_API_PATH = '/__sokoban-level-editor/data' // Путь API чтения и сохранения уровней
 const SOLVER_API_PATH = '/__sokoban-level-editor/solve' // Путь API проверки решаемости
-const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|floor|box)\/([^/]+)\.png$/
+const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|floor|box|target)\/([^/]+)\.png$/
 const MAX_BODY_SIZE = 1024 * 1024 // Максимальный размер запроса редактора в байтах
 
 // Выполняет отдельную операцию `sendJson`.
@@ -138,8 +138,16 @@ const saveLevel = async (request, paths) => {
   const mapContent = fs.readFileSync(mapPath, 'utf8')
   const appearanceContent = fs.readFileSync(appearancePath, 'utf8')
   const files = [
-    {path: mapPath, previousContent: mapContent, nextContent: updateLocationMap(mapContent, levelId, map, path.relative(paths.projectRoot, mapPath))},
-    {path: appearancePath, previousContent: appearanceContent, nextContent: await updateLocationAppearance(appearanceContent, levelId, appearance, appearancePath)},
+    {
+      path: mapPath,
+      previousContent: mapContent,
+      nextContent: updateLocationMap(mapContent, levelId, map, path.relative(paths.projectRoot, mapPath)),
+    },
+    {
+      path: appearancePath,
+      previousContent: appearanceContent,
+      nextContent: await updateLocationAppearance(appearanceContent, levelId, appearance, appearancePath),
+    },
   ]
   writeAndBuild(paths, files)
 }
@@ -204,6 +212,7 @@ const createSokobanLevelEditorPlugin = (projectRoot) => {
   return {
     name: 'sokoban-level-editor',
     apply: 'serve',
+    // Подключает наблюдение за файлами уровней и HTTP-маршруты редактора.
     configureServer(server) {
       server.watcher.add([
         paths.appearanceSourceDirectory,
@@ -219,6 +228,4 @@ const createSokobanLevelEditorPlugin = (projectRoot) => {
   }
 }
 
-export {
-  createSokobanLevelEditorPlugin,
-}
+export {createSokobanLevelEditorPlugin}

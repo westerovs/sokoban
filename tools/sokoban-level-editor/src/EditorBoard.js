@@ -8,17 +8,23 @@ import {applyTileVisualScale} from '@/game/sokoban/rendering/applyTileVisualScal
 
 const TILE_SIZE = 100 // Логический размер клетки редактора
 const BOARD_PADDING = 44 // Минимальный отступ карты от краёв рабочей области
+const MIN_ZOOM = 1 // Минимальный масштаб относительно полного поля
+const MAX_ZOOM = 4 // Максимальное увеличение рабочего поля
+const ZOOM_SENSITIVITY = 0.0014 // Скорость изменения масштаба колёсиком мыши
 
 export default class EditorBoard extends Container {
   #appearance = {}
   #brush = null
   #defaults
   #invalidPositions = []
-  #isPainting = false
+  #paintingBrush = null
   #lastPaintedPosition = null
   #level = null
   #onPaint
   #textures
+  #viewportHeight = 0
+  #viewportWidth = 0
+  #zoom = MIN_ZOOM
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor(textures, defaults, onPaint) {
@@ -32,6 +38,11 @@ export default class EditorBoard extends Container {
 
   // Обновляет состояние через операцию `setState`.
   setState(level, appearance, invalidPositions = []) {
+    if (level?.id !== this.#level?.id) {
+      this.#zoom = MIN_ZOOM
+      this.#viewportWidth = 0
+      this.#viewportHeight = 0
+    }
     this.#level = level
     this.#appearance = appearance
     this.#invalidPositions = invalidPositions
@@ -46,12 +57,23 @@ export default class EditorBoard extends Container {
   // Рассчитывает и применяет расположение представления.
   layout(width, height) {
     if (!this.#level) return
+    if (width === this.#viewportWidth && height === this.#viewportHeight) return
+    this.#viewportWidth = width
+    this.#viewportHeight = height
+    this.#centerBoard()
+  }
 
-    const boardWidth = this.#level.map[0].length * TILE_SIZE
-    const boardHeight = this.#level.map.length * TILE_SIZE
-    const scale = Math.min((width - BOARD_PADDING * 2) / boardWidth, (height - BOARD_PADDING * 2) / boardHeight, 1.35)
-    this.scale.set(Math.max(scale, 0.1))
-    this.position.set((width - boardWidth * this.scale.x) / 2, (height - boardHeight * this.scale.y) / 2)
+  // Изменяет масштаб относительно точки под курсором мыши.
+  zoomAt(deltaY, point) {
+    if (!this.#level) return
+    const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, this.#zoom * Math.exp(-deltaY * ZOOM_SENSITIVITY)))
+    if (nextZoom === this.#zoom) return
+    if (nextZoom === MIN_ZOOM) {
+      this.#zoom = nextZoom
+      this.#centerBoard()
+      return
+    }
+    this.#applyZoomAtPoint(nextZoom, point)
   }
 
   // Инициализирует внутреннее состояние и зависимости.
@@ -64,6 +86,34 @@ export default class EditorBoard extends Container {
     this.on('pointerup', this.#stopPainting)
     this.on('pointerupoutside', this.#stopPainting)
     this.on('pointercancel', this.#stopPainting)
+  }
+
+  // Возвращает масштаб, при котором всё поле помещается в рабочую область.
+  #getFitScale() {
+    const boardWidth = this.#level.map[0].length * TILE_SIZE
+    const boardHeight = this.#level.map.length * TILE_SIZE
+    const widthScale = (this.#viewportWidth - BOARD_PADDING * 2) / boardWidth
+    const heightScale = (this.#viewportHeight - BOARD_PADDING * 2) / boardHeight
+    return Math.max(Math.min(widthScale, heightScale, 1.35), 0.1)
+  }
+
+  // Центрирует поле с учётом текущего увеличения.
+  #centerBoard() {
+    const boardWidth = this.#level.map[0].length * TILE_SIZE
+    const boardHeight = this.#level.map.length * TILE_SIZE
+    const scale = this.#getFitScale() * this.#zoom
+    this.scale.set(scale)
+    this.position.set((this.#viewportWidth - boardWidth * scale) / 2, (this.#viewportHeight - boardHeight * scale) / 2)
+  }
+
+  // Сохраняет выбранную точку поля под курсором во время увеличения.
+  #applyZoomAtPoint(nextZoom, point) {
+    const localX = (point.x - this.x) / this.scale.x
+    const localY = (point.y - this.y) / this.scale.y
+    const scale = this.#getFitScale() * nextZoom
+    this.#zoom = nextZoom
+    this.scale.set(scale)
+    this.position.set(point.x - localX * scale, point.y - localY * scale)
   }
 
   // Выполняет отдельную операцию `render`.
@@ -95,7 +145,7 @@ export default class EditorBoard extends Container {
     if (symbol === '#') return scene.addChild(this.#createRoleSprite('wall', position, this.#getTextureName('wall', position)))
 
     scene.addChild(this.#createRoleSprite('floor', position, this.#getTextureName('floor', position)))
-    if ('.-*'.includes(symbol)) scene.addChild(this.#createRoleSprite('target', position, SOKOBAN_TEXTURES.target))
+    if ('.-*'.includes(symbol)) scene.addChild(this.#createRoleSprite('target', position, this.#getTextureName('target', position)))
     if ('$-'.includes(symbol)) scene.addChild(this.#createRoleSprite('box', position, this.#getTextureName('box', position)))
     if ('@*'.includes(symbol)) scene.addChild(this.#createRoleSprite('player', position, SOKOBAN_TEXTURES.player))
   }
@@ -155,21 +205,22 @@ export default class EditorBoard extends Container {
 
   // Выполняет отдельную операцию `startPainting`.
   #startPainting = (event) => {
-    if (event.button !== 0 || !this.#brush) return
-    this.#isPainting = true
+    if (![0, 2].includes(event.button) || !this.#brush) return
+    this.#paintingBrush = event.button === 2 ? {mode: 'void', label: 'Пустота'} : this.#brush
     this.#lastPaintedPosition = null
     this.#paintAt(event)
   }
 
   // Выполняет отдельную операцию `continuePainting`.
   #continuePainting = (event) => {
-    if (!this.#isPainting) return
+    if (!this.#paintingBrush) return
+    if (event.buttons === 0) return this.#stopPainting()
     this.#paintAt(event)
   }
 
   // Выполняет отдельную операцию `stopPainting`.
   #stopPainting = () => {
-    this.#isPainting = false
+    this.#paintingBrush = null
     this.#lastPaintedPosition = null
   }
 
@@ -180,7 +231,7 @@ export default class EditorBoard extends Container {
     if (!position || positionKey === this.#lastPaintedPosition) return
 
     this.#lastPaintedPosition = positionKey
-    this.#onPaint({brush: this.#brush, position, positionKey})
+    this.#onPaint({brush: this.#paintingBrush, position, positionKey})
   }
 
   // Возвращает данные, за которые отвечает операция `getCellPosition`.

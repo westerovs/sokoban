@@ -1,3 +1,6 @@
+import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
+import {compactEditorState, expandEditorState} from './editorGrid.js'
+
 /**
  * Хранит снимки редактируемого уровня и историю отмены изменений.
  */
@@ -74,15 +77,23 @@ export default class EditorSession {
     return true
   }
 
-  // Выполняет отдельную операцию `markSaved`.
-  markSaved() {
-    this.#savedState = serializeState(this.#state)
-    this.#savedMap = JSON.stringify(this.#state.map)
+  // Отменяет все изменения и возвращает состояние на момент открытия или сохранения.
+  reset() {
+    if (!this.isDirty) return false
+    this.#state = JSON.parse(this.#savedState)
+    this.#past = []
+    this.#future = []
+    return true
+  }
+
+  // Возвращает компактное состояние без пустой рамки рабочего поля.
+  getExportState() {
+    return compactEditorState(this.#state)
   }
 
   // Инициализирует внутреннее состояние и зависимости.
   #init(level, appearance) {
-    this.#state = {levelId: level.id, map: [...level.map], appearance: cloneState(appearance)}
+    this.#state = expandEditorState(level, appearance, SOKOBAN_SETTINGS.maxBoardColumns, SOKOBAN_SETTINGS.maxBoardRows)
     this.#savedState = serializeState(this.#state)
     this.#savedMap = JSON.stringify(this.#state.map)
   }

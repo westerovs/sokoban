@@ -6,22 +6,23 @@ import {AssetPack} from '@assetpack/core'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import {defineConfig, normalizePath} from 'vite'
 import assetPackConfig from './.assetpack.mjs'
-import {
-  DEFAULT_DEV_PLATFORM,
-  DEV_SERVER_CONFIG,
-  PLATFORMS_TO_BUILD,
-  resolvePlatform
-} from './bundler/platformConfig.mjs'
+import {DEFAULT_DEV_PLATFORM, DEV_SERVER_CONFIG, PLATFORMS_TO_BUILD, resolvePlatform} from './bundler/platformConfig.mjs'
 import {createSokobanLevelEditorPlugin} from './tools/sokoban-level-editor/vitePlugin.mjs'
 
+/**
+ * Настраивает Vite, платформенную HTML-оболочку, локальные инструменты и сборку проекта.
+ */
+
 const projectRoot = path.dirname(fileURLToPath(import.meta.url))
-const viteEntry = '/src/viteEntry.js'
+const viteEntry = '/src/viteEntry.js' // Общая точка входа игры для платформенных HTML-шаблонов
+const draftBannerMarkup = '<div id="sokoban-draft-banner" class="sokoban-draft-banner" hidden aria-live="polite">ЧЕРНОВИК</div>' // HTML-индикатор запуска черновика
 
 /** Берём первый внешний IPv4 для удобной ссылки на игру с телефона.
  * Если подходящего интерфейса нет, безопасно возвращаемся к localhost. */
-const getNetworkAddress = () => Object.values(os.networkInterfaces())
-  .flat()
-  .find((item) => item && item.family === 'IPv4' && !item.internal)?.address
+const getNetworkAddress = () =>
+  Object.values(os.networkInterfaces())
+    .flat()
+    .find((item) => item && item.family === 'IPv4' && !item.internal)?.address
 
 /** Преобразует человекочитаемый DEV_SERVER_CONFIG в параметры Vite.
  * Именно здесь формируется URL, который печатается как предпочтительный. */
@@ -46,23 +47,28 @@ const resolveDevServer = (platform) => {
   }
 }
 
+// Добавляет в платформенную оболочку точку входа и скрытую плашку черновика.
 const injectViteEntry = (html) => {
   if (!/<\/body>/i.test(html)) {
     throw new Error('Platform index.html must contain a closing </body> tag')
   }
 
-  return html.replace(/<\/body>/i, `  <script type="module" src="${viteEntry}"></script>\n</body>`)
+  const injectedMarkup = `  ${draftBannerMarkup}\n  <script type="module" src="${viteEntry}"></script>\n`
+  return html.replace(/<\/body>/i, `${injectedMarkup}</body>`)
 }
 
+// Создаёт плагин подстановки HTML-шаблона выбранной платформы.
 const createPlatformHtmlPlugin = (platform) => {
   const htmlPath = path.resolve(projectRoot, 'services', platform.serviceDir, 'index.html')
 
   return {
     name: 'platform-html',
     enforce: 'pre',
+    // Добавляет платформенный шаблон в наблюдение dev-сервера.
     configureServer(server) {
       server.watcher.add(htmlPath)
     },
+    // Перезагружает страницу при изменении платформенного шаблона.
     handleHotUpdate({file, server}) {
       if (path.resolve(file) === htmlPath) {
         server.ws.send({type: 'full-reload', path: '*'})
@@ -71,36 +77,39 @@ const createPlatformHtmlPlugin = (platform) => {
     },
     transformIndexHtml: {
       order: 'pre',
+      // Подменяет корневой HTML содержимым выбранной платформы.
       handler(html, context) {
         if (!['/', '/index.html'].includes(context.path)) return html
 
         const platformHtml = fs.readFileSync(htmlPath, 'utf8')
         return injectViteEntry(platformHtml)
-      }
-    }
+      },
+    },
   }
 }
 
+// Создаёт dev-плагин фонового наблюдения за исходными ресурсами.
 const createAssetPackWatchPlugin = () => {
   let assetPack
 
   return {
     name: 'assetpack-watch',
     apply: 'serve',
+    // Запускает наблюдение AssetPack и останавливает его вместе с сервером.
     configureServer(server) {
       assetPack = new AssetPack(assetPackConfig)
       assetPack.watch().catch((error) => server.config.logger.error(error.stack || error.message))
       server.httpServer?.once('close', () => assetPack.stop())
-    }
+    },
   }
 }
 
 /**
-* Важная особенность: во время production-сборки стандартное копирование public средствами Vite здесь отключено:
-* publicDir: false
-* Вместо него используется собственный assetsCopy.js, который запускается после Vite-сборки из [build.mjs]
-* */
-export const createViteConfig = ({platformName, command = 'build'} = {}) => {
+ * Важная особенность: во время production-сборки стандартное копирование public средствами Vite здесь отключено:
+ * publicDir: false
+ * Вместо него используется собственный assetsCopy.js, который запускается после Vite-сборки из [build.mjs]
+ * */
+const createViteConfig = ({platformName, command = 'build'} = {}) => {
   const platform = resolvePlatform(platformName)
   const isBuild = command === 'build'
   const devServer = !isBuild ? resolveDevServer(platform) : null
@@ -126,13 +135,13 @@ export const createViteConfig = ({platformName, command = 'build'} = {}) => {
       ...(platform.https ? [basicSsl({name: 'localhost', ttlDays: 365})] : []),
       ...(!isBuild ? [createAssetPackWatchPlugin()] : []),
       ...(!isBuild ? [createSokobanLevelEditorPlugin(projectRoot)] : []),
-      createPlatformHtmlPlugin(platform)
+      createPlatformHtmlPlugin(platform),
     ],
     resolve: {
       alias: {
         '@': normalizePath(path.resolve(projectRoot, 'src')),
-        '@platform-service': normalizePath(path.resolve(projectRoot, 'services', platform.serviceDir, 'Service.js'))
-      }
+        '@platform-service': normalizePath(path.resolve(projectRoot, 'services', platform.serviceDir, 'Service.js')),
+      },
     },
     server: {
       /** Переключатель расположен в bundler/platformConfig.mjs:
@@ -143,7 +152,7 @@ export const createViteConfig = ({platformName, command = 'build'} = {}) => {
       /** false не открывает новую вкладку после каждого рестарта Vite.
        * При openBrowser=true откроется preferred network/localhost URL. */
       open: devServer?.open,
-      https: platform.https ? {} : undefined
+      https: platform.https ? {} : undefined,
     },
     define: {
       'import.meta.env.VITE_PLATFORM_NAME': JSON.stringify(platform.name),
@@ -163,20 +172,26 @@ export const createViteConfig = ({platformName, command = 'build'} = {}) => {
         output: {
           entryFileNames: 'index-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
-          assetFileNames: 'assets/[name]-[hash][extname]'
-        }
-      }
+          assetFileNames: 'assets/[name]-[hash][extname]',
+        },
+      },
     }
   }
 
   return config
 }
 
-export default defineConfig(({command, mode}) => {
+// Выбирает платформу из режима команды и создаёт итоговую конфигурацию.
+const viteConfig = defineConfig(({command, mode}) => {
   const isDefaultMode = mode === 'development' || mode === 'production'
-  const platformName = command === 'serve'
-    ? (isDefaultMode ? DEFAULT_DEV_PLATFORM : mode)
-    : (isDefaultMode ? PLATFORMS_TO_BUILD[0]?.name : mode)
+  const platformName =
+    command === 'serve' ? (isDefaultMode ? DEFAULT_DEV_PLATFORM : mode) : isDefaultMode ? PLATFORMS_TO_BUILD[0]?.name : mode
 
   return createViteConfig({platformName, command})
 })
+
+export default viteConfig
+
+export {
+  createViteConfig,
+}

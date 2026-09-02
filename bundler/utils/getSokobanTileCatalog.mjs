@@ -1,17 +1,24 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+/**
+ * Собирает каталог настоящих тайлов Sokoban по структуре исходных папок ресурсов.
+ */
+
 const TILE_GROUP_DIRECTORIES = Object.freeze({
-  wall: 'walls',
-  floor: 'floors',
-  box: 'boxes',
+  wall: 'walls', // Папка вариантов стен
+  floor: 'floors', // Папка вариантов пола
+  box: 'boxes', // Папка вариантов ящиков
+  target: 'targets', // Папка вариантов целей
 })
 
 const TILE_FILE_PATTERN = /\.png$/i
 const TILE_SOURCE_ROUTE = '/__sokoban-level-editor/tile'
 
+// Возвращает имя текстуры без расширения файла.
 const getTextureName = (fileName) => path.basename(fileName, path.extname(fileName))
 
+// Возвращает отсортированные имена PNG-текстур из папки.
 const getTextureNames = (directoryPath) => {
   if (!fs.existsSync(directoryPath)) return []
 
@@ -22,17 +29,20 @@ const getTextureNames = (directoryPath) => {
     .sort((first, second) => first.localeCompare(second, 'en', {numeric: true}))
 }
 
+// Выбирает нумерованную первую текстуру роли или первый найденный вариант.
 const getDefaultTexture = (role, textures) => {
   const numberedDefault = `${role}1`
   return textures.includes(numberedDefault) ? numberedDefault : textures[0]
 }
 
+// Проверяет, что для каждой поддерживаемой роли найден хотя бы один тайл.
 const validateTileGroups = (groups) => {
   Object.entries(groups).forEach(([role, textures]) => {
     if (textures.length === 0) throw new Error(`[SokobanTileCatalog]: no textures found for ${role}`)
   })
 }
 
+// Формирует полный каталог тайлов для игры и редактора.
 const getSokobanTileCatalog = (projectRoot) => {
   const tilesDirectory = path.resolve(projectRoot, 'raw-assets', 'ui', 'levelUi{m}{tps}', 'tiles')
   const groups = Object.fromEntries(
@@ -54,6 +64,7 @@ const getSokobanTileCatalog = (projectRoot) => {
   }
 }
 
+// Безопасно разрешает путь к исходному тайлу редактора.
 const getSokobanTileSourcePath = (projectRoot, role, texture) => {
   const directory = TILE_GROUP_DIRECTORIES[role]
   if (!directory || getTextureName(texture) !== texture) return null
@@ -63,7 +74,4 @@ const getSokobanTileSourcePath = (projectRoot, role, texture) => {
   return path.resolve(projectRoot, 'raw-assets', 'ui', 'levelUi{m}{tps}', 'tiles', directory, `${texture}.png`)
 }
 
-export {
-  getSokobanTileCatalog,
-  getSokobanTileSourcePath,
-}
+export {getSokobanTileCatalog, getSokobanTileSourcePath}

@@ -1,10 +1,10 @@
 /**
- * Связывает браузерный редактор с API сохранения, решателя и буфера обмена.
+ * Связывает браузерный редактор с API сохранения, решателя и запуска черновика.
  */
 
 const EDITOR_API_URL = '/__sokoban-level-editor/data'
 const SOLVER_API_URL = '/__sokoban-level-editor/solve'
-const DRAFT_STORAGE_KEY = 'sokoban-level-editor-draft'
+const DRAFT_STORAGE_PREFIX = 'sokoban-level-editor-draft:' // Префикс временных черновиков в общем хранилище вкладок
 
 // Разбирает входные данные через операцию `parseResponse`.
 const parseResponse = async (response) => {
@@ -38,34 +38,16 @@ const checkLevelSolvability = async (map) => {
   return await parseResponse(response)
 }
 
-// Записывает данные через операцию `writeClipboardText`.
-const writeClipboardText = async (text) => {
-  if (navigator.clipboard?.writeText) return await navigator.clipboard.writeText(text)
-
-  const textArea = document.createElement('textarea')
-  textArea.value = text
-  textArea.style.position = 'fixed'
-  textArea.style.opacity = '0'
-  document.body.append(textArea)
-  textArea.select()
-  document.execCommand('copy')
-  textArea.remove()
+// Создаёт уникальный идентификатор для одной вкладки черновика.
+const createDraftToken = () => {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
-// Выполняет отдельную операцию `copyLevelData`.
-const copyLevelData = async (levelId, map, appearance) => {
-  return await writeClipboardText(JSON.stringify({levelId, map, appearance}, null, 2))
-}
-
-// Записывает данные через операцию `storeLevelDraft`.
+// Записывает черновик в доступное новой вкладке локальное хранилище.
 const storeLevelDraft = (levelId, map, appearance) => {
-  sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({levelId, map, appearance}))
+  const token = createDraftToken()
+  localStorage.setItem(`${DRAFT_STORAGE_PREFIX}${token}`, JSON.stringify({levelId, map, appearance}))
+  return token
 }
 
-export {
-  checkLevelSolvability,
-  copyLevelData,
-  loadEditorData,
-  saveEditorLevel,
-  storeLevelDraft,
-}
+export {checkLevelSolvability, loadEditorData, saveEditorLevel, storeLevelDraft}
