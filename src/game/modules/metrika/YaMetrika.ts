@@ -1,20 +1,29 @@
 import {GAME_NAMES} from '../../gameConfig/constants.js'
+import type {PlayerData} from '../../engine/storage/defaultData.js'
+import type Storage from '../../engine/storage/Storage.js'
 import {GAME_NAME} from '../../generatedAssets/buildMeta.js'
 import Logger, {MODULES} from '../../utils/Logger.js'
 
-/* global ym */
+// Отправляет игровые цели, параметры и ошибки в Яндекс Метрику.
 
+type MetrikaLevelConfig = {
+  levelName: string
+  currentSkinName: string
+}
+
+// Возвращает идентификатор счётчика для текущей игры.
 const getId = () => {
-  if (GAME_NAME === GAME_NAMES.detective) return 99603095
-  if (GAME_NAME === GAME_NAMES.hotel) return 103542034
-  if (GAME_NAME === GAME_NAMES.adventure) return 105982536
-  if (GAME_NAME === GAME_NAMES.detectiveGirl) return 107254518
+  const gameName: string = GAME_NAME
+  if (gameName === GAME_NAMES.detective) return 99603095
+  if (gameName === GAME_NAMES.hotel) return 103542034
+  if (gameName === GAME_NAMES.adventure) return 105982536
+  if (gameName === GAME_NAMES.detectiveGirl) return 107254518
   else return 0
 }
 
 const COUNTER_ID = getId()
 
-export const ERROR_TYPES = {
+const ERROR_TYPES = {
   GAME_PRELOAD: {
     initialize: 'GAME_PRELOAD:initialize',
     loadPlayerData: 'GAME_PRELOAD:loadPlayerData',
@@ -33,6 +42,7 @@ export const ERROR_TYPES = {
 export default class YaMetrika {
   // ================ ↓ ЦЕЛИ ↓ ===============
   // =========================================
+  // Отправляет нажатие кнопки старта.
   static btnStart = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'btnStart')
@@ -40,6 +50,7 @@ export default class YaMetrika {
     ym(COUNTER_ID, 'reachGoal', 'clickBtnStart')
   }
 
+  // Отправляет открытие магазина с главного экрана.
   static mainScreenBtnStore = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'mainScreenBtnStore')
@@ -47,6 +58,7 @@ export default class YaMetrika {
     ym(COUNTER_ID, 'reachGoal', 'mainScreenBtnStore')
   }
 
+  // Отправляет открытие таблицы лидеров.
   static btnLeaders = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'btnLeaders')
@@ -56,6 +68,7 @@ export default class YaMetrika {
 
   // --------------- ОТЗЫВЫ
   // Нажатие на кнопку оставить отзыв за звезды
+  // Отправляет подтверждение отзыва пользователем.
   static userReviewClickOk = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'userReviewClickOk')
@@ -64,6 +77,7 @@ export default class YaMetrika {
   }
 
   // Нажатие на кнопку позже в предложении поставить отзыв
+  // Отправляет откладывание отзыва пользователем.
   static userReviewClickLater = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'userReviewClickLater')
@@ -72,6 +86,7 @@ export default class YaMetrika {
   }
 
   // --------------- Экран завершения  уровня
+  // Отправляет переход к следующему уровню.
   static finalScreenBtnNext = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'finalScreenBtnNext')
@@ -79,6 +94,7 @@ export default class YaMetrika {
     ym(COUNTER_ID, 'reachGoal', 'finalScreenBtnNext')
   }
 
+  // Отправляет возврат домой с финального экрана.
   static finalScreenBtnHome = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'finalScreenBtnHome')
@@ -87,6 +103,7 @@ export default class YaMetrika {
   }
 
   // Кнопка отключить рекламу
+  // Отправляет нажатие отключения рекламы.
   static finalScreenBtnDisableAd = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'finalScreenBtnDisableAd')
@@ -95,6 +112,7 @@ export default class YaMetrika {
   }
 
   // Клик по кнопке Магазин (финальный экран)
+  // Отправляет открытие магазина с финального экрана.
   static finalScreenBtnStore = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'finalScreenBtnStore')
@@ -103,6 +121,7 @@ export default class YaMetrika {
   }
 
   // Окно когда не хватает подсказок: Нажатие на кнопку Магазин
+  // Отправляет переход в магазин из окна нехватки подсказок.
   static noHintsClickBtnStore = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'noHintsClickBtnStore')
@@ -111,6 +130,7 @@ export default class YaMetrika {
   }
 
   // Окно когда не хватает подсказок: Нажатие на кнопку playReward
+  // Отправляет просмотр рекламы из окна нехватки подсказок.
   static noHintsClickBtnReward = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'noHintsClickBtnReward')
@@ -119,6 +139,7 @@ export default class YaMetrika {
   }
 
   // Все уровни и все скины пройдены полностью
+  // Отправляет полное завершение игры.
   static completeGame = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'completeGame')
@@ -127,6 +148,7 @@ export default class YaMetrika {
   }
 
   // Время сессии после загрузки, таймер каждые 3 минуты
+  // Отправляет периодическую отметку времени сессии.
   static gameTimeTracker = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'gameTimeTracker')
@@ -135,6 +157,7 @@ export default class YaMetrika {
   }
 
   // --------------- Реклама
+  // Отправляет успешный просмотр рекламы с наградой.
   static rewardedAdWatched = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'rewardedAdWatched')
@@ -142,6 +165,7 @@ export default class YaMetrika {
     ym(COUNTER_ID, 'reachGoal', 'rewardedAdWatched')
   }
 
+  // Отправляет успешный просмотр межстраничной рекламы.
   static interstitialWatched = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'interstitialWatched')
@@ -149,6 +173,7 @@ export default class YaMetrika {
     ym(COUNTER_ID, 'reachGoal', 'interstitialWatched')
   }
 
+  // Отправляет принудительную перезагрузку игры.
   static forceReload = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'forceReload')
@@ -156,6 +181,7 @@ export default class YaMetrika {
     ym(COUNTER_ID, 'reachGoal', 'forceReload')
   }
 
+  // Отправляет покупку новогоднего события.
   static newYearIsPurchased = () => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'newYearIsPurchased')
@@ -165,7 +191,7 @@ export default class YaMetrika {
 
   // ============= ↓ Параметры ↓ =============
   // =========================================
-  static startLevel = (config, storage) => {
+  static startLevel = (config: MetrikaLevelConfig, storage: Storage) => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'startLevel')
 
@@ -182,7 +208,7 @@ export default class YaMetrika {
   }
 
   // статистика прохождения уровня, включая его время играния
-  static completeLevel = (config, storage, levelPlayTime) => {
+  static completeLevel = (config: MetrikaLevelConfig, storage: Storage, levelPlayTime: number) => {
     if (typeof ym !== 'function') return
 
     const {levelName, currentSkinName} = config
@@ -204,7 +230,7 @@ export default class YaMetrika {
   }
 
   // когда досрочно вышли с уровня
-  static earlyExit = (config, storage, levelPlayTime) => {
+  static earlyExit = (config: MetrikaLevelConfig, storage: Storage, levelPlayTime: number) => {
     if (typeof ym !== 'function') return
 
     const {levelName, currentSkinName} = config
@@ -226,7 +252,7 @@ export default class YaMetrika {
   }
 
   // Использование подсказки
-  static useHint = (playerData, hintName) => {
+  static useHint = (playerData: PlayerData, hintName: string) => {
     if (typeof ym !== 'function') return
     const data = {
       levelIndex: playerData.levelIndex,
@@ -242,7 +268,7 @@ export default class YaMetrika {
   }
 
   // количество использованных подсказок
-  static hintCounter = (storage, counter) => {
+  static hintCounter = (storage: Storage, counter: number) => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'hintCounter')
 
@@ -261,7 +287,7 @@ export default class YaMetrika {
   }
 
   // количество неправильных кликов
-  static missClickCounter = (storage, counter) => {
+  static missClickCounter = (storage: Storage, counter: number) => {
     if (typeof ym !== 'function') return
 
     const userLevel = storage.userLevel + 1 // todo внимательно, +1 небольшой костыль
@@ -279,27 +305,30 @@ export default class YaMetrika {
     })
   }
 
-  static purchase = (id) => {
+  // Отправляет идентификатор купленного товара.
+  static purchase = (id: string) => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'purchase', id)
 
     ym(COUNTER_ID, 'params', {purchase: {id}})
   }
 
-  static soundLoadErr = (src, err) => {
+  // Отправляет ошибку загрузки звука.
+  static soundLoadErr = (src: unknown, err: unknown) => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'soundLoadErr')
 
     ym(COUNTER_ID, 'params', {soundLoadErr: {src, err}})
   }
 
-  static preloadError = (type, error) => {
+  // Отправляет диагностические данные ошибки предзагрузки.
+  static preloadError = (type: string, error: unknown) => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'preloadError')
 
     try {
-      const errorMessage = error?.message || 'Unknown error'
-      const errorStack = error?.stack || 'No stack available'
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorStack = error instanceof Error ? error.stack || 'No stack available' : 'No stack available'
 
       const errorPayload = {
         [`error_${type}`]: {
@@ -317,6 +346,7 @@ export default class YaMetrika {
   }
 
   // -------------- OTHER
+  // Отправляет тестовый набор ошибок предзагрузки.
   static testingErrors = () => {
     const e = new Error('Это тестовая ошибка')
 
@@ -329,10 +359,15 @@ export default class YaMetrika {
     YaMetrika.preloadError(ERROR_TYPES?.SOUND_PRELOAD?.preload, e)
   }
 
-  static loadDuration = (duration) => {
+  // Отправляет длительность загрузки игры.
+  static loadDuration = (duration: number) => {
     if (typeof ym !== 'function') return
     Logger.log(MODULES.Metrika, 'loadDuration', duration)
 
     ym(COUNTER_ID, 'params', {gameLoadTime: duration})
   }
+}
+
+export {
+  ERROR_TYPES,
 }

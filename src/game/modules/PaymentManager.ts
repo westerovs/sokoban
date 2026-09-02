@@ -8,19 +8,31 @@ import {MAGNIFIERS_IDS, rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.j
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Logger from '@/game/utils/Logger.js'
+import type Game from '@/game/Game.js'
+
+// Обрабатывает покупки платформы и выдаёт соответствующие игровые награды.
+
+type Reward = {
+  id: string
+  amount?: number
+}
+
+type RewardGroup = Record<string, Reward>
 
 export default class PaymentManager {
-  #game
+  static instance: PaymentManager | null = null
+  #game!: Game
 
-  constructor(game) {
-    if (typeof PaymentManager.instance === 'object') {
+  // Сохраняет игровую шину и возвращает общий экземпляр менеджера.
+  constructor(game: Game) {
+    if (PaymentManager.instance) {
       return PaymentManager.instance
     }
 
     this.#game = game
 
     PaymentManager.instance = this
-    return PaymentManager.instance
+    return this
   }
 
   // проверяет необработанные платежи при первом запуске
@@ -28,7 +40,7 @@ export default class PaymentManager {
     try {
       if (!SdkManager.isPurchaseAvailable) return
 
-      const purchase = await SdkManager.sdk.purchase
+      const purchase = SdkManager.purchase
       const pendingPayments = await purchase.getPurchases()
       if (pendingPayments.length === 0) return
 
@@ -48,15 +60,17 @@ export default class PaymentManager {
         await this.consumePurchase(productID, purchaseToken)
       }
     } catch (err) {
-      console.error('[consumePendingPayments]', err)
+      console.error('[PaymentManager]: pending payments processing failed', err)
     }
   }
 
-  async onPurchase(id) {
+  // Запускает покупку указанного товара.
+  async onPurchase(id: string) {
     return this.#buy(id)
   }
 
-  #buy = (itemId) => {
+  // Покупает товар и передаёт его на обработку.
+  #buy = (itemId: string) => {
     Logger.log('', `[onPurchase]: ${itemId}`)
 
     const purchase = SdkManager.purchase
@@ -67,13 +81,14 @@ export default class PaymentManager {
         await this.consumePurchase(itemId, purchaseToken)
         return true
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         GameUtils.showError(error)
         return false
       })
   }
 
-  consumePurchase = async (itemId, purchaseToken) => {
+  // Подтверждает покупку и выдаёт награду.
+  consumePurchase = async (itemId: string, purchaseToken: string) => {
     Logger.log('', `[consumePurchase]: ${itemId}`)
     const purchase = SdkManager.purchase
 
@@ -83,12 +98,13 @@ export default class PaymentManager {
 
       YaMetrika.purchase(itemId)
     } catch (e) {
-      console.error('[consumePurchase]', e)
+      console.error('[PaymentManager]: purchase consumption failed', e)
       return false
     }
   }
 
-  giveReward = (itemId) => {
+  // Выдаёт награду из магазина или промонабора.
+  giveReward = (itemId: string) => {
     Logger.log('', 'giveReward', itemId)
     const {store, promo} = rewardsCatalog
 
@@ -96,18 +112,19 @@ export default class PaymentManager {
     this.#processPromoDataReward(promo, itemId)
   }
 
-  #processStoreReward = (store, itemId) => {
-    const reward = rewardsCatalog.store[itemId]
+  // Применяет награду обычного товара магазина.
+  #processStoreReward = (store: RewardGroup, itemId: string) => {
+    const reward = store[itemId]
     if (!reward) return false
 
     const storage = Locator.storage
     console.log('processStoreReward')
-    if (MAGNIFIERS_IDS.includes(itemId)) storage.addHints(STORAGE_KEYS.hints, store[itemId].amount)
-    if (itemId === store.dartsHint.id) storage.addHints(STORAGE_KEYS.hintDarts, store[itemId].amount)
-    if (itemId === store.compassHint.id) storage.addHints(STORAGE_KEYS.hintCompass, store[itemId].amount)
+    if ((MAGNIFIERS_IDS as string[]).includes(itemId)) storage.addHints(STORAGE_KEYS.hints, reward.amount ?? 0)
+    if (itemId === store.dartsHint.id) storage.addHints(STORAGE_KEYS.hintDarts, reward.amount ?? 0)
+    if (itemId === store.compassHint.id) storage.addHints(STORAGE_KEYS.hintCompass, reward.amount ?? 0)
     // coins
-    if (itemId === store.coinLarge.id) storage.addHints(STORAGE_KEYS.coins, store[itemId].amount)
-    if (itemId === store.coinXL.id) storage.addHints(STORAGE_KEYS.coins, store[itemId].amount)
+    if (itemId === store.coinLarge.id) storage.addHints(STORAGE_KEYS.coins, reward.amount ?? 0)
+    if (itemId === store.coinXL.id) storage.addHints(STORAGE_KEYS.coins, reward.amount ?? 0)
 
     // пропуск рекламы
     if (itemId === store.noAdPack.id) {
@@ -118,7 +135,8 @@ export default class PaymentManager {
     }
   }
 
-  #processPromoDataReward = (promo, itemId) => {
+  // Применяет награду купленного промонабора.
+  #processPromoDataReward = (promo: RewardGroup, itemId: string) => {
     const storage = Locator.storage
 
     // проверка наличия id в promoPacks

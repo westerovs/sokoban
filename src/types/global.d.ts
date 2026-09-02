@@ -36,4 +36,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare const ym: ((...args: unknown[]) => void) | undefined
 // Объявляет типы импортируемых ресурсов и переменных окружения Vite.
