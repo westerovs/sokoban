@@ -4,26 +4,29 @@ import {LEVEL_TYPES} from '@/game/gameConfig/constants.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
+// Отображает метку сложности на кнопке следующего уровня.
+
 const COLORS = {
-  white: 0xffffff,
-  red: 0xff2b3e,
-  black: 0x2f2f2f,
-  orange: 0xffa500,
+  white: 0xffffff, // Белый цвет метки
+  red: 0xff2b3e, // Красный цвет метки
+  black: 0x2f2f2f, // Тёмный цвет метки
+  orange: 0xffa500, // Оранжевый цвет метки
 }
 
 export default class BtnBadge extends Container {
-  #type
+  #type: string | null
 
-  constructor({type} = {}) {
-    super()
+  // Сохраняет тип уровня и создаёт соответствующую метку.
+  constructor({type = null}: {type?: string | null} = {}) {
+    super({label: 'btnBadge'})
 
     this.#type = type
 
     this.#init()
   }
 
+  // Настраивает положение метки и создаёт содержимое.
   #init = () => {
-    this.label = 'btnBadge'
     this.position.set(90, 46)
     this.angle = -10
     this.visible = false
@@ -31,10 +34,11 @@ export default class BtnBadge extends Container {
     this.#createContent()
   }
 
+  // Создаёт фон и текст метки.
   #createContent() {
     const {badgeTint, message, textFill} = this.#getBadgeData()
 
-    const background = GameUtils.createSprite('btn-badge')
+    const background = GameUtils.createSprite('btn-badge', {label: 'btnBadge-background'})
     background.tint = badgeTint
 
     const text = GameUtils.createText(message, {
@@ -51,6 +55,7 @@ export default class BtnBadge extends Container {
     this.addChild(background, text)
   }
 
+  // Выбирает цвета и подпись по типу уровня.
   #getBadgeData() {
     const data = {
       badgeTint: COLORS.white,

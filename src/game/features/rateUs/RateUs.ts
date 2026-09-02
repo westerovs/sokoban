@@ -39,7 +39,7 @@ export default class RateUs {
   }
 
   // Показывает окно оценки после заданного уровня.
-  static checkAndShowRateUs = async () => {
+  static checkAndShowRateUs = async (_storage?: unknown, _levelEntity?: unknown) => {
     const completedLevelIndex = Locator.storage.playerData.levelIndex - 1
     if (completedLevelIndex !== RateUs.displayLevelIndex) return
     // if (!RateUs.shouldAct) return // не удалять!

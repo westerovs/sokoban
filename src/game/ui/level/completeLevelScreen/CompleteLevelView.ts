@@ -8,40 +8,45 @@ import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import CompleteLocationUnlockCelebration from './CompleteLocationUnlockCelebration.js'
+import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
+
+// Создаёт экран завершения уровня и кнопки дальнейшей навигации.
 
 const STYLES = {
   btnNext: {
     ...primaryFontStyle,
-    fontSize: 36,
+    fontSize: 36, // Размер основной подписи кнопки
   },
   btnNextLevel: {
     ...primaryFontStyle,
-    fontSize: 22,
+    fontSize: 22, // Размер номера следующего уровня
   },
   arrow: {
     ...primaryFontStyle,
-    fontSize: 22,
-    fill: 0xffffff,
+    fontSize: 22, // Размер подписи локации
+    fill: 0xffffff, // Цвет подписи локации
   },
 }
 
 export default class CompleteLevelView extends Container {
-  #locationUnlockCelebration
-  #refs
+  #locationUnlockCelebration!: CompleteLocationUnlockCelebration
+  #refs: Record<string, any>
 
-  constructor({refs} = {}) {
-    super()
+  // Сохраняет ссылки уровня и создаёт элементы экрана завершения.
+  constructor({refs = {}}: {refs?: Record<string, any>} = {}) {
+    super({label: 'completeLevelView'})
 
     this.#refs = refs
-    this.label = 'completeLevelView'
 
     this.#init()
   }
 
-  showLocationUnlock = (location) => {
+  // Показывает карточку новой локации, если она была открыта.
+  showLocationUnlock = (location: LocationDefinition | null) => {
     this.#locationUnlockCelebration.show(location)
   }
 
+  // Регистрирует представление и создаёт его содержимое.
   #init = () => {
     this.#refs.completeLevelView = this
     this.#createButtonsContainer()
@@ -49,9 +54,9 @@ export default class CompleteLevelView extends Container {
     this.addChild(this.#locationUnlockCelebration)
   }
 
+  // Создаёт контейнер основных кнопок.
   #createButtonsContainer() {
-    const buttonsContainer = new Container()
-    buttonsContainer.label = 'btnsContainer'
+    const buttonsContainer = new Container({label: 'btnsContainer'})
     buttonsContainer.position.set(WORLD.HALF_W, 800)
 
     buttonsContainer.addChild(this.#createButtonNext())
@@ -65,12 +70,12 @@ export default class CompleteLevelView extends Container {
     this.addChild(buttonsContainer)
   }
 
+  // Создаёт кнопку перехода к следующему уровню.
   #createButtonNext() {
-    const button = new Container()
-    button.label = 'btnNext'
+    const button = new Container({label: 'btnNext'})
     applyInteractive(button, {isButton: true})
 
-    const textureKey = GAME_NAME === GAME_NAMES.hotel ? 'btn-start' : 'btn-next'
+    const textureKey = String(GAME_NAME) === GAME_NAMES.hotel ? 'btn-start' : 'btn-next'
     const background = GameUtils.createSprite(textureKey)
     const text = GameUtils.createText(`${i18next.t('btnNextText')}`, {
       name: 'btnNextText',
@@ -88,9 +93,9 @@ export default class CompleteLevelView extends Container {
     return button
   }
 
+  // Создаёт стрелку с названием следующей локации.
   #createButtonNextArrow() {
-    const arrow = new Container()
-    arrow.label = 'btnNextArrow'
+    const arrow = new Container({label: 'btnNextArrow'})
     arrow.position.set(-54, -75)
 
     const background = GameUtils.createSprite('btn-next-arrow')
@@ -103,6 +108,7 @@ export default class CompleteLevelView extends Container {
     return arrow
   }
 
+  // Создаёт кнопку открытия магазина.
   #createButtonStore() {
     return new ButtonContainer({
       props: {
@@ -115,6 +121,7 @@ export default class CompleteLevelView extends Container {
     })
   }
 
+  // Создаёт кнопку перехода на главный экран.
   #createButtonHome() {
     return new ButtonContainer({
       props: {
@@ -127,6 +134,7 @@ export default class CompleteLevelView extends Container {
     })
   }
 
+  // Создаёт кнопку возврата к списку локаций.
   #createButtonBack() {
     return new ButtonContainer({
       props: {
@@ -139,6 +147,7 @@ export default class CompleteLevelView extends Container {
     })
   }
 
+  // Создаёт кнопку покупки отключения рекламы.
   #createButtonByeAd() {
     const button = new ButtonContainer({
       props: {

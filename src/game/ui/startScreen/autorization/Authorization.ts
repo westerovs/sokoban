@@ -5,11 +5,15 @@ import Locator from '../../../engine/Locator.ts'
 import SdkManager from '../../../engine/SdkManager.js'
 import {primaryFontStyle} from '../../../styles.js'
 import GameUtils from '../../../utils/gameUtils/GameUtils.js'
+import type {DestroyOptions} from 'pixi.js'
+
+// Показывает окно входа в платформенный профиль игрока.
 
 export default class Authorization extends BaseModal {
   #game = Locator.game
-  #btnEnter
+  #btnEnter!: ButtonContainer
 
+  // Создаёт адаптивное окно авторизации.
   constructor() {
     super({h: 350, forceUpdateAdaptive: true})
 
@@ -18,6 +22,7 @@ export default class Authorization extends BaseModal {
     this.#init()
   }
 
+  // Создаёт текст и кнопку входа.
   #init = () => {
     this.#createTexts()
     this.#createBtnEnter()
@@ -25,11 +30,13 @@ export default class Authorization extends BaseModal {
     Locator.uiLayer.stateUiLayer.addChild(this)
   }
 
-  destroy(_options) {
+  // Освобождает окно и обработчик кнопки входа.
+  destroy(_options?: DestroyOptions) {
     super.destroy(_options)
     this.#btnEnter.off('pointerdown', this.#btnEnterAction)
   }
 
+  // Создаёт поясняющие тексты окна.
   #createTexts = () => {
     const style = {
       ...primaryFontStyle,
@@ -48,6 +55,7 @@ export default class Authorization extends BaseModal {
     this.addChild(header, p1, p2)
   }
 
+  // Создаёт кнопку входа.
   #createBtnEnter = () => {
     this.#btnEnter = new ButtonContainer({
       props: {name: 'btnEnter', x: 0, y: 100},
@@ -62,15 +70,19 @@ export default class Authorization extends BaseModal {
     this.#btnEnter.on('pointerdown', this.#btnEnterAction)
   }
 
+  // Запускает платформенную авторизацию и обновляет страницу.
   #btnEnterAction = async () => {
-    SdkManager.player
-      .auth()
+    const auth = SdkManager.player.auth ?? SdkManager.player.authorize
+    if (!auth) return
+
+    auth
+      .call(SdkManager.player)
       .then(() => {
         console.log('[Authorization] The player is successfully logged in, page reload!')
         location.reload()
       })
-      .catch((err) => {
-        console.error('[Authorization] The player is not logged in!.', err)
+      .catch((err: unknown) => {
+        console.error('[Authorization]: player login failed', err)
         GameUtils.showError(err, {message: `${i18next.t('errors.type1')}`})
       })
   }

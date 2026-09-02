@@ -56,6 +56,7 @@ type SdkLeaderboard = {
 type SdkPlayer = {
   getId: () => string | null
   isAuth: () => boolean
+  auth?: () => Promise<unknown> // Старое имя метода авторизации платформы
   authorize?: () => Promise<unknown>
 }
 

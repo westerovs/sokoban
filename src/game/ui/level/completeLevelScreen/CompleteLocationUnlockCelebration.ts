@@ -3,6 +3,7 @@ import {Container} from 'pixi.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
 import LocationCard from '@/game/states/stateGame/startScreen/locationSelect/LocationCard.js'
 import LocationUnlockCelebration from '@/game/states/stateGame/startScreen/locationSelect/LocationUnlockCelebration.js'
+import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 
 /**
  * Показывает на экране завершения уровня карточку новой локации и эффекты её разблокировки.
@@ -12,9 +13,10 @@ import LocationUnlockCelebration from '@/game/states/stateGame/startScreen/locat
 const POSITION_Y = 245 // Центр карточки по вертикали в координатах игрового мира
 
 export default class CompleteLocationUnlockCelebration extends Container {
-  #card
-  #effects
+  #card: LocationCard | null = null
+  #effects!: LocationUnlockCelebration
 
+  // Создаёт контейнер эффекта в координатах экрана завершения.
   constructor() {
     super({label: 'complete-location-unlock-celebration', visible: false})
 
@@ -23,7 +25,8 @@ export default class CompleteLocationUnlockCelebration extends Container {
     this.#init()
   }
 
-  show = (location) => {
+  // Показывает временную карточку открытой локации.
+  show = (location: LocationDefinition | null) => {
     this.hide()
     if (!location) return
 
@@ -41,6 +44,7 @@ export default class CompleteLocationUnlockCelebration extends Container {
     })
   }
 
+  // Останавливает эффект и удаляет временную карточку.
   hide = () => {
     this.#effects.stop()
     this.#card?.destroy({children: true})
@@ -48,19 +52,31 @@ export default class CompleteLocationUnlockCelebration extends Container {
     this.visible = false
   }
 
-  destroy(options) {
+  // Освобождает карточку и дочерние эффекты.
+  destroy(options?: Parameters<Container['destroy']>[0]) {
     this.hide()
     super.destroy(options)
   }
 
+  // Создаёт общий эффект разблокировки.
   #init = () => {
     this.#effects = new LocationUnlockCelebration()
     this.addChild(this.#effects)
   }
 
-  #createCard = (location) => {
-    const card = new LocationCard(location, () => {})
+  // Создаёт неинтерактивную карточку новой локации.
+  #createCard = (location: LocationDefinition) => {
+    const state = {
+      ...location,
+      completedCount: 0,
+      isCompleted: false,
+      isCurrent: true,
+      isUnlocked: true,
+      totalCount: location.levels.length,
+    }
+    const card = new LocationCard(state, () => {})
     card.setState({
+      ...state,
       completedCount: 0,
       isCompleted: false,
       isCurrent: true,

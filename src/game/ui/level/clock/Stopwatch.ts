@@ -1,14 +1,30 @@
 import {gsap} from 'gsap'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import Logger, {MODULES} from '../../../utils/Logger.js'
+import type Game from '../../../Game.js'
 
-export const STOPWATCH_LABELS = {
-  level: 'level',
+// Измеряет время прохождения уровня и публикует секундные обновления.
+
+const STOPWATCH_LABELS = {
+  level: 'level', // Метка секундомера игрового уровня
+}
+
+type StopwatchOptions = {
+  game: Game
+  label?: string
 }
 
 // todo remove duration
 export default class Stopwatch {
-  constructor({game, label = 'defaultStopwatch'} = {}) {
+  game: Game
+  duration: number
+  label: string
+  remainingTime: number
+  timerTween: gsap.core.Tween | null
+  elapsedTime: number
+
+  // Сохраняет игру и начальные значения секундомера.
+  constructor({game, label = 'defaultStopwatch'}: StopwatchOptions) {
     this.game = game
     this.duration = Math.floor(9999)
     this.label = label
@@ -17,6 +33,7 @@ export default class Stopwatch {
     this.elapsedTime = 0
   }
 
+  // Запускает отсчёт и ежесекундные события.
   start = () => {
     this.#setEvents(true)
 
@@ -40,6 +57,7 @@ export default class Stopwatch {
     })
   }
 
+  // Возвращает прошедшее время по часам, минутам и секундам.
   get fullDataTime() {
     const elapsed = Math.floor(this.elapsedTime)
 
@@ -50,18 +68,21 @@ export default class Stopwatch {
     }
   }
 
+  // Возвращает целое число прошедших секунд.
   get seconds() {
     return Math.floor(this.elapsedTime)
   }
 
-  #setEvents = (bool) => {
+  // Включает или отключает события автоматической остановки.
+  #setEvents = (bool: boolean) => {
     const status = bool ? 'on' : 'off'
 
     this.game[status](GAME_EVENTS.completeLevel, this.clear)
     this.game[status](GAME_EVENTS.clearLevel, this.clear)
   }
 
-  #tick = (currentTime) => {
+  // Публикует очередное секундное обновление.
+  #tick = (currentTime: number) => {
     this.game.emit(GAME_EVENTS.Stopwatch.tick, {
       label: this.label,
       currentTime,
@@ -69,7 +90,8 @@ export default class Stopwatch {
     })
   }
 
-  clear = (log) => {
+  // Останавливает секундомер и удаляет его события.
+  clear = (log = false) => {
     if (log) Logger.log(MODULES.DestroyMessage, '[Stopwatch] module clear')
     if (this.timerTween) {
       this.timerTween.kill()
@@ -79,4 +101,8 @@ export default class Stopwatch {
 
     this.#setEvents(false)
   }
+}
+
+export {
+  STOPWATCH_LABELS,
 }

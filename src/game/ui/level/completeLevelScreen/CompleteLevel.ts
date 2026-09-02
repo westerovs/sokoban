@@ -16,24 +16,46 @@ import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import GrayscaleFilter from '@/game/utils/filters/GrayscaleFilter.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import BtnBadge from './BtnBadge.js'
+import {Container, Text} from 'pixi.js'
+import type Level from '@/game/states/stateLevel/Level.js'
+import type StateLevel from '@/game/states/stateLevel/StateLevel.js'
+import type Storage from '@/game/engine/storage/Storage.js'
+import type SoundManager from '@/game/engine/audio/SoundManager.js'
+import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
+import type CompleteLevelView from './CompleteLevelView.js'
+
+// Управляет экраном завершения, наградами, рекламой и дальнейшей навигацией.
+
+type CompletionResult = {
+  unlockedLocation?: LocationDefinition | null
+}
 
 export default class CompleteLevel {
   #game = Locator.game
   #refs = this.#game.refs
-  #view
-  #storage
-  #soundManager
-  #btnNext
-  #showTimeline
-  #canPlaySounds = true
-  #levelType
+  #view!: CompleteLevelView
+  #storage!: Storage
+  #soundManager!: SoundManager
+  #btnNext!: Container
+  #showTimeline: gsap.core.Timeline | null = null
+  #canPlaySounds = true // Разрешает звуки экрана завершения
+  #levelType: string | null = null
+  levelEntity: Level
+  state: StateLevel
+  btnBuyLoupe: Container | null = null
+  btnBackToLevels!: Container
+  btnHome!: Container
+  btnByeAd: Container | null = null
+  btns: Array<Container | null> = []
 
-  constructor(levelEntity) {
+  // Сохраняет уровень и его состояние.
+  constructor(levelEntity: Level) {
     this.levelEntity = levelEntity
     this.state = levelEntity.state
   }
 
-  init = async (completionResult = {}) => {
+  // Подготавливает данные, события и анимацию экрана завершения.
+  init = async (completionResult: CompletionResult = {}) => {
     try {
       this.#storage = Locator.storage
       this.#soundManager = Locator.soundManager
@@ -51,27 +73,29 @@ export default class CompleteLevel {
       await RateUs.checkAndShowRateUs(this.#storage, this.levelEntity)
 
       await this.#showAndAnimate()
-      this.#view.showLocationUnlock(completionResult.unlockedLocation)
+      this.#view.showLocationUnlock(completionResult.unlockedLocation ?? null)
       SdkManager.gameplayStop()
     } catch (err) {
-      console.error('CompleteLevel', err)
+      console.error('[CompleteLevel]: initialization failed', err)
     }
   }
 
+  // Находит созданное представление и его интерактивные элементы.
   #initViewElements = () => {
     this.#view = this.#refs.completeLevelView
-    this.#btnNext = this.#view.getChildByLabel('btnNext', true)
+    this.#btnNext = this.#view.getChildByLabel('btnNext', true)!
 
     this.btnBuyLoupe = this.#view.getChildByLabel('btnBuyLoupe', true)
-    this.btnBackToLevels = this.#view.getChildByLabel('btnBackToLevels', true)
-    this.btnHome = this.#view.getChildByLabel('btnHome', true)
+    this.btnBackToLevels = this.#view.getChildByLabel('btnBackToLevels', true)!
+    this.btnHome = this.#view.getChildByLabel('btnHome', true)!
     this.btnByeAd = this.#view.getChildByLabel('btnByeAd', true)
     this.btns = [this.#btnNext, this.btnBuyLoupe, this.btnBackToLevels, this.btnHome, this.btnByeAd]
 
     ButtonAnimator.initOverHandler(this.btns)
   }
 
-  #setEvents = (bool) => {
+  // Включает или отключает события кнопок и сервисов.
+  #setEvents = (bool: boolean) => {
     const status = bool ? 'on' : 'off'
     const statusOnce = bool ? 'once' : 'off'
 
@@ -87,6 +111,7 @@ export default class CompleteLevel {
     if (this.btnByeAd) this.btnByeAd[status]('pointertap', this.#btnByeAd)
   }
 
+  // Показывает доступную промокарточку магазина.
   #showPromoIfAvailable = async () => {
     if (!SdkManager.adapter.purchase.isAvailable()) return
     if (SdkManager.flags?.noStore) return
@@ -99,8 +124,9 @@ export default class CompleteLevel {
   }
 
   // 1 ------------- level result
+  // Показывает экран и последовательно анимирует кнопку продолжения.
   #showAndAnimate = async () => {
-    const btnNext = this.#view.getChildByLabel('btnNext', true)
+    const btnNext = this.#view.getChildByLabel('btnNext', true)!
     this.#view.visible = true
 
     try {
@@ -128,20 +154,22 @@ export default class CompleteLevel {
       this.#showTimeline.set(btnNext, {eventMode: 'static'})
     } catch (err) {
       btnNext.eventMode = 'static'
-      console.error('[showAndAnimate]', err)
+      console.error('[CompleteLevel]: show animation failed', err)
     }
   }
 
+  // Обновляет подпись кнопки следующего уровня.
   #setBtnNextValue = () => {
-    const btnNextArrow = this.#btnNext.getChildByLabel('btnNextArrow')
-    const arrowText = btnNextArrow.getChildByLabel('arrowText')
-    const levelText = this.#btnNext.getChildByLabel('btnNextLevelText')
+    const btnNextArrow = this.#btnNext.getChildByLabel('btnNextArrow')!
+    const arrowText = btnNextArrow.getChildByLabel('arrowText') as Text
+    const levelText = this.#btnNext.getChildByLabel('btnNextLevelText') as Text
 
     const nextLevel = LevelConfig.getGameLevelData(this.#storage.playerData.levelIndex)
     arrowText.text = i18next.t(nextLevel.locationTitleKey)
     levelText.text = `${i18next.t('level')} ${nextLevel.locationLevelNumber}`
   }
 
+  // Добавляет метку сложности следующего уровня.
   #createBtnBadge = () => {
     // 1 определить какой следующий уровень
     const nextLevel = LevelConfig.getGameLevelData(this.#storage.playerData.levelIndex)
@@ -154,18 +182,21 @@ export default class CompleteLevel {
     this.#btnNext.addChild(badge)
   }
 
+  // Скрывает интерфейс завершения перед открытием магазина.
   #hideInterface = () => {
     this.#view.interactiveChildren = false
 
     return gsap.timeline().to([this.#view, this.#refs.skinContainerView], {alpha: 0, visible: false})
   }
 
+  // Возвращает интерфейс после закрытия магазина.
   #unHideInterface = () => {
     this.#view.interactiveChildren = true
 
     return gsap.timeline().to([this.#view, this.#refs.skinContainerView], {alpha: 1, visible: true})
   }
 
+  // Запускает следующий уровень.
   #btnNextHandler = async () => {
     this.#canPlaySounds = false
 
@@ -176,6 +207,7 @@ export default class CompleteLevel {
     await this.state.runNextLevel()
   }
 
+  // Возвращает игрока на главный экран.
   #btnHomeHandler = async () => {
     YaMetrika.finalScreenBtnHome()
 
@@ -185,6 +217,7 @@ export default class CompleteLevel {
     this.state.checkoutState(GAME_STATES.gameState)
   }
 
+  // Возвращает игрока к списку локаций.
   #btnBackToLevelsHandler = async () => {
     this.#setEvents(false)
     this.#soundManager.play('sfx_btnClick')
@@ -193,6 +226,7 @@ export default class CompleteLevel {
     this.state.checkoutState(GAME_STATES.gameState)
   }
 
+  // Скрывает экран завершения и открывает магазин.
   #btnStoreHandler = () => {
     YaMetrika.finalScreenBtnStore()
 
@@ -202,11 +236,13 @@ export default class CompleteLevel {
   }
 
   // todo дублирование
+  // Создаёт представление и контроллер магазина.
   #createStore = () => {
     const view = new StoreView()
     new Store(view)
   }
 
+  // Запускает покупку отключения рекламы.
   #btnByeAd = () => {
     YaMetrika.finalScreenBtnDisableAd()
     const id = rewardsCatalog.store.noAdPack.id
@@ -215,10 +251,11 @@ export default class CompleteLevel {
     paymentManager.onPurchase(id)
   }
 
+  // Загружает и выводит цену отключения рекламы.
   #setPriceTextForBtnAd = async () => {
     if (!this.btnByeAd) return
 
-    const btnByeAdText = this.btnByeAd.getChildByLabel('btnByeAdText')
+    const btnByeAdText = this.btnByeAd.getChildByLabel('btnByeAdText') as Text | null
     if (!btnByeAdText) return
 
     try {
@@ -230,15 +267,16 @@ export default class CompleteLevel {
 
       const currency = SdkManager.purchase.getCurrency()
 
-      btnByeAdText.text = `${data.price}\n${currency}`
+      btnByeAdText.text = `${data?.price ?? ''}\n${currency}`
     } catch (err) {
       console.log('[setPriceTextForBtnAd]', err)
       btnByeAdText.text = ''
     }
   }
 
+  // Отключает кнопку рекламы после покупки пропуска.
   #checkAdPassPurchased = () => {
-    if (this.#storage.playerData.hasAdPass) {
+    if (this.#storage.playerData.hasAdPass && this.btnByeAd) {
       const card = this.btnByeAd
       card.eventMode = 'none'
 
@@ -246,14 +284,15 @@ export default class CompleteLevel {
       card.filters = [grayscale]
 
       const btnByeAdText = this.btnByeAd.getChildByLabel('btnByeAdText')
-      btnByeAdText.visible = false
+      if (btnByeAdText) btnByeAdText.visible = false
     }
   }
 
   // ---------- other
+  // Отправляет метрику завершения с временем прохождения.
   #sendCompleteLvlMetrika = () => {
     const stopwatch = this.levelEntity.modulesInitializer.getMod('stopwatch')
-    const levelPlayTime = stopwatch.seconds
+    const levelPlayTime = stopwatch?.seconds ?? 0
     YaMetrika.completeLevel(this.levelEntity.config, this.#storage, levelPlayTime)
   }
 }
