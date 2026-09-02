@@ -14,17 +14,58 @@ import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 import {ASSETS_URL, WORLD} from '@/game/gameConfig/constants.js'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
 
-const slotViews = new WeakMap()
+// Загружает Spine-ресурсы и предоставляет совместимые операции со слотами и скелетами.
+
+type SlotView = {
+  container: Container
+  sprite: Mesh & {attachment?: unknown; slot?: unknown}
+}
+
+type CreateSpineOptions = {
+  animationName?: string
+  autorun?: boolean
+  duration?: number
+  forceFirstFrame?: boolean
+  freeze?: boolean
+  loop?: boolean
+  scale?: number
+  skinName?: string
+  speed?: number
+  spineName?: string
+}
+
+type LoadSpineOptions = {
+  basePath?: string
+  exists?: string
+  folderPath?: string
+  spineName: string
+}
+
+type TestSpineOptions = Omit<LoadSpineOptions, 'basePath'> & {
+  animationName?: string
+  loop?: boolean
+}
+
+type SpineAssetData = {
+  atlas: string
+  json: any
+  name: string
+}
+
+const slotViews = new WeakMap<object, Map<object, SlotView>>()
 
 export default class SpineUtils {
-  static getAttachment = (slot) => slot?.getAppliedPose().getAttachment() ?? null
+  // Возвращает текущее вложение слота.
+  static getAttachment = (slot: any) => slot?.getAppliedPose().getAttachment() ?? null
 
-  static getExistingSlotView = (spine, slot) => slotViews.get(spine)?.get(slot) ?? null
+  // Возвращает ранее созданное Pixi-представление слота.
+  static getExistingSlotView = (spine: object, slot: object) => slotViews.get(spine)?.get(slot) ?? null
 
-  static getSlotView = (spine, slot) => {
+  // Создаёт интерактивное Pixi-представление вложения слота.
+  static getSlotView = (spine: any, slot: any) => {
     let views = slotViews.get(spine)
     if (!views) {
-      views = new Map()
+      views = new Map<object, SlotView>()
       slotViews.set(spine, views)
     }
 
@@ -68,8 +109,8 @@ export default class SpineUtils {
       topology: 'triangle-list',
     })
 
-    const mesh = new Mesh({geometry, texture})
-    const color = attachment.color
+    const mesh = new Mesh({label: `slot-mesh:${slot.data.name}`, geometry, texture}) as SlotView['sprite']
+    const color = (attachment as any).color
     mesh.tint = (Math.round(color.r * 255) << 16) | (Math.round(color.g * 255) << 8) | Math.round(color.b * 255)
     mesh.alpha = color.a
     mesh.attachment = attachment
@@ -81,7 +122,7 @@ export default class SpineUtils {
 
     // The official v8 runtime renders attachments directly. Keep a transparent
     // per-skeleton copy in the slot so only the interactive Pixi mesh is drawn.
-    const hiddenAttachment = attachment.copy()
+    const hiddenAttachment = attachment.copy() as any
     hiddenAttachment.color.a = 0
     slot.getPose().setAttachment(hiddenAttachment)
     slot.getAppliedPose().setAttachment(hiddenAttachment)
@@ -91,10 +132,11 @@ export default class SpineUtils {
     return view
   }
 
-  static getSlotsRecursively = (spine, boneName) => {
+  // Возвращает непустые слоты кости и всех её потомков.
+  static getSlotsRecursively = (spine: any, boneName: string): any[] => {
     // Проверка: Скелет должен быть доступен
     if (!spine?.skeleton) {
-      console.error('[SpineUtils getSlotsRecursively] Скелет отсутствует в spineLevelComponent')
+      console.error('[SpineUtils]: skeleton is missing')
       return []
     }
 
@@ -106,14 +148,15 @@ export default class SpineUtils {
       return []
     }
 
-    const collectSlots = (bone) => {
+    // Собирает слоты текущей кости и её потомков.
+    const collectSlots = (bone: any): any[] => {
       if (!bone) {
         console.warn('[SpineUtils getSlotsRecursively] Пустая кость передана в рекурсию')
         return []
       }
 
       // Собираем все слоты, связанные с текущей костью
-      const slots = bone.skeleton?.slots.filter((slot) => slot.bone === bone) || []
+      const slots = bone.skeleton?.slots.filter((slot: any) => slot.bone === bone) || []
 
       // Проверка: У кости могут отсутствовать дочерние кости
       const childBones = bone.children || []
@@ -122,7 +165,7 @@ export default class SpineUtils {
       }
 
       // Рекурсивно обрабатываем детей
-      childBones.forEach((childBone) => {
+      childBones.forEach((childBone: any) => {
         slots.push(...collectSlots(childBone))
       })
 
@@ -132,7 +175,7 @@ export default class SpineUtils {
     const allSlots = collectSlots(hogItemsBone)
 
     // Фильтруем слоты с валидными аттачментами
-    return allSlots.filter((slot) => {
+    return allSlots.filter((slot: any) => {
       const slotName = slot.data.name
       if (slot.getAppliedPose().getAttachment() === null) {
         console.log(slotName, 'empty')
@@ -142,42 +185,41 @@ export default class SpineUtils {
     })
   }
 
-  static findSlots = (spine, config) => {
+  // Находит валидные слоты указанной служебной кости.
+  static findSlots = (spine: any, config: any) => {
     const {spineName, currentSkinName} = config
 
     const hogItemsBone = spine.skeleton.findBone(config.hogItemsBone)
     if (!hogItemsBone) {
-      console.error(`[SpineUtils findSlots] кость ${config.hogItemsBone} не найдена
-          spineName:${spineName}
-          skin: ${currentSkinName}`)
+      console.error(`[SpineUtils]: bone ${config.hogItemsBone} is missing in ${spineName}, skin ${currentSkinName}`)
       return
     }
 
-    const slots = spine.skeleton.slots.filter((slot) => slot.bone === hogItemsBone)
+    const slots = spine.skeleton.slots.filter((slot: any) => slot.bone === hogItemsBone)
 
     // доп.проверка на случай если в слоте нет картинки (по ошибке дизайнера)
-    return slots.filter((slot) => {
+    return slots.filter((slot: any) => {
       const attachment = slot.getAppliedPose().getAttachment()
 
       if (!attachment?.name) {
         // на 0 уровне, 1 скине игнорируем ошибки, т.к там 5 слотов выключены
         if (spineName === 'level0' && currentSkinName === 'mode1/skin_mode1_v1') return
 
-        console.error(`[SpineUtils findSlots] не обнаружен спрайт в слоте ${slot?.data?.name}:
-          spineName:${spineName}
-          skin: ${currentSkinName}`)
+        console.error(`[SpineUtils]: sprite is missing in slot ${slot?.data?.name}, spine ${spineName}, skin ${currentSkinName}`)
         return
       }
       if (attachment.name) return slot
     })
   }
 
-  static findBone = (spine, boneName) => {
+  // Возвращает кость скелета по имени.
+  static findBone = (spine: any, boneName: string) => {
     return spine.skeleton.findBone(boneName)
   }
 
   // todo - вынести в класс
-  static createSpine = (props = {}) => {
+  // Создаёт и настраивает Spine-объект из кэшированных данных.
+  static createSpine = (props: CreateSpineOptions = {}) => {
     const {
       spineName,
       scale = 1,
@@ -199,13 +241,14 @@ export default class SpineUtils {
     }
 
     const spine = new Spine(spineData)
+    spine.label = `spine:${spineName ?? 'unknown'}`
     spine.scale.set(scale)
     spine.state.timeScale = speed
 
     try {
       spine.skeleton.setSkin(skinName)
     } catch (e) {
-      console.error('[createSpine]', e)
+      console.error('[SpineUtils]: skin setup failed', e)
 
       // todo Временное поведение - применить дефолтный скин в случае ошибки.
       const skin = spine.skeleton.data.findSkin(skinName) ?? spine.skeleton.data.defaultSkin ?? spine.skeleton.data.skins[0]
@@ -242,7 +285,8 @@ export default class SpineUtils {
     return spine
   }
 
-  static freezeSpine(spine) {
+  // Останавливает автоматическое обновление статичного Spine-объекта.
+  static freezeSpine(spine: Spine) {
     if (LocalStorage.isDebug) return
 
     spine.state.clearTracks()
@@ -250,7 +294,8 @@ export default class SpineUtils {
     spine.autoUpdate = false
   }
 
-  static spineParser = (spines, exists = 'webp') => {
+  // Разбирает атласы и сохраняет подготовленные данные скелетов в Assets.
+  static spineParser = (spines: SpineAssetData[], exists = 'webp') => {
     try {
       const allSpines = [...spines]
 
@@ -278,11 +323,12 @@ export default class SpineUtils {
         Assets.cache.set(`${name}.spineData`, spineJsonParser.readSkeletonData(json))
       })
     } catch (e) {
-      console.error('[spineParser]', e)
+      console.error('[SpineUtils]: atlas parsing failed', e)
     }
   }
 
-  static getSlotSpritePosition = (hogItem) => {
+  // Возвращает локальный центр спрайта или меша слота.
+  static getSlotSpritePosition = (hogItem: any) => {
     const {sprite} = hogItem
 
     if (!hogItem.isMesh) {
@@ -299,7 +345,8 @@ export default class SpineUtils {
     }
   }
 
-  static positionLog = (target) => {
+  // Выводит отладочную информацию о позиции представления слота.
+  static positionLog = (target: any) => {
     const sprite = target.sprite
     const bounds = sprite.getLocalBounds()
 
@@ -310,7 +357,8 @@ export default class SpineUtils {
   }
 
   // осторожно, нужно выгружать данные Assets.load!
-  static loadAndParseSpineAsset = async ({spineName, folderPath = 'spines', exists = 'webp', basePath = ASSETS_URL.local}) => {
+  // Загружает JSON, атлас и все текстуры одного Spine-ресурса.
+  static loadAndParseSpineAsset = async ({spineName, folderPath = 'spines', exists = 'webp', basePath = ASSETS_URL.local}: LoadSpineOptions) => {
     const jsonUrl = `${basePath}assets/${folderPath}/${spineName}.json`
     const atlasUrl = `${basePath}assets/${folderPath}/${spineName}.atlas`
 
@@ -343,7 +391,8 @@ export default class SpineUtils {
   }
 
   // SpineUtils.js
-  static createTestSpine = async ({spineName, folderPath = 'spines', loop = true, exists = 'png', animationName = 'animation'}) => {
+  // Загружает и создаёт Spine-объект для отладочного просмотра.
+  static createTestSpine = async ({spineName, folderPath = 'spines', loop = true, exists = 'png', animationName = 'animation'}: TestSpineOptions) => {
     await SpineUtils.loadAndParseSpineAsset({spineName, folderPath, exists})
 
     const spine = SpineUtils.createSpine({spineName, animationName, autorun: true, loop})
@@ -357,9 +406,10 @@ export default class SpineUtils {
     return spine
   }
 
-  static checkoutSkin = (spine, skinName) => {
+  // Применяет существующий скин к Spine-объекту.
+  static checkoutSkin = (spine: Spine, skinName: string) => {
     if (!spine?.skeleton) {
-      console.error('[SpineUtils checkoutSkin] Скелет не найден')
+      console.error('[SpineUtils]: skeleton is missing')
       return
     }
 
@@ -367,7 +417,7 @@ export default class SpineUtils {
     const skin = skeleton.data.findSkin(skinName)
 
     if (!skin) {
-      console.error(`[SpineUtils checkoutSkin] Скин "${skinName}" не найден в skeleton.data`)
+      console.error(`[SpineUtils]: skin "${skinName}" is missing`)
       return
     }
 
@@ -376,7 +426,8 @@ export default class SpineUtils {
     skeleton.updateWorldTransform(Physics.update)
   }
 
-  static destroySpine = (spine, spineName) => {
+  // Останавливает, уничтожает и удаляет из кэша Spine-объект.
+  static destroySpine = (spine: Spine, spineName?: string) => {
     try {
       spine.state.setEmptyAnimations(0)
       spine.state.clearListeners()
@@ -387,14 +438,15 @@ export default class SpineUtils {
         Assets.cache.remove(`${spineName}.spineData`)
       }
     } catch (err) {
-      console.error('destroySpine', err)
+      console.error('[SpineUtils]: spine cleanup failed', err)
     }
   }
 
-  static destroyLevelAssets = async (atlasLines) => {
-    const promises = []
+  // Выгружает текстуры, перечисленные в строках атласа.
+  static destroyLevelAssets = async (atlasLines: string[]) => {
+    const promises: Promise<unknown>[] = []
 
-    atlasLines.forEach((line) => {
+    atlasLines.forEach((line: string) => {
       const alias = line.replace(`.webp`, '').trim()
       promises.push(Assets.unload(alias))
     })
@@ -402,7 +454,9 @@ export default class SpineUtils {
     await Promise.all(promises)
   }
 
-  static hideAndDestroySpine = async (spine) => {
+  // Плавно скрывает и затем уничтожает Spine-объект.
+  static hideAndDestroySpine = async (spine: Spine) => {
+    // Уничтожает Spine-объект после завершения анимации.
     const destroy = () => {
       try {
         spine.destroy()

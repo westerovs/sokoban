@@ -1,9 +1,30 @@
-import {Assets, Sprite, Texture, Ticker} from 'pixi.js'
+import {Assets, Container, Sprite, Texture, Ticker} from 'pixi.js'
 
+// Реализует простой совместимый эмиттер спрайтовых частиц без внешней зависимости.
+
+type EmitterConfig = Record<string, any> & {
+  textures?: Texture[]
+}
+
+type EmitterParticle = {
+  age: number
+  endScale: number
+  lifetime: number
+  rotationSpeed: number
+  startScale: number
+  velocityX: number
+  velocityY: number
+  view: Sprite
+}
+
+// Возвращает случайное число в заданном диапазоне.
 const random = (min = 0, max = min) => min + Math.random() * (max - min)
-const lerp = (start, end, progress) => start + (end - start) * progress
 
-const upgradeConfig = (config, textures = []) => ({
+// Линейно интерполирует значение между началом и концом.
+const lerp = (start: number, end: number, progress: number) => start + (end - start) * progress
+
+// Добавляет загруженные текстуры к конфигурации эмиттера.
+const upgradeConfig = <Config extends Record<string, any>>(config: Config, textures: Texture[] = []): Config & {textures: Texture[]} => ({
   ...config,
   textures,
 })
@@ -15,43 +36,52 @@ class Emitter {
   #emitterElapsed = 0
   #ownerX = 0
   #ownerY = 0
-  #particles = []
-  #playOnceCallback
+  #particles: EmitterParticle[] = []
+  #playOnceCallback: (() => void) | null = null
 
   emit = false
+  container: Container
+  config: EmitterConfig
 
-  constructor(container, config) {
+  // Сохраняет контейнер и конфигурацию частиц.
+  constructor(container: Container, config: EmitterConfig) {
     this.container = container
     this.config = config
   }
 
+  // Возвращает состояние автоматического обновления.
   get autoUpdate() {
     return this.#autoUpdate
   }
 
-  set autoUpdate(value) {
+  // Подключает или отключает эмиттер от общего тикера.
+  set autoUpdate(value: boolean) {
     if (this.#autoUpdate === value || this.#destroyed) return
 
     this.#autoUpdate = value
     Ticker.shared[value ? 'add' : 'remove'](this.#update)
   }
 
-  updateOwnerPos = (x, y) => {
+  // Обновляет позицию владельца эмиттера.
+  updateOwnerPos = (x: number, y: number) => {
     this.#ownerX = x
     this.#ownerY = y
   }
 
-  playOnceAndDestroy = (callback) => {
+  // Запускает один цикл эмиссии и вызывает обработчик после завершения.
+  playOnceAndDestroy = (callback: () => void) => {
     this.#playOnceCallback = callback
     this.emit = true
     this.autoUpdate = true
   }
 
+  // Удаляет все активные частицы.
   cleanup = () => {
     this.#particles.forEach(({view}) => view.destroy())
     this.#particles.length = 0
   }
 
+  // Полностью останавливает и очищает эмиттер.
   destroy = () => {
     if (this.#destroyed) return
 
@@ -61,7 +91,8 @@ class Emitter {
     this.#destroyed = true
   }
 
-  #update = (ticker) => {
+  // Обновляет эмиссию и частицы на каждом кадре.
+  #update = (ticker: Ticker) => {
     if (this.#destroyed) return
 
     const delta = Math.min(ticker.deltaMS / 1000, 0.1)
@@ -92,6 +123,7 @@ class Emitter {
     }
   }
 
+  // Создаёт одну частицу из текущей конфигурации.
   #spawnParticle = () => {
     const texture = this.config.textures?.[0] ?? Assets.get('particle') ?? Texture.WHITE
     const scaleMultiplier = random(this.config.scale?.minimumScaleMultiplier ?? 1, 1)
@@ -102,6 +134,7 @@ class Emitter {
     const angle = (startRotation * Math.PI) / 180
     const position = this.#getSpawnPosition()
     const view = new Sprite({
+      label: 'particle-emitter-particle',
       texture,
       anchor: 0.5,
       x: position.x,
@@ -125,6 +158,7 @@ class Emitter {
     })
   }
 
+  // Рассчитывает позицию рождения частицы.
   #getSpawnPosition = () => {
     const baseX = this.#ownerX + (this.config.pos?.x ?? 0)
     const baseY = this.#ownerY + (this.config.pos?.y ?? 0)
@@ -151,7 +185,8 @@ class Emitter {
     return {x: baseX, y: baseY}
   }
 
-  #updateParticles = (delta) => {
+  // Перемещает, вращает и затухает активные частицы.
+  #updateParticles = (delta: number) => {
     const acceleration = this.config.acceleration ?? {x: 0, y: 0}
 
     for (let index = this.#particles.length - 1; index >= 0; index--) {
