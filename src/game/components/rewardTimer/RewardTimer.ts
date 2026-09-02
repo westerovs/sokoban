@@ -1,4 +1,5 @@
 import {GrayscaleFilter} from 'pixi-filters'
+import type {Container} from 'pixi.js'
 import Locator from '../../engine/Locator.ts'
 import SdkManager from '../../engine/SdkManager.js'
 import {STORAGE_KEYS} from '../../engine/storage/defaultData.js'
@@ -9,20 +10,37 @@ import {HINT_BUTTON_NAMES} from '../../modules/hints/HintsController.js'
 import Timer from '../../ui/level/clock/Timer.js'
 import Logger, {MODULES} from '../../utils/Logger.js'
 
+// Управляет рекламной наградой и временем блокировки кнопки.
+
+type RewardTimerKey =
+  | typeof STORAGE_KEYS.timer_RewardMagnifier
+  | typeof STORAGE_KEYS.timer_RewardDarts
+  | typeof STORAGE_KEYS.timer_RewardCompass
+
+type TimerTickEvent = {
+  label: string
+  currentTimeWithZero: number | string
+}
+
+type TimerEndEvent = {
+  label: string
+}
+
 export default class RewardTimer {
   #game = Locator.game
   #storage = Locator.storage
   #isDisabledBtn = false
-  #timerLabel
-  #timerKey
-  #hasReward
-  btn
-  btnHintName
-  timer
+  #timerLabel = ''
+  #timerKey!: RewardTimerKey
+  #hasReward = false
+  btn: Container | null = null
+  btnHintName = ''
+  timer: Timer | null = null
   initiatorName = ''
   #duration = ABTest.getTimerRewardDuration()
 
-  init(btn, timerLabel, timerKeys) {
+  // Подключает кнопку к рекламной награде и восстанавливает активный таймер.
+  init(btn: Container, timerLabel: string, timerKeys: RewardTimerKey) {
     this.btn = btn
     this.btn.on('pointerup', this.#showAd)
     this.#timerLabel = timerLabel
@@ -32,6 +50,7 @@ export default class RewardTimer {
     this.#restoreTimerIfActive()
   }
 
+  // Останавливает таймер и удаляет подписки.
   destroy = () => {
     Logger.log(MODULES.DestroyMessage, '[BtnTimer] destroy')
     this.timer?.kill()
@@ -39,15 +58,18 @@ export default class RewardTimer {
     this.#setTimerEvents(false)
   }
 
-  // Публичные методы, который можно переопределить
-  onError() {}
+  // Обрабатывает ошибку показа рекламы в наследнике.
+  onError(_error?: unknown) {}
 
+  // Обрабатывает окончание таймера в наследнике.
   onTimerEnd() {}
 
-  onTimerTick() {}
+  // Обрабатывает очередную секунду таймера в наследнике.
+  onTimerTick(_currentTimeWithZero: number | string) {}
 
   // ------------- ↓ timer ↓ -------------
-  #startTimer = (duration) => {
+  // Создаёт и запускает таймер блокировки кнопки.
+  #startTimer = (duration: number) => {
     this.timer = new Timer({
       game: this.#game,
       duration: duration,
@@ -56,11 +78,13 @@ export default class RewardTimer {
     this.timer.start()
   }
 
-  #checkoutDisabled = (bool) => {
+  // Переключает доступность и визуальное состояние кнопки.
+  #checkoutDisabled = (bool: boolean) => {
+    if (!this.btn) return
     if (bool) {
       this.#isDisabledBtn = true
 
-      const grayscale = new GrayscaleFilter(1)
+      const grayscale = new GrayscaleFilter()
       this.btn.filters = [grayscale]
       this.btn.eventMode = 'none'
       return
@@ -71,20 +95,23 @@ export default class RewardTimer {
     this.btn.eventMode = 'static'
   }
 
-  #setTimerEvents = (bool) => {
+  // Подключает или отключает события таймера.
+  #setTimerEvents = (bool: boolean) => {
     const status = bool ? 'on' : 'off'
 
     this.#game[status](GAME_EVENTS.Timer.tick, this.#timerTick)
     this.#game[status](GAME_EVENTS.Timer.kill, this.#timerEnd)
   }
 
-  #timerTick = ({label, currentTimeWithZero}) => {
+  // Передаёт обновление нужного таймера публичному обработчику.
+  #timerTick = ({label, currentTimeWithZero}: TimerTickEvent) => {
     if (label === this.#timerLabel) {
       this.onTimerTick(currentTimeWithZero)
     }
   }
 
-  #timerEnd = ({label}) => {
+  // Восстанавливает кнопку после завершения нужного таймера.
+  #timerEnd = ({label}: TimerEndEvent) => {
     if (label === this.#timerLabel) {
       this.#checkoutDisabled(false)
       this.onTimerEnd()
@@ -92,11 +119,13 @@ export default class RewardTimer {
   }
 
   // ------------- ↓ time ↓ -------------
+  // Получает серверное время в секундах.
   #getServerTime = async () => {
     const serverTime = await SdkManager.getServerTime()
     return Math.floor(serverTime / 1000)
   }
 
+  // Вычисляет оставшееся время сохранённой блокировки.
   findServerTime = async () => {
     const savedTime = this.#storage.playerData[this.#timerKey]
 
@@ -110,6 +139,7 @@ export default class RewardTimer {
     return false
   }
 
+  // Восстанавливает таймер из сохранённых данных.
   #restoreTimerIfActive = async () => {
     const remainingTime = await this.findServerTime()
 
@@ -122,6 +152,7 @@ export default class RewardTimer {
     return false
   }
 
+  // Сохраняет серверное время начала блокировки.
   #saveTime = async () => {
     // Сохраняем в нужный таймер серверное время
     this.#storage.playerData[this.#timerKey] = await this.#getServerTime()
@@ -129,6 +160,7 @@ export default class RewardTimer {
   }
 
   // ------------- ↓ AD ↓ -------------
+  // Запускает показ рекламы с наградой.
   #showAd = () => {
     if (this.#isDisabledBtn) return
 
@@ -143,6 +175,7 @@ export default class RewardTimer {
   }
 
   // --------- rewarded callbacks
+  // Выдаёт награду после успешного просмотра рекламы.
   #onRewarded = () => {
     this.#hasReward = true
     this.#game.emit(GAME_EVENTS.AD.onRewarded, this.initiatorName)
@@ -154,6 +187,7 @@ export default class RewardTimer {
     this.#saveTime()
   }
 
+  // Добавляет соответствующий тип подсказки в профиль игрока.
   #giveReward = () => {
     if (this.initiatorName === 'store' && this.btnHintName === HINT_BUTTON_NAMES.hints) {
       this.#storage.addHints(STORAGE_KEYS.hints, rewardsCatalog.store.free.amount, true)
@@ -167,6 +201,7 @@ export default class RewardTimer {
     Locator.storage.save(true)
   }
 
+  // Снимает внутреннюю блокировку после завершения рекламы.
   #onFinally = () => {
     this.#isDisabledBtn = false
   }

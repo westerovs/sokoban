@@ -1,20 +1,38 @@
 import {gsap} from 'gsap'
 import {Container, Text} from 'pixi.js'
+import type {DestroyOptions, Sprite} from 'pixi.js'
 import {rewardsCatalog} from '../gameConfig/rewardsCatalog.js'
 import {primaryFontStyle} from '../styles.js'
 import {destroyTimeLine} from '../utils/animations/gsapUtils.js'
 import GameUtils from '../utils/gameUtils/GameUtils.js'
 
-export default class PaymentAnimation extends Container {
-  #parent
-  #parentElements
-  #productID
-  #textRewardCounter
-  #timeline = gsap.timeline()
-  #isPromo
+// Показывает анимацию полученного после покупки игрового ресурса.
 
-  constructor({parent, parentElements, productID, isPromo = false} = {}) {
-    super()
+type AnimationParent = Container & {
+  frameSize: {
+    halfH: number
+    halfW: number
+  }
+}
+
+type PaymentAnimationOptions = {
+  parent: AnimationParent
+  parentElements: gsap.TweenTarget
+  productID: string
+  isPromo?: boolean
+}
+
+export default class PaymentAnimation extends Container {
+  #parent: AnimationParent
+  #parentElements: gsap.TweenTarget
+  #productID: string
+  #textRewardCounter!: Text
+  #timeline = gsap.timeline()
+  #isPromo: boolean
+
+  // Сохраняет параметры анимации покупки.
+  constructor({parent, parentElements, productID, isPromo = false}: PaymentAnimationOptions) {
+    super({label: 'payment-animation'})
 
     this.#parent = parent
     this.#parentElements = parentElements
@@ -26,16 +44,20 @@ export default class PaymentAnimation extends Container {
     console.warn('---productID', productID)
   }
 
+  // Проигрывает анимацию и удаляет её контейнер.
   init = async () => {
     await this.#animate()
     this.destroy()
   }
 
-  destroy(_options) {
+  // Останавливает таймлайн и уничтожает дочерние элементы.
+  destroy(_options?: DestroyOptions) {
     destroyTimeLine(this.#timeline)
-    super.destroy({..._options, children: true})
+    const options = typeof _options === 'object' ? _options : {}
+    super.destroy({...options, children: true})
   }
 
+  // Собирает и последовательно проигрывает анимацию награды.
   #animate = async () => {
     const shine = this.#createShineIcon()
     this.#textRewardCounter = this.#createRewardCounter()
@@ -59,12 +81,14 @@ export default class PaymentAnimation extends Container {
       .set([this.#parentElements], {visible: !this.#isPromo})
   }
 
-  #setPositionCenter = (shine) => {
+  // Центрирует анимацию относительно родительского кадра.
+  #setPositionCenter = (shine: Sprite) => {
     this.pivot.set(shine.texture.width / 2, shine.texture.height / 2)
     const frameSize = this.#parent.frameSize
     this.position.set(frameSize.halfW + shine.texture.width / 2, frameSize.halfH + 180)
   }
 
+  // Создаёт фоновое свечение награды.
   #createShineIcon = () => {
     const shine = GameUtils.createSprite('glow-type1')
     this.addChild(shine)
@@ -72,6 +96,7 @@ export default class PaymentAnimation extends Container {
     return shine
   }
 
+  // Создаёт и настраивает иконку купленного продукта.
   #createPaymentIcon = () => {
     let textureKey = null
 
@@ -88,7 +113,7 @@ export default class PaymentAnimation extends Container {
     if (magnifiers.includes(this.#productID)) {
       textureKey = 'store-loupe-big'
       const product = Object.values(storeCatalog).find((item) => item.id === this.#productID)
-      this.#textRewardCounter.text = `+${product.amount}`
+      if (product && 'amount' in product) this.#textRewardCounter.text = `+${product.amount}`
     }
     if (this.#productID === storeCatalog.dartsHint.id) {
       textureKey = 'store-darts-big'
@@ -126,14 +151,16 @@ export default class PaymentAnimation extends Container {
       this.#textRewardCounter.text = `+${promoCatalog.promoMegaHintsPack.amount}`
     }
 
-    const icon = GameUtils.createSprite(textureKey)
+    const icon = GameUtils.createSprite(textureKey as string)
     this.addChild(icon)
 
     return icon
   }
 
+  // Создаёт текстовый счётчик полученной награды.
   #createRewardCounter = () => {
     const textRewardCounter = new Text({
+      label: 'payment-reward-counter',
       text: '',
       style: {
         ...primaryFontStyle,

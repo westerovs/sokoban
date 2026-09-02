@@ -4,22 +4,27 @@ import Locator from '../engine/Locator.ts'
 import SdkManager from '../engine/SdkManager.js'
 import {ADAPTER_EVENTS} from '../gameConfig/gameEvents.js'
 
+// Синхронизирует паузу игры с событиями платформенного адаптера.
+
 export default class GamePause {
   #game = Locator.game
-  #wrapper
-  #canvas
+  #wrapper: HTMLDivElement
+  #canvas: HTMLCanvasElement | null
   #isPaused = false
 
+  // Находит DOM-элементы игры и подключает события паузы.
   constructor() {
-    this.#wrapper = document.querySelector('#canvas-wrapper')
+    this.#wrapper = document.querySelector<HTMLDivElement>('#canvas-wrapper')!
     this.#canvas = this.#wrapper.querySelector('canvas')
     this.#init()
   }
 
+  // Запускает настройку контроллера паузы.
   #init = () => {
     this.#setEvents()
   }
 
+  // Приостанавливает рендеринг и ввод игры.
   #setPause = () => {
     if (this.#isPaused) return
     this.#isPaused = true
@@ -30,6 +35,7 @@ export default class GamePause {
     SdkManager.gameplayStop()
   }
 
+  // Возобновляет рендеринг и ввод игры.
   #setResume = () => {
     if (!this.#isPaused) return
     this.#isPaused = false
@@ -43,6 +49,7 @@ export default class GamePause {
     SdkManager.gameplayStart()
   }
 
+  // Добавляет поверх игры текст паузы.
   #createTextPause = () => {
     const textPause = document.createElement('p')
     textPause.innerText = `${i18next.t('pause')}`
@@ -50,7 +57,8 @@ export default class GamePause {
     this.#wrapper.appendChild(textPause)
   }
 
-  #setInteractiveApp = (isPause) => {
+  // Переключает активность PixiJS и временной шкалы GSAP.
+  #setInteractiveApp = (isPause: boolean) => {
     if (isPause) {
       this.#game.app.stop()
       gsap.globalTimeline.pause()
@@ -62,6 +70,7 @@ export default class GamePause {
     }
   }
 
+  // Подписывается на события паузы платформенного адаптера.
   #setEvents = () => {
     SdkManager.adapter.on(ADAPTER_EVENTS.PAUSE_EVENT, this.#setPause)
     SdkManager.adapter.on(ADAPTER_EVENTS.RESUME_EVENT, this.#setResume)

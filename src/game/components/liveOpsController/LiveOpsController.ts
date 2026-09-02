@@ -3,17 +3,31 @@ import LocalStorage from '../../engine/storage/LocalStorage.js'
 import {GAME_NAMES, PLATFORM_ID} from '../../gameConfig/constants.js'
 
 /**
- * Первая версия класса для работы с эвентами по расписанию.
- * Отвечает за поддержку игровых эвентов, проверяет актуальную дату
+ * Управляет доступностью игровых событий по расписанию.
  * Проверка доступности: Locator.liveOps.isActive(LIVE_OPS_ID.NEW_YEAR)
- * */
+ */
 
-export const LIVE_OPS_ID = {
+const LIVE_OPS_ID = {
   NEW_YEAR: 'newYear',
+} as const
+
+type EventDate = {
+  day: number
+  month: number
+}
+
+type LiveOpsEvent = {
+  id: string
+  isDisabled: boolean
+  repeat?: 'yearly'
+  start?: EventDate
+  end?: EventDate
+  startAt?: string
+  endAt?: string
 }
 
 // перед сборкой для продакшена тут можно потестировать, выставляя различные даты
-const LIVE_OPS_EVENTS = {
+const LIVE_OPS_EVENTS: Record<string, LiveOpsEvent> = {
   newYear: {
     id: LIVE_OPS_ID.NEW_YEAR,
     isDisabled: true, // меняется динамически в init в зависимости от игры и платформы
@@ -31,7 +45,7 @@ const LIVE_OPS_EVENTS = {
 }
 
 export default class LiveOpsController {
-  #events = {}
+  #events: Record<string, boolean> = {}
 
   // todo не должно быть тут. Смешанная логика
   static get newYearIsActiveAndPurchased() {
@@ -49,7 +63,7 @@ export default class LiveOpsController {
    если нужно добавить новый год в некоторые платформы, добавь это как && в константу isAvailable
    если нужно разрешить для всех платформ - удали && NEW_YEAR_ENABLED_PLATFORMS*/
   static get isNewYearAvailable() {
-    const NEW_YEAR_ENABLED_GAMES = [GAME_NAMES.detective, GAME_NAMES.test]
+    const NEW_YEAR_ENABLED_GAMES: readonly string[] = [GAME_NAMES.detective, GAME_NAMES.test]
     const NEW_YEAR_ENABLED_PLATFORMS = [PLATFORM_ID.yandex, PLATFORM_ID.vk, PLATFORM_ID.ok, PLATFORM_ID.base]
     const isAvailable = NEW_YEAR_ENABLED_GAMES.includes(GAME_NAMES.currentName) && NEW_YEAR_ENABLED_PLATFORMS
 
@@ -77,7 +91,7 @@ export default class LiveOpsController {
   }
 
   // проверяет любой эвент на доступность
-  isActive = (eventName) => {
+  isActive = (eventName: string) => {
     const config = LIVE_OPS_EVENTS[eventName]
     if (!config || config.isDisabled) return false
 
@@ -97,9 +111,9 @@ export default class LiveOpsController {
   }
 
   // Проверяет, попадает ли текущее время в интервал эвента
-  #isInTimeRange = (config) => {
-    if (config.repeat === 'yearly') {
-      return this.#isInYearlyRange(config)
+  #isInTimeRange = (config: LiveOpsEvent) => {
+    if (config.repeat === 'yearly' && config.start && config.end) {
+      return this.#isInYearlyRange({start: config.start, end: config.end})
     }
 
     if (config.startAt && config.endAt) {
@@ -110,8 +124,10 @@ export default class LiveOpsController {
     return false
   }
 
-  #isInYearlyRange = ({start, end}) => {
+  // Проверяет ежегодный диапазон, включая переход через Новый год.
+  #isInYearlyRange = ({start, end}: {start: EventDate; end: EventDate}) => {
     const now = new Date()
+    const nowTime = now.getTime()
     const year = now.getUTCFullYear()
 
     const startDate = Date.UTC(year, start.month - 1, start.day, 0, 0, 0)
@@ -119,10 +135,14 @@ export default class LiveOpsController {
 
     // диапазон внутри одного года (например: март → май)
     if (start.month <= end.month) {
-      return now >= startDate && now <= endDate
+      return nowTime >= startDate && nowTime <= endDate
     }
 
     // диапазон через Новый год (например: декабрь → январь)
-    return now >= startDate || now <= endDate
+    return nowTime >= startDate || nowTime <= endDate
   }
+}
+
+export {
+  LIVE_OPS_ID,
 }
