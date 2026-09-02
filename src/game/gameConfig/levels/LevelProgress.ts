@@ -1,4 +1,6 @@
 import {getLevelEntries, getLevelEntryById, getLevelEntryByIndex, getLocationPageIndex, getLocations} from './locationCatalog.js'
+import type Storage from '../../engine/storage/Storage.js'
+import type {LevelEntry, LocationDefinition} from './levelTypes.js'
 
 /**
  * Хранит прогресс по стабильным идентификаторам карт и синхронизирует старый числовой levelIndex.
@@ -7,12 +9,18 @@ import {getLevelEntries, getLevelEntryById, getLevelEntryByIndex, getLocationPag
 
 const LEGACY_NEW_PLAYER_LEVEL = 1 // Начальный userLevel в сохранениях до перехода на идентификаторы карт
 
+type SelectLevelOptions = {
+  ignoreLock?: boolean
+  save?: boolean
+}
+
 export default class LevelProgress {
   #pageSize = 4 // Количество карточек локаций на одной вкладке выбора
   #progressVersion = 1 // Версия формата прогресса по идентификаторам уровней
-  #storage
+  #storage: Storage
 
-  constructor(storage) {
+  // Сохраняет доступ к профилю, который содержит прогресс уровней.
+  constructor(storage: Storage) {
     this.#storage = storage
   }
 
@@ -44,7 +52,7 @@ export default class LevelProgress {
     }))
   }
 
-  getLevelStates = (locationId) => {
+  getLevelStates = (locationId: string) => {
     const location = getLocations().find(({id}) => id === locationId)
     if (!location) return []
 
@@ -100,7 +108,7 @@ export default class LevelProgress {
     return location ?? null
   }
 
-  getSelectedEntry = (locationId = this.selectedLocationId) => {
+  getSelectedEntry = (locationId: string | null = this.selectedLocationId) => {
     const selected = getLevelEntryById(this.#storage.playerData.selectedLevelId)
     if (selected?.location.id === locationId) return selected
 
@@ -111,17 +119,17 @@ export default class LevelProgress {
     return firstLevel ? getLevelEntryById(firstLevel.id) : null
   }
 
-  isLocationUnlocked = (locationId) => {
+  isLocationUnlocked = (locationId: string) => {
     return this.#storage.playerData.unlockedLocationIds.includes(locationId)
   }
 
-  selectPage = (pageIndex) => {
+  selectPage = (pageIndex: number) => {
     const maxPage = Math.max(Math.ceil(getLocations().length / this.#pageSize) - 1, 0)
     this.#storage.playerData.locationPageIndex = Math.min(Math.max(pageIndex, 0), maxPage)
     this.#storage.save()
   }
 
-  selectLocation = (locationId) => {
+  selectLocation = (locationId: string) => {
     if (!this.isLocationUnlocked(locationId)) return false
 
     this.#storage.playerData.selectedLocationId = locationId
@@ -131,11 +139,11 @@ export default class LevelProgress {
   }
 
   selectLevel = (
-    levelId,
+    levelId: string,
     {
       ignoreLock = false, // Разрешает служебный выбор ещё заблокированного уровня
       save = true, // Управляет немедленной записью выбранного уровня в хранилище
-    } = {},
+    }: SelectLevelOptions = {},
   ) => {
     const entry = getLevelEntryById(levelId)
     if (!entry || (!ignoreLock && !this.#isLevelUnlocked(entry))) return false
@@ -145,7 +153,7 @@ export default class LevelProgress {
     return true
   }
 
-  markLevelPlayed = (levelId) => {
+  markLevelPlayed = (levelId: string) => {
     const entry = getLevelEntryById(levelId)
     if (!entry || !this.isLocationUnlocked(entry.location.id)) return false
 
@@ -154,7 +162,7 @@ export default class LevelProgress {
     return true
   }
 
-  completeLevel = (levelId) => {
+  completeLevel = (levelId: string) => {
     const entry = getLevelEntryById(levelId)
     if (!entry) throw new Error(`Уровень ${levelId} не найден`)
 
@@ -190,10 +198,11 @@ export default class LevelProgress {
     this.#storage.playerData.completedLevelIds = this.#uniqueExistingIds(this.#storage.playerData.completedLevelIds, levelIds)
     this.#storage.playerData.unlockedLocationIds = this.#uniqueExistingIds(this.#storage.playerData.unlockedLocationIds, locationIds)
     this.#storage.playerData.celebratedLocationIds = this.#uniqueExistingIds(this.#storage.playerData.celebratedLocationIds, locationIds)
-    if (!levelIds.has(this.#storage.playerData.lastPlayedLevelId)) this.#storage.playerData.lastPlayedLevelId = null
+    const lastPlayedLevelId = this.#storage.playerData.lastPlayedLevelId
+    if (!lastPlayedLevelId || !levelIds.has(lastPlayedLevelId)) this.#storage.playerData.lastPlayedLevelId = null
   }
 
-  #uniqueExistingIds = (ids, validIds) => {
+  #uniqueExistingIds = (ids: string[], validIds: Set<string>) => {
     return [...new Set(Array.isArray(ids) ? ids : [])].filter((id) => validIds.has(id))
   }
 
@@ -212,7 +221,7 @@ export default class LevelProgress {
     this.#setSelectedEntry(selected ?? fallback)
   }
 
-  #setSelectedEntry = (entry) => {
+  #setSelectedEntry = (entry: LevelEntry | null) => {
     if (!entry) return
 
     this.#storage.playerData.selectedLevelId = entry.level.id
@@ -221,7 +230,7 @@ export default class LevelProgress {
     this.#storage.playerData.levelIndex = entry.globalIndex
   }
 
-  #getLocationProgress = (location) => {
+  #getLocationProgress = (location: LocationDefinition) => {
     const completedIds = this.#getCompletedIds()
     const completedCount = location.levels.filter((level) => completedIds.has(level.id)).length
 
@@ -233,36 +242,36 @@ export default class LevelProgress {
     }
   }
 
-  #isLevelUnlocked = (entry) => {
+  #isLevelUnlocked = (entry: LevelEntry) => {
     const state = this.getLevelStates(entry.location.id).find(({id}) => id === entry.level.id)
     return Boolean(state?.isUnlocked)
   }
 
-  #isLocationCompleted = (location) => {
+  #isLocationCompleted = (location: LocationDefinition) => {
     const completedIds = this.#getCompletedIds()
     return location.levels.every((level) => completedIds.has(level.id))
   }
 
-  #addCompletedLevel = (levelId) => {
+  #addCompletedLevel = (levelId: string) => {
     if (this.#storage.playerData.completedLevelIds.includes(levelId)) return false
 
     this.#storage.playerData.completedLevelIds.push(levelId)
     return true
   }
 
-  #addUnlockedLocation = (locationId) => {
+  #addUnlockedLocation = (locationId: string) => {
     if (!this.#storage.playerData.unlockedLocationIds.includes(locationId)) {
       this.#storage.playerData.unlockedLocationIds.push(locationId)
     }
   }
 
-  #addCelebratedLocation = (locationId) => {
+  #addCelebratedLocation = (locationId: string) => {
     if (!this.#storage.playerData.celebratedLocationIds.includes(locationId)) {
       this.#storage.playerData.celebratedLocationIds.push(locationId)
     }
   }
 
-  #findNewlyUnlockedLocation = (unlockedIdsBefore) => {
+  #findNewlyUnlockedLocation = (unlockedIdsBefore: Set<string>) => {
     return getLocations().find(({id}) => !unlockedIdsBefore.has(id) && this.isLocationUnlocked(id)) ?? null
   }
 
@@ -283,7 +292,7 @@ export default class LevelProgress {
     })
   }
 
-  #saveIfChanged = (before) => {
+  #saveIfChanged = (before: string) => {
     if (before !== this.#createSnapshot()) this.#storage.save()
   }
 }
