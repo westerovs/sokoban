@@ -7,7 +7,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 import {defineConfig, normalizePath} from 'vite'
 import assetPackConfig from './.assetpack.mjs'
 import {DEFAULT_DEV_PLATFORM, DEV_SERVER_CONFIG, PLATFORMS_TO_BUILD, resolvePlatform} from './bundler/platformConfig.mjs'
-import {createSokobanLevelEditorPlugin} from './tools/sokoban-level-editor/vitePlugin.mjs'
+import {createSokobanLevelEditorPlugin} from './tools/sokoban-level-editor/vitePlugin.ts'
 
 /**
  * Настраивает Vite, платформенную HTML-оболочку, локальные инструменты и сборку проекта.

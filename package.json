@@ -42,6 +42,7 @@
   "devDependencies": {
     "@assetpack/core": "^1.7.0",
     "@types/howler": "^2.2.13",
+    "@types/node": "^26.2.0",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",
     "@vitejs/plugin-basic-ssl": "^2.3.0",

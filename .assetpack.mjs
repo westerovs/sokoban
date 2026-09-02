@@ -1,7 +1,7 @@
 import {createRequire} from 'node:module'
 import {audio as createAudioPipe} from '@assetpack/core/ffmpeg'
 import {pixiPipes} from '@assetpack/core/pixi'
-import {ATLAS_RESOLUTIONS} from './src/game/gameConfig/resolutionConfig.mjs'
+import {ATLAS_RESOLUTIONS} from './src/game/gameConfig/resolutionConfig.ts'
 
 /**
  * Конфигурация сборки игровых ресурсов через AssetPack.

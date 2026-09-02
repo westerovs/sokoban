@@ -1,8 +1,8 @@
 import {SOKOBAN_SETTINGS} from '../../../src/game/sokoban/config/settings.js'
-import {solveSokoban} from '../solver.mjs'
-import {DIFFICULTY_CONFIG, normalizeGeneratorOptions} from './config.mjs'
-import {createRandom} from './grid.mjs'
-import {createReverseCandidates} from './reverseSearch.mjs'
+import {solveSokoban, type SolverResult} from '../solver.js'
+import {DIFFICULTY_CONFIG, normalizeGeneratorOptions, type GeneratorOptions, type GeneratorRequest} from './config.js'
+import {createRandom, type Random} from './grid.js'
+import {createReverseCandidates, type ReverseCandidate} from './reverseSearch.js'
 import {
   createGeneratedTopology,
   createTopologyBoard,
@@ -10,7 +10,8 @@ import {
   getRecommendedBoxCount,
   isTopologyConnected,
   normalizeTopology,
-} from './topology.mjs'
+  type TopologyBoard,
+} from './topology.js'
 
 /**
  * Создаёт решаемый уровень, отбирая лучшие обратные состояния на новой или сохранённой геометрии.
@@ -18,15 +19,33 @@ import {
 
 const STRUCTURE_ATTEMPTS = 8 // Число попыток создать подходящую новую геометрию
 
+type GeneratorConfig = (typeof DIFFICULTY_CONFIG)[keyof typeof DIFFICULTY_CONFIG]
+
+type PopulationOptions = Omit<GeneratorOptions, 'shape'> & {
+  shape: string
+}
+
+type BoxCapacity = {
+  boxCount: number
+  maximum: number
+}
+
+type EvaluatedCandidate = {
+  candidate: ReverseCandidate
+  map: string[]
+  solution: SolverResult
+  score: number
+}
+
 // Возвращает случайное 32-битное зерно или нормализует переданное.
-const resolveSeed = (seed) => {
+const resolveSeed = (seed: unknown) => {
   const parsed = Number(seed)
   if (Number.isInteger(parsed)) return parsed >>> 0
   return Math.floor(Math.random() * 4294967296) >>> 0
 }
 
 // Проверяет размеры структуры с учётом ограничений игрового поля.
-const validateTopologyDimensions = (topology) => {
+const validateTopologyDimensions = (topology: string[]) => {
   const width = topology[0].length
   const height = topology.length
   if (width > SOKOBAN_SETTINGS.maxBoardColumns || height > SOKOBAN_SETTINGS.maxBoardRows) {
@@ -36,7 +55,7 @@ const validateTopologyDimensions = (topology) => {
 }
 
 // Определяет количество ящиков для текущей структуры.
-const resolveBoxCount = (requestedBoxCount, board, config) => {
+const resolveBoxCount = (requestedBoxCount: number | null, board: TopologyBoard, config: GeneratorConfig): BoxCapacity => {
   const maximum = getMaximumBoxCount(board)
   const boxCount = requestedBoxCount ?? getRecommendedBoxCount(board, config)
   if (boxCount > maximum) throw new Error(`В этой структуре можно разместить не более ${maximum} ящиков`)
@@ -44,7 +63,7 @@ const resolveBoxCount = (requestedBoxCount, board, config) => {
 }
 
 // Собирает игровой символ одной клетки из структуры, целей и объектов.
-const getMapSymbol = (index, board, targets, boxes, player) => {
+const getMapSymbol = (index: number, board: TopologyBoard, targets: Set<number>, boxes: Set<number>, player: number) => {
   const baseSymbol = board.topology[Math.floor(index / board.width)][index % board.width]
   if ('_#'.includes(baseSymbol)) return baseSymbol
   const isTarget = targets.has(index)
@@ -54,7 +73,7 @@ const getMapSymbol = (index, board, targets, boxes, player) => {
 }
 
 // Преобразует найденное состояние в карту Sokoban.
-const createMap = (candidate, board) => {
+const createMap = (candidate: ReverseCandidate, board: TopologyBoard) => {
   const targets = new Set(candidate.goals)
   const boxes = new Set(candidate.state.boxes.map(({position}) => position))
   return board.topology.map((row, y) => {
@@ -63,7 +82,7 @@ const createMap = (candidate, board) => {
 }
 
 // Возвращает сокращённые лимиты решателя для быстрого отбора кандидатов.
-const getSolverLimits = (config, boxCount) => {
+const getSolverLimits = (config: GeneratorConfig, boxCount: number) => {
   const scale = boxCount > 9 ? 0.45 : 1
   return {
     maxStates: Math.max(12000, Math.round(config.solverStateLimit * scale)),
@@ -72,7 +91,12 @@ const getSolverLimits = (config, boxCount) => {
 }
 
 // Оценивает кандидата минимальным решением и шириной пространства состояний.
-const evaluateCandidate = (candidate, board, config, boxCount) => {
+const evaluateCandidate = (
+  candidate: ReverseCandidate,
+  board: TopologyBoard,
+  config: GeneratorConfig,
+  boxCount: number,
+): EvaluatedCandidate | null => {
   const map = createMap(candidate, board)
   const solution = solveSokoban(map, getSolverLimits(config, boxCount))
   if (solution.status === 'unsolved') return null
@@ -82,17 +106,17 @@ const evaluateCandidate = (candidate, board, config, boxCount) => {
 }
 
 // Выбирает лучшего кандидата после ограниченной проверки решателем.
-const selectBestCandidate = (candidates, board, config, boxCount) => {
+const selectBestCandidate = (candidates: ReverseCandidate[], board: TopologyBoard, config: GeneratorConfig, boxCount: number) => {
   const limit = boxCount > 9 ? 1 : config.candidateCount
   const evaluated = candidates
     .slice(0, limit)
     .map((candidate) => evaluateCandidate(candidate, board, config, boxCount))
-    .filter(Boolean)
+    .filter((result): result is EvaluatedCandidate => Boolean(result))
   return evaluated.sort((first, second) => second.score - first.score)[0] ?? null
 }
 
 // Собирает статистику, объясняющую качество получившейся головоломки.
-const createGenerationStats = (result, options, capacity, seed) => ({
+const createGenerationStats = (result: EvaluatedCandidate, options: PopulationOptions, capacity: BoxCapacity, seed: number) => ({
   width: result.map[0].length,
   height: result.map.length,
   difficulty: options.difficulty,
@@ -109,7 +133,13 @@ const createGenerationStats = (result, options, capacity, seed) => ({
 })
 
 // Наполняет заданную структуру целями, ящиками и игроком.
-const tryPopulateTopology = (topology, options, config, random, seed) => {
+const tryPopulateTopology = (
+  topology: string[],
+  options: PopulationOptions,
+  config: GeneratorConfig,
+  random: Random,
+  seed: number,
+) => {
   const board = createTopologyBoard(topology)
   if (!isTopologyConnected(board)) throw new Error('Все клетки пола должны образовывать одну связную область')
   const capacity = resolveBoxCount(options.boxCount, board, config)
@@ -120,7 +150,7 @@ const tryPopulateTopology = (topology, options, config, random, seed) => {
 }
 
 // Генерирует новую геометрию до получения качественно наполненного варианта.
-const generateWithNewTopology = (options, config, random, seed) => {
+const generateWithNewTopology = (options: GeneratorOptions, config: GeneratorConfig, random: Random, seed: number) => {
   for (let attempt = 0; attempt < STRUCTURE_ATTEMPTS; attempt++) {
     const generated = createGeneratedTopology(options.width, options.height, config, options.shape, random)
     const result = tryPopulateTopology(generated.topology, {...options, shape: generated.shape}, config, random, seed)
@@ -130,7 +160,7 @@ const generateWithNewTopology = (options, config, random, seed) => {
 }
 
 // Создаёт уровень на новой или переданной из редактора структуре.
-const generateSokobanLevel = (request = {}) => {
+const generateSokobanLevel = (request: GeneratorRequest = {}) => {
   const options = normalizeGeneratorOptions(request)
   const config = DIFFICULTY_CONFIG[options.difficulty]
   const seed = resolveSeed(options.seed)

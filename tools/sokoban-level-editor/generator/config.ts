@@ -1,5 +1,5 @@
 import {SOKOBAN_SETTINGS} from '../../../src/game/sokoban/config/settings.js'
-import {clamp} from './grid.mjs'
+import {clamp} from './grid.js'
 
 /**
  * Хранит режимы сложности и формы, нормализуя параметры процедурной генерации уровней.
@@ -60,21 +60,47 @@ const DIFFICULTY_CONFIG = Object.freeze({
   }),
 })
 
+type Difficulty = keyof typeof DIFFICULTY_CONFIG
+type Shape = keyof typeof SHAPE_CONFIG
+
+type GeneratorRequest = {
+  width?: unknown
+  height?: unknown
+  difficulty?: unknown
+  shape?: unknown
+  boxCount?: unknown
+  seed?: unknown
+  topology?: string[]
+}
+
+type GeneratorOptions = {
+  width: number
+  height: number
+  difficulty: Difficulty
+  shape: Shape
+  boxCount: number | null
+  seed: unknown
+}
+
 // Проверяет целочисленный размер карты и ограничивает его возможностями игры.
-const normalizeDimension = (value, fallback, maximum) => {
+const normalizeDimension = (value: unknown, fallback: number, maximum: number) => {
   const parsed = Number(value)
   if (!Number.isInteger(parsed)) return fallback
   return clamp(parsed, MIN_BOARD_SIZE, maximum)
 }
 
 // Возвращает существующий режим сложности.
-const normalizeDifficulty = (difficulty) => (DIFFICULTY_CONFIG[difficulty] ? difficulty : DEFAULT_DIFFICULTY)
+const normalizeDifficulty = (difficulty: unknown): Difficulty => {
+  return typeof difficulty === 'string' && difficulty in DIFFICULTY_CONFIG ? (difficulty as Difficulty) : DEFAULT_DIFFICULTY
+}
 
 // Возвращает существующий режим внешней формы.
-const normalizeShape = (shape) => (SHAPE_CONFIG[shape] ? shape : DEFAULT_SHAPE)
+const normalizeShape = (shape: unknown): Shape => {
+  return typeof shape === 'string' && shape in SHAPE_CONFIG ? (shape as Shape) : DEFAULT_SHAPE
+}
 
 // Возвращает положительное целое количество ящиков или автоматический режим.
-const normalizeBoxCount = (boxCount) => {
+const normalizeBoxCount = (boxCount: unknown) => {
   if (boxCount === null || boxCount === undefined || boxCount === '') return null
   const parsed = Number(boxCount)
   if (!Number.isInteger(parsed) || parsed < 1) throw new Error('Количество ящиков должно быть положительным целым числом')
@@ -82,7 +108,7 @@ const normalizeBoxCount = (boxCount) => {
 }
 
 // Нормализует параметры одного запроса генерации.
-const normalizeGeneratorOptions = (options = {}) => {
+const normalizeGeneratorOptions = (options: GeneratorRequest = {}): GeneratorOptions => {
   const width = normalizeDimension(options.width, DEFAULT_BOARD_WIDTH, SOKOBAN_SETTINGS.maxBoardColumns)
   const height = normalizeDimension(options.height, DEFAULT_BOARD_HEIGHT, SOKOBAN_SETTINGS.maxBoardRows)
   const difficulty = normalizeDifficulty(options.difficulty)
@@ -99,4 +125,11 @@ export {
   MIN_BOARD_SIZE, // Минимальный размер новой структуры
   normalizeGeneratorOptions, // Нормализация входных параметров
   SHAPE_CONFIG, // Доступные формы внешнего контура
+}
+
+export type {
+  Difficulty,
+  GeneratorOptions,
+  GeneratorRequest,
+  Shape,
 }

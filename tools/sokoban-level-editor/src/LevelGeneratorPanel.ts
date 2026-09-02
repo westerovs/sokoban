@@ -8,8 +8,8 @@ import {
   DIFFICULTY_CONFIG,
   MIN_BOARD_SIZE,
   SHAPE_CONFIG,
-} from '../generator/config.mjs'
-import {createTopologyBoard, getMaximumBoxCount, normalizeTopology} from '../generator/topology.mjs'
+} from '../generator/config.js'
+import {createTopologyBoard, getMaximumBoxCount, normalizeTopology} from '../generator/topology.js'
 
 /**
  * Управляет настройками генерации новой структуры и перестановки объектов в текущей геометрии.

@@ -1,12 +1,42 @@
-import {DIRECTIONS, getAdjacentIndex, randomInteger, shuffle, toPosition} from './grid.mjs'
-import {getEligibleGoalPositions} from './topology.mjs'
+import {DIRECTIONS, getAdjacentIndex, randomInteger, shuffle, toPosition, type Direction, type Random} from './grid.js'
+import {getEligibleGoalPositions, type TopologyBoard} from './topology.js'
 
 /**
  * Ищет удалённые от решения состояния обратными вытягиваниями ящиков.
  */
 
+type ReverseBox = {
+  id: number
+  position: number
+}
+
+type ReverseState = {
+  boxes: ReverseBox[]
+  player: number
+  pulls: number
+  boxLines: number
+  boxChanges: number
+  lastBoxId: number | null
+  lastDirection: string | null
+  movedBoxIds: Set<number>
+}
+
+type ReverseCandidate = {
+  state: ReverseState
+  goals: number[]
+  reverseScore: number
+}
+
+type ReverseConfig = {
+  beamWidth: number
+  pullsPerBox: number
+  movedBoxRatio: number
+  placementAttempts: number
+  candidateCount: number
+}
+
 // Возвращает клетки, доступные игроку без перемещения ящиков.
-const getReachablePositions = (player, occupied, board) => {
+const getReachablePositions = (player: number, occupied: Set<number>, board: TopologyBoard) => {
   const visited = new Set([player])
   const queue = [player]
   for (let index = 0; index < queue.length; index++) {
@@ -22,20 +52,20 @@ const getReachablePositions = (player, occupied, board) => {
 }
 
 // Возвращает ключ состояния ящиков и точной позиции игрока.
-const createStateKey = (state) => {
+const createStateKey = (state: ReverseState) => {
   const boxes = state.boxes.map(({position}) => position).sort((first, second) => first - second)
   return `${boxes.join(',')}|${state.player}`
 }
 
 // Возвращает манхэттенское расстояние между двумя клетками.
-const getDistance = (first, second, width) => {
+const getDistance = (first: number, second: number, width: number) => {
   const firstPosition = toPosition(first, width)
   const secondPosition = toPosition(second, width)
   return Math.abs(firstPosition.x - secondPosition.x) + Math.abs(firstPosition.y - secondPosition.y)
 }
 
 // Считает соседние стены и границы вокруг клетки.
-const countBlockedNeighbors = (position, board) => {
+const countBlockedNeighbors = (position: number, board: TopologyBoard) => {
   return DIRECTIONS.filter((direction) => {
     const neighbor = getAdjacentIndex(position, direction, board.width, board.height)
     return neighbor === null || !board.floors.has(neighbor)
@@ -43,7 +73,7 @@ const countBlockedNeighbors = (position, board) => {
 }
 
 // Оценивает клетку-кандидат для размещения цели.
-const getGoalPositionScore = (position, selected, board) => {
+const getGoalPositionScore = (position: number, selected: number[], board: TopologyBoard) => {
   const wallScore = countBlockedNeighbors(position, board) * 5
   if (selected.length === 0) return wallScore
   const nearest = Math.min(...selected.map((goal) => getDistance(position, goal, board.width)))
@@ -53,9 +83,9 @@ const getGoalPositionScore = (position, selected, board) => {
 }
 
 // Выбирает цели рядом с геометрическими ограничениями и друг с другом.
-const selectGoals = (board, boxCount, random) => {
+const selectGoals = (board: TopologyBoard, boxCount: number, random: Random) => {
   let available = shuffle(getEligibleGoalPositions(board), random)
-  const selected = []
+  const selected: number[] = []
   while (selected.length < boxCount && available.length > 0) {
     available.sort((first, second) => getGoalPositionScore(second, selected, board) - getGoalPositionScore(first, selected, board))
     const poolSize = Math.min(6, Math.max(1, Math.ceil(available.length * 0.16)))
@@ -66,14 +96,14 @@ const selectGoals = (board, boxCount, random) => {
 }
 
 // Выбирает начальную позицию игрока вне решённых ящиков.
-const selectInitialPlayer = (board, goals, random) => {
+const selectInitialPlayer = (board: TopologyBoard, goals: number[], random: Random) => {
   const blocked = new Set(goals)
   const positions = Array.from(board.floors).filter((position) => !blocked.has(position))
   return positions[randomInteger(random, 0, positions.length)]
 }
 
 // Создаёт начальное полностью решённое состояние.
-const createSolvedState = (board, goals, random) => ({
+const createSolvedState = (board: TopologyBoard, goals: number[], random: Random): ReverseState => ({
   boxes: goals.map((position, id) => ({id, position})),
   player: selectInitialPlayer(board, goals, random),
   pulls: 0,
@@ -81,11 +111,17 @@ const createSolvedState = (board, goals, random) => ({
   boxChanges: 0,
   lastBoxId: null,
   lastDirection: null,
-  movedBoxIds: new Set(),
+  movedBoxIds: new Set<number>(),
 })
 
 // Создаёт следующее состояние после одного допустимого обратного вытягивания.
-const createPullState = (state, boxIndex, direction, nextBoxPosition, nextPlayer) => {
+const createPullState = (
+  state: ReverseState,
+  boxIndex: number,
+  direction: Direction,
+  nextBoxPosition: number,
+  nextPlayer: number,
+): ReverseState => {
   const box = state.boxes[boxIndex]
   const boxes = state.boxes.map((item, index) => (index === boxIndex ? {...item, position: nextBoxPosition} : item))
   const isNewLine = state.lastBoxId !== box.id || state.lastDirection !== direction.key
@@ -104,7 +140,14 @@ const createPullState = (state, boxIndex, direction, nextBoxPosition, nextPlayer
 }
 
 // Пытается вытянуть один ящик в указанном направлении.
-const tryCreatePull = (state, boxIndex, direction, reachable, occupied, board) => {
+const tryCreatePull = (
+  state: ReverseState,
+  boxIndex: number,
+  direction: Direction,
+  reachable: Set<number>,
+  occupied: Set<number>,
+  board: TopologyBoard,
+) => {
   const boxPosition = state.boxes[boxIndex].position
   const nextBoxPosition = getAdjacentIndex(boxPosition, direction, board.width, board.height)
   const nextPlayer = getAdjacentIndex(boxPosition, direction, board.width, board.height, 2)
@@ -114,7 +157,7 @@ const tryCreatePull = (state, boxIndex, direction, reachable, occupied, board) =
 }
 
 // Перечисляет все допустимые обратные вытягивания состояния.
-const getPullStates = (state, board) => {
+const getPullStates = (state: ReverseState, board: TopologyBoard): ReverseState[] => {
   const occupied = new Set(state.boxes.map(({position}) => position))
   const reachable = getReachablePositions(state.player, occupied, board)
   return state.boxes.flatMap((_, boxIndex) => {
@@ -126,40 +169,47 @@ const getPullStates = (state, board) => {
 }
 
 // Считает суммарное удаление ящиков от исходных целей.
-const getGoalDistance = (state, goals, board) => {
+const getGoalDistance = (state: ReverseState, goals: number[], board: TopologyBoard) => {
   return state.boxes.reduce((total, box) => total + getDistance(box.position, goals[box.id], board.width), 0)
 }
 
 // Оценивает глубину, смены направлений и взаимодействие нескольких ящиков.
-const getReverseScore = (state, goals, board) => {
+const getReverseScore = (state: ReverseState, goals: number[], board: TopologyBoard) => {
   const distance = getGoalDistance(state, goals, board)
   return state.boxLines * 12 + state.boxChanges * 9 + state.movedBoxIds.size * 16 + distance * 2 + state.pulls
 }
 
 // Возвращает размер луча с поправкой на большое количество ящиков.
-const getBeamWidth = (config, boxCount) => {
+const getBeamWidth = (config: ReverseConfig, boxCount: number) => {
   const scale = Math.sqrt(4 / Math.max(4, boxCount))
   return Math.max(6, Math.round(config.beamWidth * scale))
 }
 
 // Возвращает глубину обратного поиска для выбранной сложности.
-const getPullLimit = (config, boxCount, floorCount) => {
+const getPullLimit = (config: ReverseConfig, boxCount: number, floorCount: number) => {
   const desired = boxCount * config.pullsPerBox + Math.round(Math.sqrt(floorCount))
   return Math.min(240, Math.max(10, desired))
 }
 
 // Отбирает лучшие уникальные состояния следующей глубины.
-const selectFrontier = (states, goals, board, config, boxCount, random) => {
+const selectFrontier = (
+  states: ReverseState[],
+  goals: number[],
+  board: TopologyBoard,
+  config: ReverseConfig,
+  boxCount: number,
+  random: Random,
+) => {
   const scored = states.map((state) => ({state, rank: getReverseScore(state, goals, board) + random() * 18}))
   scored.sort((first, second) => second.rank - first.rank)
   return scored.slice(0, getBeamWidth(config, boxCount)).map(({state}) => state)
 }
 
 // Выполняет ограниченный лучевой поиск назад от решённой позиции.
-const searchFromGoals = (board, goals, config, random) => {
+const searchFromGoals = (board: TopologyBoard, goals: number[], config: ReverseConfig, random: Random) => {
   const initial = createSolvedState(board, goals, random)
   const visited = new Set([createStateKey(initial)])
-  const candidates = []
+  const candidates: ReverseState[] = []
   let frontier = [initial]
   const pullLimit = getPullLimit(config, goals.length, board.floors.size)
   for (let depth = 0; depth < pullLimit && frontier.length > 0; depth++) {
@@ -177,18 +227,22 @@ const searchFromGoals = (board, goals, config, random) => {
 }
 
 // Проверяет, что в задаче участвует достаточная доля ящиков.
-const hasEnoughMovedBoxes = (candidate, boxCount, config) => {
+const hasEnoughMovedBoxes = (candidate: ReverseCandidate, boxCount: number, config: ReverseConfig) => {
   return candidate.state.movedBoxIds.size >= Math.ceil(boxCount * config.movedBoxRatio)
 }
 
 // Оборачивает состояние метаданными целей и обратной оценки.
-const createCandidate = (state, goals, board) => ({state, goals, reverseScore: getReverseScore(state, goals, board)})
+const createCandidate = (state: ReverseState, goals: number[], board: TopologyBoard): ReverseCandidate => ({
+  state,
+  goals,
+  reverseScore: getReverseScore(state, goals, board),
+})
 
 // Подбирает несколько удалённых решаемых состояний для последующей оценки решателем.
-const createReverseCandidates = (board, boxCount, config, random) => {
+const createReverseCandidates = (board: TopologyBoard, boxCount: number, config: ReverseConfig, random: Random) => {
   const attemptScale = Math.sqrt(4 / Math.max(4, boxCount))
   const attempts = Math.max(3, Math.round(config.placementAttempts * attemptScale))
-  const candidates = []
+  const candidates: ReverseCandidate[] = []
   for (let attempt = 0; attempt < attempts; attempt++) {
     const goals = selectGoals(board, boxCount, random)
     if (goals.length !== boxCount) continue
@@ -202,4 +256,10 @@ const createReverseCandidates = (board, boxCount, config, random) => {
 
 export {
   createReverseCandidates, // Кандидаты, гарантированно достижимые из решения
+}
+
+export type {
+  ReverseCandidate,
+  ReverseConfig,
+  ReverseState,
 }
