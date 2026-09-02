@@ -94,7 +94,7 @@ export default class StoreView extends BaseModal {
 
     for (let i = 0; i < cardsData.length; i++) {
       const card = new StoreCard({view: this.view, ...cardsData[i]})
-      this.#cardsContainer.addChild(card as unknown as Container)
+      this.#cardsContainer.addChild(card)
       this.#cards.push(card)
 
       const currentRowIndex = Math.floor(i / maxColumns)

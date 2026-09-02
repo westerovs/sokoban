@@ -6,7 +6,9 @@ declare module 'pixi.js' {
   interface Container<C extends ContainerChild = ContainerChild> {
     _initScale?: number
     _customPosition?: {x?: number; y?: number}
+    productID?: string
     type?: string
+    typeName?: string
     updateAdaptive?: boolean | (() => void)
   }
 

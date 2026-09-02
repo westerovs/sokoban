@@ -1,20 +1,29 @@
 import i18next from 'i18next'
 import {Container} from 'pixi.js'
+import type {Text} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import {createRect} from '@/game/utils/commonUtils.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
-// в атласах стоит двойной размер
-export const CARD_SIZE = {
-  width: 244 / 2,
-  height: 320 / 2,
-  halfW: 244 / 2,
-  gap: 10,
+// Отображает один товар магазина и его кнопку покупки.
+
+type StoreCardData = {
+  id: string
+  amount: string
+  textureKey: string
 }
 
-export const CARDS_DATA = {
+// в атласах стоит двойной размер
+const CARD_SIZE = {
+  width: 244 / 2, // Ширина карточки в игровом масштабе.
+  height: 320 / 2, // Высота карточки в игровом масштабе.
+  halfW: 244 / 2, // Половина исходной ширины карточки.
+  gap: 10, // Промежуток между карточками.
+}
+
+const CARDS_DATA: Record<string, StoreCardData> = {
   free: {
     id: rewardsCatalog.store.free.id,
     amount: `x${rewardsCatalog.store.free.amount}`,
@@ -68,15 +77,16 @@ export const CARDS_DATA = {
 }
 
 export default class StoreCard extends Container {
-  #view
-  #id
-  #textureKey
-  #amount
-  #button
-  #priceText
+  #view: Container | null
+  #id: string
+  #textureKey: string
+  #amount: string
+  #button!: ButtonContainer
+  #priceText: Text | null = null
 
-  constructor({view, id, amount, textureKey} = {}) {
-    super()
+  // Сохраняет данные товара и создаёт карточку.
+  constructor({view, id, amount, textureKey}: StoreCardData & {view: Container | null}) {
+    super({label: `store-card-${id}`})
     this.#view = view
     this.#id = id
     this.#textureKey = textureKey
@@ -88,18 +98,22 @@ export default class StoreCard extends Container {
     this.#create()
   }
 
+  // Возвращает кнопку покупки товара.
   get button() {
     return this.#button
   }
 
+  // Возвращает идентификатор товара.
   get id() {
     return this.#id
   }
 
-  set priceText(text) {
+  // Обновляет отображаемую цену товара.
+  set priceText(text: string) {
     if (this.#priceText) this.#priceText.text = text
   }
 
+  // Создаёт все элементы карточки.
   #create = () => {
     this.#createCover()
     this.#createPic()
@@ -107,11 +121,13 @@ export default class StoreCard extends Container {
     this.#createButton()
   }
 
+  // Создаёт фоновую текстуру карточки.
   #createCover = () => {
     const cover = GameUtils.createSprite('store-card')
     this.addChild(cover)
   }
 
+  // Создаёт подпись количества товара.
   #createTitleAmount = () => {
     const title = GameUtils.createText(this.#amount, {
       style: {
@@ -123,13 +139,15 @@ export default class StoreCard extends Container {
     this.addChild(title)
   }
 
+  // Сохраняет заготовку отметки о покупке.
   #createTextIsBuy = () => {
     //     <Text name={'isBuy'} text={`${i18next.t('purchased')}`} y={38} anchor={{x: 0.5, y: 0.5}}
     //           style={{...primaryFontStyle, fontSize: 18}} visible={false}/>
   }
 
+  // Создаёт иллюстрацию товара.
   #createPic = () => {
-    const container = new Container()
+    const container = new Container({label: 'store-card-picture'})
     const cardPic = GameUtils.createSprite(this.#textureKey)
     cardPic.y = 10
     cardPic.scale.set(0.9)
@@ -149,6 +167,7 @@ export default class StoreCard extends Container {
     this.addChild(container)
   }
 
+  // Создаёт кнопку покупки товара.
   #createButton = () => {
     const button = new ButtonContainer({
       props: {name: 'btnBuyLoupe', x: 0, y: 0},
@@ -171,6 +190,7 @@ export default class StoreCard extends Container {
     this.#createIconPlayForBtnFree()
   }
 
+  // Добавляет иконку рекламы бесплатному товару.
   #createIconPlayForBtnFree = () => {
     if (this.#id !== CARDS_DATA.free.id) return
 
@@ -178,6 +198,15 @@ export default class StoreCard extends Container {
     iconPlay.x = this.#button.width - iconPlay.width / 2
     this.#button.addChild(iconPlay)
 
-    this.#priceText.x -= iconPlay.width / 2
+    this.#priceText!.x -= iconPlay.width / 2
   }
+}
+
+export {
+  CARDS_DATA,
+  CARD_SIZE,
+}
+
+export type {
+  StoreCardData,
 }

@@ -18,21 +18,28 @@ import {clearTimeLine} from '../../utils/animations/gsapUtils.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
 import LoadUtils from '../../utils/gameUtils/LoadUtils.js'
 import StoreCard from './StoreCard.js'
+import StoreView from './StoreView.js'
+import type Game from '../../Game.js'
+import type ButtonContainer from '../../components/buttons/ButtonContainer.js'
+
+// Загружает ресурсы магазина и связывает его карточки с игровыми сервисами.
 
 export default class Store {
   #game = Locator.game
-  #refs = this.#game.refs
-  #view = this.#refs.storeView
-  #cardsContainer
-  #buttons
+  #refs: Record<string, Container>
+  #view: StoreView
+  #cardsContainer!: Container
+  #buttons: ButtonContainer[] = []
   #storage = Locator.storage
-  #cardsTimeLine = null
-  #btnTimer
+  #cardsTimeLine: gsap.core.Timeline | null = null
+  #btnTimer: BtnRewardTimer | null = null
   #paymentManager = Locator.paymentManager
-  #paymentAnimation
-  #productID
+  #paymentAnimation: PaymentAnimation | null = null
+  #productID: string | null = null
 
-  constructor(view) {
+  // Сохраняет представление и запускает его подготовку.
+  constructor(view: StoreView) {
+    this.#refs = (this.#game as Game & {refs: Record<string, Container>}).refs
     this.#view = view
 
     this.#init()
@@ -58,6 +65,7 @@ export default class Store {
   //   }
   // }
 
+  // Показывает магазин после загрузки его ресурсов.
   #init = async () => {
     const showPromise = this.#view.show()
     const spriteSheetLoaded = await this.#loadSpritesheet()
@@ -70,7 +78,7 @@ export default class Store {
     this.#cardsContainer = this.#view.cardsContainer
     // this.#setEvents(true)
 
-    this.#buttons = this.#view.cards.map((card) => card.button)
+    this.#buttons = this.#view.cards.map((card: StoreCard) => card.button)
     // this.#btnTimer = new BtnRewardTimer()
 
     // this.#view.interactiveChildren = false
@@ -83,6 +91,7 @@ export default class Store {
     // this.#view.interactiveChildren = true
   }
 
+  // Загружает спрайтшиты товаров магазина.
   #loadSpritesheet = async () => {
     this.#view.animateLoadingStart()
 
@@ -90,7 +99,7 @@ export default class Store {
       await Promise.all([LoadUtils.loadSpriteSheet({spriteSheetName: 'purchases'}), LoadUtils.loadSpriteSheet({spriteSheetName: 'store'})])
       return true
     } catch (error) {
-      console.error('[Store] Не удалось загрузить ресурсы магазина', error)
+      console.error('[Store]: failed to load store assets', error)
       if (!this.#view.destroyed) this.#view.destroy()
       return false
     } finally {
