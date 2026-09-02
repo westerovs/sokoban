@@ -16,6 +16,9 @@ import {STOPWATCH_LABELS} from '@/game/ui/level/clock/Stopwatch.js'
 import CompleteLevel from '@/game/ui/level/completeLevelScreen/CompleteLevel.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
 import StateIntro from './states/intro/StateIntro.js'
+import type {RuntimeLevelConfig} from '@/game/gameConfig/levels/levelTypes.js'
+import type StateLevel from './StateLevel.js'
+import type LevelView from './LevelView.js'
 
 /**
  * Координирует жизненный цикл игрового уровня и подключает режим Sokoban.
@@ -23,22 +26,23 @@ import StateIntro from './states/intro/StateIntro.js'
 
 export default class Level {
   #storage = Locator.storage
-  #stateIntro
-  #clearLevel
-  #completeLevel
+  #stateIntro!: StateIntro
+  #clearLevel!: ClearLevel
+  #completeLevel!: CompleteLevel
   #isLevelCompleted = false
   game = Locator.game
   refs = this.game.refs
   stage = this.game.app.stage
-  entityManager
-  systemManager
-  config
-  modulesInitializer
-  levelConfig
-  sokobanGame
+  state: StateLevel
+  entityManager: EntityManager | null = null
+  systemManager: SystemManager | null = null
+  config!: RuntimeLevelConfig
+  modulesInitializer!: ModulesInitializer
+  levelConfig!: LevelConfig
+  sokobanGame: SokobanGame | null = null
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(state) {
+  constructor(state: StateLevel) {
     this.state = state
   }
 
@@ -66,7 +70,7 @@ export default class Level {
   exit = async (props = {}) => {
     CrazyGames.hideAllAdaptiveBanners()
     SdkManager.gameplayStop()
-    await this.game.clearLevelCache()
+    await this.game.clearLevelCache?.()
 
     this.#lockScene()
     this.sokobanGame?.setInputEnabled(false)
@@ -93,7 +97,7 @@ export default class Level {
   #unlockScene() {
     this.stage.interactiveChildren = true
     this.game.gameContainer.eventMode = 'static'
-    this.sokobanGame.setInputEnabled(true)
+    this.sokobanGame!.setInputEnabled(true)
   }
 
   // Выполняет отдельную операцию `initComponents`.
@@ -121,7 +125,7 @@ export default class Level {
 
   // Выполняет отдельную операцию `initSystemManager`.
   #initSystemManager() {
-    this.systemManager = new SystemManager(this)
+    this.systemManager = new SystemManager(this as this & {entityManager: EntityManager})
     this.systemManager.initSystems()
   }
 
@@ -153,7 +157,7 @@ export default class Level {
   }
 
   // Обновляет состояние через операцию `setEvents`.
-  #setEvents(isEnabled) {
+  #setEvents(isEnabled: boolean) {
     const toggle = eventToggle(isEnabled)
 
     this.game[toggle.gameOnOff](GAME_EVENTS.completeLevelWin, this.#winAction)
@@ -186,18 +190,18 @@ export default class Level {
     if (this.#isLevelCompleted) return
 
     this.#isLevelCompleted = true
-    this.sokobanGame.setInputEnabled(false)
-    this.sokobanGame.hideInterface()
+    this.sokobanGame!.setInputEnabled(false)
+    this.sokobanGame!.hideInterface()
     SdkManager.gameplayStop()
     this.game.emit(GAME_EVENTS.completeLevel)
-    this.systemManager.removeAllSystems()
+    this.systemManager!.removeAllSystems()
 
     await GameUtils.showVkOkAdAfterLevelStart()
 
     CrazyGames.showCrazyGamesBanner()
     // await new LevelResultsReward().init()
 
-    this.game.view.createCompleteLevelView()
+    ;(this.game.view as LevelView).createCompleteLevelView()
     const completionResult = this.levelConfig.updateSavedLevel()
     this.#completeLevel.init(completionResult)
   }
@@ -213,8 +217,8 @@ export default class Level {
   // Выполняет отдельную операцию `destroyLevel`.
   #destroyLevel() {
     this.#destroySokobanGame()
-    this.systemManager.removeAllSystems()
-    this.#clearLevel.clear(this.entityManager.entities, this.systemManager.systems)
+    this.systemManager!.removeAllSystems()
+    this.#clearLevel.clear(this.entityManager!.entities, this.systemManager!.systems)
   }
 
   // Выполняет отдельную операцию `destroySokobanGame`.
@@ -236,9 +240,9 @@ export default class Level {
   // Выполняет отдельную операцию `forceNextLevel`.
   #forceNextLevel = async () => {
     this.#isLevelCompleted = true
-    this.sokobanGame.setInputEnabled(false)
+    this.sokobanGame!.setInputEnabled(false)
     this.game.emit(GAME_EVENTS.completeLevel)
-    this.systemManager.removeAllSystems()
+    this.systemManager!.removeAllSystems()
     this.#destroySokobanGame()
 
     this.levelConfig.updateSavedLevel()

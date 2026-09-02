@@ -36,7 +36,7 @@ export default class BaseState {
   }
 
   // Выполняет общую подготовку при входе в состояние.
-  checkoutState() {
+  checkoutState(_stateName?: string) {
     Locator.soundManager.stopAll()
     Locator.options.setVisibleToggle(false)
   }

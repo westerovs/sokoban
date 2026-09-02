@@ -7,6 +7,7 @@ import type Game from '../Game.js'
 
 type ClearableModule = {
   clear?: (showLog?: boolean) => void
+  seconds?: number
   start?: () => void
 }
 

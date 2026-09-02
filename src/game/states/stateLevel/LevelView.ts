@@ -1,16 +1,21 @@
 import {Container} from 'pixi.js'
 import CompleteLevelView from '@/game/ui/level/completeLevelScreen/CompleteLevelView.js'
+import type Game from '@/game/Game.js'
+
+// Содержит визуальные элементы игрового уровня и общие ссылки на них.
 
 export default class LevelView extends Container {
-  #game
+  #game: Game
+  refs: Record<string, any> = {}
 
-  constructor(game) {
+  // Сохраняет игру и создаёт контейнер ссылок уровня.
+  constructor(game: Game) {
     super({label: 'levelView'})
 
     this.#game = game
-    this.refs = {}
   }
 
+  // Создаёт или возвращает экран завершения уровня.
   createCompleteLevelView() {
     if (this.refs.completeLevelView) return this.refs.completeLevelView
 

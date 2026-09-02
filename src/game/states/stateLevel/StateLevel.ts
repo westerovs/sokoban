@@ -4,22 +4,29 @@ import {GAME_STATES} from '../../gameConfig/constants.js'
 import BaseState from '../BaseState.js'
 import Level from './Level.js'
 import LevelView from './LevelView.js'
+import type Game from '../../Game.js'
+
+// Управляет входом, повторным запуском и завершением состояния уровня.
 
 export default class StateLevel extends BaseState {
-  #game = null
-  #view = null
-  #refs = null
-  #controller = null
+  #game: Game
+  #view: LevelView | null = null
+  #refs: Record<string, any> | null = null
+  #controller: unknown = null
+  level: Level | null = null
 
-  constructor(game) {
+  // Сохраняет игру и регистрирует состояние уровня.
+  constructor(game: Game) {
     super(game)
     this.#game = game
   }
 
+  // Возвращает событие запуска состояния уровня.
   get initEventName() {
     return GAME_STATES.levelState
   }
 
+  // Создаёт представление и запускает уровень.
   initialize() {
     super.initialize()
 
@@ -36,6 +43,7 @@ export default class StateLevel extends BaseState {
     this.start()
   }
 
+  // Создаёт и инициализирует контроллер уровня.
   async start() {
     this.level = new Level(this)
     await this.level.init()
@@ -43,6 +51,7 @@ export default class StateLevel extends BaseState {
     Locator.soundManager.startLevelMusic()
   }
 
+  // Завершает уровень и запускает предзагрузку следующего.
   runNextLevel = async () => {
     await this.level?.exit()
 
@@ -50,7 +59,8 @@ export default class StateLevel extends BaseState {
     this.#game.emit(GAME_STATES.levelPreload)
   }
 
-  checkoutState = async (stateName) => {
+  // Завершает уровень и переключает игру в указанное состояние.
+  checkoutState = async (stateName = GAME_STATES.gameState) => {
     super.checkoutState()
     await this.level?.exit()
 
@@ -58,6 +68,7 @@ export default class StateLevel extends BaseState {
     this.#game.emit(stateName)
   }
 
+  // Очищает сцену и сбрасывает состояние уровня.
   terminate() {
     Locator.soundManager.stopLevelMusic()
 
@@ -66,7 +77,7 @@ export default class StateLevel extends BaseState {
     gsap.globalTimeline.clear()
     Locator.uiLayer.destroyStateUiLayerChildren()
     // view destroy
-    this.#view.destroy({children: true})
+    this.#view?.destroy({children: true})
     this.#view = null
     this.#controller = null
 

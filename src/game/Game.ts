@@ -28,6 +28,9 @@ import type BaseState from './states/BaseState.js'
 export default class Game extends EventEmitter {
   refs: Record<string, any> = {}
   level: any = null
+  levelType: string | null = null
+  state: BaseState | null = null
+  stateName: string | undefined
   currentState: BaseState | null = null
   clearLevelCache?: () => void
   #app!: Application
