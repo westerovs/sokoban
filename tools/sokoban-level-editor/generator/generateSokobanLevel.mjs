@@ -96,6 +96,7 @@ const createGenerationStats = (result, options, capacity, seed) => ({
   width: result.map[0].length,
   height: result.map.length,
   difficulty: options.difficulty,
+  shape: options.shape,
   boxCount: capacity.boxCount,
   maxBoxCount: capacity.maximum,
   solutionPushes: result.candidate.state.pulls,
@@ -121,8 +122,8 @@ const tryPopulateTopology = (topology, options, config, random, seed) => {
 // Генерирует новую геометрию до получения качественно наполненного варианта.
 const generateWithNewTopology = (options, config, random, seed) => {
   for (let attempt = 0; attempt < STRUCTURE_ATTEMPTS; attempt++) {
-    const topology = createGeneratedTopology(options.width, options.height, config, random)
-    const result = tryPopulateTopology(topology, options, config, random, seed)
+    const generated = createGeneratedTopology(options.width, options.height, config, options.shape, random)
+    const result = tryPopulateTopology(generated.topology, {...options, shape: generated.shape}, config, random, seed)
     if (result) return result
   }
   throw new Error('Не удалось подобрать интересный вариант; попробуйте запустить генерацию ещё раз')
@@ -138,7 +139,7 @@ const generateSokobanLevel = (request = {}) => {
 
   const topology = normalizeTopology(request.topology)
   validateTopologyDimensions(topology)
-  const result = tryPopulateTopology(topology, options, config, random, seed)
+  const result = tryPopulateTopology(topology, {...options, shape: 'current'}, config, random, seed)
   if (!result) throw new Error('Не удалось расставить объекты в этой структуре; попробуйте другой вариант')
   return result
 }

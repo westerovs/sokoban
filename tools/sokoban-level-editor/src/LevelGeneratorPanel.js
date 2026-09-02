@@ -1,5 +1,13 @@
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
-import {DEFAULT_BOARD_HEIGHT, DEFAULT_BOARD_WIDTH, DEFAULT_DIFFICULTY, DIFFICULTY_CONFIG, MIN_BOARD_SIZE} from '../generator/config.mjs'
+import {
+  DEFAULT_BOARD_HEIGHT,
+  DEFAULT_BOARD_WIDTH,
+  DEFAULT_DIFFICULTY,
+  DEFAULT_SHAPE,
+  DIFFICULTY_CONFIG,
+  MIN_BOARD_SIZE,
+  SHAPE_CONFIG,
+} from '../generator/config.mjs'
 import {createTopologyBoard, getMaximumBoxCount, normalizeTopology} from '../generator/topology.mjs'
 
 /**
@@ -15,6 +23,13 @@ const getCurrentMaximumBoxes = (map) => getMaximumBoxCount(createTopologyBoard(n
 // Создаёт варианты выбора сложности из общей конфигурации генератора.
 const createDifficultyOptions = () => {
   return Object.entries(DIFFICULTY_CONFIG)
+    .map(([value, config]) => `<option value="${value}">${config.label}</option>`)
+    .join('')
+}
+
+// Создаёт варианты выбора внешней формы из общей конфигурации генератора.
+const createShapeOptions = () => {
+  return Object.entries(SHAPE_CONFIG)
     .map(([value, config]) => `<option value="${value}">${config.label}</option>`)
     .join('')
 }
@@ -35,6 +50,11 @@ const createStructureControlsMarkup = () => `
     <span>Сложность</span>
     <select data-field="difficulty">${createDifficultyOptions()}</select>
   </label>
+  <label class="editor-generator__field">
+    <span>Форма</span>
+    <select data-field="shape">${createShapeOptions()}</select>
+  </label>
+  <p class="editor-generator__hint">Размер задаёт максимальную область: контур может занимать только часть её клеток.</p>
   <button class="editor-generator__primary" data-action="new-structure" type="button">Создать новую структуру</button>
 `
 
@@ -56,7 +76,8 @@ const createObjectControlsMarkup = () => `
 const formatGenerationStats = (stats) => {
   if (!stats) return 'Создайте структуру или переставьте объекты, чтобы увидеть оценку.'
   const solution = stats.minimumPushes ? `Минимум ${stats.minimumPushes} толчков` : `Гарантированный путь — ${stats.solutionPushes} толчков`
-  return `${stats.width}×${stats.height} · ${stats.boxCount} ящ. · ${solution} · линий ящиков: ${stats.boxLines}`
+  const shape = SHAPE_CONFIG[stats.shape]?.label ?? 'Текущая структура'
+  return `${stats.width}×${stats.height} · ${shape} · ${stats.boxCount} ящ. · ${solution} · линий ящиков: ${stats.boxLines}`
 }
 
 export default class LevelGeneratorPanel {
@@ -70,6 +91,7 @@ export default class LevelGeneratorPanel {
   #maximumBoxCount = 1
   #onGenerate
   #removeButton
+  #shapeSelect
   #stats = null
   #statsElement
   #widthInput
@@ -107,6 +129,7 @@ export default class LevelGeneratorPanel {
     this.#element.innerHTML = createStructureControlsMarkup() + createObjectControlsMarkup()
     this.#cacheElements()
     this.#difficultySelect.value = DEFAULT_DIFFICULTY
+    this.#shapeSelect.value = DEFAULT_SHAPE
     this.#bindActions()
     this.#render()
   }
@@ -116,6 +139,7 @@ export default class LevelGeneratorPanel {
     this.#widthInput = this.#element.querySelector('[data-field="width"]')
     this.#heightInput = this.#element.querySelector('[data-field="height"]')
     this.#difficultySelect = this.#element.querySelector('[data-field="difficulty"]')
+    this.#shapeSelect = this.#element.querySelector('[data-field="shape"]')
     this.#boxCountOutput = this.#element.querySelector('[data-field="box-count"]')
     this.#statsElement = this.#element.querySelector('[data-field="stats"]')
     this.#removeButton = this.#element.querySelector('[data-action="remove-box"]')
@@ -136,6 +160,7 @@ export default class LevelGeneratorPanel {
       width: Number(this.#widthInput.value),
       height: Number(this.#heightInput.value),
       difficulty: this.#difficultySelect.value,
+      shape: this.#shapeSelect.value,
       boxCount: null,
       preserveTopology: false,
     })

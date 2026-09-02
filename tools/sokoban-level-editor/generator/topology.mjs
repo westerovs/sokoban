@@ -1,7 +1,8 @@
 import {DIRECTIONS, getAdjacentIndex, randomInteger, shuffle, toIndex} from './grid.mjs'
+import {createFloorMask, resolveGeneratedShape} from './shapeGeneration.mjs'
 
 /**
- * Создаёт связную геометрию комнаты с внутренними стенами и оценивает её вместимость.
+ * Создаёт связную геометрию произвольной формы с внутренними стенами и оценивает её вместимость.
  */
 
 const WALL_PATTERNS = Object.freeze([
@@ -38,11 +39,25 @@ const OPEN_RECTANGLE_SIZES = Object.freeze([
   {width: 4, height: 3}, // Горизонтальная открытая площадка
   {width: 3, height: 4}, // Вертикальная открытая площадка
 ])
+const SHAPE_ATTEMPTS = 18 // Число попыток получить пригодный внешний контур
 
-// Создаёт прямоугольную комнату с внешней стеной.
-const createOpenGrid = (width, height) => {
-  return Array.from({length: height}, (_, y) => {
-    return Array.from({length: width}, (_, x) => x === 0 || y === 0 || x === width - 1 || y === height - 1)
+// Проверяет наличие пола рядом с клеткой, включая диагонали.
+const hasNeighboringFloor = (mask, x, y) => {
+  for (let offsetY = -1; offsetY <= 1; offsetY++) {
+    for (let offsetX = -1; offsetX <= 1; offsetX++) {
+      if (mask[y + offsetY]?.[x + offsetX]) return true
+    }
+  }
+  return false
+}
+
+// Превращает маску пола в сетку пола, стен и внешней пустоты.
+const createGridFromFloorMask = (mask) => {
+  return mask.map((row, y) => {
+    return row.map((isFloor, x) => {
+      if (isFloor) return false
+      return hasNeighboringFloor(mask, x, y) ? true : null
+    })
   })
 }
 
@@ -53,16 +68,16 @@ const cloneGrid = (grid) => grid.map((row) => [...row])
 const replaceGrid = (target, source) => source.forEach((row, y) => row.forEach((value, x) => (target[y][x] = value)))
 
 // Возвращает количество клеток пола в сетке.
-const countFloorCells = (grid) => grid.reduce((total, row) => total + row.filter((isWall) => !isWall).length, 0)
+const countFloorCells = (grid) => grid.reduce((total, row) => total + row.filter((cell) => cell === false).length, 0)
 
 // Возвращает соседние клетки пола для заданной позиции.
 const getFloorNeighbors = (grid, x, y) => {
-  return DIRECTIONS.filter((direction) => !grid[y + direction.y]?.[x + direction.x])
+  return DIRECTIONS.filter((direction) => grid[y + direction.y]?.[x + direction.x] === false)
 }
 
 // Проверяет отсутствие бесполезных тупиков шириной в одну клетку.
 const hasFloorDeadEnd = (grid) => {
-  return grid.some((row, y) => row.some((isWall, x) => !isWall && getFloorNeighbors(grid, x, y).length < 2))
+  return grid.some((row, y) => row.some((cell, x) => cell === false && getFloorNeighbors(grid, x, y).length < 2))
 }
 
 // Считает клетки связной области пола от указанной позиции.
@@ -126,7 +141,9 @@ const tryPlacePattern = (grid, pattern, random, minimumFloorCount) => {
   const originX = randomInteger(random, 1, grid[0].length - size.width)
   const originY = randomInteger(random, 1, grid.length - size.height)
   const candidate = cloneGrid(grid)
-  const changed = pattern.some(({x, y}) => !candidate[originY + y][originX + x])
+  const cells = pattern.map(({x, y}) => candidate[originY + y][originX + x])
+  if (cells.some((cell) => cell === null)) return false
+  const changed = cells.some((cell) => cell === false)
   pattern.forEach(({x, y}) => (candidate[originY + y][originX + x] = true))
   if (!changed || !isUsableGrid(candidate, minimumFloorCount)) return false
   replaceGrid(grid, candidate)
@@ -135,11 +152,11 @@ const tryPlacePattern = (grid, pattern, random, minimumFloorCount) => {
 
 // Добавляет набор внутренних стен из базовых шаблонов.
 const addWallPatterns = (grid, wallDensity, random) => {
-  const innerArea = (grid[0].length - 2) * (grid.length - 2)
-  const targetWalls = Math.round(innerArea * wallDensity)
-  const minimumFloorCount = Math.max(8, Math.round(innerArea * 0.56))
+  const initialFloorCount = countFloorCells(grid)
+  const targetWalls = Math.round(initialFloorCount * wallDensity)
+  const minimumFloorCount = Math.max(8, Math.round(initialFloorCount * 0.72))
   let placedWalls = 0
-  for (let attempt = 0; attempt < innerArea * 12 && placedWalls < targetWalls; attempt++) {
+  for (let attempt = 0; attempt < initialFloorCount * 12 && placedWalls < targetWalls; attempt++) {
     const source = WALL_PATTERNS[randomInteger(random, 0, WALL_PATTERNS.length)]
     const pattern = createPatternVariant(source, random)
     if (tryPlacePattern(grid, pattern, random, minimumFloorCount)) placedWalls += pattern.length
@@ -149,7 +166,7 @@ const addWallPatterns = (grid, wallDensity, random) => {
 // Проверяет, полностью ли прямоугольник состоит из пола.
 const isOpenRectangle = (grid, startX, startY, size) => {
   for (let y = startY; y < startY + size.height; y++) {
-    for (let x = startX; x < startX + size.width; x++) if (grid[y][x]) return false
+    for (let x = startX; x < startX + size.width; x++) if (grid[y][x] !== false) return false
   }
   return true
 }
@@ -191,14 +208,37 @@ const breakOpenAreas = (grid, random) => {
 }
 
 // Преобразует сетку стен в карту структуры Sokoban.
-const serializeGrid = (grid) => grid.map((row) => row.map((isWall) => (isWall ? '#' : ' ')).join(''))
+const serializeGrid = (grid) => {
+  return grid.map((row) => row.map((cell) => (cell === null ? '_' : cell ? '#' : ' ')).join(''))
+}
 
-// Создаёт новую структуру с внешними и внутренними стенами.
-const createGeneratedTopology = (width, height, config, random) => {
-  const grid = createOpenGrid(width, height)
-  addWallPatterns(grid, config.wallDensity, random)
-  breakOpenAreas(grid, random)
-  return serializeGrid(grid)
+// Проверяет достаточный размер полезной области внешней формы.
+const hasEnoughFloor = (grid, width, height) => {
+  const innerArea = (width - 2) * (height - 2)
+  return countFloorCells(grid) >= Math.max(12, Math.round(innerArea * 0.32))
+}
+
+// Проверяет, что внешний контур действительно отличается от прямоугольника.
+const hasOuterVoid = (grid) => grid.some((row) => row.includes(null))
+
+// Создаёт одну пригодную сетку выбранной внешней формы.
+const tryCreateShapeGrid = (width, height, shape, random) => {
+  const grid = createGridFromFloorMask(createFloorMask(width, height, shape, random))
+  if (!hasOuterVoid(grid) || !hasEnoughFloor(grid, width, height) || !isUsableGrid(grid, 8)) return null
+  return grid
+}
+
+// Создаёт новую структуру с произвольным контуром и внутренними стенами.
+const createGeneratedTopology = (width, height, config, requestedShape, random) => {
+  for (let attempt = 0; attempt < SHAPE_ATTEMPTS; attempt++) {
+    const shape = resolveGeneratedShape(requestedShape, random)
+    const grid = tryCreateShapeGrid(width, height, shape, random)
+    if (!grid) continue
+    addWallPatterns(grid, config.wallDensity, random)
+    breakOpenAreas(grid, random)
+    return {topology: serializeGrid(grid), shape}
+  }
+  throw new Error('Не удалось создать связную форму; попробуйте другой размер или режим')
 }
 
 // Удаляет объекты с карты, сохраняя пол, внешние и внутренние стены.

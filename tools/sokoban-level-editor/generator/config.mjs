@@ -2,13 +2,21 @@ import {SOKOBAN_SETTINGS} from '../../../src/game/sokoban/config/settings.js'
 import {clamp} from './grid.mjs'
 
 /**
- * Хранит режимы сложности и нормализует параметры процедурной генерации уровней.
+ * Хранит режимы сложности и формы, нормализуя параметры процедурной генерации уровней.
  */
 
 const MIN_BOARD_SIZE = 8 // Минимальная ширина и высота новой структуры с достаточным пространством для сложной задачи
 const DEFAULT_BOARD_WIDTH = 10 // Начальная ширина карты в интерфейсе
 const DEFAULT_BOARD_HEIGHT = 8 // Начальная высота карты в интерфейсе
 const DEFAULT_DIFFICULTY = 'normal' // Начальная сложность генератора
+const DEFAULT_SHAPE = 'random' // Начальный режим внешней формы уровня
+
+const SHAPE_CONFIG = Object.freeze({
+  random: Object.freeze({label: 'Случайная'}), // Случайный выбор конкретной формы
+  compact: Object.freeze({label: 'Компактная'}), // Единая область с выемками по краям
+  rooms: Object.freeze({label: 'Комнаты'}), // Несколько помещений с переходами
+  winding: Object.freeze({label: 'Извилистая'}), // Ветвистая система широких коридоров
+})
 
 const DIFFICULTY_CONFIG = Object.freeze({
   easy: Object.freeze({
@@ -62,6 +70,9 @@ const normalizeDimension = (value, fallback, maximum) => {
 // Возвращает существующий режим сложности.
 const normalizeDifficulty = (difficulty) => (DIFFICULTY_CONFIG[difficulty] ? difficulty : DEFAULT_DIFFICULTY)
 
+// Возвращает существующий режим внешней формы.
+const normalizeShape = (shape) => (SHAPE_CONFIG[shape] ? shape : DEFAULT_SHAPE)
+
 // Возвращает положительное целое количество ящиков или автоматический режим.
 const normalizeBoxCount = (boxCount) => {
   if (boxCount === null || boxCount === undefined || boxCount === '') return null
@@ -75,14 +86,17 @@ const normalizeGeneratorOptions = (options = {}) => {
   const width = normalizeDimension(options.width, DEFAULT_BOARD_WIDTH, SOKOBAN_SETTINGS.maxBoardColumns)
   const height = normalizeDimension(options.height, DEFAULT_BOARD_HEIGHT, SOKOBAN_SETTINGS.maxBoardRows)
   const difficulty = normalizeDifficulty(options.difficulty)
-  return {width, height, difficulty, boxCount: normalizeBoxCount(options.boxCount), seed: options.seed}
+  const shape = normalizeShape(options.shape)
+  return {width, height, difficulty, shape, boxCount: normalizeBoxCount(options.boxCount), seed: options.seed}
 }
 
 export {
   DEFAULT_BOARD_HEIGHT, // Начальная высота
   DEFAULT_BOARD_WIDTH, // Начальная ширина
   DEFAULT_DIFFICULTY, // Начальная сложность
+  DEFAULT_SHAPE, // Начальный режим формы
   DIFFICULTY_CONFIG, // Настройки режимов сложности
   MIN_BOARD_SIZE, // Минимальный размер новой структуры
   normalizeGeneratorOptions, // Нормализация входных параметров
+  SHAPE_CONFIG, // Доступные формы внешнего контура
 }
