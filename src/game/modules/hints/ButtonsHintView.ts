@@ -1,4 +1,5 @@
 import {Container} from 'pixi.js'
+import type {PointData, Sprite} from 'pixi.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
@@ -6,20 +7,34 @@ import {GAME_NAMES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+import type {HintButton, HintRefs} from './hintTypes.js'
+
+// Создаёт и размещает кнопки доступных типов подсказок.
+
+type HintIconType = 'compass' | 'darts' | 'default'
+type ButtonOptions = {
+  name: string
+  y?: number
+  iconType: HintIconType
+  iconTexture: string
+  iconPos: PointData
+}
 
 export default class ButtonsHintView extends Container {
-  #refs
-  #positionY
-  #adaptiveWidth
+  #refs: HintRefs
+  #positionY = 0
+  #adaptiveWidth = 0
 
-  constructor({refs} = {}) {
-    super()
+  // Сохраняет внешние ссылки и создаёт представление кнопок.
+  constructor({refs}: {refs: HintRefs}) {
+    super({label: 'buttonsHintView'})
 
     this.#refs = refs
 
     this.#init()
   }
 
+  // Выравнивает блок кнопок по правому краю интерфейса.
   alignRight = () => {
     Locator.uiLayer.alignRight(this, {
       y: this.#positionY,
@@ -27,6 +42,7 @@ export default class ButtonsHintView extends Container {
     })
   }
 
+  // Инициализирует представление и регистрирует его ссылки.
   #init = () => {
     this.eventMode = 'static'
     this.label = 'buttonsHintView'
@@ -39,11 +55,13 @@ export default class ButtonsHintView extends Container {
     this.alignRight()
   }
 
+  // Возвращает вертикальную позицию для текущей платформы.
   #getPositionY() {
     const platformId = SdkManager.getPlatformId()
     return platformId === PLATFORM_ID.ok.toLowerCase() ? 120 : 60
   }
 
+  // Создаёт доступные текущей игре кнопки подсказок.
   #createButtons() {
     const btnHint = this.#createButton({
       name: 'hints',
@@ -54,7 +72,7 @@ export default class ButtonsHintView extends Container {
     this.#refs.btnHint = btnHint
     this.addChild(btnHint)
 
-    if (GAME_NAME === GAME_NAMES.hotel) return
+    if ((GAME_NAME as string) === GAME_NAMES.hotel) return
 
     const btnHintDarts = this.#createButton({
       name: 'hintDarts',
@@ -77,9 +95,9 @@ export default class ButtonsHintView extends Container {
     this.addChild(btnHintCompass)
   }
 
-  #createButton({name, y = 0, iconType, iconTexture, iconPos}) {
-    const button = new Container()
-    button.label = name
+  // Создаёт одну кнопку подсказки с иконкой и счётчиком.
+  #createButton({name, y = 0, iconType, iconTexture, iconPos}: ButtonOptions): HintButton {
+    const button = new Container({label: name}) as HintButton
     button.y = y
     button.visible = true
     applyInteractive(button, {isButton: true})
@@ -95,23 +113,25 @@ export default class ButtonsHintView extends Container {
     return button
   }
 
-  #createIcon({iconType, iconTexture, iconPos}) {
+  // Выбирает вариант иконки для типа подсказки.
+  #createIcon({iconType, iconTexture, iconPos}: Omit<ButtonOptions, 'name' | 'y'>) {
     if (iconType === 'darts') return this.#createDartsIcon(iconTexture, iconPos)
     if (iconType === 'compass') return this.#createCompassIcon(iconTexture, iconPos)
 
     return this.#createDefaultIcon(iconTexture, iconPos)
   }
 
-  #createDefaultIcon(iconTexture, iconPos) {
+  // Создаёт обычную спрайтовую иконку.
+  #createDefaultIcon(iconTexture: string, iconPos: PointData) {
     const icon = GameUtils.createSprite(iconTexture, {name: 'icon'})
     icon.position.copyFrom(iconPos)
 
     return icon
   }
 
-  #createDartsIcon(iconTexture, iconPos) {
-    const icon = new Container()
-    icon.label = 'icon'
+  // Создаёт составную иконку дротиков.
+  #createDartsIcon(iconTexture: string, iconPos: PointData) {
+    const icon = new Container({label: 'icon'})
 
     const iconSprite = GameUtils.createSprite(iconTexture)
     iconSprite.position.copyFrom(iconPos)
@@ -127,7 +147,8 @@ export default class ButtonsHintView extends Container {
     return icon
   }
 
-  #createDart({x, y, angle}) {
+  // Создаёт один декоративный дротик.
+  #createDart({x, y, angle}: {x: number; y: number; angle: number}) {
     const dart = GameUtils.createSprite('btn-hint-dart', {name: 'dart'})
     dart.position.set(x, y)
     dart.angle = angle
@@ -136,9 +157,9 @@ export default class ButtonsHintView extends Container {
     return dart
   }
 
-  #createCompassIcon(iconTexture, iconPos) {
-    const icon = new Container()
-    icon.label = 'icon'
+  // Создаёт составную иконку компаса.
+  #createCompassIcon(iconTexture: string, iconPos: PointData) {
+    const icon = new Container({label: 'icon'})
 
     const iconCompass = GameUtils.createSprite(iconTexture, {name: 'iconCompass'})
     iconCompass.position.copyFrom(iconPos)
@@ -162,9 +183,9 @@ export default class ButtonsHintView extends Container {
     return icon
   }
 
+  // Создаёт подпись с количеством доступных подсказок.
   #createButtonLabel() {
-    const label = new Container()
-    label.label = 'btnLabel'
+    const label = new Container({label: 'btnLabel'})
     label.y = 36
 
     const background = GameUtils.createSprite('btn-hint-label')

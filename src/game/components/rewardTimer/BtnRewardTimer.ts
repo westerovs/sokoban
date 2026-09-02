@@ -7,6 +7,7 @@ import {TIMER_LABELS} from '../../ui/level/clock/Timer.js'
 import DateUtils from '../../utils/DateUtils.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
 import RewardTimer from './RewardTimer.js'
+import type {RewardTimerKey} from './RewardTimer.js'
 
 // Связывает таймер рекламной награды с визуальным состоянием кнопки.
 
@@ -35,9 +36,9 @@ export default class BtnRewardTimer extends RewardTimer {
   }
 
   // Настраивает таймер для конкретной кнопки и типа подсказки.
-  init(btn: Container, initiatorName = '', btnHintName: HintButtonName) {
+  init(btn: Container, initiatorName = '', btnHintName: HintButtonName | RewardTimerKey) {
     this.initiatorName = initiatorName
-    this.btnHintName = btnHintName
+    this.btnHintName = btnHintName as HintButtonName
 
     super.init(btn, this.timerLabel, this.dataTimerKey)
 

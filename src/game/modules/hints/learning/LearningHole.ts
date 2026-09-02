@@ -1,46 +1,56 @@
 import {gsap} from 'gsap'
 import {Graphics} from 'pixi.js'
+import type {Container} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
+import type Game from '@/game/Game.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {GAME_STYLES} from '@/game/styles.js'
 import {destroyTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
-// todo адаптировать под step FirstLearning
+// Создаёт затемнение с прозрачной областью вокруг обучаемой кнопки.
+
 export default class LearningHole {
   #game = Locator.game
-  #refs = this.#game.refs
-  #uiFade
-  #holeMask
-  #buttonName
-  #timeLine = gsap.timeline()
+  #refs: {buttonsHintView: Container}
+  #uiFade!: Container
+  #holeMask!: Graphics
+  #buttonName: string
+  #timeLine: gsap.core.Timeline | null = gsap.timeline()
 
-  constructor(buttonName) {
+  // Сохраняет имя кнопки и создаёт обучающую маску.
+  constructor(buttonName: string) {
+    this.#refs = (this.#game as Game & {refs: {buttonsHintView: Container}}).refs
     this.#buttonName = buttonName
     this.init()
   }
 
+  // Возвращает затемняющий слой обучения.
   get uiFade() {
     return this.#uiFade
   }
 
+  // Подключает изменение размера и создаёт маску.
   init = () => {
     this.#game.on(GAME_EVENTS.gameResize, this.#resize)
     this.#createHole()
   }
 
+  // Показывает затемнение и прозрачную область.
   show = async () => {
-    await this.#timeLine
+    await this.#timeLine!
       .set([this.#refs.buttonsHintView, this.#uiFade], {visible: true})
       .fromTo(this.#uiFade, {alpha: 0}, {alpha: GAME_STYLES.fadeHalfAlpha, duration: 1}, '<')
       .fromTo(this.#holeMask, {alpha: 0}, {alpha: 1}, '<')
   }
 
+  // Скрывает затемняющий слой.
   hide = async () => {
-    await this.#timeLine.to([this.#uiFade], {alpha: 0, duration: 1})
+    await this.#timeLine!.to([this.#uiFade], {alpha: 0, duration: 1})
   }
 
+  // Удаляет события, таймлайн и затемняющий слой.
   destroy = () => {
     this.#game.off(GAME_EVENTS.gameResize, this.#resize)
     destroyTimeLine(this.#timeLine)
@@ -51,6 +61,7 @@ export default class LearningHole {
     }
   }
 
+  // Создаёт затемняющий слой интерфейса.
   #createHole = () => {
     this.#uiFade = Locator.uiLayer.createFade()
     this.#uiFade.zIndex = 2
@@ -58,10 +69,10 @@ export default class LearningHole {
     this.#createHoleMask()
   }
 
+  // Создаёт графическую маску с отверстием.
   #createHoleMask = () => {
-    const mask = new Graphics()
+    const mask = new Graphics({label: 'holeMask'})
     this.#holeMask = mask
-    mask.label = 'holeMask'
 
     this.#uiFade.mask = mask
     Locator.uiLayer.stateUiLayer.addChild(mask)
@@ -69,19 +80,22 @@ export default class LearningHole {
     this.#updateHole()
   }
 
+  // Возвращает позицию кнопки в координатах маски.
   #getBtnHintPosition = () => {
     const buttonCircle = this.#getButtonCircle()
     return GameUtils.getLocalPosition(buttonCircle, this.#holeMask)
   }
 
+  // Возвращает круг подложки целевой кнопки.
   #getButtonCircle = () => {
-    const {buttonsHintView} = this.#game.refs
-    const button = buttonsHintView.getChildByLabel(this.#buttonName)
-    const buttonCircle = button.getChildByLabel('btnHintCircle')
+    const {buttonsHintView} = this.#refs
+    const button = buttonsHintView.getChildByLabel(this.#buttonName)!
+    const buttonCircle = button.getChildByLabel('btnHintCircle')!
 
     return buttonCircle
   }
 
+  // Перерисовывает отверстие маски по текущей позиции кнопки.
   #updateHole = () => {
     const buttonCircle = this.#getButtonCircle()
 
@@ -98,6 +112,7 @@ export default class LearningHole {
       .cut()
   }
 
+  // Перерисовывает отверстие после изменения размеров игры.
   #resize = () => {
     this.#updateHole()
   }

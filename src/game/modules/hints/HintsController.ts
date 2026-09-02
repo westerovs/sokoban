@@ -1,6 +1,8 @@
 import {gsap} from 'gsap'
 import {Rectangle} from 'pixi.js'
+import type {Container, FederatedPointerEvent} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
+import type Game from '@/game/Game.js'
 import SdkManager from '@/game/engine/SdkManager.js'
 import Store from '@/game/features/store/Store.js'
 import StoreView from '@/game/features/store/StoreView.js'
@@ -14,63 +16,87 @@ import ButtonsHintView from './ButtonsHintView.js'
 import ButtonsStateFX from './ButtonsStateFX.js'
 import HintsLearning from './learning/HintsLearning.js'
 import NoHintsWindow from './NoHintsWindow.js'
+import type {HintButton, HintButtonName, HintRefs} from './hintTypes.js'
 
-// todo проверить все места в коде, где могут быть хардкод-строки с именами
-export const HINT_BUTTON_NAMES = {
+// Координирует кнопки, доступность и выполнение игровых подсказок.
+
+const HINT_BUTTON_NAMES = {
   hints: 'hints',
   hintDarts: 'hintDarts',
   hintCompass: 'hintCompass',
+} as const
+
+type HintLevel = {
+  aliveTargets: unknown[]
+}
+
+type DartsHint = {
+  getAvailableTargets: () => unknown[]
+  runHint: (targets: unknown[]) => Promise<unknown>
+}
+
+type CompassHint = {
+  runHint: () => Promise<unknown>
 }
 
 export default class HintsController {
   #game = Locator.game
-  #refs = this.#game.refs
+  #refs: HintRefs
   #storage = Locator.storage
-  #hintsLearning
-  #level
+  #hintsLearning: HintsLearning | null = null
+  #level: HintLevel
   // view
-  #optionsToggleBtn
-  #buttonsHintView
-  #buttons
-  #btnHint
-  #btnDarts
-  #btnCompass
+  #optionsToggleBtn: HintButton
+  #buttonsHintView!: ButtonsHintView
+  #buttons: HintButton[] = []
+  #btnHint!: HintButton
+  #btnDarts!: HintButton
+  #btnCompass!: HintButton
   // hints
-  #hintDarts
-  #hintCompass
-  #idleTimeLine
-  #buttonsStateFX
-  #isDestroyed
+  #hintDarts!: DartsHint
+  #hintCompass!: CompassHint
+  #idleTimeLine: gsap.core.Timeline | null = null
+  #buttonsStateFX!: ButtonsStateFX
+  #isDestroyed = false
 
-  constructor(level) {
+  // Сохраняет уровень и элементы управления интерфейса.
+  constructor(level: HintLevel) {
+    this.#refs = (this.#game as Game & {refs: HintRefs}).refs
     this.#level = level
-    this.#optionsToggleBtn = Locator.options.optionsToggleBtn
+    this.#optionsToggleBtn = Locator.options.optionsToggleBtn as HintButton
   }
 
+  // Возвращает текущий уровень.
   get level() {
     return this.#level
   }
 
+  // Возвращает кнопки подсказок и настроек.
   get buttons() {
     return this.#buttons
   }
 
+  // Возвращает кнопку дротиков.
   get btnDarts() {
     return this.#btnDarts
   }
 
+  // Возвращает кнопку компаса.
   get btnCompass() {
     return this.#btnCompass
   }
 
+  // Возвращает представление кнопок подсказок.
   get buttonsHintView() {
     return this.#buttonsHintView
   }
 
+  // Возвращает активный сценарий обучения.
   get hintsLearning() {
     return this.#hintsLearning
   }
 
+  // Создаёт визуальную часть контроллера подсказок.
   init = async () => {
     try {
       this.#createButtons()
@@ -104,46 +130,52 @@ export default class HintsController {
     })
   }
 
-  setInteractive = (bool) => {
+  // Переключает интерактивность кнопок подсказок.
+  setInteractive = (bool: boolean) => {
     const toggle = eventToggle(bool)
 
     Locator.options.optionsToggleBtn.eventMode = bool ? 'static' : 'none'
     this.#buttonsHintView[toggle.gameOnOff]('pointerup', this.#onHandlerContainerUp)
   }
 
+  // Создаёт представление кнопок и добавляет его в UI-слой.
   #createButtons = () => {
     this.#buttonsHintView = new ButtonsHintView({refs: this.#refs})
     Locator.uiLayer.stateUiLayer.addChild(this.#buttonsHintView)
   }
 
+  // Запускает обучение дополнительным подсказкам.
   #initHintsLearning = async () => {
-    if (GAME_NAME === GAME_NAMES.hotel) return
+    if ((GAME_NAME as string) === GAME_NAMES.hotel) return
 
     this.#hintsLearning = new HintsLearning(this)
     await this.#hintsLearning.init()
   }
 
+  // Создаёт вспомогательные компоненты кнопок.
   #initComponents = () => {
     this.#initButtons()
 
     this.#buttonsStateFX = new ButtonsStateFX(this.buttons)
   }
 
+  // Получает созданные кнопки из общего набора ссылок.
   #initButtons = () => {
-    this.#buttonsHintView = this.#refs.buttonsHintView
-    this.#btnHint = this.#refs.btnHint
+    this.#buttonsHintView = this.#refs.buttonsHintView as ButtonsHintView
+    this.#btnHint = this.#refs.btnHint as HintButton
 
-    if (GAME_NAME === GAME_NAMES.hotel) {
+    if ((GAME_NAME as string) === GAME_NAMES.hotel) {
       this.#buttons = [this.#btnHint, this.#optionsToggleBtn]
       return
     }
 
-    this.#btnDarts = this.#refs.btnHintDarts
-    this.#btnCompass = this.#refs.btnHintCompass
+    this.#btnDarts = this.#refs.btnHintDarts as HintButton
+    this.#btnCompass = this.#refs.btnHintCompass as HintButton
     this.#buttons = [this.#btnHint, this.#btnDarts, this.#btnCompass, this.#optionsToggleBtn]
   }
 
-  #setEvents = (bool) => {
+  // Подключает или отключает события жизненного цикла уровня.
+  #setEvents = (bool: boolean) => {
     const toggle = eventToggle(bool)
 
     this.#game[toggle.gameOnOff](GAME_EVENTS.completeLevel, this.#destroy)
@@ -152,10 +184,12 @@ export default class HintsController {
   }
 
   // ---------- pointer events
-  #onHandlerContainerUp = async ({target}) => {
+  // Обрабатывает нажатие одной из кнопок подсказок.
+  #onHandlerContainerUp = async (event: FederatedPointerEvent) => {
+    const target = event.target as HintButton
     if (Locator.options.isVisible) return
 
-    const aliveTargets = this.#game.level.aliveTargets
+    const aliveTargets = (this.#game as Game & {level: HintLevel}).level.aliveTargets
     if (!aliveTargets.length) return
     if (target.isDisabled) return
     if (target.type === 'button') Locator.soundManager.play('sfx_btnClick')
@@ -165,12 +199,13 @@ export default class HintsController {
 
     if (target.label === HINT_BUTTON_NAMES.hints) this.#onBtnMagnifierClick(target)
 
-    if (GAME_NAME === GAME_NAMES.hotel) return
+    if ((GAME_NAME as string) === GAME_NAMES.hotel) return
     if (target.label === HINT_BUTTON_NAMES.hintDarts) this.#onBtnDartsClick(target)
     if (target.label === HINT_BUTTON_NAMES.hintCompass) this.#onBtnCompassClick(target)
   }
 
-  #onHandlerBtnHint = (button) => {
+  // Фиксирует использование подсказки и обновляет кнопки.
+  #onHandlerBtnHint = (button: HintButton) => {
     this.#game.emit(GAME_EVENTS.HINTS.startHint, button.label)
     this.#setButtonsEnabled()
 
@@ -178,18 +213,20 @@ export default class HintsController {
 
     // если это обучающий уровень, то не списываем подсказки
     if (HintsLearning.isLearningStarted) return
-    this.#storage.spendHints(button.label)
+    this.#storage.spendHints(button.label as HintButtonName)
   }
 
+  // Переключает блокировку кнопок подсказок.
   #setButtonsEnabled = (isLocked = false) => {
     this.setInteractive(isLocked)
   }
 
-  #isHintAvailable = async (button) => {
+  // Проверяет запас выбранной подсказки.
+  #isHintAvailable = async (button: HintButton) => {
     // если это обучающий уровень, разрешаем в любом случае
     if (HintsLearning.isLearningStarted) return true
 
-    const amount = this.#storage.playerData[button.label]
+    const amount = this.#storage.playerData[button.label as HintButtonName]
     if (amount <= 0) {
       if (SdkManager.flags?.noStore) {
         this.#showNoHintsWindow(button)
@@ -203,12 +240,14 @@ export default class HintsController {
     return true
   }
 
-  #onBtnMagnifierClick = async (button) => {
+  // Запускает подсказку-лупу.
+  #onBtnMagnifierClick = async (button: HintButton) => {
     this.#onHandlerBtnHint(button)
     await this.#onCompleteHintAction(button)
   }
 
-  #onBtnDartsClick = async (button) => {
+  // Запускает подсказку-дротики.
+  #onBtnDartsClick = async (button: HintButton) => {
     const targets = this.#hintDarts.getAvailableTargets()
     if (!targets.length) return
 
@@ -217,13 +256,15 @@ export default class HintsController {
     await this.#onCompleteHintAction(button)
   }
 
-  #onBtnCompassClick = async (button) => {
+  // Запускает подсказку-компас.
+  #onBtnCompassClick = async (button: HintButton) => {
     await this.#onHandlerBtnHint(button)
     await this.#hintCompass.runHint()
     await this.#onCompleteHintAction(button)
   }
 
-  #onCompleteHintAction = async (button) => {
+  // Восстанавливает интерфейс после завершения подсказки.
+  #onCompleteHintAction = async (button: HintButton) => {
     if (this.#isDestroyed || button.destroyed) return
 
     await this.#buttonsStateFX.checkoutBtnState(button, false)
@@ -232,8 +273,9 @@ export default class HintsController {
   }
   // ---------- pointer events end
 
+  // Запускает периодическую анимацию иконок подсказок.
   #idleButtons = () => {
-    const scales = this.#buttons.filter((btn) => btn.label !== 'optionsToggleBtn').map((btn) => btn.getChildByLabel('icon', 1).scale)
+    const scales = this.#buttons.filter((btn) => btn.label !== 'optionsToggleBtn').map((btn) => btn.getChildByLabel('icon', true)!.scale)
 
     if (!scales.length) return
 
@@ -242,6 +284,7 @@ export default class HintsController {
       .fromTo(scales, {x: 1, y: 1}, {x: 1.15, y: 1.15, yoyo: true, repeat: 5, duration: 0.8, stagger: 0.3, ease: 'sine.inOut'})
   }
 
+  // Удаляет события, анимации и представление контроллера.
   #destroy = async () => {
     if (this.#isDestroyed) return
     this.#isDestroyed = true
@@ -255,19 +298,26 @@ export default class HintsController {
     Logger.log(MODULES.DestroyMessage, '[HintsController destroy]')
   }
 
+  // Обновляет области фильтров после изменения размеров.
   #resize = () => {
     this.#setStaticFilterArea()
   }
 
-  #showNoHintsWindow = (button) => {
-    const view = new NoHintsWindow(button.label)
+  // Показывает окно получения подсказки за рекламу.
+  #showNoHintsWindow = (button: HintButton) => {
+    const view = new NoHintsWindow(button.label as HintButtonName)
     view.init()
   }
 
+  // Открывает игровой магазин.
   #openStore = () => {
     Locator.soundManager.play('sfx_btnClick')
 
     const view = new StoreView()
     new Store(view)
   }
+}
+
+export {
+  HINT_BUTTON_NAMES,
 }

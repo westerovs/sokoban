@@ -9,4 +9,8 @@ declare module 'pixi.js' {
     type?: string
     updateAdaptive?: boolean | (() => void)
   }
+
+  interface Sprite {
+    initPos?: {x: number; y: number}
+  }
 }

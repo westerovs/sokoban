@@ -206,3 +206,7 @@ export default class RewardTimer {
     this.#isDisabledBtn = false
   }
 }
+
+export type {
+  RewardTimerKey,
+}

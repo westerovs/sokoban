@@ -1,6 +1,7 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Text} from 'pixi.js'
+import type {DestroyOptions} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import BtnRewardTimer from '@/game/components/rewardTimer/BtnRewardTimer.js'
 import Locator from '@/game/engine/Locator.ts'
@@ -9,20 +10,25 @@ import {primaryFontStyle} from '@/game/styles.js'
 import BaseModal from '@/game/ui/common/modal/BaseModal.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
+import type {HintButton, HintButtonName} from './hintTypes.js'
+
+// Показывает получение подсказки за рекламу при нулевом остатке.
 
 export default class NoHintsWindow extends BaseModal {
-  #buttonReward
-  #btnTimer
-  #btnHintName
-  #header
-  #icon
+  #buttonReward!: ButtonContainer
+  #btnTimer: BtnRewardTimer | null = null
+  #btnHintName: HintButtonName
+  #header!: Text
+  #icon!: Container
 
-  constructor(btnHintName) {
+  // Создаёт окно для выбранного типа подсказки.
+  constructor(btnHintName: HintButtonName) {
     super({label: 'noHintsWindow', h: 350})
 
     this.#btnHintName = btnHintName
   }
 
+  // Загружает ресурсы, создаёт содержимое и показывает окно.
   async init() {
     const showPromise = this.show()
     const spriteSheetLoaded = await this.#loadSpritesheet()
@@ -33,6 +39,7 @@ export default class NoHintsWindow extends BaseModal {
     if (!isShown) this.destroy()
   }
 
+  // Загружает спрайтшит окна с обработкой ошибки.
   #loadSpritesheet = async () => {
     this.animateLoadingStart()
 
@@ -40,7 +47,7 @@ export default class NoHintsWindow extends BaseModal {
       await LoadUtils.loadSpriteSheet({spriteSheetName: 'purchases'})
       return true
     } catch (error) {
-      console.error('[NoHintsWindow] Не удалось загрузить ресурсы окна', error)
+      console.error('[NoHintsWindow]: failed to load modal assets', error)
       if (!this.destroyed) this.destroy()
       return false
     } finally {
@@ -48,18 +55,20 @@ export default class NoHintsWindow extends BaseModal {
     }
   }
 
+  // Создаёт содержимое окна и подключает рекламную награду.
   #create = () => {
     this.#createTextHeader()
     this.#createHintIcon()
     this.#createButtonReward()
 
     this.#btnTimer = new BtnRewardTimer()
-    this.#btnTimer.init(this.#buttonReward, 'noHintsWindow', this.#btnHintName)
+    this.#btnTimer.init(this.#buttonReward as HintButton, 'noHintsWindow', this.#btnHintName)
 
     Locator.game.on(GAME_EVENTS.AD.onRewarded, this.#animateAndDestroy)
   }
 
-  destroy(_options) {
+  // Отключает таймер и игровые события перед уничтожением.
+  destroy(_options?: DestroyOptions) {
     if (this.destroyed) return
 
     this.#btnTimer?.destroy()
@@ -67,11 +76,13 @@ export default class NoHintsWindow extends BaseModal {
     super.destroy(_options)
   }
 
+  // Проигрывает финальную анимацию и закрывает окно.
   #animateAndDestroy = async () => {
     await this.#finalAnimation()
     this.destroy()
   }
 
+  // Показывает анимацию полученной подсказки.
   #finalAnimation = async () => {
     const shine = GameUtils.createSprite('glow-type1')
     shine.scale.set(0)
@@ -93,10 +104,12 @@ export default class NoHintsWindow extends BaseModal {
       .to([this.#icon, textRewardCounter], {alpha: 0}, '<')
   }
 
+  // Создаёт счётчик полученной награды.
   #createRewardCounter = () => {
     const {width, height} = this
 
     const textRewardCounter = new Text({
+      label: 'no-hints-reward-counter',
       text: '+1',
       style: {
         ...primaryFontStyle,
@@ -115,6 +128,7 @@ export default class NoHintsWindow extends BaseModal {
     return textRewardCounter
   }
 
+  // Создаёт заголовок окна.
   #createTextHeader = () => {
     this.#header = GameUtils.createText(`${i18next.t('notEnoughHints')}`)
     this.#header.style.fontSize = 30
@@ -123,6 +137,7 @@ export default class NoHintsWindow extends BaseModal {
     this.addChild(this.#header)
   }
 
+  // Создаёт иконку запрошенного типа подсказки.
   #createHintIcon = () => {
     const textureKey = this.#getIconTexture()
     if (!textureKey) return
@@ -140,12 +155,14 @@ export default class NoHintsWindow extends BaseModal {
     this.addChild(icon)
   }
 
+  // Возвращает текстуру выбранного типа подсказки.
   #getIconTexture = () => {
     if (this.#btnHintName === 'hints') return 'store-loupe-big'
     if (this.#btnHintName === 'hintDarts') return 'store-darts-big'
     if (this.#btnHintName === 'hintCompass') return 'store-compass-big'
   }
 
+  // Создаёт кнопку просмотра рекламы.
   #createButtonReward = () => {
     const button = new ButtonContainer({
       props: {label: 'noHintsRewardButton'},
