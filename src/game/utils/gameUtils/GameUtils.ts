@@ -8,7 +8,7 @@ import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 import {LEVEL_TYPES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
 import {FONT_COLORS, primaryFontStyle} from '@/game/styles.js'
 import PurchaseError from '@/game/ui/common/purchaseError/PurchaseError.js'
-import {Logger} from '../Logger.js'
+import Logger from '../Logger.js'
 
 // Содержит общие фабрики PixiJS и небольшие игровые утилиты.
 

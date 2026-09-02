@@ -1,5 +1,7 @@
 import {defaultFilterVert, Filter, GlProgram} from 'pixi.js'
 
+// Реализует регулируемый фильтр перевода изображения в оттенки серого.
+
 const fragment = `
   in vec2 vTextureCoord;
   out vec4 finalColor;
@@ -17,7 +19,9 @@ const fragment = `
 
 export default class GrayscaleFilter extends Filter {
   #amount = 1
+  name = 'grayscaleFilter'
 
+  // Создаёт фильтр с заданной интенсивностью обесцвечивания.
   constructor(amount = 1) {
     super({
       glProgram: GlProgram.from({
@@ -30,14 +34,15 @@ export default class GrayscaleFilter extends Filter {
         },
       },
     })
-    this.name = 'grayscaleFilter'
     this.#amount = amount
   }
 
+  // Возвращает текущую интенсивность обесцвечивания.
   get amount() {
     return this.resources.grayscaleUniforms.uniforms.amount
   }
 
+  // Обновляет интенсивность обесцвечивания.
   set amount(value) {
     this.#amount = value
     this.resources.grayscaleUniforms.uniforms.amount = value

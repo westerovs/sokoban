@@ -4,7 +4,7 @@ import {GAME_EVENTS} from '../gameConfig/gameEvents.js'
 import ABTest from '../modules/ABTest.js'
 import Timer, {TIMER_LABELS} from '../ui/level/clock/Timer.js'
 import GameUtils from '../utils/gameUtils/GameUtils.js'
-import {Logger, MODULES} from '../utils/Logger.js'
+import Logger, {MODULES} from '../utils/Logger.js'
 
 /*
  * - проверка, куплена ли опция - пропуск рекламы

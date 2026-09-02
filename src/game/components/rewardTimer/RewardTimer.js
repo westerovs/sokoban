@@ -7,7 +7,7 @@ import {rewardsCatalog} from '../../gameConfig/rewardsCatalog.js'
 import ABTest from '../../modules/ABTest.js'
 import {HINT_BUTTON_NAMES} from '../../modules/hints/HintsController.js'
 import Timer from '../../ui/level/clock/Timer.js'
-import {Logger, MODULES} from '../../utils/Logger.js'
+import Logger, {MODULES} from '../../utils/Logger.js'
 
 export default class RewardTimer {
   #game = Locator.game

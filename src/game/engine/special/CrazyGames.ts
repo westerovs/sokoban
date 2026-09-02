@@ -1,5 +1,5 @@
 import {WORLD} from '../../gameConfig/constants.js'
-import {Logger} from '../../utils/Logger.js'
+import Logger from '../../utils/Logger.js'
 import Locator from '../Locator.ts'
 import SdkManager from '../SdkManager.js'
 import type {AdvertisingArea} from '../sdkTypes.js'

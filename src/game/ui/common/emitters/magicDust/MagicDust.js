@@ -4,7 +4,7 @@ import Locator from '@/game/engine/Locator.js'
 import {GAME_NAMES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
-import {Logger} from '@/game/utils/Logger.js'
+import Logger from '@/game/utils/Logger.js'
 import defaultConfig from './defaultConfig.json'
 import newYearConfig from './newYearConfig.json'
 

@@ -1,6 +1,6 @@
 import {GAME_NAMES} from '../../gameConfig/constants.js'
 import {GAME_NAME} from '../../generatedAssets/buildMeta.js'
-import {Logger, MODULES} from '../../utils/Logger.js'
+import Logger, {MODULES} from '../../utils/Logger.js'
 
 /* global ym */
 

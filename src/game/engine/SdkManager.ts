@@ -3,7 +3,7 @@ import Locator from '@/game/engine/Locator.ts'
 import CrazyGames from '@/game/engine/special/CrazyGames.js'
 import {DEFAULT_DATA} from '@/game/engine/storage/defaultData.js'
 import {DEFAULT_FLAGS, GAME_STATES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
-import {Logger, MODULES} from '@/game/utils/Logger.js'
+import Logger, {MODULES} from '@/game/utils/Logger.js'
 import type {AdCallbacks, SdkAdapter, SdkLeaderboard, SdkPlayer, SdkPurchase, SdkReview} from './sdkTypes.js'
 
 // Предоставляет игре единый типизированный доступ к платформенному SDK.

@@ -1,6 +1,6 @@
 import Locator from '../../engine/Locator.ts'
 import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
-import {Logger, MODULES} from '../../utils/Logger.js'
+import Logger, {MODULES} from '../../utils/Logger.js'
 import YaMetrika from './YaMetrika.js'
 
 // подключается в MetrikaSystem

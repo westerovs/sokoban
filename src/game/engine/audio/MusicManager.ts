@@ -1,7 +1,7 @@
 import {GAME_STATES} from '../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
 import LevelConfig from '../../gameConfig/levels/LevelConfig.js'
-import {Logger, MODULES} from '../../utils/Logger.js'
+import Logger, {MODULES} from '../../utils/Logger.js'
 import Locator from '../Locator.ts'
 import {STORAGE_KEYS} from '../storage/defaultData.js'
 import type Game from '../../Game.js'

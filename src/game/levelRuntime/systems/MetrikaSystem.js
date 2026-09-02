@@ -1,5 +1,5 @@
 import MetrikaCounter from '../../modules/metrika/MetrikaCounter.js'
-import {Logger, MODULES} from '../../utils/Logger.js'
+import Logger, {MODULES} from '../../utils/Logger.js'
 
 export default class MetrikaSystem {
   #components = {}

@@ -2,11 +2,51 @@ import {gsap} from 'gsap'
 import {GAME_STYLES} from '../../styles.js'
 import MathTools from '../MathTools.js'
 
-/**
- * Utils связанные с GSAP
- * */
+// Содержит общие анимации и операции жизненного цикла GSAP.
 
-const clearTimeLine = (timeLine, remove = false, progress = 0) => {
+type FadeTarget = {
+  alpha: number
+  visible: boolean
+}
+
+type FadeOptions = {
+  hide?: boolean
+  fadeToHalf?: boolean
+  fadeInFromZeroToHalf?: boolean
+  fadeInFromFullToHalf?: boolean
+  fadeToDark?: boolean
+  duration?: number
+}
+
+type TextTarget = {
+  text: string | number
+}
+
+type AnimatedTarget = {
+  angle: number
+  scale: {
+    x: number
+    y: number
+  }
+  x: number
+  y: number
+}
+
+type DotTarget = {
+  y: number
+}
+
+type GameTicker = {
+  app: {
+    ticker: {
+      add: (callback: () => void) => unknown
+      remove: (callback: () => void) => unknown
+    }
+  }
+}
+
+// Останавливает таймлайн и при необходимости сбрасывает ссылку на него.
+const clearTimeLine = (timeLine: gsap.core.Timeline | null | undefined, remove = false, progress = 0) => {
   if (timeLine) {
     timeLine.progress(progress) // Перематываем анимацию к начальному состоянию
     timeLine.kill() // Остановить текущую анимацию
@@ -18,7 +58,8 @@ const clearTimeLine = (timeLine, remove = false, progress = 0) => {
   return timeLine
 }
 
-const destroyTimeLine = (timeLine) => {
+// Останавливает и очищает таймлайн.
+const destroyTimeLine = (timeLine: gsap.core.Timeline | null | undefined) => {
   if (timeLine) {
     timeLine.kill()
     timeLine.clear()
@@ -27,7 +68,11 @@ const destroyTimeLine = (timeLine) => {
   return timeLine
 }
 
-const checkoutFade = (fade, {hide, fadeToHalf, fadeInFromZeroToHalf, fadeInFromFullToHalf, fadeToDark, duration = 0.3}) => {
+// Выбирает и запускает нужный вариант затемнения.
+const checkoutFade = (
+  fade: FadeTarget,
+  {hide, fadeToHalf, fadeInFromZeroToHalf, fadeInFromFullToHalf, fadeToDark, duration = 0.3}: FadeOptions,
+) => {
   fade.visible = true
 
   // 1 > 0
@@ -52,13 +97,14 @@ const checkoutFade = (fade, {hide, fadeToHalf, fadeInFromZeroToHalf, fadeInFromF
   }
 }
 
-const typewriterEffect = async (target, text) => {
+// Постепенно выводит текст по одному символу.
+const typewriterEffect = async (target: TextTarget, text: string) => {
   target.text = ''
   const chars = text.split('')
   const baseDelay = 0.01
 
   for (let i = 0; i < chars.length; i++) {
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       const random = MathTools.getRandomNumber(0.01, 0.05)
 
       gsap
@@ -78,8 +124,9 @@ const typewriterEffect = async (target, text) => {
   }
 }
 
-const animateCounter = (target, fromValue, toValue, duration = 1) => {
-  return new Promise((resolve) => {
+// Анимирует числовое значение текстового счётчика.
+const animateCounter = (target: TextTarget, fromValue: number, toValue: number, duration = 1) => {
+  return new Promise<void>((resolve) => {
     const obj = {value: fromValue}
 
     gsap.to(obj, {
@@ -96,11 +143,13 @@ const animateCounter = (target, fromValue, toValue, duration = 1) => {
   })
 }
 
-const animateDots = (game, dots, delay) => {
+// Анимирует последовательную волну точек в течение заданного времени.
+const animateDots = (game: GameTicker, dots: DotTarget[], delay: number) => {
   let currentAnimationTime = 0
   const centreY = 0
   const amplitude = 10
 
+  // Обновляет вертикальную позицию каждой точки.
   const animate = () => {
     currentAnimationTime += 0.09
 
@@ -118,7 +167,8 @@ const animateDots = (game, dots, delay) => {
   })
 }
 
-const jump = (target, repeat = -1) => {
+// Запускает циклическую анимацию прыжка объекта.
+const jump = (target: AnimatedTarget, repeat = -1) => {
   const duration = 0.2
   const angle = 3
   const initialScaleX = target.scale.x
@@ -141,7 +191,8 @@ const jump = (target, repeat = -1) => {
     .to(target, {angle: 0, duration: duration, ease: 'none'}, '<')
 }
 
-const shake = (el) => {
+// Запускает короткую анимацию встряхивания объекта.
+const shake = (el: AnimatedTarget) => {
   return gsap
     .timeline({repeat: 1, yoyo: true})
     .to(el.scale, {x: 1.2, y: 1.2, duration: 0.06, yoyo: true})
@@ -151,7 +202,8 @@ const shake = (el) => {
     .to(el, {x: '-=1', y: '-=1', duration: 0.06, ease: 'linear'})
 }
 
-const shakeX = (el) => {
+// Запускает горизонтальную анимацию встряхивания объекта.
+const shakeX = (el: AnimatedTarget) => {
   const initX = el.x
   const duration = 0.05
   return gsap
@@ -166,4 +218,14 @@ const shakeX = (el) => {
     .to(el, {x: initX, duration: duration, ease: 'linear'})
 }
 
-export {animateCounter, animateDots, checkoutFade, clearTimeLine, destroyTimeLine, jump, shake, shakeX, typewriterEffect}
+export {
+  animateCounter,
+  animateDots,
+  checkoutFade,
+  clearTimeLine,
+  destroyTimeLine,
+  jump,
+  shake,
+  shakeX,
+  typewriterEffect,
+}

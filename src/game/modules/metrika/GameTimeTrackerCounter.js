@@ -1,4 +1,4 @@
-import {Logger, MODULES} from '../../utils/Logger.js'
+import Logger, {MODULES} from '../../utils/Logger.js'
 import YaMetrika from './YaMetrika.js'
 
 export default class GameTimeTrackerCounter {

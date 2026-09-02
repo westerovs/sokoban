@@ -1,5 +1,7 @@
 import {defaultFilterVert, Filter, GlProgram} from 'pixi.js'
 
+// Реализует регулируемый фильтр затемнения изображения.
+
 const fragment = `
   in vec2 vTextureCoord;
   out vec4 finalColor;
@@ -17,6 +19,7 @@ const fragment = `
 export default class DarkenFilter extends Filter {
   #darkness = 0
 
+  // Создаёт фильтр с заданной интенсивностью затемнения.
   constructor(darkness = 0) {
     super({
       glProgram: GlProgram.from({
@@ -32,10 +35,12 @@ export default class DarkenFilter extends Filter {
     this.#darkness = darkness
   }
 
+  // Возвращает текущую интенсивность затемнения.
   get darkness() {
     return this.resources.darkenUniforms.uniforms.darkness
   }
 
+  // Обновляет интенсивность затемнения.
   set darkness(value) {
     this.#darkness = value
     this.resources.darkenUniforms.uniforms.darkness = value

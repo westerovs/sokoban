@@ -1,19 +1,22 @@
 import {gsap} from 'gsap'
+import type {Container} from 'pixi.js'
 import {clearTimeLine} from './gsapUtils.js'
 
-const clickAnimations = new WeakMap()
+// Управляет стандартными анимациями нажатия и наведения для кнопок.
+
+const clickAnimations = new WeakMap<Container, Promise<void>>()
 
 export default class ButtonAnimator {
-  static click(target, x = 0.1, y = 0.1) {
+  // Проигрывает короткую анимацию нажатия и не запускает её повторно для той же кнопки.
+  static click(target: Container | null | undefined, x = 0.1, y = 0.1): Promise<void> {
     if (!target) return Promise.resolve()
 
-    if (clickAnimations.has(target)) {
-      return clickAnimations.get(target)
-    }
+    const activeAnimation = clickAnimations.get(target)
+    if (activeAnimation) return activeAnimation
 
     const {x: startX, y: startY} = target.scale
 
-    const promise = new Promise((resolve) => {
+    const promise = new Promise<void>((resolve) => {
       const tl = gsap.timeline({
         onComplete: () => {
           clearTimeLine(tl)
@@ -29,8 +32,8 @@ export default class ButtonAnimator {
     return promise
   }
 
-  // Статический метод для инициализации обработчиков pointerover и pointerout
-  static initOverHandler(target, overScale, outScale) {
+  // Инициализирует обработчики pointerover и pointerout.
+  static initOverHandler(target: Container | null | Array<Container | null>, overScale?: number, outScale?: number) {
     const targets = Array.isArray(target) ? target : [target]
 
     targets.forEach((item) => {

@@ -1,4 +1,6 @@
-export const MODULES = {
+// Управляет отладочным выводом по отдельным игровым подсистемам.
+
+const MODULES = {
   SDK: 'SDK',
   STORAGE: 'STORAGE',
   Metrika: 'Metrika',
@@ -28,11 +30,15 @@ const COLORS = {
   green: '#08FE00',
 }
 
-export const LOG_STATUS = {
+const LOG_STATUS = {
   IS_DISABLED_LOG: true,
 }
 
-const setColor = (moduleName) => {
+type ModuleName = (typeof MODULES)[keyof typeof MODULES]
+
+// Возвращает цвет журнала для указанного модуля.
+const setColor = (moduleName: string | null | undefined) => {
+  if (!moduleName) return COLORS.default
   return COLORS[moduleName] || COLORS.default
 }
 
@@ -47,30 +53,37 @@ enabledModules.add(MODULES.Config)
 // enabledModules.add(MODULES.SOUND_MANAGER)
 // enabledModules.add(MODULES.DestroyMessage)
 
-export class Logger {
-  static log(moduleName, message, ...args) {
+export default class Logger {
+  // Выводит обычное сообщение, если журналирование модуля включено.
+  static log(moduleName: ModuleName | string | null | undefined, message?: unknown, ...args: unknown[]) {
     if (LOG_STATUS.IS_DISABLED_LOG) return
 
-    if (enabledModules.has(moduleName)) {
+    if (moduleName && enabledModules.has(moduleName)) {
       console.log(`%c[${moduleName}]`, `color: ${setColor(moduleName)}`, message, ...args)
       return
     }
 
-    if (Object.values(MODULES).includes(moduleName)) return
+    if (moduleName && Object.values(MODULES).includes(moduleName)) return
 
     console.log(`%c[Logger]`, `color: ${setColor(moduleName)}`, moduleName ?? '', message, ...args)
   }
 
-  static warn(moduleName, message, ...args) {
+  // Выводит предупреждение, если журналирование модуля включено.
+  static warn(moduleName: ModuleName | string | null | undefined, message?: unknown, ...args: unknown[]) {
     if (LOG_STATUS.IS_DISABLED_LOG) return
 
-    if (enabledModules.has(moduleName)) {
+    if (moduleName && enabledModules.has(moduleName)) {
       console.warn(`[${moduleName}]`, message, ...args)
       return
     }
 
-    if (Object.values(MODULES).includes(moduleName)) return
+    if (moduleName && Object.values(MODULES).includes(moduleName)) return
 
     console.log(`%c[Logger]`, `color: ${COLORS.warning}`, message, ...args)
   }
+}
+
+export {
+  LOG_STATUS,
+  MODULES,
 }

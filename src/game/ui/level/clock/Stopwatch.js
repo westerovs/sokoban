@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
-import {Logger, MODULES} from '../../../utils/Logger.js'
+import Logger, {MODULES} from '../../../utils/Logger.js'
 
 export const STOPWATCH_LABELS = {
   level: 'level',

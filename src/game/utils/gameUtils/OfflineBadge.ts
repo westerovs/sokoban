@@ -1,9 +1,12 @@
 import i18next from 'i18next'
 
-export default class OfflineBadge {
-  static #instance
-  #badge = null
+// Показывает временное уведомление об отсутствии сетевого подключения.
 
+export default class OfflineBadge {
+  static #instance: OfflineBadge | null = null
+  #badge: HTMLDivElement | null = null
+
+  // Проверяет подключение и показывает уведомление в офлайн-режиме.
   static checkAndShow() {
     if (navigator.onLine) return false
 
@@ -14,6 +17,7 @@ export default class OfflineBadge {
     return true
   }
 
+  // Создаёт и показывает уведомление, затем планирует его удаление.
   #showBadge = () => {
     this.#removeBadge()
     this.#badge = this.#createBadge()
@@ -23,6 +27,7 @@ export default class OfflineBadge {
     window.addEventListener('online', this.#removeBadge, {once: true})
   }
 
+  // Создаёт DOM-элемент уведомления.
   #createBadge = () => {
     const badge = document.createElement('div')
     badge.className = 'offline-badge'
@@ -32,6 +37,7 @@ export default class OfflineBadge {
     return badge
   }
 
+  // Удаляет текущее уведомление со страницы.
   #removeBadge = () => {
     if (this.#badge) {
       this.#badge.remove()

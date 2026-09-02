@@ -1,7 +1,7 @@
 import Locator from '@/game/engine/Locator.ts'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
-import {Logger, MODULES} from '@/game/utils/Logger.js'
+import Logger, {MODULES} from '@/game/utils/Logger.js'
 import type Storage from '@/game/engine/storage/Storage.js'
 import {ASSETS_URL} from '../constants.js'
 import LevelProgress from './LevelProgress.js'

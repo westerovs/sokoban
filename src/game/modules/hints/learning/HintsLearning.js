@@ -8,7 +8,7 @@ import SpeechBubbleView from '@/game/ui/common/speechBubble/SpeechBubbleView.js'
 import {destroyTimeLine, shake} from '@/game/utils/animations/gsapUtils.js'
 import GrayscaleFilter from '@/game/utils/filters/GrayscaleFilter.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
-import {Logger} from '@/game/utils/Logger.js'
+import Logger from '@/game/utils/Logger.js'
 import LearningArrow from './LearningArrow.js'
 import LearningHole from './LearningHole.js'
 
