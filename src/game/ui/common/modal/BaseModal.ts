@@ -315,3 +315,7 @@ export default class BaseModal extends Container {
     this.addChild(header)
   }
 }
+
+export type {
+  BaseModalOptions,
+}

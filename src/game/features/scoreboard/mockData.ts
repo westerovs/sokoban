@@ -1,4 +1,6 @@
-export const mockData = [
+// Содержит тестовые записи таблицы лидеров.
+
+const mockData = [
   {
     id: '28yQ21ULb5LqwMQQnIYzwFHCcjDgQpMKUzcyOZqsL4w=',
     title: 'Александр Гарадзецкийassf',
@@ -71,3 +73,7 @@ export const mockData = [
     rank: 312348,
   },
 ]
+
+export {
+  mockData,
+}

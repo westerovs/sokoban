@@ -2,6 +2,9 @@ import {Container, Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {WORLD} from '@/game/gameConfig/constants.js'
 import PromoCard from './PromoCard.js'
+import type {PromoData, PromoDataCatalog} from './promoTypes.js'
+
+// Отображает все промокарточки рядом для визуальной проверки.
 
 const PREVIEW_CARD_CONFIGS = [
   {promoKey: 'STARTED_PACK', x: -470},
@@ -10,7 +13,8 @@ const PREVIEW_CARD_CONFIGS = [
 ]
 
 export default class PromoCardsTestRenderer {
-  render = (promoData) => {
+  // Добавляет тестовый набор карточек в игровую сцену.
+  render = (promoData: PromoDataCatalog) => {
     const preview = this.#createPreview()
     const cards = this.#createCards(promoData)
 
@@ -18,6 +22,7 @@ export default class PromoCardsTestRenderer {
     Locator.game.view.addChild(preview)
   }
 
+  // Создаёт контейнер предпросмотра карточек.
   #createPreview = () => {
     return new Container({
       label: 'promoCardsPreview',
@@ -26,13 +31,15 @@ export default class PromoCardsTestRenderer {
     })
   }
 
-  #createCards = (promoData) => {
+  // Создаёт карточки из тестовой конфигурации.
+  #createCards = (promoData: PromoDataCatalog) => {
     return PREVIEW_CARD_CONFIGS.map(({promoKey, x}) => {
       return this.#createCard(promoData[promoKey], x)
     })
   }
 
-  #createCard = (promoData, x) => {
+  // Создаёт и размещает одну тестовую карточку.
+  #createCard = (promoData: PromoData, x: number) => {
     const card = new PromoCard({promoData})
     card.label = `${promoData.texture}PreviewCard`
     card.position.x = x
@@ -43,7 +50,8 @@ export default class PromoCardsTestRenderer {
     return card
   }
 
-  #createLabel = (promoData) => {
+  // Создаёт подпись с именем текстуры карточки.
+  #createLabel = (promoData: PromoData) => {
     const label = new Text({
       label: `${promoData.texture}PreviewLabel`,
       text: promoData.texture,

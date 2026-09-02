@@ -2,16 +2,20 @@ import i18next from 'i18next'
 import {Container} from 'pixi.js'
 import {ROW_SIZE} from '@/game/features/scoreboard/ScoreRow.js'
 import BaseModal from '@/game/ui/common/modal/BaseModal.js'
+import type {BaseModalOptions} from '@/game/ui/common/modal/BaseModal.js'
 import Locator from '../../engine/Locator.ts'
 import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
 import StoreCard, {CARD_SIZE, CARDS_DATA} from './StoreCard.js'
 import StoreTopRow from './StoreTopRow.js'
 
-export default class StoreView extends BaseModal {
-  #cardsContainer
-  #cards = []
+// Создаёт модальное представление магазина и сетку товаров.
 
-  constructor(props = {}) {
+export default class StoreView extends BaseModal {
+  #cardsContainer!: Container
+  #cards: StoreCard[] = []
+
+  // Создаёт окно магазина с заголовком.
+  constructor(props: BaseModalOptions = {}) {
     super({h: 648, w: 420, isNeedHeader: true, ...props})
 
     this.label = 'storeView'
@@ -20,52 +24,61 @@ export default class StoreView extends BaseModal {
     this.#setHeaderText()
   }
 
+  // Возвращает контейнер карточек товаров.
   get cardsContainer() {
     return this.#cardsContainer
   }
 
+  // Вычисляет вертикальную позицию первого ряда карточек.
   get startPositionYFirstRow() {
-    const halfHeaderHeight = this.header.height / 2
+    const halfHeaderHeight = this.header!.height / 2
     const halfViewHeight = this.rect.height / 2
 
     return halfViewHeight + halfHeaderHeight - ROW_SIZE.rowHeight
   }
 
+  // Возвращает созданные карточки товаров.
   get cards() {
     return this.#cards
   }
 
+  // Закрывает магазин и отправляет событие.
   async hide() {
     await super.hide()
     Locator.game.emit(GAME_EVENTS.STORE.hide)
   }
 
+  // Центрирует магазин в UI-слое.
   updateAdaptive = () => {
     const {x, y} = Locator.uiLayer.uiData.center
     this.position.set(x, y)
   }
 
+  // Создаёт содержимое магазина.
   createContent() {
     this.#createCardsContainer()
     this.#createStoreTopRow()
     this.#createCards()
   }
 
+  // Устанавливает локализованный заголовок магазина.
   #setHeaderText = () => {
     if (!this.headerText) return
     this.headerText.text = `${i18next.t('btnStore')}`
   }
 
+  // Создаёт строку счётчиков над товарами.
   #createStoreTopRow = () => {
     const storeTopRow = new StoreTopRow(this)
     const startPositionY = this.startPositionYFirstRow
-    storeTopRow.y = -(startPositionY - this.header.height + 6)
+    storeTopRow.y = -(startPositionY - this.header!.height + 6)
 
     this.addChild(storeTopRow)
   }
 
+  // Создаёт контейнер сетки карточек.
   #createCardsContainer = () => {
-    this.#cardsContainer = new Container()
+    this.#cardsContainer = new Container({label: 'store-cards'})
     const startPositionY = this.startPositionYFirstRow
 
     const posX = CARD_SIZE.width + CARD_SIZE.gap
@@ -74,13 +87,14 @@ export default class StoreView extends BaseModal {
     this.addChild(this.#cardsContainer)
   }
 
+  // Создаёт и раскладывает карточки товаров.
   #createCards = () => {
     const cardsData = Object.values(CARDS_DATA)
     const maxColumns = 3
 
     for (let i = 0; i < cardsData.length; i++) {
       const card = new StoreCard({view: this.view, ...cardsData[i]})
-      this.#cardsContainer.addChild(card)
+      this.#cardsContainer.addChild(card as unknown as Container)
       this.#cards.push(card)
 
       const currentRowIndex = Math.floor(i / maxColumns)
@@ -90,6 +104,7 @@ export default class StoreView extends BaseModal {
     }
   }
 
+  // Сохраняет заготовку будущего счётчика монет.
   storeCoins = () => {
     // <Container name={'counterCoins'} x={frameSize.halfW + cardSize.width + (gap - 2)} y={110}>
     //   <Sprite x={35} texture={'store-icon-small'} anchor={{x: 0, y: 0.5}}/>
