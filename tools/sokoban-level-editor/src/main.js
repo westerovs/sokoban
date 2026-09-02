@@ -1,11 +1,14 @@
 import {Application, Assets} from 'pixi.js'
 import {SOKOBAN_TILE_CATALOG} from '@/game/generatedAssets/sokobanTileCatalog.js'
+import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
 import {getLevelAppearance} from './appearanceState.js'
-import {checkLevelSolvability, loadEditorData, saveEditorLevel, storeLevelDraft} from './editorApi.js'
+import {checkLevelSolvability, generateEditorLevel, loadEditorData, saveEditorLevel, storeLevelDraft} from './editorApi.js'
 import EditorBoard from './EditorBoard.js'
+import {expandEditorState} from './editorGrid.js'
 import EditorPalette from './EditorPalette.js'
 import EditorSession from './EditorSession.js'
 import {applyEditorBrush} from './levelEditing.js'
+import LevelGeneratorPanel from './LevelGeneratorPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
 import ValidationPanel from './ValidationPanel.js'
@@ -18,9 +21,13 @@ const elements = {
   brushLabel: document.querySelector('#brush-label'),
   canvasHost: document.querySelector('#canvas-host'),
   emptyState: document.querySelector('#empty-state'),
+  generatorPanel: document.querySelector('#generator-panel'),
+  generatorTab: document.querySelector('#generator-tab'),
   launchButton: document.querySelector('#launch-button'),
   levelSelect: document.querySelector('#level-select'),
   locationSelect: document.querySelector('#location-select'),
+  manualToolsPanel: document.querySelector('#manual-tools-panel'),
+  manualToolsTab: document.querySelector('#manual-tools-tab'),
   modeTabs: document.querySelector('#mode-tabs'),
   palette: document.querySelector('#palette'),
   redoButton: document.querySelector('#redo-button'),
@@ -35,8 +42,10 @@ const elements = {
 
 let board
 let editorData
+let generatorPanel
 let palette
 let selectedLevel = null
+let selectedBrushLabel = 'Выберите кисть'
 let session = null
 let statusTimer = null
 let validationPanel
@@ -67,6 +76,7 @@ const renderSession = () => {
   elements.undoButton.disabled = !session.canUndo
   elements.redoButton.disabled = !session.canRedo
   elements.saveButton.dataset.dirty = String(session.isDirty)
+  generatorPanel?.setCurrentLevel(getExportState())
 }
 
 // Открывает выбранный уровень на полном рабочем поле редактора.
@@ -82,6 +92,7 @@ const updateSelectedLevel = (level) => {
   session = new EditorSession(level, appearance)
   history.replaceState(null, '', `?level=${encodeURIComponent(level.id)}`)
   renderSession()
+  generatorPanel?.setCurrentLevel(getExportState(), {syncDimensions: true})
 }
 
 // Разрешает смену уровня либо просит подтвердить потерю изменений.
@@ -99,7 +110,63 @@ const handlePaint = ({brush, position}) => {
 // Передаёт выбранную кисть доске и обновляет подпись интерфейса.
 const selectBrush = (brush) => {
   board.setBrush(brush)
-  elements.brushLabel.textContent = brush.label
+  selectedBrushLabel = brush.label
+  if (!elements.manualToolsPanel.hidden) elements.brushLabel.textContent = selectedBrushLabel
+}
+
+// Оставляет оформление стен и пола при перестановке игровых объектов.
+const getStructuralAppearance = (appearance) => {
+  return Object.fromEntries(['wall', 'floor'].filter((role) => appearance[role]).map((role) => [role, structuredClone(appearance[role])]))
+}
+
+// Создаёт полное состояние редактора из компактного результата генератора.
+const createGeneratedState = (result, preserveTopology) => {
+  const appearance = preserveTopology ? getStructuralAppearance(getExportState().appearance) : {}
+  const level = {id: selectedLevel.id, map: result.map}
+  return expandEditorState(level, appearance, SOKOBAN_SETTINGS.maxBoardColumns, SOKOBAN_SETTINGS.maxBoardRows)
+}
+
+// Применяет всю сгенерированную головоломку одним шагом истории.
+const applyGenerationResult = (result, preserveTopology) => {
+  const nextState = createGeneratedState(result, preserveTopology)
+  if (!session.apply(nextState)) return false
+  renderSession()
+  return true
+}
+
+// Возвращает краткое описание результата автогенерации.
+const getGenerationMessage = (stats) => {
+  const solution = stats.minimumPushes
+    ? `минимум ${stats.minimumPushes} толчков`
+    : `решение гарантировано за ${stats.solutionPushes} толчков`
+  return `Создан уровень ${stats.width}×${stats.height}, ящиков: ${stats.boxCount}, ${solution}`
+}
+
+// Запрашивает генерацию и применяет результат к текущему открытому уровню.
+const generateLevel = async (options) => {
+  if (!session) return null
+  const {preserveTopology, ...request} = options
+  if (preserveTopology) request.topology = getExportState().map
+  showStatus(preserveTopology ? 'Переставляем объекты, стены останутся прежними…' : 'Создаём структуру и ищем сложную задачу…')
+  try {
+    const result = await generateEditorLevel(request)
+    applyGenerationResult(result, preserveTopology)
+    showStatus(getGenerationMessage(result.stats))
+    return result.stats
+  } catch (error) {
+    showStatus(error.message, 'error')
+    return null
+  }
+}
+
+// Переключает ручные инструменты и вкладку автогенерации.
+const selectSidebarPanel = (mode) => {
+  const isGenerator = mode === 'generator'
+  elements.manualToolsPanel.hidden = isGenerator
+  elements.generatorPanel.hidden = !isGenerator
+  elements.manualToolsTab.ariaSelected = String(!isGenerator)
+  elements.generatorTab.ariaSelected = String(isGenerator)
+  elements.brushLabel.textContent = isGenerator ? 'Автогенерация' : selectedBrushLabel
 }
 
 // Проверяет текущую карту и показывает ошибки перед внешним действием.
@@ -246,7 +313,16 @@ const handleKeyboard = (event) => {
   if (isEditableTarget(event.target)) return
   if (handleControlShortcut(event)) return event.preventDefault()
   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
-  if (['1', '2', '3', '4'].includes(event.key)) palette.selectModeByShortcut(event.key)
+  if (['1', '2', '3', '4'].includes(event.key)) {
+    selectSidebarPanel('manual')
+    palette.selectModeByShortcut(event.key)
+  }
+}
+
+// Подключает переключатели ручного режима и автогенерации.
+const bindSidebarTabs = () => {
+  elements.manualToolsTab.addEventListener('click', () => selectSidebarPanel('manual'))
+  elements.generatorTab.addEventListener('click', () => selectSidebarPanel('generator'))
 }
 
 // Подключает кнопки интерфейса и защиту несохранённой сессии.
@@ -271,6 +347,7 @@ const init = async () => {
     validationPanel = new ValidationPanel(elements.validationSummary)
     await createBoard()
     palette = new EditorPalette(elements.utilityPalette, elements.modeTabs, elements.palette, SOKOBAN_TILE_CATALOG, selectBrush)
+    generatorPanel = new LevelGeneratorPanel(elements.generatorPanel, generateLevel)
     const navigation = new LevelNavigation(
       elements.locationSelect,
       elements.levelSelect,
@@ -280,6 +357,7 @@ const init = async () => {
     )
     palette.selectDefault()
     navigation.selectLevel(new URLSearchParams(location.search).get('level'))
+    bindSidebarTabs()
     bindActions()
   } catch (error) {
     console.error('[SokobanLevelEditor]: initialization failed', error)

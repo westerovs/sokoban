@@ -6,6 +6,7 @@ import process from 'node:process'
 import prettier from 'prettier'
 import {getSokobanTileSourcePath} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {parseXsb, serializeXsb, toRuntimeMap, toStandardMap} from '../sokoban-levels/xsbFormat.mjs'
+import {generateSokobanLevel} from './generator/generateSokobanLevel.mjs'
 import {solveSokoban} from './solver.mjs'
 
 /**
@@ -13,8 +14,9 @@ import {solveSokoban} from './solver.mjs'
  */
 
 const DATA_API_PATH = '/__sokoban-level-editor/data' // Путь API чтения и сохранения уровней
+const GENERATOR_API_PATH = '/__sokoban-level-editor/generate' // Путь API процедурной генерации
 const SOLVER_API_PATH = '/__sokoban-level-editor/solve' // Путь API проверки решаемости
-const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|floor|box|target)\/([^/]+)\.png$/
+const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|floor|box|target)\/([^/]+)\.png$/ // Шаблон адреса исходного тайла
 const MAX_BODY_SIZE = 1024 * 1024 // Максимальный размер запроса редактора в байтах
 
 // Выполняет отдельную операцию `sendJson`.
@@ -168,6 +170,13 @@ const handleSolverRequest = async (request, response) => {
   sendJson(response, 200, solveSokoban(map))
 }
 
+// Обрабатывает запрос создания новой головоломки.
+const handleGeneratorRequest = async (request, response) => {
+  if (request.method !== 'POST') return sendJson(response, 405, {error: 'Method not allowed'})
+  const options = JSON.parse(await readBody(request))
+  sendJson(response, 200, generateSokobanLevel(options))
+}
+
 // Создаёт данные или представление для операции `createPaths`.
 const createPaths = (projectRoot) => ({
   projectRoot,
@@ -196,9 +205,10 @@ const tryServeTile = (request, response, projectRoot) => {
 // Обрабатывает событие, за которое отвечает операция `handleEditorApi`.
 const handleEditorApi = async (request, response, next, paths) => {
   const requestPath = request.url?.split('?')[0]
-  if (![DATA_API_PATH, SOLVER_API_PATH].includes(requestPath)) return next()
+  if (![DATA_API_PATH, GENERATOR_API_PATH, SOLVER_API_PATH].includes(requestPath)) return next()
   try {
     if (requestPath === DATA_API_PATH) await handleDataRequest(request, response, paths)
+    else if (requestPath === GENERATOR_API_PATH) await handleGeneratorRequest(request, response)
     else await handleSolverRequest(request, response)
   } catch (error) {
     console.error('[SokobanLevelEditor]: request failed', error)
@@ -228,4 +238,6 @@ const createSokobanLevelEditorPlugin = (projectRoot) => {
   }
 }
 
-export {createSokobanLevelEditorPlugin}
+export {
+  createSokobanLevelEditorPlugin, // Подключение API редактора к Vite
+}

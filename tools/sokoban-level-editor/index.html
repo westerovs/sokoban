@@ -44,9 +44,16 @@
           <span class="editor-sidebar__caption">Инструмент</span>
           <strong id="brush-label">Выберите кисть</strong>
         </div>
-        <div id="utility-palette" class="editor-utility-palette"></div>
-        <div id="mode-tabs" class="editor-mode-tabs"></div>
-        <div id="palette" class="editor-palette"></div>
+        <div class="editor-sidebar-tabs" role="tablist" aria-label="Режим редактора">
+          <button id="manual-tools-tab" type="button" role="tab" aria-selected="true">Редактирование</button>
+          <button id="generator-tab" type="button" role="tab" aria-selected="false">Автогенерация</button>
+        </div>
+        <div id="manual-tools-panel" role="tabpanel">
+          <div id="utility-palette" class="editor-utility-palette"></div>
+          <div id="mode-tabs" class="editor-mode-tabs"></div>
+          <div id="palette" class="editor-palette"></div>
+        </div>
+        <section id="generator-panel" class="editor-generator" role="tabpanel" hidden></section>
         <section class="editor-validation">
           <div class="editor-sidebar__caption">Проверка структуры</div>
           <div id="validation-summary" class="editor-validation__summary"></div>

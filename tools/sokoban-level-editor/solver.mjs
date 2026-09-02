@@ -9,8 +9,10 @@ const DIRECTIONS = Object.freeze([
   {x: -1, y: 0},
 ])
 
-const MAX_STATES = 150000 // Максимальное количество исследуемых состояний
-const MAX_DURATION_MS = 4000 // Максимальная длительность поиска решения в миллисекундах
+const DEFAULT_SOLVER_LIMITS = Object.freeze({
+  maxStates: 150000, // Максимальное количество исследуемых состояний
+  maxDurationMs: 4000, // Максимальная длительность поиска решения в миллисекундах
+})
 
 // Выполняет отдельную операцию `toIndex`.
 const toIndex = (x, y, width) => y * width + x
@@ -66,7 +68,9 @@ const getReachable = (player, boxes, board) => {
 // Создаёт данные или представление для операции `createStateKey`.
 const createStateKey = (player, boxes, board) => {
   const reachableAnchor = Math.min(...getReachable(player, boxes, board))
-  return `${Array.from(boxes).sort((first, second) => first - second).join(',')}|${reachableAnchor}`
+  return `${Array.from(boxes)
+    .sort((first, second) => first - second)
+    .join(',')}|${reachableAnchor}`
 }
 
 // Проверяет условие, описанное операцией `isSolved`.
@@ -110,13 +114,14 @@ const getNextStates = (state, board) => {
 }
 
 // Создаёт данные или представление для операции `createLimitResult`.
-const createLimitResult = (explored, startedAt) => {
-  const reason = explored >= MAX_STATES ? 'state-limit' : 'time-limit'
+const createLimitResult = (explored, startedAt, limits) => {
+  const reason = explored >= limits.maxStates ? 'state-limit' : 'time-limit'
   return {status: 'limit', reason, explored, durationMs: Date.now() - startedAt}
 }
 
 // Ищет решение карты в пределах заданных ограничений.
-const solveSokoban = (map) => {
+const solveSokoban = (map, options = {}) => {
+  const limits = {...DEFAULT_SOLVER_LIMITS, ...options}
   const board = parseMap(map)
   const initial = {player: board.player, boxes: board.boxes, pushes: 0}
   const queue = [initial]
@@ -126,7 +131,9 @@ const solveSokoban = (map) => {
   for (let index = 0; index < queue.length; index++) {
     const state = queue[index]
     if (isSolved(state.boxes, board.targets)) return {status: 'solved', pushes: state.pushes, explored: visited.size}
-    if (visited.size >= MAX_STATES || Date.now() - startedAt >= MAX_DURATION_MS) return createLimitResult(visited.size, startedAt)
+    if (visited.size >= limits.maxStates || Date.now() - startedAt >= limits.maxDurationMs) {
+      return createLimitResult(visited.size, startedAt, limits)
+    }
     getNextStates(state, board).forEach((nextState) => {
       const key = createStateKey(nextState.player, nextState.boxes, board)
       if (visited.has(key)) return
@@ -138,5 +145,5 @@ const solveSokoban = (map) => {
 }
 
 export {
-  solveSokoban,
+  solveSokoban, // Поиск минимального числа толчков
 }

@@ -2,8 +2,9 @@
  * Связывает браузерный редактор с API сохранения, решателя и запуска черновика.
  */
 
-const EDITOR_API_URL = '/__sokoban-level-editor/data'
-const SOLVER_API_URL = '/__sokoban-level-editor/solve'
+const EDITOR_API_URL = '/__sokoban-level-editor/data' // Путь чтения и сохранения данных редактора
+const GENERATOR_API_URL = '/__sokoban-level-editor/generate' // Путь процедурной генерации уровня
+const SOLVER_API_URL = '/__sokoban-level-editor/solve' // Путь отдельной проверки решаемости
 const DRAFT_STORAGE_PREFIX = 'sokoban-level-editor-draft:' // Префикс временных черновиков в общем хранилище вкладок
 
 // Разбирает входные данные через операцию `parseResponse`.
@@ -38,6 +39,16 @@ const checkLevelSolvability = async (map) => {
   return await parseResponse(response)
 }
 
+// Запрашивает решаемую головоломку с новой или переданной структурой стен.
+const generateEditorLevel = async (options) => {
+  const response = await fetch(GENERATOR_API_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(options),
+  })
+  return await parseResponse(response)
+}
+
 // Создаёт уникальный идентификатор для одной вкладки черновика.
 const createDraftToken = () => {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
@@ -50,4 +61,10 @@ const storeLevelDraft = (levelId, map, appearance) => {
   return token
 }
 
-export {checkLevelSolvability, loadEditorData, saveEditorLevel, storeLevelDraft}
+export {
+  checkLevelSolvability, // Проверка карты решателем
+  generateEditorLevel, // Процедурная генерация карты
+  loadEditorData, // Загрузка каталога уровней
+  saveEditorLevel, // Перезапись открытого уровня
+  storeLevelDraft, // Передача черновика в игровую вкладку
+}
