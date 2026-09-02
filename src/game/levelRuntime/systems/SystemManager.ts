@@ -1,17 +1,31 @@
 import AdLvlTimer from '../../features/AdLvlTimer.js'
+import type EntityManager from '../entities/EntityManager.js'
 import MetrikaSystem from './MetrikaSystem.js'
 import RenderSystem from './RenderSystem.js'
 
-export default class SystemManager {
-  #levelEntity
-  systems = new Map()
-  entityManager
+// Создаёт и координирует системы текущего уровня.
 
-  constructor(levelEntity) {
+type LevelEntity = {
+  entityManager: EntityManager
+}
+
+type ManagedSystem = {
+  init: () => void
+  destroy?: () => void
+}
+
+export default class SystemManager {
+  #levelEntity: LevelEntity
+  systems = new Map<string, ManagedSystem>()
+  entityManager: EntityManager
+
+  // Сохраняет сущность уровня и её менеджер сущностей.
+  constructor(levelEntity: LevelEntity) {
     this.#levelEntity = levelEntity
     this.entityManager = levelEntity.entityManager
   }
 
+  // Создаёт системы и передаёт сущности системе рендера.
   initSystems() {
     this.systems.set('adLvlTimer', new AdLvlTimer(this.#levelEntity))
     this.systems.set('metrikaSystem', new MetrikaSystem(this.#levelEntity))
@@ -27,7 +41,8 @@ export default class SystemManager {
     this.systems.forEach((system) => system.init())
   }
 
-  removeSystem(systemName) {
+  // Уничтожает и удаляет систему по имени.
+  removeSystem(systemName: string) {
     const system = this.systems.get(systemName)
 
     if (system && system.destroy) {
@@ -36,6 +51,7 @@ export default class SystemManager {
     }
   }
 
+  // Уничтожает все зарегистрированные системы.
   removeAllSystems() {
     this.systems.forEach((_, key) => this.removeSystem(key))
     this.systems.clear()

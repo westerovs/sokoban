@@ -1,22 +1,32 @@
 import BackgroundComponent from '@/game/levelRuntime/components/BackgroundComponent.js'
 import Entity from '@/game/levelRuntime/entities/Entity.js'
 
-export default class EntityManager {
-  #config
-  #entities = new Map()
+// Создаёт и хранит сущности текущего уровня.
 
-  constructor(config) {
+type EntityManagerConfig = {
+  bgTexture: string
+}
+
+export default class EntityManager {
+  #config: EntityManagerConfig
+  #entities = new Map<string, Entity>()
+
+  // Сохраняет конфигурацию сущностей уровня.
+  constructor(config: EntityManagerConfig) {
     this.#config = config
   }
 
+  // Возвращает коллекцию созданных сущностей.
   get entities() {
     return this.#entities
   }
 
+  // Создаёт все сущности уровня.
   createEntities = async () => {
     await this.#createBackgroundEntity()
   }
 
+  // Создаёт сущность фонового изображения.
   #createBackgroundEntity = async () => {
     const textureName = this.#config.bgTexture
 
@@ -30,7 +40,8 @@ export default class EntityManager {
     return Promise.resolve()
   }
 
-  #findEntity = (id) => {
+  // Находит сущность по идентификатору.
+  #findEntity = (id: string) => {
     return this.#entities.get(id)
   }
 }

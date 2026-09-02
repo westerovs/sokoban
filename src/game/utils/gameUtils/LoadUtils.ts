@@ -2,7 +2,7 @@ import {Assets, Texture} from 'pixi.js'
 import type {SpritesheetData} from 'pixi.js'
 import SdkManager from '../../engine/SdkManager.js'
 import {ASSETS_URL} from '../../gameConfig/constants.js'
-import {getAtlasResolutionSuffix} from '../../gameConfig/resolutionConfig.mjs'
+import {getAtlasResolutionSuffix} from '../../gameConfig/resolutionConfig.js'
 import {CACHE_VERSION} from '../../generatedAssets/buildMeta.js'
 import GameUtils from './GameUtils.js'
 

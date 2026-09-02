@@ -1,4 +1,4 @@
-import {ATLAS_RESOLUTIONS} from '../../gameConfig/resolutionConfig.mjs'
+import {ATLAS_RESOLUTIONS} from '../../gameConfig/resolutionConfig.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
 
 /**

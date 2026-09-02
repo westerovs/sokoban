@@ -2,7 +2,7 @@ import {Application, EventEmitter} from 'pixi.js'
 import GameContainer from '@/game/engine/GameContainer.js'
 import UiLayer from '@/game/engine/uiLayer/UiLayer.ts'
 // other
-import {getGameResolution} from '@/game/gameConfig/resolutionConfig.mjs'
+import {getGameResolution} from '@/game/gameConfig/resolutionConfig.js'
 import LiveOpsController from './components/liveOpsController/LiveOpsController.js'
 import SoundManager from './engine/audio/SoundManager.js'
 import GameResize from './engine/GameResize.ts'

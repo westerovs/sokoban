@@ -5,7 +5,7 @@
  * 2 — atlas@2x.webp
  * 3 — atlas@3x.webp
  */
-const ATLAS_RESOLUTION = 2
+const ATLAS_RESOLUTION = 2 // Основное разрешение игровых атласов.
 
 // Разрешение canvas не может быть ниже качества выбранного атласа.
 // devicePixelRatio передаётся снаружи, чтобы конфиг можно было импортировать в Node.js (AssetPack).
@@ -27,8 +27,8 @@ const getGameResolution = (devicePixelRatio = 1) => {
  * }
  */
 const ATLAS_RESOLUTIONS = {
-  default: 2,
-  low: 1,
+  default: 2, // Разрешение для качественного режима.
+  low: 1, // Разрешение для экономного режима.
 }
 
 const availableResolutions = Object.values(ATLAS_RESOLUTIONS)
@@ -43,4 +43,9 @@ const getAtlasResolutionSuffix = (resolution = ATLAS_RESOLUTION) => {
   return resolution === 1 ? '' : `@${resolution}x`
 }
 
-export {ATLAS_RESOLUTION, ATLAS_RESOLUTIONS, getGameResolution, getAtlasResolutionSuffix}
+export {
+  ATLAS_RESOLUTION,
+  ATLAS_RESOLUTIONS,
+  getAtlasResolutionSuffix,
+  getGameResolution,
+}
