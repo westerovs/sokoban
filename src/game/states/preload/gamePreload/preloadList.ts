@@ -3,12 +3,16 @@ import Locator from '../../../engine/Locator.ts'
 import {ASSETS_URL, GAME_NAMES} from '../../../gameConfig/constants.js'
 import {GAME_NAME} from '../../../generatedAssets/buildMeta.js'
 
+// Формирует манифест основных ресурсов и фоновых шрифтов игры.
+
+// Создаёт манифест ресурсов главного экрана.
 const createPreloadList = () => {
   const basePath = ASSETS_URL.local
-  const isHotel = GAME_NAME === GAME_NAMES.hotel
+  const isHotel = String(GAME_NAME) === GAME_NAMES.hotel
   const secondaryFontName = isHotel ? 'primaryFont' : 'secondaryFont'
-  const locationAssetNames = ['antarctica', 'factory', 'forest', 'garden', 'garden2', 'mine']
+  const locationAssetNames = ['antarctica', 'factory', 'forest', 'garden', 'garden2', 'mine'] // Имена ресурсов игровых локаций
 
+  // Создаёт ресурс стартового фона с учётом активного события.
   const createBackgroundAsset = () => {
     const isNewYear = Locator.liveOps.isActive(LIVE_OPS_ID.NEW_YEAR)
     const src = isNewYear ? `${basePath}assets/_events/newYear/images/startScreen.webp` : `${basePath}assets/images/startScreen.webp`

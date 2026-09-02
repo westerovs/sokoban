@@ -243,7 +243,8 @@ export default class GameUtils {
     return SdkManager.flags?.skipAdInFirstLevel && levelIndex === 0
   }
 
-  static showTextPreloadAttempts = async (preloadText: Text | null, attempts: number, maxAttempts: number, err: unknown) => {
+  // Показывает ошибку загрузки и выдерживает паузу перед следующей попыткой.
+  static showTextPreloadAttempts = async (preloadText: Text | null, attempts: number, maxAttempts: number, err?: unknown) => {
     const baseDelay = 3000 // первая попытка — 1 секунда
     const delay = baseDelay * attempts // вторая — 2с, третья — 3с и т.д.
 

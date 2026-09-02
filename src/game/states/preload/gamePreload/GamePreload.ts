@@ -1,5 +1,5 @@
 import i18next from 'i18next'
-import {Assets} from 'pixi.js'
+import {Assets, Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.js'
 import GamePause from '../../../components/GamePause.js'
 import {LIVE_OPS_ID} from '../../../components/liveOpsController/LiveOpsController.js'
@@ -20,21 +20,23 @@ import DebugInfo from '../../../utils/testing/DebugInfo.js'
 import BaseState from '../../BaseState.js'
 import PreloadView from '../PreloadView.js'
 import {createPreloadList} from './preloadList.js'
+import type Game from '../../../Game.js'
+import type {SdkAdapter} from '../../../engine/sdkTypes.js'
 
 /**
  * Загружает обязательные ресурсы игры и подготавливает стартовое состояние.
  */
 
 export default class GamePreload extends BaseState {
-  #view
-  #preloadText
-  #startTime
-  #adapter
-  #loadAttempts = 0
+  #view: PreloadView | null = null
+  #preloadText: Text | null = null
+  #startTime = 0
+  #adapter: SdkAdapter
+  #loadAttempts = 0 // Текущее количество попыток загрузки
   #maxLoadAttempts = 3 // Максимальное количество повторов после ошибки загрузки
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(game, adapter) {
+  constructor(game: Game, adapter: SdkAdapter) {
     super(game)
 
     this.#adapter = adapter
@@ -62,7 +64,8 @@ export default class GamePreload extends BaseState {
 
   // Пересчитывает размеры и расположение представления.
   async resize() {
-    await this.#view?.resize()
+    const view = this.#view as (PreloadView & {resize?: () => void | Promise<void>}) | null
+    await view?.resize?.()
   }
 
   // Возвращает данные, за которые отвечает операция `load`.
@@ -94,22 +97,22 @@ export default class GamePreload extends BaseState {
   }
 
   // Обрабатывает событие, за которое отвечает операция `handleLoadError`.
-  #handleLoadError = async (err) => {
-    console.error('[GamePreload load]', err)
+  #handleLoadError = async (err: unknown) => {
+    console.error('[GamePreload]: load failed', err)
     this.#loadAttempts++
 
     // Показываем статус + ждём задержку, увеличивая её на каждую попытку
     await GameUtils.showTextPreloadAttempts(this.#preloadText, this.#loadAttempts, this.#maxLoadAttempts, err)
 
     if (this.#loadAttempts < this.#maxLoadAttempts) return true
-    console.error(`[MODULES.GamePreload] initialize error: ${err}`)
+    console.error(`[GamePreload]: initialize failed: ${err}`)
     YaMetrika.preloadError(ERROR_TYPES?.GAME_PRELOAD?.initialize, err)
 
     return false
   }
 
   // Возвращает данные, за которые отвечает операция `loadGameBundle`.
-  #loadGameBundle = async (progress) => {
+  #loadGameBundle = async (progress: number) => {
     await Assets.init({manifest: createPreloadList()})
     await Assets.loadBundle('gameScreen')
 
@@ -117,7 +120,7 @@ export default class GamePreload extends BaseState {
   }
 
   // Загружает SDK, локализации и основной набор игровых ресурсов.
-  #loadSdkAndLocales = async (progress) => {
+  #loadSdkAndLocales = async (progress: number) => {
     const sdkPromise = SdkManager.initSdk(this.#adapter)
     const localesPromise = Locator.gameConfig.loadLocalesJson()
 
@@ -130,7 +133,7 @@ export default class GamePreload extends BaseState {
   }
 
   // Загружает сохранения игрока и подготавливает платежи.
-  #loadStorageAndPayments = async (progress) => {
+  #loadStorageAndPayments = async (progress: number) => {
     await Locator.storage.load()
     await Locator.paymentManager.consumePendingPayments()
     this.#updateProgressView(progress)
@@ -145,7 +148,7 @@ export default class GamePreload extends BaseState {
 
   // Выполняет отдельную операцию `initView`.
   #initView = () => {
-    this.#view = new PreloadView(this.game)
+    this.#view = new PreloadView()
     this.game.gameContainer.addChild(this.#view)
     this.#updateProgressView(0)
 
@@ -154,7 +157,7 @@ export default class GamePreload extends BaseState {
   }
 
   // Обновляет состояние через операцию `updateProgressView`.
-  #updateProgressView = (progress) => {
+  #updateProgressView = (progress: number) => {
     const preloadText = this.#view?.refs?.preloadText
     if (!this.#view || !preloadText) return
 
@@ -214,7 +217,7 @@ export default class GamePreload extends BaseState {
   terminate() {
     this.game.emit(GAME_EVENTS.clearLevel)
 
-    this.#view.destroy({children: true})
+    this.#view?.destroy({children: true})
     this.#view = null
 
     this.isInitialized = false
