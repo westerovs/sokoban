@@ -1,4 +1,5 @@
 import {getLevelEntryById} from '../../gameConfig/levels/locationCatalog.js'
+import type {LevelAppearance} from '../../gameConfig/levels/levelTypes.js'
 
 /**
  * Подменяет выбранный уровень несохранённым черновиком редактора.
@@ -7,20 +8,30 @@ import {getLevelEntryById} from '../../gameConfig/levels/locationCatalog.js'
 const DRAFT_QUERY_PARAMETER = 'sokobanDraft' // Параметр URL с идентификатором запускаемого черновика
 const DRAFT_STORAGE_PREFIX = 'sokoban-level-editor-draft:' // Префикс черновиков в общем хранилище вкладок
 
+type SokobanLevelDraft = {
+  levelId: string
+  map: string[]
+  appearance: LevelAppearance
+}
+
 // Читает указанный черновик из локального хранилища браузера.
-const readDraft = (token) => {
+const readDraft = (token: string): unknown => {
   try {
-    return JSON.parse(localStorage.getItem(`${DRAFT_STORAGE_PREFIX}${token}`))
+    const serializedDraft = localStorage.getItem(`${DRAFT_STORAGE_PREFIX}${token}`)
+    return serializedDraft ? JSON.parse(serializedDraft) : null
   } catch {
     return null
   }
 }
 
 // Проверяет структуру и принадлежность сохранённого черновика.
-const isValidDraft = (draft, levelId) => {
-  const hasMap = Array.isArray(draft?.map) && draft.map.length > 0 && draft.map.every((row) => typeof row === 'string')
-  const hasAppearance = draft?.appearance && typeof draft.appearance === 'object' && !Array.isArray(draft.appearance)
-  return draft?.levelId === levelId && hasMap && hasAppearance
+const isValidDraft = (draft: unknown, levelId: string): draft is SokobanLevelDraft => {
+  if (!draft || typeof draft !== 'object' || Array.isArray(draft)) return false
+
+  const candidate = draft as Partial<SokobanLevelDraft>
+  const hasMap = Array.isArray(candidate.map) && candidate.map.length > 0 && candidate.map.every((row) => typeof row === 'string')
+  const hasAppearance = candidate.appearance && typeof candidate.appearance === 'object' && !Array.isArray(candidate.appearance)
+  return candidate.levelId === levelId && Boolean(hasMap && hasAppearance)
 }
 
 // Показывает поверх игры HTML-плашку режима черновика.
@@ -29,7 +40,7 @@ const showDraftBanner = () => {
 }
 
 // Применяет подходящий черновик к выбранному игровому уровню.
-const applySokobanLevelDraft = (levelId, searchParams) => {
+const applySokobanLevelDraft = (levelId: string, searchParams: URLSearchParams) => {
   const token = searchParams.get(DRAFT_QUERY_PARAMETER)
   if (!token) return false
   const draft = readDraft(token)
@@ -44,4 +55,6 @@ const applySokobanLevelDraft = (levelId, searchParams) => {
   return true
 }
 
-export {applySokobanLevelDraft}
+export {
+  applySokobanLevelDraft,
+}

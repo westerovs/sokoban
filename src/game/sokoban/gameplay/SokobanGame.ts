@@ -1,36 +1,50 @@
 import {Container} from 'pixi.js'
+import type {DestroyOptions} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
+import type {LevelAppearance} from '@/game/gameConfig/levels/levelTypes.js'
+import type {SokobanDirectionName} from '../config/config.js'
 import SokobanDpad from '../input/SokobanDpad.js'
 import SokobanInput from '../input/SokobanInput.js'
 import SokobanBoard from '../rendering/SokobanBoard.js'
 import SokobanHud from '../ui/SokobanHud.js'
 import SokobanLevel from './SokobanLevel.js'
+import type {SokobanMoveResult} from './SokobanLevel.js'
 
 /**
  * Координирует модель, ввод и представление одной игровой сессии Sokoban.
  */
 
+type SokobanGameOptions = {
+  map: string[]
+  appearance?: LevelAppearance
+  levelNumber: number
+  pushRecord?: number
+  onComplete?: () => void
+  onMove?: () => void
+  canMove?: () => boolean
+}
+
 export default class SokobanGame extends Container {
-  #map
-  #appearance
-  #levelNumber
-  #pushRecord
-  #onComplete
-  #onMove
-  #canMove
-  #level
-  #board
-  #hud
-  #dpad
-  #input
-  #dpadVisibilityHandler
+  #map: string[]
+  #appearance: LevelAppearance
+  #levelNumber: number
+  #pushRecord?: number
+  #onComplete?: () => void
+  #onMove?: () => void
+  #canMove?: () => boolean
+  #level!: SokobanLevel
+  #board!: SokobanBoard
+  #hud!: SokobanHud
+  #dpad!: SokobanDpad
+  #input!: SokobanInput
+  #dpadVisibilityHandler!: (isVisible: boolean) => void
   #isInputEnabled = false
   #isAnimatingMove = false
-  #heldDirection = null
+  #heldDirection: SokobanDirectionName | null = null
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({map, appearance, levelNumber, pushRecord, onComplete, onMove, canMove}) {
+  constructor({map, appearance = {}, levelNumber, pushRecord, onComplete, onMove, canMove}: SokobanGameOptions) {
     super({label: 'sokoban-game'})
 
     this.#map = map
@@ -44,12 +58,12 @@ export default class SokobanGame extends Container {
   }
 
   // Пытается выполнить перемещение в заданном направлении.
-  move(direction) {
+  move(direction: SokobanDirectionName) {
     return this.#startMove(direction, null)
   }
 
   // Включает или отключает все способы управления уровнем.
-  setInputEnabled(isEnabled) {
+  setInputEnabled(isEnabled: boolean) {
     this.#isInputEnabled = isEnabled
     this.#input.setEnabled(isEnabled)
     this.#hud.setEnabled(isEnabled)
@@ -91,7 +105,7 @@ export default class SokobanGame extends Container {
   }
 
   // Освобождает обработчики, анимации и ресурсы экземпляра.
-  destroy(options) {
+  destroy(options?: DestroyOptions) {
     Locator.game.off(GAME_EVENTS.Options.checkboxSokobanDpad, this.#dpadVisibilityHandler)
     this.#input?.destroy()
     this.#hud?.destroy({children: true})
@@ -101,7 +115,7 @@ export default class SokobanGame extends Container {
   }
 
   // Запускает игровой ход и его визуальную анимацию.
-  #startMove(direction, heldDirection) {
+  #startMove(direction: SokobanDirectionName, heldDirection: SokobanDirectionName | null) {
     if (!this.#canUseControls()) return false
 
     const levelDirection = this.#board.getLevelDirection(direction)
@@ -144,7 +158,7 @@ export default class SokobanGame extends Container {
   }
 
   // Сохраняет удерживаемое направление и запускает движение.
-  #setHeldDirection(direction) {
+  #setHeldDirection(direction: SokobanDirectionName | null) {
     if (direction === this.#heldDirection) return
 
     this.#heldDirection = direction
@@ -158,7 +172,7 @@ export default class SokobanGame extends Container {
   }
 
   // Завершает ход, обновляет тупик и проверяет победу.
-  #finishMove(result) {
+  #finishMove(result: SokobanMoveResult) {
     this.#isAnimatingMove = false
     if (result.deadlockedBox) {
       this.#board.showDeadlock(result.deadlockedBox)
@@ -196,7 +210,7 @@ export default class SokobanGame extends Container {
   }
 
   // Применяет настройку видимости экранной крестовины.
-  #setDpadVisible(isVisible) {
+  #setDpadVisible(isVisible: boolean) {
     this.#dpad.setVisible(isVisible)
   }
 

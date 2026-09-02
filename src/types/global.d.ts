@@ -29,9 +29,11 @@ declare module '*.atlas' {
 }
 
 interface ImportMetaEnv {
-  readonly VITE_PLATFORM_NAME: string
+  readonly DEV: boolean // Признак режима разработки Vite.
+  readonly VITE_PLATFORM_NAME: string // Имя выбранной платформы сборки.
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+// Объявляет типы импортируемых ресурсов и переменных окружения Vite.

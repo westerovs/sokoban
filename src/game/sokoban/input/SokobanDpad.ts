@@ -1,5 +1,7 @@
 import {gsap} from 'gsap'
 import {Circle, Container, Graphics} from 'pixi.js'
+import type {DestroyOptions, FederatedPointerEvent} from 'pixi.js'
+import type {SokobanDirectionName} from '../config/config.js'
 
 /**
  * Отображает экранную крестовину и передаёт удерживаемое направление движения.
@@ -12,7 +14,10 @@ const DPAD_BOTTOM_PADDING = 110 // Отступ крестовины от ниж
 const BUTTON_DISTANCE = 52 // Расстояние кнопки направления от центра
 const BUTTON_HIT_RADIUS = 38 // Радиус области нажатия одной кнопки
 const ARROW_COLOR = 0x172b38 // Цвет стрелок управления
-const BUTTON_DIRECTIONS = Object.freeze({
+type ButtonLayout = {x: number; y: number; angle: number}
+type ButtonVisuals = {button: Container; highlight: Graphics; arrow: Graphics}
+
+const BUTTON_DIRECTIONS: Readonly<Record<SokobanDirectionName, ButtonLayout>> = Object.freeze({
   up: Object.freeze({x: 0, y: -BUTTON_DISTANCE, angle: 0}), // Верхняя кнопка и угол её стрелки
   right: Object.freeze({x: BUTTON_DISTANCE, y: 0, angle: Math.PI / 2}), // Правая кнопка и угол её стрелки
   down: Object.freeze({x: 0, y: BUTTON_DISTANCE, angle: Math.PI}), // Нижняя кнопка и угол её стрелки
@@ -20,15 +25,15 @@ const BUTTON_DIRECTIONS = Object.freeze({
 })
 
 export default class SokobanDpad extends Container {
-  #onHeldDirectionChange
-  #buttons = []
-  #pressTimelines = new Map()
-  #activePointerId = null
-  #activeButtonVisuals = null
+  #onHeldDirectionChange: (direction: SokobanDirectionName | null) => void
+  #buttons: Container[] = []
+  #pressTimelines = new Map<Container, gsap.core.Timeline>()
+  #activePointerId: number | null = null
+  #activeButtonVisuals: ButtonVisuals | null = null
   #isEnabled = false
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(onHeldDirectionChange) {
+  constructor(onHeldDirectionChange: (direction: SokobanDirectionName | null) => void) {
     super({label: 'sokoban-dpad', zIndex: 5})
 
     this.#onHeldDirectionChange = onHeldDirectionChange
@@ -36,21 +41,21 @@ export default class SokobanDpad extends Container {
   }
 
   // Включает или отключает взаимодействие с элементом.
-  setEnabled(isEnabled) {
+  setEnabled(isEnabled: boolean) {
     this.#isEnabled = isEnabled
     if (!isEnabled) this.#releaseActiveDirection()
     this.#updateInteraction()
   }
 
   // Изменяет видимость экранной крестовины.
-  setVisible(isVisible) {
+  setVisible(isVisible: boolean) {
     this.visible = isVisible
     if (!isVisible) this.#releaseActiveDirection()
     this.#updateInteraction()
   }
 
   // Рассчитывает и применяет расположение представления.
-  layout({width, height}) {
+  layout({width, height}: {width: number; height: number}) {
     const availableSize = Math.min(width, height)
     const displaySize = Math.min(DPAD_SIZE, Math.max(150, availableSize * 0.22))
     const scale = displaySize / DPAD_SIZE
@@ -60,7 +65,7 @@ export default class SokobanDpad extends Container {
   }
 
   // Освобождает обработчики, анимации и ресурсы экземпляра.
-  destroy(options) {
+  destroy(options?: DestroyOptions) {
     this.#releaseActiveDirection()
     this.#pressTimelines.forEach((timeline) => timeline.kill())
     this.#pressTimelines.clear()
@@ -71,7 +76,7 @@ export default class SokobanDpad extends Container {
   #init() {
     this.addChild(this.#createBackground())
     this.#buttons = Object.entries(BUTTON_DIRECTIONS).map(([direction, layout]) => {
-      return this.#createButton(direction, layout)
+      return this.#createButton(direction as SokobanDirectionName, layout)
     })
     this.addChild(...this.#buttons)
     this.#updateInteraction()
@@ -86,7 +91,7 @@ export default class SokobanDpad extends Container {
   }
 
   // Создаёт интерактивную кнопку с заданной иконкой.
-  #createButton(direction, {x, y, angle}) {
+  #createButton(direction: SokobanDirectionName, {x, y, angle}: ButtonLayout) {
     const button = new Container({label: `sokoban-dpad-${direction}`})
     const highlight = new Graphics({label: `sokoban-dpad-${direction}-highlight`}).circle(0, 0, 34).fill(0xf2b632)
     const arrow = new Graphics({label: `sokoban-dpad-${direction}-arrow`})
@@ -110,7 +115,13 @@ export default class SokobanDpad extends Container {
   }
 
   // Активирует направление выбранной кнопки крестовины.
-  #handlePress(event, button, highlight, arrow, direction) {
+  #handlePress(
+    event: FederatedPointerEvent,
+    button: Container,
+    highlight: Graphics,
+    arrow: Graphics,
+    direction: SokobanDirectionName,
+  ) {
     event.stopPropagation()
     if (this.#activePointerId !== null) return
 
@@ -121,7 +132,7 @@ export default class SokobanDpad extends Container {
   }
 
   // Завершает активное нажатие крестовины.
-  #handleRelease(event) {
+  #handleRelease(event: FederatedPointerEvent) {
     event.stopPropagation()
     if (event.pointerId !== this.#activePointerId) return
 
@@ -140,7 +151,7 @@ export default class SokobanDpad extends Container {
   }
 
   // Анимирует нажатие кнопки направления.
-  #animatePress(button, highlight, arrow) {
+  #animatePress(button: Container, highlight: Graphics, arrow: Graphics) {
     this.#pressTimelines.get(button)?.kill()
     highlight.alpha = 0.92
     arrow.tint = 0xffffff
@@ -154,7 +165,7 @@ export default class SokobanDpad extends Container {
   }
 
   // Возвращает кнопку направления в обычное состояние.
-  #animateRelease(activeButtonVisuals) {
+  #animateRelease(activeButtonVisuals: ButtonVisuals | null) {
     if (!activeButtonVisuals) return
 
     const {button, highlight, arrow} = activeButtonVisuals

@@ -1,4 +1,5 @@
 import LevelProgress from '../../gameConfig/levels/LevelProgress.js'
+import type Storage from '../../engine/storage/Storage.js'
 import {applySokobanLevelDraft} from './applySokobanLevelDraft.js'
 
 /**
@@ -8,7 +9,7 @@ import {applySokobanLevelDraft} from './applySokobanLevelDraft.js'
 const LEVEL_QUERY_PARAMETER = 'sokobanLevel' // Параметр URL с идентификатором запускаемого уровня
 
 // Выбирает указанный в URL уровень в режиме разработки.
-const trySelectRequestedSokobanLevel = (storage) => {
+const trySelectRequestedSokobanLevel = (storage: Storage) => {
   if (!import.meta.env.DEV) return false
 
   const searchParams = new URLSearchParams(window.location.search)
@@ -22,4 +23,6 @@ const trySelectRequestedSokobanLevel = (storage) => {
   return progress.selectLevel(levelId, {ignoreLock: true, save: false})
 }
 
-export {trySelectRequestedSokobanLevel}
+export {
+  trySelectRequestedSokobanLevel,
+}

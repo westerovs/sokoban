@@ -1,10 +1,15 @@
 import {gsap} from 'gsap'
 import {Container, Graphics, Rectangle} from 'pixi.js'
+import type {DestroyOptions, Sprite} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '../../engine/Locator.ts'
 import {WORLD} from '../../gameConfig/constants.js'
+import type {LevelAppearance} from '../../gameConfig/levels/levelTypes.js'
 import {ROTATED_DIRECTIONS, SOKOBAN_TEXTURES} from '../config/config.js'
+import type {SokobanDirectionName} from '../config/config.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
+import SokobanLevel from '../gameplay/SokobanLevel.js'
+import type {PushedBox, SokobanMoveResult, SokobanPosition} from '../gameplay/SokobanLevel.js'
 import {applyTileVisualScale} from './applyTileVisualScale.js'
 import SokobanBoxView from './SokobanBoxView.js'
 
@@ -20,22 +25,25 @@ const BOARD_Z_INDEX = {
   deadlockHighlight: SOKOBAN_SETTINGS.maxBoardRows * 2 + 2, // Глубина подсветки тупика поверх всей доски
 }
 
+type TileTextureType = Exclude<keyof typeof SOKOBAN_TEXTURES, 'player'>
+type MovementOptions = {isContinuous?: boolean}
+
 export default class SokobanBoard extends Container {
-  #level
-  #appearance
+  #level: SokobanLevel
+  #appearance: LevelAppearance
   #tileSize = SOKOBAN_SETTINGS.tileSize
-  #boardWidth
-  #boardHeight
-  #boxesContainer
-  #boxViews = new Map()
-  #player
-  #movementTimeline = null
-  #deadlockHighlight
-  #deadlockTimeline = null
+  #boardWidth: number
+  #boardHeight: number
+  #boxesContainer!: Container
+  #boxViews = new Map<string, SokobanBoxView>()
+  #player!: Sprite
+  #movementTimeline: gsap.core.Timeline | null = null
+  #deadlockHighlight!: Graphics
+  #deadlockTimeline: gsap.core.Timeline | null = null
   #isRotated = false
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(level, appearance = {}) {
+  constructor(level: SokobanLevel, appearance: LevelAppearance = {}) {
     super({label: 'sokoban-board', sortableChildren: true})
 
     this.#level = level
@@ -55,7 +63,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Показывает подсветку клетки с застрявшим ящиком.
-  showDeadlock(position) {
+  showDeadlock(position: SokobanPosition) {
     this.#hideDeadlockHighlight()
     this.#deadlockHighlight.position.set(position.x * this.#tileSize, position.y * this.#tileSize)
     this.#deadlockHighlight.visible = true
@@ -63,8 +71,8 @@ export default class SokobanBoard extends Container {
   }
 
   // Анимирует перемещение игрока и при необходимости ящика.
-  animateMove(moveResult, {isContinuous = false} = {}) {
-    return new Promise((resolve) => {
+  animateMove(moveResult: SokobanMoveResult, {isContinuous = false}: MovementOptions = {}) {
+    return new Promise<void>((resolve) => {
       this.#updatePlayerDepth()
       this.#movementTimeline = this.#createMovementTimeline(moveResult, isContinuous, resolve)
     })
@@ -83,12 +91,12 @@ export default class SokobanBoard extends Container {
   }
 
   // Преобразует экранное направление в направление карты.
-  getLevelDirection(direction) {
+  getLevelDirection(direction: SokobanDirectionName): SokobanDirectionName {
     return this.#isRotated ? ROTATED_DIRECTIONS[direction] : direction
   }
 
   // Возвращает данные раскладки доски для внешнего интерфейса.
-  getLayout(parent) {
+  getLayout(parent: Container) {
     const bounds = this.getBounds()
     const topLeft = parent.toLocal({x: bounds.x, y: bounds.y})
     const bottomRight = parent.toLocal({
@@ -105,7 +113,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Освобождает обработчики, анимации и ресурсы экземпляра.
-  destroy(options) {
+  destroy(options?: DestroyOptions) {
     this.#killMovementTimeline()
     this.#hideDeadlockHighlight()
     super.destroy(options)
@@ -134,7 +142,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Возвращает отображаемые размеры с учётом поворота доски.
-  #getDisplayedSize(shouldRotate) {
+  #getDisplayedSize(shouldRotate: boolean) {
     return {
       width: shouldRotate ? this.#boardHeight : this.#boardWidth,
       height: shouldRotate ? this.#boardWidth : this.#boardHeight,
@@ -142,7 +150,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Вычисляет масштаб доски по доступному экранному пространству.
-  #getBoardScale(displayedWidth, displayedHeight) {
+  #getBoardScale(displayedWidth: number, displayedHeight: number) {
     const {scaleFactor} = Locator.gameResize.resizeData
     const visibleWidth = window.innerWidth / scaleFactor
     const horizontalPadding = this.#getHorizontalPadding(visibleWidth)
@@ -160,7 +168,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Вычисляет адаптивный горизонтальный отступ доски.
-  #getHorizontalPadding(visibleWidth) {
+  #getHorizontalPadding(visibleWidth: number) {
     const preferredPadding = Math.max(
       SOKOBAN_SETTINGS.minHorizontalPadding,
       Math.min(SOKOBAN_SETTINGS.maxHorizontalPadding, visibleWidth * SOKOBAN_SETTINGS.horizontalPaddingRatio),
@@ -193,7 +201,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Распределяет визуалы клетки между слоями пола и стен.
-  #addTileViews(groundTiles, wallTiles, position) {
+  #addTileViews(groundTiles: Container, wallTiles: Container, position: SokobanPosition) {
     if (this.#level.isVoid(position)) return
 
     if (this.#level.isWall(position)) {
@@ -208,7 +216,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Создаёт и позиционирует спрайт тайла.
-  #createTileSprite(textureName, position, type) {
+  #createTileSprite(textureName: string, position: SokobanPosition, type: TileTextureType) {
     const tile = GameUtils.createSprite(textureName, {
       label: `sokoban-${type}-${position.x}-${position.y}`,
       anchorY: 1,
@@ -230,7 +238,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Возвращает назначенную клетке текстуру или значение по умолчанию.
-  #getTextureName(type, position) {
+  #getTextureName(type: TileTextureType, position: SokobanPosition) {
     const positionKey = `${position.x}:${position.y}`
     return this.#appearance[type]?.[positionKey] ?? SOKOBAN_TEXTURES[type]
   }
@@ -259,7 +267,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Создаёт таймлайн одного игрового перемещения.
-  #createMovementTimeline(moveResult, isContinuous, resolve) {
+  #createMovementTimeline(moveResult: SokobanMoveResult, isContinuous: boolean, resolve: () => void) {
     const timeline = gsap.timeline({
       onComplete: () => this.#finishMovement(resolve),
     })
@@ -271,7 +279,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Добавляет перемещение толкнутого ящика в общий таймлайн хода.
-  #addBoxMovement(timeline, pushedBox, isContinuous) {
+  #addBoxMovement(timeline: gsap.core.Timeline, pushedBox: PushedBox | null | undefined, isContinuous: boolean) {
     if (!pushedBox) return
 
     const boxView = this.#boxViews.get(pushedBox.id)
@@ -281,7 +289,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Создаёт параметры анимации перемещения к клетке.
-  #getMovementVars(position, isContinuous) {
+  #getMovementVars(position: SokobanPosition, isContinuous: boolean) {
     return {
       ...position,
       duration: SOKOBAN_SETTINGS.moveDuration,
@@ -295,7 +303,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Возвращает экранную позицию ящика.
-  #getBoxPixelPosition(position) {
+  #getBoxPixelPosition(position: SokobanPosition) {
     return {
       x: position.x * this.#tileSize,
       y: position.y * this.#tileSize,
@@ -303,7 +311,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Возвращает позицию визуала с учётом якоря тайла.
-  #getTileVisualPosition(position) {
+  #getTileVisualPosition(position: SokobanPosition) {
     return {
       x: (position.x + 0.5) * this.#tileSize,
       y: (position.y + 1) * this.#tileSize,
@@ -311,7 +319,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Завершает таймлайн движения и сообщает об окончании анимации.
-  #finishMovement(resolve) {
+  #finishMovement(resolve: () => void) {
     this.#movementTimeline = null
     this.#updateBoxTargetStates()
     resolve()
@@ -353,7 +361,7 @@ export default class SokobanBoard extends Container {
   #updateBoxes() {
     this.#level.boxes.forEach((box) => {
       const boxView = this.#boxViews.get(box.id)
-      boxView.position.set(box.x * this.#tileSize, box.y * this.#tileSize)
+      boxView!.position.set(box.x * this.#tileSize, box.y * this.#tileSize)
     })
     this.#updateBoxTargetStates()
   }
@@ -372,7 +380,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Возвращает глубину визуального ряда стен.
-  #getWallRowDepth(rowIndex) {
+  #getWallRowDepth(rowIndex: number) {
     // Шаг в два слоя оставляет место игроку между соседними рядами кустов.
     return BOARD_Z_INDEX.firstDepthRow + rowIndex * 2
   }

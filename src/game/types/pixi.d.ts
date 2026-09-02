@@ -5,6 +5,8 @@ import type {ContainerChild} from 'pixi.js'
 declare module 'pixi.js' {
   interface Container<C extends ContainerChild = ContainerChild> {
     _initScale?: number
+    _customPosition?: {x?: number; y?: number}
     type?: string
+    updateAdaptive?: boolean | (() => void)
   }
 }

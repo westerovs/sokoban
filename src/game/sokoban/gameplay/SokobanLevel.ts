@@ -1,25 +1,59 @@
 import {SOKOBAN_DIRECTIONS, SOKOBAN_SYMBOLS} from '../config/config.js'
+import type {SokobanDirection, SokobanDirectionName} from '../config/config.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
 
 /**
  * Хранит игровое состояние уровня и применяет правила перемещения Sokoban.
  */
 
+type SokobanPosition = {
+  x: number
+  y: number
+}
+
+type SokobanBox = SokobanPosition & {
+  id: string
+}
+
+type PushedBox = {
+  id: string
+  from: SokobanPosition
+  to: SokobanPosition
+}
+
+type SokobanMoveResult = {
+  moved: boolean
+  completed: boolean
+  deadlockedBox?: SokobanPosition | null
+  pushedBox?: PushedBox | null
+}
+
+type BoxMoveResult = {
+  canMove: boolean
+  pushedBox: PushedBox | null
+}
+
+type LevelState = {
+  boxes: Map<string, string>
+  playerPosition: SokobanPosition
+  isCompleted: boolean
+}
+
 export default class SokobanLevel {
   #width = 0
   #height = 0
-  #voids = new Set()
-  #walls = new Set()
-  #targets = new Set()
-  #boxes = new Map()
+  #voids = new Set<string>()
+  #walls = new Set<string>()
+  #targets = new Set<string>()
+  #boxes = new Map<string, string>()
   #nextBoxId = 0
-  #playerPosition = null
+  #playerPosition: SokobanPosition | null = null
   #isCompleted = false
-  #initialState = null
-  #history = []
+  #initialState!: LevelState
+  #history: LevelState[] = []
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(map) {
+  constructor(map: string[]) {
     this.#init(map)
   }
 
@@ -50,7 +84,7 @@ export default class SokobanLevel {
 
   // Возвращает значение свойства `playerPosition`.
   get playerPosition() {
-    return {...this.#playerPosition}
+    return {...this.#playerPosition!}
   }
 
   // Возвращает значение свойства `isCompleted`.
@@ -64,27 +98,27 @@ export default class SokobanLevel {
   }
 
   // Проверяет, является ли клетка стеной.
-  isWall(position) {
+  isWall(position: SokobanPosition) {
     return this.#walls.has(this.#getPositionKey(position))
   }
 
   // Проверяет, находится ли клетка вне игрового поля.
-  isVoid(position) {
+  isVoid(position: SokobanPosition) {
     return this.#voids.has(this.#getPositionKey(position))
   }
 
   // Проверяет, является ли клетка целью.
-  isTarget(position) {
+  isTarget(position: SokobanPosition) {
     return this.#targets.has(this.#getPositionKey(position))
   }
 
   // Пытается выполнить перемещение в заданном направлении.
-  move(direction) {
+  move(direction: SokobanDirectionName): SokobanMoveResult {
     const offset = SOKOBAN_DIRECTIONS[direction]
     if (!offset || this.#isCompleted) return {moved: false, completed: this.#isCompleted}
 
     const previousState = this.#createStateSnapshot()
-    const nextPosition = this.#addPositions(this.#playerPosition, offset)
+    const nextPosition = this.#addPositions(this.#playerPosition!, offset)
     if (this.#isWallOrOutside(nextPosition)) return {moved: false, completed: false}
     const boxMove = this.#tryMoveBox(nextPosition, offset)
     if (!boxMove.canMove) return {moved: false, completed: false}
@@ -119,7 +153,7 @@ export default class SokobanLevel {
   }
 
   // Инициализирует внутреннее состояние и зависимости.
-  #init(map) {
+  #init(map: string[]) {
     this.#validateMap(map)
     this.#width = map[0].length
     this.#height = map.length
@@ -130,7 +164,7 @@ export default class SokobanLevel {
   }
 
   // Проверяет размеры и прямоугольную форму карты.
-  #validateMap(map) {
+  #validateMap(map: string[]) {
     if (!Array.isArray(map) || map.length === 0) {
       throw new Error('Sokoban map must be a non-empty array')
     }
@@ -146,7 +180,7 @@ export default class SokobanLevel {
   }
 
   // Разбирает все строки карты во внутреннее состояние уровня.
-  #parseMap(map) {
+  #parseMap(map: string[]) {
     map.forEach((row, y) => {
       Array.from(row).forEach((symbol, x) => {
         this.#parseSymbol(symbol, {x, y})
@@ -155,7 +189,7 @@ export default class SokobanLevel {
   }
 
   // Добавляет один символ карты в соответствующую коллекцию.
-  #parseSymbol(symbol, position) {
+  #parseSymbol(symbol: string, position: SokobanPosition) {
     if (symbol === SOKOBAN_SYMBOLS.void) return this.#addPosition(this.#voids, position)
     if (symbol === SOKOBAN_SYMBOLS.floor) return
     if (symbol === SOKOBAN_SYMBOLS.wall) return this.#addPosition(this.#walls, position)
@@ -188,13 +222,13 @@ export default class SokobanLevel {
   }
 
   // Сохраняет новую позицию игрока.
-  #setPlayerPosition(position) {
+  #setPlayerPosition(position: SokobanPosition) {
     if (this.#playerPosition) throw new Error('Sokoban level must contain only one player')
     this.#playerPosition = position
   }
 
   // Пытается передвинуть ящик и возвращает результат толчка.
-  #tryMoveBox(position, offset) {
+  #tryMoveBox(position: SokobanPosition, offset: SokobanDirection): BoxMoveResult {
     const positionKey = this.#getPositionKey(position)
     const boxId = this.#getBoxIdAt(positionKey)
     if (!boxId) return {canMove: true, pushedBox: null}
@@ -210,13 +244,13 @@ export default class SokobanLevel {
   }
 
   // Проверяет, занята ли клетка стеной или ящиком.
-  #isBlocked(position) {
+  #isBlocked(position: SokobanPosition) {
     if (this.#isWallOrOutside(position)) return true
     return Boolean(this.#getBoxIdAt(this.#getPositionKey(position)))
   }
 
   // Проверяет, является ли клетка стеной или находится за картой.
-  #isWallOrOutside(position) {
+  #isWallOrOutside(position: SokobanPosition) {
     if (!this.#isInside(position)) return true
     const positionKey = this.#getPositionKey(position)
 
@@ -224,7 +258,7 @@ export default class SokobanLevel {
   }
 
   // Проверяет, находится ли координата внутри карты.
-  #isInside(position) {
+  #isInside(position: SokobanPosition) {
     return position.x >= 0 && position.y >= 0 && position.x < this.#width && position.y < this.#height
   }
 
@@ -234,7 +268,7 @@ export default class SokobanLevel {
   }
 
   // Возвращает ящик, попавший после толчка в статический тупик.
-  #getDeadlockedBox(pushedBox) {
+  #getDeadlockedBox(pushedBox: PushedBox | null) {
     if (!pushedBox || this.isTarget(pushedBox.to)) return null
     if (!this.#isStaticCorner(pushedBox.to)) return null
 
@@ -242,7 +276,7 @@ export default class SokobanLevel {
   }
 
   // Проверяет, является ли клетка статическим угловым тупиком.
-  #isStaticCorner(position) {
+  #isStaticCorner(position: SokobanPosition) {
     const verticalBlocked =
       this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.up)) ||
       this.#isTerrainBlocked(this.#addPositions(position, SOKOBAN_DIRECTIONS.down))
@@ -254,7 +288,7 @@ export default class SokobanLevel {
   }
 
   // Проверяет, блокирует ли рельеф соседнюю клетку.
-  #isTerrainBlocked(position) {
+  #isTerrainBlocked(position: SokobanPosition) {
     return this.#isWallOrOutside(position)
   }
 
@@ -262,58 +296,65 @@ export default class SokobanLevel {
   #createStateSnapshot() {
     return {
       boxes: new Map(this.#boxes),
-      playerPosition: {...this.#playerPosition},
+      playerPosition: {...this.#playerPosition!},
       isCompleted: this.#isCompleted,
     }
   }
 
   // Восстанавливает модель уровня из снимка состояния.
-  #restoreState(state) {
+  #restoreState(state: LevelState) {
     this.#boxes = new Map(state.boxes)
     this.#playerPosition = {...state.playerPosition}
     this.#isCompleted = state.isCompleted
   }
 
   // Добавляет координату в коллекцию в строковом формате.
-  #addPosition(collection, position) {
+  #addPosition(collection: Set<string>, position: SokobanPosition) {
     collection.add(this.#getPositionKey(position))
   }
 
   // Добавляет ящик в модель и назначает ему уникальный идентификатор.
-  #addBox(position) {
+  #addBox(position: SokobanPosition) {
     const boxId = `box-${this.#nextBoxId}`
     this.#nextBoxId++
     this.#boxes.set(boxId, this.#getPositionKey(position))
   }
 
   // Возвращает идентификатор ящика в заданной клетке.
-  #getBoxIdAt(positionKey) {
+  #getBoxIdAt(positionKey: string) {
     return Array.from(this.#boxes).find(([, boxPositionKey]) => boxPositionKey === positionKey)?.[0] ?? null
   }
 
   // Возвращает координаты из коллекции строковых ключей.
-  #getPositions(collection) {
+  #getPositions(collection: Set<string>): SokobanPosition[] {
     return Array.from(collection)
       .map((positionKey) => this.#parsePositionKey(positionKey))
       .sort((first, second) => first.y - second.y || first.x - second.x)
   }
 
   // Преобразует координату клетки в строковый ключ.
-  #getPositionKey(position) {
+  #getPositionKey(position: SokobanPosition) {
     return position.x + ':' + position.y
   }
 
   // Преобразует строковый ключ обратно в координату.
-  #parsePositionKey(positionKey) {
+  #parsePositionKey(positionKey: string): SokobanPosition {
     const [x, y] = positionKey.split(':').map(Number)
     return {x, y}
   }
 
   // Складывает две координаты клеток.
-  #addPositions(first, second) {
+  #addPositions(first: SokobanPosition, second: SokobanPosition): SokobanPosition {
     return {
       x: first.x + second.x,
       y: first.y + second.y,
     }
   }
+}
+
+export type {
+  PushedBox,
+  SokobanBox,
+  SokobanMoveResult,
+  SokobanPosition,
 }

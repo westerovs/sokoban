@@ -1,8 +1,10 @@
+import type {SokobanDirectionName} from '../config/config.js'
+
 /**
  * Преобразует клавиатурный и сенсорный ввод в направления Sokoban.
  */
 
-const KEY_DIRECTIONS = Object.freeze({
+const KEY_DIRECTIONS: Readonly<Record<string, SokobanDirectionName>> = Object.freeze({
   ArrowUp: 'up', // Стрелка вверх
   KeyW: 'up', // Альтернативная клавиша движения вверх
   ArrowDown: 'down', // Стрелка вниз
@@ -15,21 +17,29 @@ const KEY_DIRECTIONS = Object.freeze({
 const SWIPE_MIN_DISTANCE = 32 // Минимальная длина жеста для распознавания свайпа
 
 export default class SokobanInput {
-  #onMove
-  #onHeldDirectionChange
-  #pointerTarget
-  #pointerStart = null
-  #heldKeyCodes = []
+  #onMove: (direction: SokobanDirectionName) => void
+  #onHeldDirectionChange: (direction: SokobanDirectionName | null) => void
+  #pointerTarget: HTMLElement
+  #pointerStart: {id: number; x: number; y: number} | null = null
+  #heldKeyCodes: string[] = []
   #isEnabled = false
-  #keyDownHandler
-  #keyUpHandler
-  #blurHandler
-  #pointerDownHandler
-  #pointerUpHandler
-  #pointerCancelHandler
+  #keyDownHandler!: (event: KeyboardEvent) => void
+  #keyUpHandler!: (event: KeyboardEvent) => void
+  #blurHandler!: () => void
+  #pointerDownHandler!: (event: PointerEvent) => void
+  #pointerUpHandler!: (event: PointerEvent) => void
+  #pointerCancelHandler!: () => void
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({onMove, onHeldDirectionChange, pointerTarget}) {
+  constructor({
+    onMove,
+    onHeldDirectionChange,
+    pointerTarget,
+  }: {
+    onMove: (direction: SokobanDirectionName) => void
+    onHeldDirectionChange: (direction: SokobanDirectionName | null) => void
+    pointerTarget: HTMLElement
+  }) {
     this.#onMove = onMove
     this.#onHeldDirectionChange = onHeldDirectionChange
     this.#pointerTarget = pointerTarget
@@ -37,7 +47,7 @@ export default class SokobanInput {
   }
 
   // Включает или отключает взаимодействие с элементом.
-  setEnabled(isEnabled) {
+  setEnabled(isEnabled: boolean) {
     this.#isEnabled = isEnabled
     if (!isEnabled) this.#clearHeldKeys()
   }
@@ -72,7 +82,7 @@ export default class SokobanInput {
   }
 
   // Обрабатывает нажатие клавиши движения.
-  #handleKeyDown(event) {
+  #handleKeyDown(event: KeyboardEvent) {
     const direction = KEY_DIRECTIONS[event.code]
     if (!this.#isEnabled || !direction) return
     if (this.#isEditableTarget(event.target)) return
@@ -85,7 +95,7 @@ export default class SokobanInput {
   }
 
   // Обрабатывает отпускание клавиши движения.
-  #handleKeyUp(event) {
+  #handleKeyUp(event: KeyboardEvent) {
     const keyIndex = this.#heldKeyCodes.indexOf(event.code)
     if (keyIndex === -1) return
 
@@ -95,13 +105,14 @@ export default class SokobanInput {
   }
 
   // Проверяет, относится ли DOM-элемент к полю ввода.
-  #isEditableTarget(target) {
-    const tagName = target?.tagName
-    return tagName === 'INPUT' || tagName === 'TEXTAREA' || target?.isContentEditable
+  #isEditableTarget(target: EventTarget | null) {
+    const element = target instanceof HTMLElement ? target : null
+    const tagName = element?.tagName
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' || element?.isContentEditable
   }
 
   // Запоминает начало возможного свайпа.
-  #handlePointerDown(event) {
+  #handlePointerDown(event: PointerEvent) {
     if (!this.#isEnabled || !this.#isSwipePointer(event)) return
 
     this.#pointerStart = {
@@ -112,7 +123,7 @@ export default class SokobanInput {
   }
 
   // Распознаёт завершённый свайп и передаёт направление.
-  #handlePointerUp(event) {
+  #handlePointerUp(event: PointerEvent) {
     const start = this.#pointerStart
     this.#pointerStart = null
     if (!this.#isEnabled || !start || start.id !== event.pointerId) return
@@ -122,14 +133,14 @@ export default class SokobanInput {
   }
 
   // Определяет направление свайпа по горизонтальному и вертикальному смещению.
-  #getSwipeDirection(deltaX, deltaY) {
+  #getSwipeDirection(deltaX: number, deltaY: number): SokobanDirectionName | null {
     if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < SWIPE_MIN_DISTANCE) return null
     if (Math.abs(deltaX) > Math.abs(deltaY)) return deltaX > 0 ? 'right' : 'left'
     return deltaY > 0 ? 'down' : 'up'
   }
 
   // Проверяет, можно ли считать событие сенсорным свайпом.
-  #isSwipePointer(event) {
+  #isSwipePointer(event: PointerEvent) {
     return event.isPrimary && (event.pointerType === 'touch' || event.pointerType === 'pen')
   }
 

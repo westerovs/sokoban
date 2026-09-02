@@ -1,4 +1,5 @@
 import {Container} from 'pixi.js'
+import type {Sprite} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
 import {applyTileVisualScale} from './applyTileVisualScale.js'
@@ -8,11 +9,11 @@ import {applyTileVisualScale} from './applyTileVisualScale.js'
  */
 
 export default class SokobanBoxView extends Container {
-  #tileSize
-  #box
+  #tileSize: number
+  #box!: Sprite
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(id, tileSize, textureName) {
+  constructor(id: string, tileSize: number, textureName: string) {
     super({label: 'sokoban-' + id})
 
     this.#tileSize = tileSize
@@ -20,18 +21,18 @@ export default class SokobanBoxView extends Container {
   }
 
   // Обновляет визуальное состояние ящика на цели.
-  setOnTarget(isOnTarget) {
+  setOnTarget(isOnTarget: boolean) {
     this.#box.tint = isOnTarget ? SOKOBAN_SETTINGS.boxOnTargetTint : 0xffffff
   }
 
   // Инициализирует внутреннее состояние и зависимости.
-  #init(id, textureName) {
+  #init(id: string, textureName: string) {
     this.#box = this.#createBox(id, textureName)
     this.addChild(this.#box)
   }
 
   // Создаёт спрайт ящика с выбранной текстурой.
-  #createBox(id, textureName) {
+  #createBox(id: string, textureName: string) {
     const box = GameUtils.createSprite(textureName, {
       label: 'sokoban-box-sprite-' + id,
       anchorY: 1,

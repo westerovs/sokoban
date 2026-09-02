@@ -1,5 +1,6 @@
 import {gsap} from 'gsap'
 import {Container, Graphics, Rectangle} from 'pixi.js'
+import type {DestroyOptions, Sprite} from 'pixi.js'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
@@ -9,16 +10,16 @@ import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
  */
 
 export default class SokobanHudButton extends Container {
-  #iconName
-  #onPress
-  #background
-  #icon
+  #iconName: string
+  #onPress: () => void
+  #background!: Graphics
+  #icon!: Sprite
   #size = 0
-  #isEnabled = null
-  #pulseTimeline = null
+  #isEnabled: boolean | null = null
+  #pulseTimeline: gsap.core.Timeline | null = null
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({iconName, label, onPress}) {
+  constructor({iconName, label, onPress}: {iconName: string; label: string; onPress: () => void}) {
     super({label})
 
     this.#iconName = iconName
@@ -27,7 +28,7 @@ export default class SokobanHudButton extends Container {
   }
 
   // Включает или отключает взаимодействие с элементом.
-  setEnabled(isEnabled) {
+  setEnabled(isEnabled: boolean) {
     if (this.#isEnabled === isEnabled) return
 
     this.#isEnabled = isEnabled
@@ -38,7 +39,7 @@ export default class SokobanHudButton extends Container {
   }
 
   // Применяет размер кнопки и её иконки.
-  setLayoutSize(size, iconSize) {
+  setLayoutSize(size: number, iconSize: number) {
     this.#size = size
     this.#setHitArea()
     this.#setIconSize(iconSize)
@@ -70,7 +71,7 @@ export default class SokobanHudButton extends Container {
   }
 
   // Освобождает обработчики, анимации и ресурсы экземпляра.
-  destroy(options) {
+  destroy(options?: DestroyOptions) {
     this.stopPulse()
     super.destroy(options)
   }
@@ -92,7 +93,7 @@ export default class SokobanHudButton extends Container {
   }
 
   // Масштабирует иконку до заданного размера.
-  #setIconSize(iconSize) {
+  #setIconSize(iconSize: number) {
     this.#icon.scale.set(1)
     const iconScale = iconSize / Math.max(this.#icon.width, this.#icon.height)
 

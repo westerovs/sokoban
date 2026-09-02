@@ -49,4 +49,7 @@ const SOKOBAN_HUD_SETTINGS = Object.freeze({
   disabledAlpha: 0.55, // Прозрачность недоступной кнопки
 })
 
-export {SOKOBAN_HUD_SETTINGS, SOKOBAN_SETTINGS}
+export {
+  SOKOBAN_HUD_SETTINGS,
+  SOKOBAN_SETTINGS,
+}

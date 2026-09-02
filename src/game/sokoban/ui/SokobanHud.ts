@@ -1,6 +1,7 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
+import type {DestroyOptions, Sprite, TextStyleOptions} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
 import SokobanHudButton from './SokobanHudButton.js'
@@ -10,47 +11,57 @@ import SokobanHudButton from './SokobanHudButton.js'
  */
 
 export default class SokobanHud extends Container {
-  #levelNumber
-  #pushRecord
-  #onUndo
-  #onRestart
-  #stepsText
-  #stepsIcon
-  #stepsView
-  #levelText
-  #recordText
-  #panel
-  #backButton
-  #restartButton
-  #deadlockWarning
-  #deadlockWarningBackground
+  updateAdaptive = true
+  _customPosition = {x: 0, y: 0}
+  #levelNumber: number
+  #pushRecord?: number
+  #onUndo: () => void
+  #onRestart: () => void
+  #stepsText!: Text
+  #stepsIcon!: Sprite
+  #stepsView!: Container
+  #levelText!: Text
+  #recordText!: Text
+  #panel!: Graphics
+  #backButton!: SokobanHudButton
+  #restartButton!: SokobanHudButton
+  #deadlockWarning!: Container
+  #deadlockWarningBackground!: Graphics
   #deadlockWarningY = 0
-  #deadlockTimeline = null
+  #deadlockTimeline: gsap.core.Timeline | null = null
   #isEnabled = false
   #steps = 0
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({levelNumber, pushRecord, onUndo, onRestart}) {
+  constructor({
+    levelNumber,
+    pushRecord,
+    onUndo,
+    onRestart,
+  }: {
+    levelNumber: number
+    pushRecord?: number
+    onUndo: () => void
+    onRestart: () => void
+  }) {
     super({label: 'sokoban-hud'})
 
     this.#levelNumber = levelNumber
     this.#pushRecord = pushRecord
     this.#onUndo = onUndo
     this.#onRestart = onRestart
-    this.updateAdaptive = true
-    this._customPosition = {}
     this.#init()
   }
 
   // Обновляет отображаемое количество шагов.
-  setSteps(steps) {
+  setSteps(steps: number) {
     this.#steps = steps
     this.#stepsText.text = String(steps)
     this.#updateButtons()
   }
 
   // Включает или отключает взаимодействие с элементом.
-  setEnabled(isEnabled) {
+  setEnabled(isEnabled: boolean) {
     this.#isEnabled = isEnabled
     this.#updateButtons()
   }
@@ -76,7 +87,19 @@ export default class SokobanHud extends Container {
   }
 
   // Рассчитывает и применяет расположение представления.
-  layout({boardWidth, tileSize, availableWidth, centerX, availableHeight}) {
+  layout({
+    boardWidth,
+    tileSize,
+    availableWidth,
+    centerX,
+    availableHeight,
+  }: {
+    boardWidth: number
+    tileSize: number
+    availableWidth: number
+    centerX: number
+    availableHeight: number
+  }) {
     const settings = SOKOBAN_HUD_SETTINGS
     const height = tileSize * settings.heightInTiles
     const borderWidth = height * settings.borderWidthRatio
@@ -90,7 +113,7 @@ export default class SokobanHud extends Container {
   }
 
   // Освобождает обработчики, анимации и ресурсы экземпляра.
-  destroy(options) {
+  destroy(options?: DestroyOptions) {
     this.clearDeadlockFeedback()
     super.destroy(options)
   }
@@ -189,7 +212,7 @@ export default class SokobanHud extends Container {
   }
 
   // Перерисовывает фон и рамку панели HUD.
-  #drawPanel(width, height) {
+  #drawPanel(width: number, height: number) {
     const settings = SOKOBAN_HUD_SETTINGS
 
     this.#panel
@@ -200,7 +223,7 @@ export default class SokobanHud extends Container {
   }
 
   // Рассчитывает размеры и положение всего содержимого HUD.
-  #layoutContent(width, height) {
+  #layoutContent(width: number, height: number) {
     const settings = SOKOBAN_HUD_SETTINGS
     const buttonSize = height * settings.buttonSizeRatio
 
@@ -214,7 +237,7 @@ export default class SokobanHud extends Container {
   }
 
   // Размещает подписи уровня и рекорда по центру HUD.
-  #layoutCenterTexts(height) {
+  #layoutCenterTexts(height: number) {
     const settings = SOKOBAN_HUD_SETTINGS
     const hasRecord = this.#recordText.visible
 
@@ -225,7 +248,7 @@ export default class SokobanHud extends Container {
   }
 
   // Размещает предупреждение о тупике над HUD.
-  #layoutDeadlockWarning(width, hudHeight) {
+  #layoutDeadlockWarning(width: number, hudHeight: number) {
     const warningHeight = Math.max(hudHeight, 44)
     const warningWidth = Math.min(width, 520)
     const cornerRadius = warningHeight * 0.28
@@ -240,7 +263,7 @@ export default class SokobanHud extends Container {
   }
 
   // Выравнивает крайние элементы и блок шагов внутри HUD.
-  #positionContent(width) {
+  #positionContent(width: number) {
     this.#alignLeft(this.#backButton, width)
     this.#alignRight(this.#restartButton, width)
     this.#positionStepsAfterBack()
@@ -249,14 +272,14 @@ export default class SokobanHud extends Container {
   }
 
   // Выравнивает элемент по левому краю панели.
-  #alignLeft(view, width) {
+  #alignLeft(view: Container, width: number) {
     const bounds = view.getLocalBounds()
 
     view.x = -width / 2 + SOKOBAN_HUD_SETTINGS.horizontalPadding - bounds.x
   }
 
   // Выравнивает элемент по правому краю панели.
-  #alignRight(view, width) {
+  #alignRight(view: Container, width: number) {
     const bounds = view.getLocalBounds()
 
     view.x = width / 2 - SOKOBAN_HUD_SETTINGS.horizontalPadding - bounds.x - bounds.width
@@ -272,7 +295,7 @@ export default class SokobanHud extends Container {
   }
 
   // Масштабирует иконку счётчика шагов.
-  #setStepsIconSize(iconSize) {
+  #setStepsIconSize(iconSize: number) {
     this.#stepsIcon.scale.set(1)
     const iconScale = iconSize / Math.max(this.#stepsIcon.width, this.#stepsIcon.height)
 
@@ -280,7 +303,7 @@ export default class SokobanHud extends Container {
   }
 
   // Размещает HUD относительно доски и доступной высоты.
-  #positionHud(centerX, availableHeight, height) {
+  #positionHud(centerX: number, availableHeight: number, height: number) {
     const y = availableHeight - SOKOBAN_HUD_SETTINGS.bottomPadding - height / 2
 
     this._customPosition.x = centerX
@@ -290,7 +313,7 @@ export default class SokobanHud extends Container {
   }
 
   // Создаёт единый стиль текста заданного размера.
-  #createTextStyle(fontSize) {
+  #createTextStyle(fontSize: number): TextStyleOptions {
     return {
       fill: SOKOBAN_HUD_SETTINGS.textColor,
       fontFamily: 'primaryFont',
@@ -300,7 +323,7 @@ export default class SokobanHud extends Container {
   }
 
   // Создаёт интерактивную кнопку с заданной иконкой.
-  #createButton(iconName, label, onPress) {
+  #createButton(iconName: string, label: string, onPress: () => void) {
     return new SokobanHudButton({iconName, label, onPress})
   }
 
