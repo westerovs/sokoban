@@ -1,13 +1,14 @@
 import {removeTileAppearances, setTileAppearance} from './appearanceState.js'
+import type {EditorBrush, EditorState, Position} from './editorTypes.js'
 
 /**
  * Сразу изменяет тип клетки и назначает выбранную пользователем текстуру.
  */
 
-const APPEARANCE_ROLES = Object.freeze(['wall', 'floor', 'box', 'target'])
+const APPEARANCE_ROLES = Object.freeze(['wall', 'floor', 'box', 'target']) // Визуальные слои, привязанные к клетке
 
 // Возвращает тип основания клетки по символу карты.
-const getTerrain = (symbol) => {
+const getTerrain = (symbol: string) => {
   if (symbol === '_') return 'void'
   if (symbol === '#') return 'wall'
   if ('.-*'.includes(symbol)) return 'target'
@@ -15,14 +16,14 @@ const getTerrain = (symbol) => {
 }
 
 // Возвращает объект, занимающий клетку карты.
-const getOccupant = (symbol) => {
+const getOccupant = (symbol: string) => {
   if ('$-'.includes(symbol)) return 'box'
   if ('@*'.includes(symbol)) return 'player'
   return null
 }
 
 // Собирает символ карты из основания и находящегося на нём объекта.
-const composeSymbol = (terrain, occupant) => {
+const composeSymbol = (terrain: string, occupant: string | null) => {
   if (terrain === 'void') return '_'
   if (terrain === 'wall') return '#'
   if (terrain === 'target' && occupant === 'box') return '-'
@@ -34,7 +35,7 @@ const composeSymbol = (terrain, occupant) => {
 }
 
 // Возвращает новую карту с изменённым символом одной клетки.
-const setMapSymbol = (map, position, symbol) => {
+const setMapSymbol = (map: string[], position: Position, symbol: string) => {
   const nextMap = [...map]
   const row = Array.from(nextMap[position.y])
   row[position.x] = symbol
@@ -43,7 +44,7 @@ const setMapSymbol = (map, position, symbol) => {
 }
 
 // Убирает прежнюю позицию игрока, сохраняя основание клетки.
-const removePlayer = (map) => {
+const removePlayer = (map: string[]) => {
   return map.map((row) =>
     Array.from(row, (symbol) => {
       return getOccupant(symbol) === 'player' ? composeSymbol(getTerrain(symbol), null) : symbol
@@ -52,20 +53,26 @@ const removePlayer = (map) => {
 }
 
 // Удаляет устаревшие слои и назначает выбранную текстуру клетки.
-const replaceAppearance = (state, brush, positionKey, roles, defaults) => {
+const replaceAppearance = (
+  state: EditorState,
+  brush: EditorBrush,
+  positionKey: string,
+  roles: readonly string[],
+  defaults: Record<string, string>,
+) => {
   const cleared = removeTileAppearances(state.appearance, positionKey, roles)
   return setTileAppearance(cleared, brush, positionKey, defaults)
 }
 
 // Ставит стену и полностью очищает прежнее содержимое клетки.
-const applyWallBrush = (state, brush, position, positionKey, defaults) => {
+const applyWallBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
   const map = setMapSymbol(state.map, position, '#')
   const appearance = replaceAppearance(state, brush, positionKey, APPEARANCE_ROLES, defaults)
   return {state: {...state, map, appearance}}
 }
 
 // Ставит выбранный пол, сохраняя находящийся на клетке объект.
-const applyFloorBrush = (state, brush, position, positionKey, defaults) => {
+const applyFloorBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
   const occupant = getOccupant(state.map[position.y][position.x])
   const roles = occupant === 'box' ? ['wall', 'target'] : ['wall', 'target', 'box']
   const map = setMapSymbol(state.map, position, composeSymbol('floor', occupant))
@@ -74,7 +81,7 @@ const applyFloorBrush = (state, brush, position, positionKey, defaults) => {
 }
 
 // Ставит выбранную цель, сохраняя находящийся на клетке объект.
-const applyTargetBrush = (state, brush, position, positionKey, defaults) => {
+const applyTargetBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
   const occupant = getOccupant(state.map[position.y][position.x])
   const roles = occupant === 'box' ? ['wall'] : ['wall', 'box']
   const map = setMapSymbol(state.map, position, composeSymbol('target', occupant))
@@ -83,7 +90,7 @@ const applyTargetBrush = (state, brush, position, positionKey, defaults) => {
 }
 
 // Ставит выбранный ящик на существующее основание или новый обычный пол.
-const applyBoxBrush = (state, brush, position, positionKey, defaults) => {
+const applyBoxBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
   const oldTerrain = getTerrain(state.map[position.y][position.x])
   const terrain = oldTerrain === 'target' ? 'target' : 'floor'
   const roles = terrain === 'target' ? ['wall'] : ['wall', 'target']
@@ -93,7 +100,7 @@ const applyBoxBrush = (state, brush, position, positionKey, defaults) => {
 }
 
 // Перемещает единственного игрока на выбранную клетку.
-const applyPlayerBrush = (state, position, positionKey) => {
+const applyPlayerBrush = (state: EditorState, position: Position, positionKey: string) => {
   let map = removePlayer(state.map)
   const oldSymbol = map[position.y][position.x]
   const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'floor'
@@ -104,14 +111,14 @@ const applyPlayerBrush = (state, position, positionKey) => {
 }
 
 // Превращает клетку в пустоту и удаляет все её визуальные слои.
-const applyVoidBrush = (state, position, positionKey) => {
+const applyVoidBrush = (state: EditorState, position: Position, positionKey: string) => {
   const map = setMapSymbol(state.map, position, '_')
   const appearance = removeTileAppearances(state.appearance, positionKey, APPEARANCE_ROLES)
   return {state: {...state, map, appearance}}
 }
 
 // Применяет выбранную прямую кисть к одной клетке редактора.
-const applyEditorBrush = (state, brush, position, defaults) => {
+const applyEditorBrush = (state: EditorState, brush: EditorBrush, position: Position, defaults: Record<string, string>) => {
   const positionKey = `${position.x}:${position.y}`
   if (brush.mode === 'void') return applyVoidBrush(state, position, positionKey)
   if (brush.mode === 'player') return applyPlayerBrush(state, position, positionKey)

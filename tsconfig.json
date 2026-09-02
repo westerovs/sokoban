@@ -24,7 +24,8 @@
     "src/**/*",
     "services/**/*",
     "bundler/**/*",
-    "utils/**/*"
+    "utils/**/*",
+    "tools/sokoban-level-editor/**/*"
   ],
   "exclude": [
     "node_modules",

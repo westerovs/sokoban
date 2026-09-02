@@ -1,24 +1,25 @@
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
 import {compactEditorState, expandEditorState} from './editorGrid.js'
+import type {EditorLevel, EditorState, LevelAppearance} from './editorTypes.js'
 
 /**
  * Хранит снимки редактируемого уровня и историю отмены изменений.
  */
 
 // Выполняет отдельную операцию `cloneState`.
-const cloneState = (state) => structuredClone(state)
+const cloneState = (state: EditorState): EditorState => structuredClone(state)
 // Преобразует данные в формат операции `serializeState`.
-const serializeState = (state) => JSON.stringify(state)
+const serializeState = (state: EditorState) => JSON.stringify(state)
 
 export default class EditorSession {
-  #future = []
-  #past = []
-  #savedMap
-  #savedState
-  #state
+  #future: EditorState[] = []
+  #past: EditorState[] = []
+  #savedMap = ''
+  #savedState = ''
+  #state!: EditorState
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(level, appearance) {
+  constructor(level: EditorLevel, appearance: LevelAppearance) {
     this.#init(level, appearance)
   }
 
@@ -48,7 +49,7 @@ export default class EditorSession {
   }
 
   // Обновляет состояние через операцию `apply`.
-  apply(nextState) {
+  apply(nextState: EditorState) {
     if (serializeState(nextState) === serializeState(this.#state)) return false
 
     this.#past.push(cloneState(this.#state))
@@ -92,7 +93,7 @@ export default class EditorSession {
   }
 
   // Инициализирует внутреннее состояние и зависимости.
-  #init(level, appearance) {
+  #init(level: EditorLevel, appearance: LevelAppearance) {
     this.#state = expandEditorState(level, appearance, SOKOBAN_SETTINGS.maxBoardColumns, SOKOBAN_SETTINGS.maxBoardRows)
     this.#savedState = serializeState(this.#state)
     this.#savedMap = JSON.stringify(this.#state.map)

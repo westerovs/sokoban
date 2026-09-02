@@ -1,6 +1,7 @@
-import {Container, Graphics, Rectangle, Sprite} from 'pixi.js'
+import {Container, Graphics, Rectangle, Sprite, type Texture} from 'pixi.js'
 import {SOKOBAN_TEXTURES} from '@/game/sokoban/config/config.js'
 import {applyTileVisualScale} from '@/game/sokoban/rendering/applyTileVisualScale.js'
+import type {EditorBrush, EditorLevel, LevelAppearance, Position} from './editorTypes.js'
 
 /**
  * Отображает редактируемую карту настоящими PixiJS-тайлами и принимает рисование.
@@ -13,21 +14,25 @@ const MAX_ZOOM = 4 // Максимальное увеличение рабоче
 const ZOOM_SENSITIVITY = 0.0014 // Скорость изменения масштаба колёсиком мыши
 
 export default class EditorBoard extends Container {
-  #appearance = {}
-  #brush = null
-  #defaults
-  #invalidPositions = []
-  #paintingBrush = null
-  #lastPaintedPosition = null
-  #level = null
-  #onPaint
-  #textures
+  #appearance: LevelAppearance = {}
+  #brush: EditorBrush | null = null
+  #defaults: Record<string, string>
+  #invalidPositions: Position[] = []
+  #paintingBrush: EditorBrush | null = null
+  #lastPaintedPosition: string | null = null
+  #level: EditorLevel | null = null
+  #onPaint: (payload: {brush: EditorBrush; position: Position; positionKey: string}) => void
+  #textures: Record<string, Texture>
   #viewportHeight = 0
   #viewportWidth = 0
   #zoom = MIN_ZOOM
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(textures, defaults, onPaint) {
+  constructor(
+    textures: Record<string, Texture>,
+    defaults: Record<string, string>,
+    onPaint: (payload: {brush: EditorBrush; position: Position; positionKey: string}) => void,
+  ) {
     super({label: 'sokoban-level-editor-board', sortableChildren: true})
 
     this.#textures = textures
@@ -37,7 +42,7 @@ export default class EditorBoard extends Container {
   }
 
   // Обновляет состояние через операцию `setState`.
-  setState(level, appearance, invalidPositions = []) {
+  setState(level: EditorLevel | null, appearance: LevelAppearance, invalidPositions: Position[] = []) {
     if (level?.id !== this.#level?.id) {
       this.#zoom = MIN_ZOOM
       this.#viewportWidth = 0
@@ -50,12 +55,12 @@ export default class EditorBoard extends Container {
   }
 
   // Обновляет состояние через операцию `setBrush`.
-  setBrush(brush) {
+  setBrush(brush: EditorBrush) {
     this.#brush = brush
   }
 
   // Рассчитывает и применяет расположение представления.
-  layout(width, height) {
+  layout(width: number, height: number) {
     if (!this.#level) return
     if (width === this.#viewportWidth && height === this.#viewportHeight) return
     this.#viewportWidth = width
@@ -64,7 +69,7 @@ export default class EditorBoard extends Container {
   }
 
   // Изменяет масштаб относительно точки под курсором мыши.
-  zoomAt(deltaY, point) {
+  zoomAt(deltaY: number, point: Position) {
     if (!this.#level) return
     const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, this.#zoom * Math.exp(-deltaY * ZOOM_SENSITIVITY)))
     if (nextZoom === this.#zoom) return
@@ -90,8 +95,10 @@ export default class EditorBoard extends Container {
 
   // Возвращает масштаб, при котором всё поле помещается в рабочую область.
   #getFitScale() {
-    const boardWidth = this.#level.map[0].length * TILE_SIZE
-    const boardHeight = this.#level.map.length * TILE_SIZE
+    const level = this.#level
+    if (!level) return 1
+    const boardWidth = level.map[0].length * TILE_SIZE
+    const boardHeight = level.map.length * TILE_SIZE
     const widthScale = (this.#viewportWidth - BOARD_PADDING * 2) / boardWidth
     const heightScale = (this.#viewportHeight - BOARD_PADDING * 2) / boardHeight
     return Math.max(Math.min(widthScale, heightScale, 1.35), 0.1)
@@ -99,15 +106,17 @@ export default class EditorBoard extends Container {
 
   // Центрирует поле с учётом текущего увеличения.
   #centerBoard() {
-    const boardWidth = this.#level.map[0].length * TILE_SIZE
-    const boardHeight = this.#level.map.length * TILE_SIZE
+    const level = this.#level
+    if (!level) return
+    const boardWidth = level.map[0].length * TILE_SIZE
+    const boardHeight = level.map.length * TILE_SIZE
     const scale = this.#getFitScale() * this.#zoom
     this.scale.set(scale)
     this.position.set((this.#viewportWidth - boardWidth * scale) / 2, (this.#viewportHeight - boardHeight * scale) / 2)
   }
 
   // Сохраняет выбранную точку поля под курсором во время увеличения.
-  #applyZoomAtPoint(nextZoom, point) {
+  #applyZoomAtPoint(nextZoom: number, point: Position) {
     const localX = (point.x - this.x) / this.scale.x
     const localY = (point.y - this.y) / this.scale.y
     const scale = this.#getFitScale() * nextZoom
@@ -123,24 +132,27 @@ export default class EditorBoard extends Container {
 
     const scene = new Container({label: 'sokoban-level-editor-scene', sortableChildren: true})
     scene.addChild(this.#createBackground())
-    this.#level.map.forEach((row, y) => {
+    const level = this.#level
+    level.map.forEach((row, y) => {
       Array.from(row).forEach((symbol, x) => this.#addCell(scene, symbol, {x, y}))
     })
     scene.addChild(this.#createGrid())
     scene.addChild(this.#createIssueOverlay())
     this.addChild(scene)
-    this.hitArea = new Rectangle(0, 0, this.#level.map[0].length * TILE_SIZE, this.#level.map.length * TILE_SIZE)
+    this.hitArea = new Rectangle(0, 0, level.map[0].length * TILE_SIZE, level.map.length * TILE_SIZE)
   }
 
   // Создаёт данные или представление для операции `createBackground`.
   #createBackground() {
-    const width = this.#level.map[0].length * TILE_SIZE
-    const height = this.#level.map.length * TILE_SIZE
+    const level = this.#level
+    if (!level) throw new Error('[EditorBoard]: level is missing')
+    const width = level.map[0].length * TILE_SIZE
+    const height = level.map.length * TILE_SIZE
     return new Graphics({label: 'sokoban-level-editor-background'}).rect(0, 0, width, height).fill({color: 0x101913, alpha: 0.94})
   }
 
   // Добавляет данные или представление через операцию `addCell`.
-  #addCell(scene, symbol, position) {
+  #addCell(scene: Container, symbol: string, position: Position) {
     if (symbol === '_') return scene.addChild(this.#createVoidCell(position))
     if (symbol === '#') return scene.addChild(this.#createRoleSprite('wall', position, this.#getTextureName('wall', position)))
 
@@ -151,14 +163,14 @@ export default class EditorBoard extends Container {
   }
 
   // Создаёт данные или представление для операции `createVoidCell`.
-  #createVoidCell(position) {
+  #createVoidCell(position: Position) {
     return new Graphics({label: `editor-void-${position.x}-${position.y}`})
       .rect(position.x * TILE_SIZE, position.y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
       .fill({color: 0x07100b, alpha: 0.62})
   }
 
   // Создаёт данные или представление для операции `createRoleSprite`.
-  #createRoleSprite(role, position, textureName) {
+  #createRoleSprite(role: string, position: Position, textureName: string) {
     const texture = this.#textures[textureName]
     if (!texture) throw new Error(`[EditorBoard]: texture ${textureName} is missing`)
 
@@ -171,7 +183,7 @@ export default class EditorBoard extends Container {
   }
 
   // Возвращает данные, за которые отвечает операция `getRoleDepth`.
-  #getRoleDepth(role, row) {
+  #getRoleDepth(role: string, row: number) {
     if (role === 'floor' || role === 'target') return 0
     if (role === 'box') return 1
     if (role === 'wall') return 2 + row * 2
@@ -181,7 +193,9 @@ export default class EditorBoard extends Container {
   // Создаёт данные или представление для операции `createGrid`.
   #createGrid() {
     const grid = new Graphics({label: 'sokoban-level-editor-grid', zIndex: 1000})
-    this.#level.map.forEach((row, y) => {
+    const level = this.#level
+    if (!level) return grid
+    level.map.forEach((row, y) => {
       Array.from(row).forEach((_, x) => {
         grid.rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE).stroke({color: 0xd7ead9, alpha: 0.2, width: 1})
       })
@@ -199,12 +213,12 @@ export default class EditorBoard extends Container {
   }
 
   // Возвращает данные, за которые отвечает операция `getTextureName`.
-  #getTextureName(role, position) {
+  #getTextureName(role: string, position: Position) {
     return this.#appearance[role]?.[`${position.x}:${position.y}`] ?? this.#defaults[role]
   }
 
   // Выполняет отдельную операцию `startPainting`.
-  #startPainting = (event) => {
+  #startPainting = (event: any) => {
     if (![0, 2].includes(event.button) || !this.#brush) return
     this.#paintingBrush = event.button === 2 ? {mode: 'void', label: 'Пустота'} : this.#brush
     this.#lastPaintedPosition = null
@@ -212,7 +226,7 @@ export default class EditorBoard extends Container {
   }
 
   // Выполняет отдельную операцию `continuePainting`.
-  #continuePainting = (event) => {
+  #continuePainting = (event: any) => {
     if (!this.#paintingBrush) return
     if (event.buttons === 0) return this.#stopPainting()
     this.#paintAt(event)
@@ -225,21 +239,23 @@ export default class EditorBoard extends Container {
   }
 
   // Выполняет отдельную операцию `paintAt`.
-  #paintAt(event) {
+  #paintAt(event: any) {
     const position = this.#getCellPosition(event)
     const positionKey = position ? `${position.x}:${position.y}` : null
     if (!position || positionKey === this.#lastPaintedPosition) return
 
     this.#lastPaintedPosition = positionKey
-    this.#onPaint({brush: this.#paintingBrush, position, positionKey})
+    this.#onPaint({brush: this.#paintingBrush as EditorBrush, position, positionKey: positionKey as string})
   }
 
   // Возвращает данные, за которые отвечает операция `getCellPosition`.
-  #getCellPosition(event) {
+  #getCellPosition(event: any) {
+    const level = this.#level
+    if (!level) return null
     const point = this.toLocal(event.global)
     const position = {x: Math.floor(point.x / TILE_SIZE), y: Math.floor(point.y / TILE_SIZE)}
     if (position.x < 0 || position.y < 0) return null
-    if (position.y >= this.#level.map.length || position.x >= this.#level.map[0].length) return null
+    if (position.y >= level.map.length || position.x >= level.map[0].length) return null
     return position
   }
 }

@@ -1,33 +1,37 @@
+import type {AppearanceCatalog, EditorBrush, LevelAppearance} from './editorTypes.js'
+
 /**
  * Управляет неизменяемым состоянием визуальных переопределений тайлов.
  */
 
 // Выполняет отдельную операцию `cloneAppearance`.
-const cloneAppearance = (appearance) => structuredClone(appearance)
+const cloneAppearance = (appearance: LevelAppearance): LevelAppearance => structuredClone(appearance)
 
 // Возвращает оформление выбранного уровня из общего каталога.
-const getLevelAppearance = (appearance, levelId) => {
+const getLevelAppearance = (appearance: AppearanceCatalog, levelId: string) => {
   return appearance.levels[levelId] ?? {}
 }
 
 // Удаляет опустевший визуальный слой из оформления уровня.
-const removeEmptyRole = (appearance, role) => {
+const removeEmptyRole = (appearance: LevelAppearance, role: string) => {
   if (appearance[role] && Object.keys(appearance[role]).length === 0) delete appearance[role]
 }
 
 // Назначает выбранную текстуру клетке или убирает избыточное значение по умолчанию.
-const setTileAppearance = (appearance, brush, positionKey, defaults) => {
+const setTileAppearance = (appearance: LevelAppearance, brush: EditorBrush, positionKey: string, defaults: Record<string, string>) => {
   const nextAppearance = cloneAppearance(appearance)
-  const roleAppearance = (nextAppearance[brush.role] ??= {})
+  const role = brush.role as string
+  const texture = brush.texture as string
+  const roleAppearance = (nextAppearance[role] ??= {})
 
-  if (brush.texture === defaults[brush.role]) delete roleAppearance[positionKey]
-  else roleAppearance[positionKey] = brush.texture
-  removeEmptyRole(nextAppearance, brush.role)
+  if (texture === defaults[role]) delete roleAppearance[positionKey]
+  else roleAppearance[positionKey] = texture
+  removeEmptyRole(nextAppearance, role)
   return nextAppearance
 }
 
 // Удаляет визуальные переопределения указанных слоёв в одной клетке.
-const removeTileAppearances = (appearance, positionKey, roles) => {
+const removeTileAppearances = (appearance: LevelAppearance, positionKey: string, roles: readonly string[]) => {
   const nextAppearance = cloneAppearance(appearance)
   roles.forEach((role) => {
     delete nextAppearance[role]?.[positionKey]

@@ -1,3 +1,5 @@
+import type {EditorLevel, LevelAppearance} from './editorTypes.js'
+
 /**
  * Связывает браузерный редактор с API сохранения, решателя и запуска черновика.
  */
@@ -8,7 +10,7 @@ const SOLVER_API_URL = '/__sokoban-level-editor/solve' // Путь отдель�
 const DRAFT_STORAGE_PREFIX = 'sokoban-level-editor-draft:' // Префикс временных черновиков в общем хранилище вкладок
 
 // Разбирает входные данные через операцию `parseResponse`.
-const parseResponse = async (response) => {
+const parseResponse = async (response: Response): Promise<any> => {
   const data = await response.json()
   if (!response.ok) throw new Error(data.error || `Request failed: ${response.status}`)
   return data
@@ -20,7 +22,7 @@ const loadEditorData = async () => {
 }
 
 // Выполняет отдельную операцию `saveEditorLevel`.
-const saveEditorLevel = async (levelId, map, appearance) => {
+const saveEditorLevel = async (levelId: string, map: string[], appearance: LevelAppearance) => {
   const response = await fetch(EDITOR_API_URL, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
@@ -30,7 +32,7 @@ const saveEditorLevel = async (levelId, map, appearance) => {
 }
 
 // Выполняет отдельную операцию `checkLevelSolvability`.
-const checkLevelSolvability = async (map) => {
+const checkLevelSolvability = async (map: string[]) => {
   const response = await fetch(SOLVER_API_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -40,7 +42,7 @@ const checkLevelSolvability = async (map) => {
 }
 
 // Запрашивает решаемую головоломку с новой или переданной структурой стен.
-const generateEditorLevel = async (options) => {
+const generateEditorLevel = async (options: Record<string, any>) => {
   const response = await fetch(GENERATOR_API_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -55,7 +57,7 @@ const createDraftToken = () => {
 }
 
 // Записывает черновик в доступное новой вкладке локальное хранилище.
-const storeLevelDraft = (levelId, map, appearance) => {
+const storeLevelDraft = (levelId: EditorLevel['id'], map: string[], appearance: LevelAppearance) => {
   const token = createDraftToken()
   localStorage.setItem(`${DRAFT_STORAGE_PREFIX}${token}`, JSON.stringify({levelId, map, appearance}))
   return token

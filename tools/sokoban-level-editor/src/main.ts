@@ -12,47 +12,58 @@ import LevelGeneratorPanel from './LevelGeneratorPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
 import ValidationPanel from './ValidationPanel.js'
+import type {EditorBrush, EditorData, EditorLevel, EditorState, LevelAppearance, Position, ValidationResult} from './editorTypes.js'
 
 /**
  * Инициализирует полноэкранный редактор и связывает прямые кисти с данными уровня.
  */
 
-const elements = {
-  brushLabel: document.querySelector('#brush-label'),
-  canvasHost: document.querySelector('#canvas-host'),
-  emptyState: document.querySelector('#empty-state'),
-  generatorPanel: document.querySelector('#generator-panel'),
-  generatorTab: document.querySelector('#generator-tab'),
-  launchButton: document.querySelector('#launch-button'),
-  levelSelect: document.querySelector('#level-select'),
-  locationSelect: document.querySelector('#location-select'),
-  manualToolsPanel: document.querySelector('#manual-tools-panel'),
-  manualToolsTab: document.querySelector('#manual-tools-tab'),
-  modeTabs: document.querySelector('#mode-tabs'),
-  palette: document.querySelector('#palette'),
-  redoButton: document.querySelector('#redo-button'),
-  resetButton: document.querySelector('#reset-button'),
-  saveButton: document.querySelector('#save-button'),
-  status: document.querySelector('#status'),
-  undoButton: document.querySelector('#undo-button'),
-  utilityPalette: document.querySelector('#utility-palette'),
-  validateButton: document.querySelector('#validate-button'),
-  validationSummary: document.querySelector('#validation-summary'),
+// Возвращает обязательный элемент интерфейса по селектору.
+const getElement = <T extends Element>(selector: string): T => {
+  const element = document.querySelector<T>(selector)
+  if (!element) throw new Error(`[SokobanLevelEditor]: element ${selector} is missing`)
+  return element
 }
 
-let board
-let editorData
-let generatorPanel
-let palette
-let selectedLevel = null
+const elements = {
+  brushLabel: getElement<HTMLElement>('#brush-label'),
+  canvasHost: getElement<HTMLElement>('#canvas-host'),
+  emptyState: getElement<HTMLElement>('#empty-state'),
+  generatorPanel: getElement<HTMLElement>('#generator-panel'),
+  generatorTab: getElement<HTMLButtonElement>('#generator-tab'),
+  launchButton: getElement<HTMLButtonElement>('#launch-button'),
+  levelSelect: getElement<HTMLSelectElement>('#level-select'),
+  locationSelect: getElement<HTMLSelectElement>('#location-select'),
+  manualToolsPanel: getElement<HTMLElement>('#manual-tools-panel'),
+  manualToolsTab: getElement<HTMLButtonElement>('#manual-tools-tab'),
+  modeTabs: getElement<HTMLElement>('#mode-tabs'),
+  palette: getElement<HTMLElement>('#palette'),
+  redoButton: getElement<HTMLButtonElement>('#redo-button'),
+  resetButton: getElement<HTMLButtonElement>('#reset-button'),
+  saveButton: getElement<HTMLButtonElement>('#save-button'),
+  status: getElement<HTMLElement>('#status'),
+  undoButton: getElement<HTMLButtonElement>('#undo-button'),
+  utilityPalette: getElement<HTMLElement>('#utility-palette'),
+  validateButton: getElement<HTMLButtonElement>('#validate-button'),
+  validationSummary: getElement<HTMLElement>('#validation-summary'),
+}
+
+let board: EditorBoard
+let editorData: EditorData
+let generatorPanel: LevelGeneratorPanel | null = null
+let palette: EditorPalette
+let selectedLevel: EditorLevel | null = null
 let selectedBrushLabel = 'Выберите кисть'
-let session = null
-let statusTimer = null
-let validationPanel
+let session: EditorSession | null = null
+let statusTimer: ReturnType<typeof setTimeout> | null = null
+let validationPanel: ValidationPanel
+
+// Возвращает безопасный текст перехваченной ошибки.
+const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
 // Показывает крупное временное уведомление в верхней части редактора.
-const showStatus = (message, kind = 'info') => {
-  clearTimeout(statusTimer)
+const showStatus = (message: string, kind = 'info') => {
+  if (statusTimer !== null) clearTimeout(statusTimer)
   elements.status.textContent = message
   elements.status.dataset.kind = kind
   elements.status.dataset.visible = 'true'
@@ -60,7 +71,7 @@ const showStatus = (message, kind = 'info') => {
 }
 
 // Возвращает компактное состояние текущего уровня для внешних действий.
-const getExportState = () => {
+const getExportState = (): EditorState | null => {
   return session?.getExportState() ?? null
 }
 
@@ -80,7 +91,7 @@ const renderSession = () => {
 }
 
 // Открывает выбранный уровень на полном рабочем поле редактора.
-const updateSelectedLevel = (level) => {
+const updateSelectedLevel = (level: EditorLevel | null) => {
   selectedLevel = level
   elements.emptyState.hidden = Boolean(level)
   if (!level) {
@@ -102,40 +113,41 @@ const canChangeLevel = () => {
 }
 
 // Применяет выбранную кисть к клетке карты.
-const handlePaint = ({brush, position}) => {
+const handlePaint = ({brush, position}: {brush: EditorBrush; position: Position}) => {
+  if (!session) return
   const result = applyEditorBrush(session.state, brush, position, SOKOBAN_TILE_CATALOG.defaults)
   if (session.apply(result.state)) renderSession()
 }
 
 // Передаёт выбранную кисть доске и обновляет подпись интерфейса.
-const selectBrush = (brush) => {
+const selectBrush = (brush: EditorBrush) => {
   board.setBrush(brush)
   selectedBrushLabel = brush.label
   if (!elements.manualToolsPanel.hidden) elements.brushLabel.textContent = selectedBrushLabel
 }
 
 // Оставляет оформление стен и пола при перестановке игровых объектов.
-const getStructuralAppearance = (appearance) => {
+const getStructuralAppearance = (appearance: LevelAppearance): LevelAppearance => {
   return Object.fromEntries(['wall', 'floor'].filter((role) => appearance[role]).map((role) => [role, structuredClone(appearance[role])]))
 }
 
 // Создаёт полное состояние редактора из компактного результата генератора.
-const createGeneratedState = (result, preserveTopology) => {
-  const appearance = preserveTopology ? getStructuralAppearance(getExportState().appearance) : {}
-  const level = {id: selectedLevel.id, map: result.map}
+const createGeneratedState = (result: any, preserveTopology: boolean) => {
+  const appearance = preserveTopology ? getStructuralAppearance((getExportState() as EditorState).appearance) : {}
+  const level = {id: (selectedLevel as EditorLevel).id, map: result.map}
   return expandEditorState(level, appearance, SOKOBAN_SETTINGS.maxBoardColumns, SOKOBAN_SETTINGS.maxBoardRows)
 }
 
 // Применяет всю сгенерированную головоломку одним шагом истории.
-const applyGenerationResult = (result, preserveTopology) => {
+const applyGenerationResult = (result: any, preserveTopology: boolean) => {
   const nextState = createGeneratedState(result, preserveTopology)
-  if (!session.apply(nextState)) return false
+  if (!session?.apply(nextState)) return false
   renderSession()
   return true
 }
 
 // Возвращает краткое описание результата автогенерации.
-const getGenerationMessage = (stats) => {
+const getGenerationMessage = (stats: any) => {
   const solution = stats.minimumPushes
     ? `минимум ${stats.minimumPushes} толчков`
     : `решение гарантировано за ${stats.solutionPushes} толчков`
@@ -143,10 +155,10 @@ const getGenerationMessage = (stats) => {
 }
 
 // Запрашивает генерацию и применяет результат к текущему открытому уровню.
-const generateLevel = async (options) => {
+const generateLevel = async (options: Record<string, any>) => {
   if (!session) return null
   const {preserveTopology, ...request} = options
-  if (preserveTopology) request.topology = getExportState().map
+  if (preserveTopology) request.topology = (getExportState() as EditorState).map
   showStatus(preserveTopology ? 'Переставляем объекты, стены останутся прежними…' : 'Создаём структуру и ищем сложную задачу…')
   try {
     const result = await generateEditorLevel(request)
@@ -154,13 +166,13 @@ const generateLevel = async (options) => {
     showStatus(getGenerationMessage(result.stats))
     return result.stats
   } catch (error) {
-    showStatus(error.message, 'error')
+    showStatus(getErrorMessage(error), 'error')
     return null
   }
 }
 
 // Переключает ручные инструменты и вкладку автогенерации.
-const selectSidebarPanel = (mode) => {
+const selectSidebarPanel = (mode: string) => {
   const isGenerator = mode === 'generator'
   elements.manualToolsPanel.hidden = isGenerator
   elements.generatorPanel.hidden = !isGenerator
@@ -170,26 +182,27 @@ const selectSidebarPanel = (mode) => {
 }
 
 // Проверяет текущую карту и показывает ошибки перед внешним действием.
-const getValidation = () => {
-  const validation = validateLevelMap(session.state.map)
+const getValidation = (): ValidationResult => {
+  const validation = validateLevelMap((session as EditorSession).state.map)
   validationPanel.update(validation)
   if (!validation.isValid) showStatus('Исправьте ошибки структуры перед этим действием', 'error')
   return validation
 }
 
 // Находит уровень по идентификатору в данных редактора.
-const findLevel = (data, levelId) => {
+const findLevel = (data: EditorData, levelId: string) => {
   return data.locations.flatMap((location) => location.levels).find((level) => level.id === levelId)
 }
 
 // Обновляет открытую сессию данными, перечитанными после сохранения.
-const applySavedData = (data) => {
-  const savedLevel = findLevel(data, selectedLevel.id)
-  selectedLevel.map = [...savedLevel.map]
-  selectedLevel.isVerified = savedLevel.isVerified
+const applySavedData = (data: EditorData) => {
+  const currentLevel = selectedLevel as EditorLevel
+  const savedLevel = findLevel(data, currentLevel.id) as EditorLevel
+  currentLevel.map = [...savedLevel.map]
+  currentLevel.isVerified = savedLevel.isVerified
   editorData = data
-  const appearance = getLevelAppearance(editorData.appearance, selectedLevel.id)
-  session = new EditorSession(selectedLevel, appearance)
+  const appearance = getLevelAppearance(editorData.appearance, currentLevel.id)
+  session = new EditorSession(currentLevel, appearance)
   renderSession()
 }
 
@@ -198,13 +211,13 @@ const save = async () => {
   if (!session || !getValidation().isValid) return false
   elements.saveButton.disabled = true
   try {
-    const state = getExportState()
-    const data = await saveEditorLevel(selectedLevel.id, state.map, state.appearance)
+    const state = getExportState() as EditorState
+    const data = await saveEditorLevel((selectedLevel as EditorLevel).id, state.map, state.appearance)
     applySavedData(data)
     showStatus('Уровень сохранён, файл локации и оформление обновлены')
     return true
   } catch (error) {
-    showStatus(error.message, 'error')
+    showStatus(getErrorMessage(error), 'error')
     return false
   } finally {
     elements.saveButton.disabled = false
@@ -214,17 +227,18 @@ const save = async () => {
 // Открывает несохранённый черновик уровня в новой вкладке игры.
 const launchDraft = () => {
   if (!session || !getValidation().isValid) return
-  const state = getExportState()
-  const draftToken = storeLevelDraft(selectedLevel.id, state.map, state.appearance)
+  const state = getExportState() as EditorState
+  const currentLevel = selectedLevel as EditorLevel
+  const draftToken = storeLevelDraft(currentLevel.id, state.map, state.appearance)
   const gameUrl = new URL('/', window.location.origin)
-  gameUrl.searchParams.set('sokobanLevel', selectedLevel.id)
+  gameUrl.searchParams.set('sokobanLevel', currentLevel.id)
   gameUrl.searchParams.set('sokobanDraft', draftToken)
   window.open(gameUrl, '_blank', 'noopener')
   showStatus('Черновик открыт в новой вкладке')
 }
 
 // Возвращает понятное описание результата решателя.
-const getSolvabilityMessage = (result) => {
+const getSolvabilityMessage = (result: any) => {
   if (result.status === 'solved') return `Решение найдено: минимум ${result.pushes} толчков, проверено состояний: ${result.explored}`
   if (result.status === 'unsolved') return `Решений не найдено, проверено состояний: ${result.explored}`
   return `Проверка достигла лимита, исследовано состояний: ${result.explored}`
@@ -232,15 +246,15 @@ const getSolvabilityMessage = (result) => {
 
 // Запускает серверный решатель для изменённой структуры уровня.
 const checkSolvability = async () => {
-  if (!session || !getValidation().isValid) return
+  if (!session || !selectedLevel || !getValidation().isValid) return
   if (!session.isMapDirty && selectedLevel.isVerified) return showStatus('Эта карта уже подтверждена решателем')
   elements.validateButton.disabled = true
   showStatus('Проверяем решаемость…')
   try {
-    const result = await checkLevelSolvability(getExportState().map)
+    const result = await checkLevelSolvability((getExportState() as EditorState).map)
     showStatus(getSolvabilityMessage(result), result.status === 'solved' ? 'info' : 'error')
   } catch (error) {
-    showStatus(error.message, 'error')
+    showStatus(getErrorMessage(error), 'error')
   } finally {
     elements.validateButton.disabled = false
   }
@@ -264,14 +278,14 @@ const resetAllChanges = () => {
 }
 
 // Масштабирует поле колёсиком относительно положения курсора.
-const handleBoardWheel = (event) => {
+const handleBoardWheel = (event: WheelEvent) => {
   event.preventDefault()
   board.zoomAt(event.deltaY, {x: event.offsetX, y: event.offsetY})
 }
 
 // Создаёт PixiJS-доску и отключает системное меню правой кнопки мыши.
 const createBoard = async () => {
-  const spriteSheet = await Assets.load(SOKOBAN_TILE_CATALOG.atlas)
+  const spriteSheet: any = await Assets.load(SOKOBAN_TILE_CATALOG.atlas)
   const app = new Application()
   await app.init({
     resizeTo: elements.canvasHost,
@@ -291,13 +305,14 @@ const createBoard = async () => {
 }
 
 // Проверяет, набирает ли пользователь текст в элементе формы.
-const isEditableTarget = (target) => {
-  const tagName = target?.tagName
+const isEditableTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false
+  const tagName = target.tagName
   return tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT' || target?.isContentEditable
 }
 
 // Обрабатывает сочетания отмены, повтора и сохранения.
-const handleControlShortcut = (event) => {
+const handleControlShortcut = (event: KeyboardEvent) => {
   if (!event.ctrlKey && !event.metaKey) return false
   const key = event.key.toLowerCase()
   if (key === 's') save()
@@ -309,7 +324,7 @@ const handleControlShortcut = (event) => {
 }
 
 // Переключает палитры цифрами и передаёт служебные сочетания.
-const handleKeyboard = (event) => {
+const handleKeyboard = (event: KeyboardEvent) => {
   if (isEditableTarget(event.target)) return
   if (handleControlShortcut(event)) return event.preventDefault()
   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
@@ -361,7 +376,7 @@ const init = async () => {
     bindActions()
   } catch (error) {
     console.error('[SokobanLevelEditor]: initialization failed', error)
-    showStatus(error.message, 'error')
+    showStatus(getErrorMessage(error), 'error')
   }
 }
 

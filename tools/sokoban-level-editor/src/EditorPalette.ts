@@ -1,3 +1,5 @@
+import type {EditorBrush} from './editorTypes.js'
+
 /**
  * Создаёт прямые палитры стен, ящиков, пола и целей вместе с общими инструментами.
  */
@@ -14,16 +16,25 @@ const UTILITY_TOOLS = Object.freeze([
   {mode: 'void', label: 'Пустота', icon: '×'}, // Полностью очищает выбранную клетку
 ])
 
+type ModeConfig = (typeof MODE_CONFIG)[number]
+type UtilityTool = (typeof UTILITY_TOOLS)[number]
+
 export default class EditorPalette {
-  #catalog
-  #modeElement
-  #onSelect
-  #paletteElement
-  #selectedButtons = new Map()
-  #utilityElement
+  #catalog: any
+  #modeElement: HTMLElement
+  #onSelect: (brush: EditorBrush) => void
+  #paletteElement: HTMLElement
+  #selectedButtons = new Map<string, HTMLButtonElement>()
+  #utilityElement: HTMLElement
 
   // Создаёт палитру и сохраняет её DOM-зависимости.
-  constructor(utilityElement, modeElement, paletteElement, catalog, onSelect) {
+  constructor(
+    utilityElement: HTMLElement,
+    modeElement: HTMLElement,
+    paletteElement: HTMLElement,
+    catalog: any,
+    onSelect: (brush: EditorBrush) => void,
+  ) {
     this.#utilityElement = utilityElement
     this.#modeElement = modeElement
     this.#paletteElement = paletteElement
@@ -38,7 +49,7 @@ export default class EditorPalette {
   }
 
   // Переключает палитру по цифровой горячей клавише.
-  selectModeByShortcut(shortcut) {
+  selectModeByShortcut(shortcut: string) {
     const config = MODE_CONFIG.find((item) => item.shortcut === shortcut)
     if (config) this.#selectMode(config.role)
   }
@@ -55,13 +66,14 @@ export default class EditorPalette {
   // Создаёт отдельный верхний блок игрока и пустоты.
   #createUtilitySection() {
     const section = this.#createSection('Игрок и очистка')
-    const tiles = section.querySelector('.editor-palette__tiles')
+    const tiles = section.querySelector<HTMLElement>('.editor-palette__tiles')
+    if (!tiles) throw new Error('[EditorPalette]: utility tiles are missing')
     tiles.append(...UTILITY_TOOLS.map((tool) => this.#createUtilityButton(tool)))
     return section
   }
 
   // Создаёт кнопку переключения одной прямой палитры.
-  #createModeButton(config) {
+  #createModeButton(config: ModeConfig) {
     const button = document.createElement('button')
     button.className = 'editor-mode-button'
     button.type = 'button'
@@ -74,20 +86,21 @@ export default class EditorPalette {
   }
 
   // Создаёт панель настоящих текстур одной роли.
-  #createModePanel(config) {
+  #createModePanel(config: ModeConfig) {
     const panel = document.createElement('div')
     const section = this.#createSection(config.title)
-    const tiles = section.querySelector('.editor-palette__tiles')
+    const tiles = section.querySelector<HTMLElement>('.editor-palette__tiles')
+    if (!tiles) throw new Error('[EditorPalette]: mode tiles are missing')
     panel.className = 'editor-palette__mode'
     panel.dataset.mode = config.role
     panel.hidden = true
-    tiles.append(...this.#catalog.groups[config.role].map((texture) => this.#createTextureButton(config, texture)))
+    tiles.append(...this.#catalog.groups[config.role].map((texture: string) => this.#createTextureButton(config, texture)))
     panel.append(section)
     return panel
   }
 
   // Создаёт секцию палитры с заголовком и сеткой кнопок.
-  #createSection(titleText) {
+  #createSection(titleText: string) {
     const section = document.createElement('section')
     const title = document.createElement('h2')
     const tiles = document.createElement('div')
@@ -100,7 +113,7 @@ export default class EditorPalette {
   }
 
   // Создаёт текстовую кнопку общего инструмента.
-  #createUtilityButton(tool) {
+  #createUtilityButton(tool: UtilityTool) {
     const button = document.createElement('button')
     const icon = document.createElement('span')
     const label = document.createElement('span')
@@ -117,7 +130,7 @@ export default class EditorPalette {
   }
 
   // Создаёт кнопку настоящей текстуры с прямой кистью размещения.
-  #createTextureButton(config, texture) {
+  #createTextureButton(config: ModeConfig, texture: string) {
     const button = document.createElement('button')
     const image = document.createElement('img')
     button.className = 'editor-tile-button'
@@ -142,7 +155,7 @@ export default class EditorPalette {
   }
 
   // Отмечает текстуру, используемую игрой по умолчанию.
-  #addDefaultBadge(button, role, texture) {
+  #addDefaultBadge(button: HTMLButtonElement, role: string, texture: string) {
     if (this.#catalog.defaults[role] !== texture) return
     const badge = document.createElement('span')
     badge.className = 'editor-tile-button__default'
@@ -151,22 +164,24 @@ export default class EditorPalette {
   }
 
   // Показывает нужную вкладку и восстанавливает её последнюю кисть.
-  #selectMode(role) {
-    this.#modeElement.querySelectorAll('button').forEach((button) => (button.ariaPressed = String(button.dataset.mode === role)))
-    this.#paletteElement.querySelectorAll('.editor-palette__mode').forEach((panel) => (panel.hidden = panel.dataset.mode !== role))
+  #selectMode(role: string) {
+    this.#modeElement.querySelectorAll<HTMLButtonElement>('button').forEach((button) => (button.ariaPressed = String(button.dataset.mode === role)))
+    this.#paletteElement
+      .querySelectorAll<HTMLElement>('.editor-palette__mode')
+      .forEach((panel) => (panel.hidden = panel.dataset.mode !== role))
     const selected = this.#selectedButtons.get(role) ?? this.#getDefaultButton(role)
     selected?.click()
   }
 
   // Возвращает кнопку основной текстуры выбранной роли.
-  #getDefaultButton(role) {
-    return this.#paletteElement.querySelector(`[data-role="${role}"][data-texture="${this.#catalog.defaults[role]}"]`)
+  #getDefaultButton(role: string) {
+    return this.#paletteElement.querySelector<HTMLButtonElement>(`[data-role="${role}"][data-texture="${this.#catalog.defaults[role]}"]`)
   }
 
   // Делает кнопку единственной активной кистью и сообщает о выборе.
-  #selectBrush(button, brush) {
-    this.#utilityElement.querySelectorAll('button').forEach((item) => (item.ariaPressed = 'false'))
-    this.#paletteElement.querySelectorAll('button').forEach((item) => (item.ariaPressed = 'false'))
+  #selectBrush(button: HTMLButtonElement, brush: EditorBrush) {
+    this.#utilityElement.querySelectorAll<HTMLButtonElement>('button').forEach((item) => (item.ariaPressed = 'false'))
+    this.#paletteElement.querySelectorAll<HTMLButtonElement>('button').forEach((item) => (item.ariaPressed = 'false'))
     button.ariaPressed = 'true'
     if (brush.role) this.#selectedButtons.set(brush.role, button)
     this.#onSelect(brush)

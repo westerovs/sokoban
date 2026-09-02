@@ -1,4 +1,5 @@
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
+import type {EditorState} from './editorTypes.js'
 import {
   DEFAULT_BOARD_HEIGHT,
   DEFAULT_BOARD_WIDTH,
@@ -15,10 +16,10 @@ import {createTopologyBoard, getMaximumBoxCount, normalizeTopology} from '../gen
  */
 
 // Считает ящики на обычном полу и на целях.
-const countBoxes = (map) => map.reduce((total, row) => total + Array.from(row).filter((symbol) => '$-'.includes(symbol)).length, 0)
+const countBoxes = (map: string[]) => map.reduce((total, row) => total + Array.from(row).filter((symbol) => '$-'.includes(symbol)).length, 0)
 
 // Вычисляет вместимость текущей структуры теми же правилами, что и сервер.
-const getCurrentMaximumBoxes = (map) => getMaximumBoxCount(createTopologyBoard(normalizeTopology(map)))
+const getCurrentMaximumBoxes = (map: string[]) => getMaximumBoxCount(createTopologyBoard(normalizeTopology(map)))
 
 // Создаёт варианты выбора сложности из общей конфигурации генератора.
 const createDifficultyOptions = () => {
@@ -73,51 +74,51 @@ const createObjectControlsMarkup = () => `
 `
 
 // Форматирует статистику последней созданной головоломки.
-const formatGenerationStats = (stats) => {
+const formatGenerationStats = (stats: any) => {
   if (!stats) return 'Создайте структуру или переставьте объекты, чтобы увидеть оценку.'
   const solution = stats.minimumPushes ? `Минимум ${stats.minimumPushes} толчков` : `Гарантированный путь — ${stats.solutionPushes} толчков`
-  const shape = SHAPE_CONFIG[stats.shape]?.label ?? 'Текущая структура'
+  const shape = (SHAPE_CONFIG as Record<string, {label: string}>)[stats.shape]?.label ?? 'Текущая структура'
   return `${stats.width}×${stats.height} · ${shape} · ${stats.boxCount} ящ. · ${solution} · линий ящиков: ${stats.boxLines}`
 }
 
 export default class LevelGeneratorPanel {
-  #addButton
+  #addButton!: HTMLButtonElement
   #boxCount = 1
-  #boxCountOutput
-  #difficultySelect
-  #element
-  #heightInput
+  #boxCountOutput!: HTMLOutputElement
+  #difficultySelect!: HTMLSelectElement
+  #element: HTMLElement
+  #heightInput!: HTMLInputElement
   #isBusy = false
   #maximumBoxCount = 1
-  #onGenerate
-  #removeButton
-  #shapeSelect
-  #stats = null
-  #statsElement
-  #widthInput
+  #onGenerate: (options: Record<string, any>) => Promise<any>
+  #removeButton!: HTMLButtonElement
+  #shapeSelect!: HTMLSelectElement
+  #stats: any = null
+  #statsElement!: HTMLElement
+  #widthInput!: HTMLInputElement
 
   // Создаёт панель и сохраняет обработчик генерации.
-  constructor(element, onGenerate) {
+  constructor(element: HTMLElement, onGenerate: (options: Record<string, any>) => Promise<any>) {
     this.#element = element
     this.#onGenerate = onGenerate
     this.#init()
   }
 
   // Синхронизирует размеры и количество объектов с открытым уровнем.
-  setCurrentLevel(state, {syncDimensions = false} = {}) {
+  setCurrentLevel(state: EditorState | null, {syncDimensions = false}: {syncDimensions?: boolean} = {}) {
     if (!state?.map?.length) return
     this.#boxCount = Math.max(1, countBoxes(state.map))
     this.#maximumBoxCount = Math.max(this.#boxCount, getCurrentMaximumBoxes(state.map))
     this.#stats = null
     if (syncDimensions) {
-      this.#widthInput.value = state.map[0].length
-      this.#heightInput.value = state.map.length
+      this.#widthInput.valueAsNumber = state.map[0].length
+      this.#heightInput.valueAsNumber = state.map.length
     }
     this.#render()
   }
 
   // Показывает точную статистику и вместимость результата генератора.
-  setGenerationStats(stats) {
+  setGenerationStats(stats: any) {
     this.#stats = stats
     this.#boxCount = stats.boxCount
     this.#maximumBoxCount = stats.maxBoxCount
@@ -136,20 +137,22 @@ export default class LevelGeneratorPanel {
 
   // Сохраняет ссылки на интерактивные элементы панели.
   #cacheElements() {
-    this.#widthInput = this.#element.querySelector('[data-field="width"]')
-    this.#heightInput = this.#element.querySelector('[data-field="height"]')
-    this.#difficultySelect = this.#element.querySelector('[data-field="difficulty"]')
-    this.#shapeSelect = this.#element.querySelector('[data-field="shape"]')
-    this.#boxCountOutput = this.#element.querySelector('[data-field="box-count"]')
-    this.#statsElement = this.#element.querySelector('[data-field="stats"]')
-    this.#removeButton = this.#element.querySelector('[data-action="remove-box"]')
-    this.#addButton = this.#element.querySelector('[data-action="add-box"]')
+    this.#widthInput = this.#getElement('[data-field="width"]')
+    this.#heightInput = this.#getElement('[data-field="height"]')
+    this.#difficultySelect = this.#getElement('[data-field="difficulty"]')
+    this.#shapeSelect = this.#getElement('[data-field="shape"]')
+    this.#boxCountOutput = this.#getElement('[data-field="box-count"]')
+    this.#statsElement = this.#getElement('[data-field="stats"]')
+    this.#removeButton = this.#getElement('[data-action="remove-box"]')
+    this.#addButton = this.#getElement('[data-action="add-box"]')
   }
 
   // Подключает создание структуры и изменение количества ящиков.
   #bindActions() {
-    this.#element.querySelector('[data-action="new-structure"]').addEventListener('click', () => this.#generateNewStructure())
-    this.#element.querySelector('[data-action="reshuffle"]').addEventListener('click', () => this.#populateCurrentStructure(this.#boxCount))
+    this.#getElement<HTMLButtonElement>('[data-action="new-structure"]').addEventListener('click', () => this.#generateNewStructure())
+    this.#getElement<HTMLButtonElement>('[data-action="reshuffle"]').addEventListener('click', () =>
+      this.#populateCurrentStructure(this.#boxCount),
+    )
     this.#removeButton.addEventListener('click', () => this.#populateCurrentStructure(this.#boxCount - 1))
     this.#addButton.addEventListener('click', () => this.#populateCurrentStructure(this.#boxCount + 1))
   }
@@ -167,13 +170,13 @@ export default class LevelGeneratorPanel {
   }
 
   // Переставляет выбранное количество объектов в неизменной геометрии.
-  #populateCurrentStructure(boxCount) {
+  #populateCurrentStructure(boxCount: number) {
     if (boxCount < 1 || boxCount > this.#maximumBoxCount) return
     return this.#run({difficulty: this.#difficultySelect.value, boxCount, preserveTopology: true})
   }
 
   // Выполняет одну генерацию и блокирует повторные нажатия до ответа.
-  async #run(options) {
+  async #run(options: Record<string, any>) {
     if (this.#isBusy) return
     this.#isBusy = true
     this.#render()
@@ -190,8 +193,17 @@ export default class LevelGeneratorPanel {
   #render() {
     this.#boxCountOutput.value = `${this.#boxCount} / ${this.#maximumBoxCount}`
     this.#statsElement.textContent = formatGenerationStats(this.#stats)
-    this.#element.querySelectorAll('button, input, select').forEach((element) => (element.disabled = this.#isBusy))
+    this.#element
+      .querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>('button, input, select')
+      .forEach((element) => (element.disabled = this.#isBusy))
     this.#removeButton.disabled ||= this.#boxCount <= 1
     this.#addButton.disabled ||= this.#boxCount >= this.#maximumBoxCount
+  }
+
+  // Возвращает обязательный элемент панели по селектору.
+  #getElement<T extends Element>(selector: string): T {
+    const element = this.#element.querySelector<T>(selector)
+    if (!element) throw new Error(`[LevelGeneratorPanel]: element ${selector} is missing`)
+    return element
   }
 }

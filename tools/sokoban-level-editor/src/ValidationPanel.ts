@@ -1,17 +1,19 @@
+import type {ValidationIssue, ValidationResult} from './editorTypes.js'
+
 /**
  * Отображает ошибки и предупреждения проверки редактируемого уровня.
  */
 
 export default class ValidationPanel {
-  #element
+  #element: HTMLElement
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(element) {
+  constructor(element: HTMLElement) {
     this.#element = element
   }
 
   // Обновляет состояние через операцию `update`.
-  update(validation) {
+  update(validation: ValidationResult) {
     if (validation.issues.length === 0) {
       this.#element.dataset.state = 'valid'
       this.#element.textContent = 'Структура уровня корректна'
@@ -25,7 +27,7 @@ export default class ValidationPanel {
   }
 
   // Создаёт данные или представление для операции `createIssue`.
-  #createIssue(issue) {
+  #createIssue(issue: ValidationIssue) {
     const item = document.createElement('li')
     item.dataset.type = issue.type
     item.textContent = issue.message

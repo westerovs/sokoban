@@ -1,17 +1,25 @@
+import type {EditorLevel, EditorLocation} from './editorTypes.js'
+
 /**
  * Управляет выбором локации и уровня с защитой несохранённых изменений.
  */
 
 export default class LevelNavigation {
-  #canSelect
-  #levelSelect
-  #locationSelect
-  #locations
-  #onSelect
-  #selectedLevel = null
+  #canSelect: () => boolean
+  #levelSelect: HTMLSelectElement
+  #locationSelect: HTMLSelectElement
+  #locations: EditorLocation[]
+  #onSelect: (level: EditorLevel | null) => void
+  #selectedLevel: EditorLevel | null = null
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor(locationSelect, levelSelect, locations, onSelect, canSelect) {
+  constructor(
+    locationSelect: HTMLSelectElement,
+    levelSelect: HTMLSelectElement,
+    locations: EditorLocation[],
+    onSelect: (level: EditorLevel | null) => void,
+    canSelect: () => boolean,
+  ) {
     this.#locationSelect = locationSelect
     this.#levelSelect = levelSelect
     this.#locations = locations
@@ -21,9 +29,9 @@ export default class LevelNavigation {
   }
 
   // Выполняет отдельную операцию `selectLevel`.
-  selectLevel(levelId) {
+  selectLevel(levelId: string | null) {
     const location = this.#locations.find(({levels}) => levels.some((level) => level.id === levelId))
-    if (!location) return this.#selectFirstLevel()
+    if (!levelId || !location) return this.#selectFirstLevel()
 
     this.#locationSelect.value = location.id
     this.#replaceLevelOptions(location)
@@ -54,7 +62,7 @@ export default class LevelNavigation {
   }
 
   // Выполняет отдельную операцию `replaceLevelOptions`.
-  #replaceLevelOptions(location) {
+  #replaceLevelOptions(location: EditorLocation) {
     this.#levelSelect.replaceChildren(...location.levels.map(this.#createLevelOption))
   }
 
@@ -66,7 +74,7 @@ export default class LevelNavigation {
   // Обрабатывает событие, за которое отвечает операция `handleLocationChange`.
   #handleLocationChange = () => {
     const location = this.#getSelectedLocation()
-    this.#replaceLevelOptions(location)
+    if (location) this.#replaceLevelOptions(location)
     this.#tryCommitSelection(this.getSelectedLevel())
   }
 
@@ -76,7 +84,7 @@ export default class LevelNavigation {
   }
 
   // Пытается выполнить операцию `tryCommitSelection` и сообщает результат.
-  #tryCommitSelection(level) {
+  #tryCommitSelection(level: EditorLevel | null) {
     if (this.#selectedLevel && level?.id !== this.#selectedLevel.id && !this.#canSelect()) {
       this.#restoreSelection()
       return
@@ -85,21 +93,24 @@ export default class LevelNavigation {
   }
 
   // Выполняет отдельную операцию `commitSelection`.
-  #commitSelection(level) {
+  #commitSelection(level: EditorLevel | null) {
     this.#selectedLevel = level
     this.#onSelect(level)
   }
 
   // Выполняет отдельную операцию `restoreSelection`.
   #restoreSelection() {
-    const location = this.#locations.find(({levels}) => levels.some((level) => level.id === this.#selectedLevel.id))
+    const selectedLevel = this.#selectedLevel
+    if (!selectedLevel) return
+    const location = this.#locations.find(({levels}) => levels.some((level) => level.id === selectedLevel.id))
+    if (!location) return
     this.#locationSelect.value = location.id
     this.#replaceLevelOptions(location)
-    this.#levelSelect.value = this.#selectedLevel.id
+    this.#levelSelect.value = selectedLevel.id
   }
 
   // Создаёт данные или представление для операции `createLocationOption`.
-  #createLocationOption = (location) => {
+  #createLocationOption = (location: EditorLocation) => {
     const option = document.createElement('option')
     option.value = location.id
     option.textContent = `${location.id} · ${location.titleKey}`
@@ -107,7 +118,7 @@ export default class LevelNavigation {
   }
 
   // Создаёт данные или представление для операции `createLevelOption`.
-  #createLevelOption = (level) => {
+  #createLevelOption = (level: EditorLevel) => {
     const option = document.createElement('option')
     option.value = level.id
     option.textContent = `${level.number}. ${level.id}`
