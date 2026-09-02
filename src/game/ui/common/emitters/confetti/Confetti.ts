@@ -119,7 +119,7 @@ export default class Confetti {
   #start = (): void => {
     if (this.#isRunning) return
 
-    this.#game.view.addChild(this.#container)
+    this.#game.view.addChild(this.#container!)
     this.#resize()
     this.#container!.visible = true
     this.#particleContainer!.visible = true
