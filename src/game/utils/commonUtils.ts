@@ -9,7 +9,7 @@ type RectOptions = {
   r?: number
   color?: number
   alpha?: number
-  center?: boolean
+  center?: boolean // Совместимый параметр центрирования для старых вызовов
 }
 
 type DebugRectOptions = RectOptions & {
@@ -22,6 +22,7 @@ type CircleOptions = {
   r?: number
   color?: number
   alpha?: number
+  center?: boolean
 }
 
 // Создаёт залитый прямоугольник с закруглёнными углами.

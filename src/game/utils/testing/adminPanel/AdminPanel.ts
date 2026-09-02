@@ -9,6 +9,7 @@ import LevelConfig from '../../../gameConfig/levels/LevelConfig.js'
 import LevelProgress from '../../../gameConfig/levels/LevelProgress.js'
 import {getLevelEntries, getLevelEntryByIndex, getLocations} from '../../../gameConfig/levels/locationCatalog.js'
 import GameUtils from '../../gameUtils/GameUtils.js'
+import type Storage from '../../../engine/storage/Storage.js'
 import {
   createButton,
   createCheckboxItem,
@@ -20,19 +21,21 @@ import {
   createSelectRow,
 } from './templates.js'
 
-const DEBUG_KEY = 'isDebug'
-const LEARNING_TOGGLE_KEY = 'completeLearning'
+// Создаёт DOM-панель разработчика для изменения тестового профиля и перехода между уровнями.
+
+const DEBUG_KEY = 'isDebug' // Ключ общего режима отладки
+const LEARNING_TOGGLE_KEY = 'completeLearning' // Ключ группового переключателя обучения
 
 // todo переусложнённая генерация. Изначально было пара параметров и разрослось.
 export default class AdminPanel {
-  #state = {}
-  #config
-  #panel
-  #footer
-  #adminPanelWindow
-  #storage
+  #state: Record<string, any> = {}
+  #config: any
+  #panel!: HTMLElement
+  #footer!: HTMLElement
+  #adminPanelWindow!: HTMLDivElement
+  #storage!: Storage
 
-  #learningKeys = [
+  #learningKeys: string[] = [
     STORAGE_KEYS.isTutorial_shadows,
     STORAGE_KEYS.isTutorial_words,
     STORAGE_KEYS.isTutorial_anagrams,
@@ -43,7 +46,7 @@ export default class AdminPanel {
     STORAGE_KEYS.hintCompassIsAvailable,
   ]
 
-  #storeKeys = [
+  #storeKeys: string[] = [
     STORAGE_KEYS.hints,
     STORAGE_KEYS.hintDarts,
     STORAGE_KEYS.hintCompass,
@@ -52,10 +55,12 @@ export default class AdminPanel {
     STORAGE_KEYS.coins,
   ]
 
-  constructor() {
+  // Создаёт панель; переданные устаревшие аргументы намеренно не используются.
+  constructor(..._legacyArguments: unknown[]) {
     this.#init()
   }
 
+  // Загружает зависимости, состояние и DOM-представление панели.
   #init() {
     this.#storage = Locator.storage
     this.#config = this.#getConfig()
@@ -65,6 +70,7 @@ export default class AdminPanel {
     this.#renderComponents()
   }
 
+  // Собирает описание редактируемых полей панели.
   #getConfig = () => {
     const {playerData} = this.#storage
 
@@ -162,13 +168,15 @@ export default class AdminPanel {
     }
   }
 
+  // Заполняет временное состояние текущими значениями.
   #initState() {
-    this.#config.checkboxes.forEach((cb) => (this.#state[cb.key] = cb.value))
-    this.#config.numberInputs.forEach((inp) => (this.#state[inp.key] = inp.value))
+    this.#config.checkboxes.forEach((checkbox: any) => (this.#state[checkbox.key] = checkbox.value))
+    this.#config.numberInputs.forEach((input: any) => (this.#state[input.key] = input.value))
     this.#state[STORAGE_KEYS.levelIndex] = this.#storage.playerData.levelIndex
     this.#state.adminLocationId = getLevelEntryByIndex(this.#state[STORAGE_KEYS.levelIndex]).location.id
   }
 
+  // Создаёт оболочку панели и добавляет её в документ.
   #renderPanel = () => {
     this.#adminPanelWindow = document.createElement('div')
     this.#adminPanelWindow.className = 'admin-panel__bg'
@@ -183,11 +191,12 @@ export default class AdminPanel {
       </section>`
     document.body.append(this.#adminPanelWindow)
 
-    this.#panel = this.#adminPanelWindow.querySelector('.admin-panel__content')
-    this.#footer = this.#adminPanelWindow.querySelector('.admin-panel__footer')
-    this.#adminPanelWindow.querySelector('.admin-panel__close').addEventListener('click', this.#destroy)
+    this.#panel = this.#adminPanelWindow.querySelector<HTMLElement>('.admin-panel__content')!
+    this.#footer = this.#adminPanelWindow.querySelector<HTMLElement>('.admin-panel__footer')!
+    this.#adminPanelWindow.querySelector('.admin-panel__close')?.addEventListener('click', this.#destroy)
   }
 
+  // Последовательно создаёт разделы панели.
   #renderComponents = () => {
     this.#renderLevelNavigation()
     this.#renderDebugGroup()
@@ -198,34 +207,38 @@ export default class AdminPanel {
     this.#renderInfoSection()
   }
 
+  // Создаёт группу общих отладочных настроек.
   #renderDebugGroup() {
     const grid = createFieldsetGrid(this.#panel, 'Debug')
     const debugCheckboxes = this.#getDebugCheckboxes()
-    const debugToggle = debugCheckboxes.find(({key}) => key === DEBUG_KEY)
+    const debugToggle = debugCheckboxes.find(({key}: {key: string}) => key === DEBUG_KEY)
 
     createFieldsetCheckbox(grid, {...debugToggle, ariaLabel: 'Включить режим отладки'}, this.#onCheckboxChange)
     debugCheckboxes
-      .filter(({key}) => key !== DEBUG_KEY)
-      .forEach((checkbox) => grid.append(createCheckboxRow(checkbox, this.#onCheckboxChange)))
+      .filter(({key}: {key: string}) => key !== DEBUG_KEY)
+      .forEach((checkbox: any) => grid.append(createCheckboxRow(checkbox, this.#onCheckboxChange)))
 
     this.#updateDebugInputsAvailability()
   }
 
-  #getDebugCheckboxes() {
-    return this.#config.checkboxes.filter(({key}) => !this.#learningKeys.includes(key) && !this.#storeKeys.includes(key))
+  // Возвращает поля общей отладки без обучения и магазина.
+  #getDebugCheckboxes(): any[] {
+    return this.#config.checkboxes.filter(({key}: {key: string}) => !this.#learningKeys.includes(key) && !this.#storeKeys.includes(key))
   }
 
+  // Обновляет доступность полей согласно общему режиму отладки.
   #updateDebugInputsAvailability() {
     const isDebugEnabled = !!this.#state[DEBUG_KEY]
 
     this.#getDebugCheckboxes()
-      .filter(({key}) => key !== DEBUG_KEY)
-      .forEach(({key, disabled}) => {
-        const input = this.#panel.querySelector(`input[data-key="${key}"]`)
+      .filter(({key}: {key: string}) => key !== DEBUG_KEY)
+      .forEach(({key, disabled}: {key: string; disabled?: boolean}) => {
+        const input = this.#panel.querySelector<HTMLInputElement>(`input[data-key="${key}"]`)
         if (input) input.disabled = !isDebugEnabled || !!disabled
       })
   }
 
+  // Создаёт выбор локации и уровня.
   #renderLevelNavigation() {
     const grid = createFieldsetGrid(this.#panel, `Уровни (${LevelConfig.getMaxLevels() + 1})`)
     grid.classList.add('admin-panel__fieldset-container--levels')
@@ -238,6 +251,7 @@ export default class AdminPanel {
     grid.append(createSelectRow(levelData, this.#getLevelOptions(), this.#onSelectChange))
   }
 
+  // Возвращает уровни выбранной в панели локации.
   #getLevelOptions() {
     return getLevelEntries()
       .map((entry, globalIndex) => ({...entry, globalIndex}))
@@ -248,6 +262,7 @@ export default class AdminPanel {
       }))
   }
 
+  // Создаёт группу флагов обучения.
   #renderLearningGroup() {
     const grid = createFieldsetGrid(this.#panel, 'Learning')
     createFieldsetCheckbox(
@@ -262,58 +277,64 @@ export default class AdminPanel {
     )
 
     this.#config.checkboxes
-      .filter((cb) => this.#learningKeys.includes(cb.key))
-      .forEach((cb) => {
-        grid.append(createCheckboxItem(cb, this.#onCheckboxChange))
+      .filter((checkbox: any) => this.#learningKeys.includes(checkbox.key))
+      .forEach((checkbox: any) => {
+        grid.append(createCheckboxItem(checkbox, this.#onCheckboxChange))
       })
   }
 
-  #setLearningValues(checked) {
+  // Одновременно меняет все флаги обучения.
+  #setLearningValues(checked: boolean) {
     this.#learningKeys.forEach((key) => {
       this.#state[key] = checked
 
-      const input = this.#panel.querySelector(`input[data-key="${key}"]`)
+      const input = this.#panel.querySelector<HTMLInputElement>(`input[data-key="${key}"]`)
       if (input) input.checked = checked
     })
   }
 
-  #onLearningToggle = (event) => {
-    this.#setLearningValues(event.target.checked)
+  // Обрабатывает групповой переключатель обучения.
+  #onLearningToggle = (event: Event) => {
+    this.#setLearningValues((event.target as HTMLInputElement).checked)
   }
 
+  // Синхронизирует состояние группового переключателя обучения.
   #updateLearningToggle() {
-    const input = this.#panel.querySelector(`input[data-key="${LEARNING_TOGGLE_KEY}"]`)
+    const input = this.#panel.querySelector<HTMLInputElement>(`input[data-key="${LEARNING_TOGGLE_KEY}"]`)
     if (input) input.checked = this.#learningKeys.every((key) => !!this.#state[key])
   }
 
+  // Создаёт группу тестовых значений магазина.
   #renderStoreGroup() {
     const grid = createFieldsetGrid(this.#panel, 'Store')
 
     // ЧЕКБОКСЫ Store
     this.#config.checkboxes
-      .filter((cb) => this.#storeKeys.includes(cb.key))
-      .forEach((cb) => {
-        grid.append(createCheckboxItem(cb, this.#onCheckboxChange))
+      .filter((checkbox: any) => this.#storeKeys.includes(checkbox.key))
+      .forEach((checkbox: any) => {
+        grid.append(createCheckboxItem(checkbox, this.#onCheckboxChange))
       })
 
     // NUMBER INPUTS Store
     this.#config.numberInputs
-      .filter((inp) => this.#storeKeys.includes(inp.key))
-      .forEach((inp) => {
-        grid.append(createNumberItem(inp, this.#onNumberChange))
+      .filter((input: any) => this.#storeKeys.includes(input.key))
+      .forEach((input: any) => {
+        grid.append(createNumberItem(input, this.#onNumberChange))
       })
   }
 
+  // Создаёт группу значений профиля игрока.
   #renderPlayerGroup() {
     const grid = createFieldsetGrid(this.#panel, 'Игрок')
 
     this.#config.numberInputs
-      .filter((inp) => !this.#storeKeys.includes(inp.key))
-      .forEach((inp) => {
-        grid.append(createNumberRow(inp, this.#onNumberChange))
+      .filter((input: any) => !this.#storeKeys.includes(input.key))
+      .forEach((input: any) => {
+        grid.append(createNumberRow(input, this.#onNumberChange))
       })
   }
 
+  // Создаёт кнопки сохранения и сброса.
   #renderButtons() {
     const row = document.createElement('div')
     row.className = 'admin-panel__row'
@@ -326,9 +347,11 @@ export default class AdminPanel {
     this.#footer.append(row)
   }
 
-  #onCheckboxChange = (e) => {
-    const key = e.target.dataset.key
-    const checked = !!e.target.checked
+  // Обрабатывает изменение одиночного переключателя.
+  #onCheckboxChange = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const key = target.dataset.key!
+    const checked = target.checked
 
     this.#state[key] = checked
 
@@ -344,30 +367,36 @@ export default class AdminPanel {
     if (key === 'testLoad') LocalStorage.testLoad = checked
   }
 
-  #onSelectChange = (e) => {
-    const key = e.target.dataset.key
-    this.#state[key] = key === 'adminLocationId' ? e.target.value : Number(e.target.value)
+  // Обрабатывает выбор локации или уровня.
+  #onSelectChange = (event: Event) => {
+    const target = event.target as HTMLSelectElement
+    const key = target.dataset.key!
+    this.#state[key] = key === 'adminLocationId' ? target.value : Number(target.value)
     if (key === 'adminLocationId') this.#updateLevelSelect()
   }
 
+  // Перестраивает список уровней выбранной локации.
   #updateLevelSelect() {
-    const select = this.#panel.querySelector(`select[data-key="${STORAGE_KEYS.levelIndex}"]`)
+    const select = this.#panel.querySelector<HTMLSelectElement>(`select[data-key="${STORAGE_KEYS.levelIndex}"]`)!
     const options = this.#getLevelOptions()
     select.replaceChildren(...options.map(this.#createOption))
     this.#state[STORAGE_KEYS.levelIndex] = Number(select.value)
   }
 
-  #createOption = ({label, value}) => {
+  // Создаёт DOM-элемент варианта уровня.
+  #createOption = ({label, value}: {label: string; value: string | number}) => {
     const option = document.createElement('option')
-    option.value = value
+    option.value = String(value)
     option.textContent = label
     return option
   }
 
-  #onNumberChange = (e) => {
-    const key = e.target.dataset.key
-    const v = e.target.value.trim()
-    const data = this.#config.numberInputs.find((n) => n.key === key)
+  // Обрабатывает изменение числового поля.
+  #onNumberChange = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const key = target.dataset.key!
+    const v = target.value.trim()
+    const data = this.#config.numberInputs.find((input: any) => input.key === key)
 
     const min = data.min ?? 0
     const max = data.max ?? 9999
@@ -375,11 +404,13 @@ export default class AdminPanel {
     this.#state[key] = v === '' ? 0 : Math.max(min, Math.min(max, Number(v)))
   }
 
+  // Применяет временные значения панели.
   #onSave = () => {
     this.#applySettings({...this.#state})
   }
 
-  #applySettings = (data) => {
+  // Переносит настройки в профиль и сохраняет его.
+  #applySettings = (data: Record<string, any>) => {
     const exclude = ['isDebug', 'isItemRects', 'isLog', 'forceNewYear', 'testPromo', 'testLoad']
     exclude.forEach((key) => delete data[key])
     delete data.adminLocationId
@@ -392,7 +423,7 @@ export default class AdminPanel {
 
     this.#destroy()
 
-    SdkManager.leaderboard.setScore(playerData.userLevel).catch((err) => {
+    SdkManager.leaderboard.setScore(playerData.userLevel).catch((err: unknown) => {
       console.log('[leaderboard.setScore]', err)
     })
 
@@ -402,7 +433,8 @@ export default class AdminPanel {
     setTimeout(() => location.reload(), 500)
   }
 
-  #applyLevelSelection = (levelIndex) => {
+  // Разблокирует путь к выбранному уровню и делает его текущим.
+  #applyLevelSelection = (levelIndex: number) => {
     const entry = getLevelEntryByIndex(levelIndex)
     const unlockedIds = getLocations()
       .slice(0, entry.locationIndex + 1)
@@ -412,11 +444,13 @@ export default class AdminPanel {
     new LevelProgress(this.#storage).selectLevel(entry.level.id, {ignoreLock: true, save: false})
   }
 
+  // Полностью сбрасывает профиль игрока.
   #onHardReset = () => {
     this.#storage.resetAllData()
     this.#destroy()
   }
 
+  // Сбрасывает открытые облики к стандартному.
   #resetSkins = () => {
     Locator.storage.playerData.currentSkin = 'standard'
     Locator.storage.playerData.skins = ['standard']
@@ -424,6 +458,7 @@ export default class AdminPanel {
     GameUtils.showPopUp('Reset skins!')
   }
 
+  // Добавляет справку по горячим клавишам.
   #renderInfoSection = () => {
     const wrap = document.createElement('div')
     wrap.className = 'admin-panel__hotkeys'
@@ -441,6 +476,7 @@ export default class AdminPanel {
     this.#panel.append(wrap)
   }
 
+  // Удаляет панель из документа.
   #destroy = () => {
     this.#adminPanelWindow?.remove()
   }

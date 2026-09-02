@@ -1,9 +1,12 @@
-import {Container, Texture} from 'pixi.js'
+import {Container, Sprite, Texture} from 'pixi.js'
+import type {ContainerOptions} from 'pixi.js'
 import {applyInteractive} from '../../components/buttons/buttons.js'
 import Locator from '../../engine/Locator.ts'
 import SdkManager from '../../engine/SdkManager.js'
 import {createCircle} from '../commonUtils.js'
 import GameUtils from '../gameUtils/GameUtils.js'
+
+// Создаёт отладочную кнопку принудительного включения и выключения звука платформы.
 
 /**
   Для теста добавить в BaseAdapter следующий метод:
@@ -19,21 +22,24 @@ import GameUtils from '../gameUtils/GameUtils.js'
      }
    }
 */
+
 export default class TestSoundButton extends Container {
   #game = Locator.game
-  #soundSprite
-  #soundIsEnabled = true
+  #soundSprite!: Sprite
+  #soundIsEnabled = true // Текущее тестовое состояние звука
   #textureKey = {
-    on: 'icon-sfx-on',
-    off: 'icon-sfx-off',
+    on: 'icon-sfx-on', // Текстура включённого звука
+    off: 'icon-sfx-off', // Текстура выключенного звука
   }
 
-  constructor(props) {
+  // Создаёт кнопку с переданными параметрами контейнера.
+  constructor(props: ContainerOptions = {}) {
     super({label: 'testSoundButton', ...props})
 
     this.#init()
   }
 
+  // Настраивает кнопку и её событие.
   #init = () => {
     applyInteractive(this)
     this.position.set(50, 150)
@@ -44,15 +50,17 @@ export default class TestSoundButton extends Container {
   }
 
   // кнопка для тестирования звука, которая эмитирует кнопку звука создаваемую платформой
+  // Создаёт фон и иконку тестовой кнопки.
   #renderYoutubeSoundTestButton = () => {
     const wrapperCircle = createCircle({r: 80, center: true})
-    this.#soundSprite = GameUtils.createSprite(this.#textureKey.on)
+    this.#soundSprite = GameUtils.createSprite(this.#textureKey.on, {label: 'test-sound-icon'})
     this.#soundSprite.position.set(-1, -2)
 
     this.addChild(wrapperCircle, this.#soundSprite)
     Locator.uiLayer.globalUiLayer.addChild(this)
   }
 
+  // Переключает состояние тестового звука.
   #checkoutState = () => {
     this.#soundIsEnabled = !this.#soundIsEnabled
 
@@ -63,13 +71,15 @@ export default class TestSoundButton extends Container {
     else this.#disabledAction()
   }
 
+  // Принудительно включает звук платформы.
   #enabledAction = () => {
     console.warn('sound force on')
-    SdkManager.adapter.forceMute(false)
+    SdkManager.adapter.forceMute?.(false)
   }
 
+  // Принудительно отключает звук платформы.
   #disabledAction = () => {
     console.warn('sound force off')
-    SdkManager.adapter.forceMute(true)
+    SdkManager.adapter.forceMute?.(true)
   }
 }

@@ -11,10 +11,14 @@ import {
   Sprite,
   Text,
   TilingSprite,
+  Ticker,
 } from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
+import type Game from '@/game/Game.js'
+
+// Отображает выдвижную панель производительности, памяти, звука и сцены.
 
 const PANEL = {
   x: 10,
@@ -69,22 +73,24 @@ const DEBUG_TEXT_PLACEHOLDER = [
 ].join('\n')
 
 export default class DebugInfo {
-  #game
-  #panel
-  #content
-  #debugText
-  #closeButton
-  #handle
-  #elapsed = 0
-  #isOpened = false
-  #isTickerActive = false
+  #game: Game
+  #panel!: Container
+  #content!: Container
+  #debugText!: Text
+  #closeButton!: Graphics
+  #handle!: Graphics
+  #elapsed = 0 // Время после последнего обновления показателей
+  #isOpened = false // Текущее состояние панели
+  #isTickerActive = false // Подключён ли обработчик к тикеру
   #panelTargetX = this.#isOpened ? PANEL.x : -PANEL.width
 
-  constructor(game) {
+  // Сохраняет игру и создаёт панель, если экранные логи разрешены.
+  constructor(game: Game) {
     this.#game = game
     this.#init()
   }
 
+  // Проверяет настройку и запускает создание панели.
   #init() {
     if (!LocalStorage.isLog) return
 
@@ -94,6 +100,7 @@ export default class DebugInfo {
     Locator.uiLayer.globalUiLayer.addChild(this.#panel)
   }
 
+  // Создаёт контейнеры и управляющие элементы панели.
   #createPanel() {
     this.#panel = new Container({label: 'debugInfo'})
     this.#content = new Container({
@@ -115,27 +122,34 @@ export default class DebugInfo {
     this.#panel.addChild(this.#content, this.#handle)
   }
 
+  // Создаёт текст показателей.
   #createDebugTexts = () => {
     this.#debugText = new Text({
+      label: 'debugInfoText',
       text: DEBUG_TEXT_PLACEHOLDER,
-      style: TEXT_STYLE,
+      style: TEXT_STYLE as any,
     })
     this.#debugText.position.set(PANEL.padding)
     this.#debugText.eventMode = 'none'
   }
 
+  // Рассчитывает высоту панели по тексту и кнопке.
   #getPanelHeight = () => {
     return Math.ceil(Math.max(this.#debugText.height + PANEL.padding * 2, PANEL.buttonSize + PANEL.padding * 2))
   }
 
-  #createBackground = (panelHeight) => {
-    const background = new Graphics({eventMode: 'none'}).roundRect(0, 0, PANEL.width, panelHeight, 8).fill({color: 0x000000, alpha: 0.6})
+  // Создаёт полупрозрачный фон панели.
+  #createBackground = (panelHeight: number) => {
+    const background = new Graphics({label: 'debugInfoBackground', eventMode: 'none'})
+      .roundRect(0, 0, PANEL.width, panelHeight, 8)
+      .fill({color: 0x000000, alpha: 0.6})
 
     // background.eventMode = 'none'
 
     this.#content.addChild(background)
   }
 
+  // Подключает кнопки открытия и закрытия.
   #bindEvents() {
     this.#closeButton.on('pointertap', () => {
       this.#setOpened(false)
@@ -146,7 +160,8 @@ export default class DebugInfo {
     })
   }
 
-  #setOpened(isOpened) {
+  // Переключает состояние и целевую позицию панели.
+  #setOpened(isOpened: boolean) {
     if (this.#isOpened === isOpened) return
 
     this.#isOpened = isOpened
@@ -162,7 +177,8 @@ export default class DebugInfo {
     this.#setTickerActive(true)
   }
 
-  #setTickerActive(isActive) {
+  // Подключает или отключает обновление панели от тикера.
+  #setTickerActive(isActive: boolean) {
     if (this.#isTickerActive === isActive) return
 
     this.#isTickerActive = isActive
@@ -175,7 +191,8 @@ export default class DebugInfo {
     this.#game.app.ticker.remove(this.#update, this)
   }
 
-  #update(ticker) {
+  // Анимирует панель и периодически обновляет показатели.
+  #update(ticker: Ticker) {
     const progress = Math.min(1, ticker.deltaMS * PANEL.animationSpeed)
 
     this.#panel.x += (this.#panelTargetX - this.#panel.x) * progress
@@ -200,10 +217,11 @@ export default class DebugInfo {
     this.#debugText.text = this.#getDebugText()
   }
 
+  // Создаёт кнопку закрытия панели.
   #createCloseButton() {
     const size = PANEL.buttonSize
 
-    const button = new Graphics()
+    const button = new Graphics({label: 'debugInfoCloseButton'})
       .roundRect(0, 0, size, size, 8)
       .fill({color: 0x000000, alpha: 0.4})
       .moveTo(15, 15)
@@ -224,10 +242,11 @@ export default class DebugInfo {
     this.#closeButton = button
   }
 
-  #createHandle(panelHeight) {
+  // Создаёт ручку открытия панели.
+  #createHandle(panelHeight: number) {
     const {handleWidth: width, handleHeight: height} = PANEL
 
-    const handle = new Graphics()
+    const handle = new Graphics({label: 'debugInfoHandle'})
       .roundRect(0, 0, width, height, 12)
       .fill({color: 0x000000, alpha: 0.6})
       .moveTo(23, 27)
@@ -250,6 +269,7 @@ export default class DebugInfo {
     return handle
   }
 
+  // Формирует текст текущих диагностических показателей.
   #getDebugText() {
     const {texturesCount, totalBytes} = this.#calcTextures()
     const scene = this.#calcSceneObjects(this.#game.app.stage)
@@ -281,6 +301,7 @@ export default class DebugInfo {
     ].join('\n')
   }
 
+  // Возвращает число живых игровых элементов, если доступно.
   #getAliveItems() {
     try {
       if (this.#game.stateName !== GAME_STATES.levelState) {
@@ -293,14 +314,16 @@ export default class DebugInfo {
     }
   }
 
-  #formatMb(bytes) {
+  // Форматирует количество байтов в мегабайты.
+  #formatMb(bytes: number) {
     return (bytes / 1024 / 1024).toFixed(1)
   }
 
+  // Рассчитывает число и примерный объём управляемых текстур.
   #calcTextures() {
-    const sources = (this.#game.app.renderer.texture?.managedTextures ?? []).filter(Boolean)
+    const sources = ((this.#game.app.renderer.texture as any)?.managedTextures ?? []).filter(Boolean)
 
-    const totalBytes = sources.reduce((sum, source) => {
+    const totalBytes = sources.reduce((sum: number, source: any) => {
       return sum + source.pixelWidth * source.pixelHeight * 4
     }, 0)
 
@@ -310,8 +333,9 @@ export default class DebugInfo {
     }
   }
 
-  #calcSceneObjects(stage) {
-    const stats = {
+  // Подсчитывает типы объектов в дереве сцены.
+  #calcSceneObjects(stage: Container) {
+    const stats: Record<string, number> = {
       total: 0,
       container: 0,
       sprite: 0,
@@ -320,7 +344,7 @@ export default class DebugInfo {
       text: 0,
     }
 
-    const nodes = [stage]
+    const nodes: Container[] = [stage]
 
     while (nodes.length > 0) {
       const node = nodes.pop()
@@ -332,14 +356,15 @@ export default class DebugInfo {
       if (type in stats) stats[type] += 1
 
       if (node.children?.length) {
-        nodes.push(...node.children)
+        nodes.push(...(node.children as Container[]))
       }
     }
 
     return stats
   }
 
-  #getPixiType(node) {
+  // Определяет диагностический тип объекта PixiJS.
+  #getPixiType(node: Container) {
     if (node instanceof BitmapText) return 'bitmapText'
     if (node instanceof HTMLText) return 'htmlText'
     if (node instanceof Text) return 'text'

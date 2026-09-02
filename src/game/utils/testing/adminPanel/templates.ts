@@ -1,4 +1,23 @@
-const createFieldsetGrid = (panel, title) => {
+// Создаёт DOM-элементы, используемые панелью разработчика.
+
+type FieldData = {
+  ariaLabel?: string
+  disabled?: boolean
+  key: string
+  label?: string
+  max?: number
+  min?: number
+  tooltip?: string
+  value: any
+}
+
+type SelectOption = {
+  label: string
+  value: string | number
+}
+
+// Создаёт группу настроек с заголовком и сеткой.
+const createFieldsetGrid = (panel: HTMLElement, title: string) => {
   const fieldset = document.createElement('fieldset')
   fieldset.className = 'admin-panel__fieldset'
 
@@ -15,7 +34,8 @@ const createFieldsetGrid = (panel, title) => {
   return grid
 }
 
-const createFieldsetCheckbox = (grid, data, onChange) => {
+// Добавляет общий переключатель в заголовок группы.
+const createFieldsetCheckbox = (grid: HTMLElement, data: FieldData, onChange: EventListener) => {
   const legend = grid.closest('fieldset')?.querySelector('legend')
   const input = document.createElement('input')
 
@@ -24,7 +44,7 @@ const createFieldsetCheckbox = (grid, data, onChange) => {
   input.checked = !!data.value
   input.disabled = !!data.disabled
   input.dataset.key = data.key
-  input.setAttribute('aria-label', data.ariaLabel)
+  input.setAttribute('aria-label', data.ariaLabel ?? data.label ?? data.key)
   if (data.tooltip) input.title = data.tooltip
   input.addEventListener('change', onChange)
 
@@ -34,7 +54,8 @@ const createFieldsetCheckbox = (grid, data, onChange) => {
   return input
 }
 
-const createCheckboxRow = (data, onChange) => {
+// Создаёт строку с переключателем.
+const createCheckboxRow = (data: FieldData, onChange: EventListener) => {
   const row = document.createElement('div')
   row.className = 'admin-panel__row'
 
@@ -43,14 +64,15 @@ const createCheckboxRow = (data, onChange) => {
   <input id="cb_${data.key}" type="checkbox" ${data.value ? 'checked' : ''} ${data.disabled ? 'disabled' : ''}>
 `
 
-  const input = row.querySelector('input')
+  const input = row.querySelector<HTMLInputElement>('input')!
   input.dataset.key = data.key
   input.addEventListener('change', onChange)
 
   return row
 }
 
-const createCheckboxItem = (data, onChange) => {
+// Создаёт компактный переключатель для сетки.
+const createCheckboxItem = (data: FieldData, onChange: EventListener) => {
   const item = document.createElement('div')
   item.className = 'admin-panel__fieldset-item'
 
@@ -59,14 +81,15 @@ const createCheckboxItem = (data, onChange) => {
   <input id="cb_${data.key}" type="checkbox" ${data.value ? 'checked' : ''} ${data.disabled ? 'disabled' : ''}>
 `
 
-  const input = item.querySelector('input')
+  const input = item.querySelector<HTMLInputElement>('input')!
   input.dataset.key = data.key
   input.addEventListener('change', onChange)
 
   return item
 }
 
-const createNumberItem = (data, onChange) => {
+// Создаёт компактное числовое поле для сетки.
+const createNumberItem = (data: FieldData, onChange: EventListener) => {
   const item = document.createElement('div')
   item.className = 'admin-panel__fieldset-item--store'
 
@@ -84,14 +107,15 @@ const createNumberItem = (data, onChange) => {
     >
   `
 
-  const input = item.querySelector('input')
+  const input = item.querySelector<HTMLInputElement>('input')!
   input.dataset.key = data.key
   input.addEventListener('input', onChange)
 
   return item
 }
 
-const createNumberRow = (data, onChange) => {
+// Создаёт строку с числовым полем.
+const createNumberRow = (data: FieldData, onChange: EventListener) => {
   const row = document.createElement('div')
   row.className = 'admin-panel__row'
 
@@ -109,32 +133,34 @@ const createNumberRow = (data, onChange) => {
     >
   `
 
-  const input = row.querySelector('input')
+  const input = row.querySelector<HTMLInputElement>('input')!
   input.dataset.key = data.key
   input.addEventListener('input', onChange)
 
   return row
 }
 
-const createSelectRow = (data, options, onChange) => {
+// Создаёт строку с выпадающим списком.
+const createSelectRow = (data: FieldData, options: SelectOption[], onChange: EventListener) => {
   const row = document.createElement('div')
   row.className = 'admin-panel__row'
 
-  const opts = options.map((o) => `<option value="${o.value}" ${o.value === data.value ? 'selected' : ''}>${o.label}</option>`).join('')
+  const opts = options.map((option) => `<option value="${option.value}" ${option.value === data.value ? 'selected' : ''}>${option.label}</option>`).join('')
 
   row.innerHTML = `
     <label for="sel_${data.key}"${data.tooltip ? ` title="${data.tooltip}"` : ''}>${data.label}</label>
     <select id="sel_${data.key}" class="admin-panel__select" ${data.disabled ? 'disabled' : ''}>${opts}</select>
   `
 
-  const select = row.querySelector('select')
+  const select = row.querySelector<HTMLSelectElement>('select')!
   select.dataset.key = data.key
   select.addEventListener('change', onChange)
 
   return row
 }
 
-const createButton = (text, className, onClick) => {
+// Создаёт одноразовую кнопку действия панели.
+const createButton = (text: string, className: string, onClick: EventListener) => {
   const btn = document.createElement('button')
   btn.className = className
   btn.innerText = text
