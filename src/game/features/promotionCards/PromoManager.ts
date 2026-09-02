@@ -4,8 +4,12 @@ import PromoCard from '@/game/features/promotionCards/PromoCard.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import PromoCardsTestRenderer from './PromoCardsTestRenderer.js'
+import type Storage from '@/game/engine/storage/Storage.js'
+import type {PromoData, PromoDataCatalog} from './promoTypes.js'
 
-export const promoTooltipFromAdminPanel = `
+// Выбирает, показывает и закрывает промопредложения по прогрессу игрока.
+
+const promoTooltipFromAdminPanel = `
  1 STARTED_PACK.
  Отключи рекламу и 30 подсказок
  Предлагаем в конце 2-го уровня
@@ -21,7 +25,7 @@ export const promoTooltipFromAdminPanel = `
  Если купили, то не показываем
 `
 
-export const PROMO_DATA = {
+const PROMO_DATA: PromoDataCatalog = {
   STARTED_PACK: {
     id: rewardsCatalog.promo.promoStartedPack.id,
     texture: 'promoStartedPack',
@@ -56,16 +60,19 @@ export const PROMO_DATA = {
 
 export default class PromoManager {
   #game = Locator.game
-  #card = null
-  #resolveLearningComplete
+  #card: PromoCard | null = null
+  #resolveLearningComplete: (() => void) | null = null
 
+  // Возвращает идентификаторы всех промонаборов.
   static get promoPacksId() {
     return Object.values(rewardsCatalog.promo).map((pack) => pack.id)
   }
 
+  // Отображает все промокарточки для визуальной проверки.
   static testRender = () => new PromoCardsTestRenderer().render(PROMO_DATA)
 
-  static getPromoDataForLevel = (storage) => {
+  // Выбирает предложение для текущего уровня прогресса.
+  static getPromoDataForLevel = (storage: Storage) => {
     const hasAdPass = storage.playerData.hasAdPass
     const level = storage.levelIndex
 
@@ -82,7 +89,8 @@ export default class PromoManager {
     return null
   }
 
-  createPromoCard = async (promoData) => {
+  // Создаёт карточку и возвращает обещание её закрытия.
+  createPromoCard = async (promoData: PromoData) => {
     const completionPromise = this.#createCompletionPromise()
 
     this.#card = new PromoCard({promoData})
@@ -94,22 +102,25 @@ export default class PromoManager {
     return completionPromise
   }
 
+  // Создаёт обещание завершения показа предложения.
   #createCompletionPromise = () => {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.#resolveLearningComplete = resolve
     })
   }
 
+  // Показывает карточку с безопасной обработкой ошибки.
   #showCard = async () => {
     try {
-      return await this.#card.show()
+      return await this.#card!.show()
     } catch (error) {
-      console.error('[PromoManager.showCard]', error)
+      console.error('[PromoManager]: failed to show promo card', error)
       return false
     }
   }
 
-  #setEvents = (bool) => {
+  // Подключает или отключает события карточки.
+  #setEvents = (bool: boolean) => {
     const status = bool ? 'on' : 'off'
 
     this.#game[status](GAME_EVENTS.PROMO_CARD_CLICK, this.#onHandlerBtnByeAction)
@@ -117,6 +128,7 @@ export default class PromoManager {
     this.#game[status](GAME_EVENTS.HIDE_PROMO_CARD, this.#onPromoCardHidden)
   }
 
+  // Уничтожает карточку и завершает ожидание.
   #destroy = () => {
     if (this.#card && !this.#card.destroyed) this.#card.destroy()
     this.#complete()
@@ -124,7 +136,8 @@ export default class PromoManager {
     this.#card = null
   }
 
-  #onHandlerBtnByeAction = async (id) => {
+  // Покупает выбранное предложение и закрывает карточку.
+  #onHandlerBtnByeAction = async (id: string) => {
     if (!PromoManager.promoPacksId.includes(id)) return
 
     try {
@@ -134,6 +147,7 @@ export default class PromoManager {
     }
   }
 
+  // Скрывает активную карточку.
   #hideCard = async () => {
     const card = this.#card
     if (!card || card.destroyed) return this.#complete()
@@ -146,11 +160,13 @@ export default class PromoManager {
     }
   }
 
+  // Сбрасывает ссылку после внешнего закрытия карточки.
   #onPromoCardHidden = () => {
     this.#card = null
     this.#complete()
   }
 
+  // Завершает ожидание карточки и отключает события.
   #complete = () => {
     if (!this.#resolveLearningComplete) return
 
@@ -159,4 +175,9 @@ export default class PromoManager {
     this.#setEvents(false)
     resolve()
   }
+}
+
+export {
+  PROMO_DATA,
+  promoTooltipFromAdminPanel,
 }
