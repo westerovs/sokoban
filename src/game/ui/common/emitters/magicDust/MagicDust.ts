@@ -1,4 +1,4 @@
-import {Assets, Particle, ParticleContainer, Rectangle, Texture} from 'pixi.js'
+import {Assets, Container, Particle, ParticleContainer, Rectangle, Texture, Ticker} from 'pixi.js'
 import {LIVE_OPS_ID} from '@/game/components/liveOpsController/LiveOpsController.js'
 import Locator from '@/game/engine/Locator.js'
 import {GAME_NAMES} from '@/game/gameConfig/constants.js'
@@ -7,24 +7,56 @@ import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import Logger from '@/game/utils/Logger.js'
 import defaultConfig from './defaultConfig.json'
 import newYearConfig from './newYearConfig.json'
+import type Game from '@/game/Game.js'
+
+// Создаёт лёгкий фоновой эффект частиц для главного экрана.
+
+type MagicDustConfig = {
+  acceleration: {x: number; y: number}
+  alpha: {end: number; start: number}
+  color: {
+    end: string
+    start: string
+  }
+  frequency: number
+  lifetime: {max: number; min: number}
+  maxParticles: number
+  maxSpeed: number
+  pos?: {x: number; y: number}
+  scale: {end: number; minimumScaleMultiplier?: number; start: number}
+  speed: {minimumSpeedMultiplier?: number; start: number}
+}
+
+type MagicDustParticle = {
+  age: number
+  endScale: number
+  lifetime: number
+  particle: Particle
+  startScale: number
+  velocityX: number
+  velocityY: number
+}
 
 export default class MagicDust {
-  #config
-  #particles = []
-  #particleContainer
-  #spawnElapsed = 0
-  #game
-  #parent
+  #config: MagicDustConfig | null = null
+  #particles: MagicDustParticle[] = []
+  #particleContainer: ParticleContainer | null = null
+  #spawnElapsed = 0 // Время с момента создания последней частицы
+  #game: Game
+  #parent: Container
 
-  constructor(game, parent) {
+  // Сохраняет игру и родительский контейнер эффекта.
+  constructor(game: Game, parent: Container) {
     this.#game = game
     this.#parent = parent
   }
 
+  // Возвращает внутренний контейнер частиц.
   get container() {
     return this.#particleContainer
   }
 
+  // Создаёт эмиттер и подключает его к игровому циклу.
   init = () => {
     try {
       if (!this.#parent) {
@@ -33,14 +65,15 @@ export default class MagicDust {
       }
 
       this.#initializeEmitter()
-      this.#parent.addChildAt(this.#particleContainer, Math.min(1, this.#parent.children.length))
+      this.#parent.addChildAt(this.#particleContainer!, Math.min(1, this.#parent.children.length))
       this.#game.app.ticker.add(this.#update)
       this.#game.on(GAME_EVENTS.clearLevel, this.destroy)
     } catch (error) {
-      console.error('[MagicDust] Ошибка при инициализации MagicDust:', error)
+      console.error('[MagicDust]: initialization failed', error)
     }
   }
 
+  // Отключает обновление и освобождает контейнер частиц.
   destroy = () => {
     try {
       this.#game.app.ticker.remove(this.#update)
@@ -58,6 +91,7 @@ export default class MagicDust {
     }
   }
 
+  // Выбирает конфигурацию эффекта и создаёт ParticleContainer.
   #initializeEmitter = () => {
     try {
       const texture = Assets.get('particle') ?? Texture.WHITE
@@ -75,6 +109,7 @@ export default class MagicDust {
       }
 
       this.#particleContainer = new ParticleContainer({
+        label: 'magic-dust-particles',
         texture,
         zIndex: 1,
         boundsArea: new Rectangle(bounds.x, bounds.y, Math.max(bounds.width, 1), Math.max(bounds.height, 1)),
@@ -85,12 +120,13 @@ export default class MagicDust {
         },
       })
     } catch (error) {
-      console.error('[MagicDust] Ошибка при инициализации эмиттера:', error)
+      console.error('[MagicDust]: emitter initialization failed', error)
       throw error
     }
   }
 
-  #update = (ticker) => {
+  // Создаёт и обновляет частицы на каждом кадре.
+  #update = (ticker: Ticker) => {
     if (!this.#particleContainer || !this.#config) return
 
     const delta = Math.min(ticker.deltaMS / 1000, 0.1)
@@ -132,43 +168,47 @@ export default class MagicDust {
     }
   }
 
+  // Создаёт одну частицу со случайными параметрами.
   #spawnParticle = () => {
-    const {texture} = this.#particleContainer
-    const scaleMultiplier = this.#random(this.#config.scale.minimumScaleMultiplier ?? 1, 1)
-    const speedMultiplier = this.#random(this.#config.speed.minimumSpeedMultiplier ?? 1, 1)
-    const startScale = this.#config.scale.start * scaleMultiplier
-    const startSpeed = this.#config.speed.start * speedMultiplier
+    const {texture} = this.#particleContainer!
+    const scaleMultiplier = this.#random(this.#config!.scale.minimumScaleMultiplier ?? 1, 1)
+    const speedMultiplier = this.#random(this.#config!.speed.minimumSpeedMultiplier ?? 1, 1)
+    const startScale = this.#config!.scale.start * scaleMultiplier
+    const startSpeed = this.#config!.speed.start * speedMultiplier
     const particle = new Particle({
       texture,
-      x: (this.#config.pos?.x ?? 0) + Math.random() * this.#parent.width,
-      y: (this.#config.pos?.y ?? 0) + Math.random() * this.#parent.height,
+      x: (this.#config!.pos?.x ?? 0) + Math.random() * this.#parent.width,
+      y: (this.#config!.pos?.y ?? 0) + Math.random() * this.#parent.height,
       scaleX: startScale,
       scaleY: startScale,
       anchorX: 0.5,
       anchorY: 0.5,
-      tint: this.#config.color.start,
-      alpha: this.#config.alpha.start,
+      tint: this.#config!.color.start,
+      alpha: this.#config!.alpha.start,
     })
 
-    this.#particleContainer.addParticle(particle)
+    this.#particleContainer!.addParticle(particle)
     this.#particles.push({
       particle,
       age: 0,
-      lifetime: this.#random(this.#config.lifetime.min, this.#config.lifetime.max),
+      lifetime: this.#random(this.#config!.lifetime.min, this.#config!.lifetime.max),
       startScale,
-      endScale: this.#config.scale.end * scaleMultiplier,
+      endScale: this.#config!.scale.end * scaleMultiplier,
       velocityX: startSpeed,
       velocityY: 0,
     })
   }
 
-  #lerp = (start, end, progress) => start + (end - start) * progress
+  // Линейно интерполирует значение между началом и концом.
+  #lerp = (start: number, end: number, progress: number) => start + (end - start) * progress
 
-  #random = (min, max) => min + Math.random() * (max - min)
+  // Возвращает случайное число в заданном диапазоне.
+  #random = (min: number, max: number) => min + Math.random() * (max - min)
 
+  // Возвращает цвет частиц для текущей игры.
   #getColorByGameName = () => {
-    if (GAME_NAME === GAME_NAMES.detective) return '#ffdd00'
-    if (GAME_NAME === GAME_NAMES.detectiveGirl) return '#FFFFFF'
+    if (String(GAME_NAME) === GAME_NAMES.detective) return '#ffdd00'
+    if (String(GAME_NAME) === GAME_NAMES.detectiveGirl) return '#FFFFFF'
 
     return '#FFFFFF'
   }

@@ -19,6 +19,7 @@ type CreateSpriteOptions = {
   anchorY?: number
   scale?: number
   interactive?: boolean
+  visible?: boolean
 }
 
 type CreateCheckboxOptions = {

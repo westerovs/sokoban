@@ -5,31 +5,37 @@ import {WORLD} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
+import type {DestroyOptions, Sprite, TextStyleOptions} from 'pixi.js'
+
+// Отображает адаптивное облако речи с аватаром и анимацией появления.
 
 export default class SpeechBubbleView extends Container {
   #game = Locator.game
-  #message
-  #avatar
-  #bubbleRect
-  #speechText
-  #customPosY = null
-  #padding = 20
+  #message: string
+  #avatar!: Sprite
+  #bubbleRect!: Container
+  #speechText!: Text
+  #customPosY: number | null = null
+  #padding = 20 // Внутренний отступ текста
+  innerBody!: NineSliceSprite
 
-  constructor({textMessage} = {}) {
-    super()
+  // Сохраняет сообщение и создаёт скрытое облако речи.
+  constructor({textMessage = ''}: {textMessage?: string} = {}) {
+    super({label: 'speechBubbleView'})
 
     this.#message = textMessage
-    this.label = 'speechBubbleView'
     this.visible = false
     this.zIndex = 3
 
     this.#init()
   }
 
+  // Возвращает контейнер тела облака.
   get bubbleRect() {
     return this.#bubbleRect
   }
 
+  // Создаёт анимацию появления облака.
   animateBubble = () => {
     return gsap
       .timeline()
@@ -37,22 +43,26 @@ export default class SpeechBubbleView extends Container {
       .from(this.#bubbleRect.scale, {x: 0, y: 0, ease: 'back.out', duration: 1}, '<')
   }
 
-  setText = (text) => {
+  // Заменяет текст и пересчитывает размеры облака.
+  setText = (text: string) => {
     this.#speechText.text = text
     this.#updateBubble()
     this.#resize()
   }
 
-  setPositionY(y) {
+  // Устанавливает пользовательскую вертикальную позицию.
+  setPositionY(y: number) {
     this.#customPosY = y
     this.#resize()
   }
 
+  // Возвращает автоматическое вертикальное позиционирование.
   setDefaultPositionY = () => {
     this.#customPosY = null
     this.#resize()
   }
 
+  // Создаёт визуальные элементы и подключает изменение размера.
   #init = () => {
     Locator.uiLayer.stateUiLayer.addChild(this)
 
@@ -64,25 +74,29 @@ export default class SpeechBubbleView extends Container {
     this.#resize()
   }
 
-  #setEvents = (bool) => {
+  // Включает или отключает игровые события облака.
+  #setEvents = (bool: boolean) => {
     const toggle = eventToggle(bool)
 
     this.#game[toggle.gameOnOff](GAME_EVENTS.gameResize, this.#resize)
   }
 
+  // Создаёт изображение аватара.
   #createAvatar = () => {
-    const avatar = GameUtils.createSprite('speech-bubble-avatar', {anchorX: 0, anchorY: 0})
+    const avatar = GameUtils.createSprite('speech-bubble-avatar', {label: 'speech-bubble-avatar', anchorX: 0, anchorY: 0})
     this.#avatar = avatar
     this.addChild(avatar)
   }
 
+  // Создаёт растягиваемое тело и уголок облака.
   #createSpeechBubble = () => {
-    const bubbleRect = new Container()
+    const bubbleRect = new Container({label: 'speech-bubble-body'})
     this.#bubbleRect = bubbleRect
     bubbleRect.position.set(250, 70)
 
     const texture = Texture.from('speech-bubble-rect')
     const innerBody = new NineSliceSprite({
+      label: 'innerBody',
       texture,
       leftWidth: 10,
       topHeight: 10,
@@ -91,22 +105,22 @@ export default class SpeechBubbleView extends Container {
     })
     this.innerBody = innerBody
 
-    innerBody.label = 'innerBody'
     innerBody.width = texture.width
     innerBody.height = texture.height
     bubbleRect.addChild(innerBody)
 
-    const corner = GameUtils.createSprite('speech-bubble-rect-corner', {anchorX: 0, anchorY: 0})
+    const corner = GameUtils.createSprite('speech-bubble-rect-corner', {label: 'speech-bubble-corner', anchorX: 0, anchorY: 0})
     corner.position.set(-(corner.width - 5), 20)
     bubbleRect.addChild(corner)
 
     this.addChild(bubbleRect)
   }
 
+  // Создаёт текст внутри тела облака.
   #createSpeechText = () => {
-    const innerBody = this.#bubbleRect.getChildByLabel('innerBody')
+    const innerBody = this.#bubbleRect.getChildByLabel('innerBody')!
 
-    const style = {
+    const style: TextStyleOptions = {
       ...primaryFontStyle,
       wordWrap: true,
       wordWrapWidth: innerBody.width - this.#padding,
@@ -114,12 +128,13 @@ export default class SpeechBubbleView extends Container {
       fontSize: 30,
     }
 
-    this.#speechText = new Text({text: this.#message, style})
+    this.#speechText = new Text({label: 'speech-bubble-text', text: this.#message, style})
     this.#speechText.position.set(10)
 
     this.#bubbleRect.addChild(this.#speechText)
   }
 
+  // Подгоняет фон облака под текущий текст.
   #updateBubble = () => {
     const {width, height} = this.#speechText.getLocalBounds()
 
@@ -128,6 +143,7 @@ export default class SpeechBubbleView extends Container {
     this.innerBody.height = height + this.#padding * 2
   }
 
+  // Адаптирует масштаб и позицию облака к размеру интерфейса.
   #resize = () => {
     const paddingX = 20
 
@@ -149,11 +165,10 @@ export default class SpeechBubbleView extends Container {
     this.position.set(centerX, posY)
   }
 
-  destroy(_options) {
-    super.destroy({
-      ..._options,
-      children: true,
-    })
+  // Освобождает облако и отписывает его от событий.
+  destroy(_options?: DestroyOptions) {
+    const options = typeof _options === 'object' ? {..._options, children: true} : {children: true}
+    super.destroy(options)
     this.#setEvents(false)
   }
 }

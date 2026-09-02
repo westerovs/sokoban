@@ -3,6 +3,8 @@ import Locator from '@/game/engine/Locator.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {Emitter, upgradeConfig} from '@/game/utils/particles/ParticleEmitter.js'
 
+// Создаёт след из частиц за движущимся игровым объектом.
+
 const particlesConfig = {
   alpha: {
     start: 1,
@@ -57,14 +59,15 @@ const particlesConfig = {
 
 export default class TrailEmitter extends Container {
   #game = Locator.game
-  #parent
-  #target
-  #emitter
-  #toCenter
+  #parent: Container
+  #target: Container | null
+  #emitter: Emitter | null = null
+  #toCenter: boolean
   #view = this
 
-  constructor({parent, target, toCenter = false} = {}) {
-    super()
+  // Сохраняет цель эффекта и создаёт эмиттер.
+  constructor({parent, target, toCenter = false}: {parent: Container; target: Container; toCenter?: boolean}) {
+    super({label: 'trail-emitter'})
     this.#parent = parent
     this.#target = target
     this.visible = false
@@ -73,12 +76,14 @@ export default class TrailEmitter extends Container {
     this.#init()
   }
 
+  // Подключает очистку и добавляет эмиттер к родителю.
   #init = () => {
     this.#game.on(GAME_EVENTS.completeLevel, this.destroyComponent)
     this.#initializeEmitter()
     this.#parent.addChild(this.#view)
   }
 
+  // Создаёт и запускает внутренний эмиттер частиц.
   #initializeEmitter = () => {
     const texture = Assets.get('icon-star') ?? Texture.WHITE
     const config = upgradeConfig(
@@ -98,6 +103,7 @@ export default class TrailEmitter extends Container {
     this.#game.app.ticker.add(this.#update)
   }
 
+  // Обновляет позицию источника частиц относительно цели.
   #update = () => {
     try {
       if (!this.#emitter || !this.#target || this.#target.destroyed) return
@@ -116,10 +122,11 @@ export default class TrailEmitter extends Container {
 
       this.#emitter.updateOwnerPos(tipX, tipY)
     } catch (e) {
-      console.error('[TrailEmitter]', e)
+      console.error('[TrailEmitter]: position update failed', e)
     }
   }
 
+  // Приостанавливает испускание частиц.
   pause = () => {
     if (this.#emitter) {
       this.#emitter.emit = false
@@ -127,6 +134,7 @@ export default class TrailEmitter extends Container {
     }
   }
 
+  // Возобновляет испускание частиц.
   resume = () => {
     if (this.#emitter) {
       this.#emitter.emit = true
@@ -134,6 +142,7 @@ export default class TrailEmitter extends Container {
     }
   }
 
+  // Останавливает эмиттер и освобождает его ресурсы.
   destroyComponent = () => {
     this.#game.app.ticker.remove(this.#update)
     this.#game.off(GAME_EVENTS.completeLevel, this.destroyComponent)
@@ -150,7 +159,7 @@ export default class TrailEmitter extends Container {
       this.#target = null
       this.destroy({children: true})
     } catch (e) {
-      console.error('[DartsTrail]', e)
+      console.error('[TrailEmitter]: cleanup failed', e)
     }
   }
 }

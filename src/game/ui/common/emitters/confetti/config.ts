@@ -1,3 +1,5 @@
+// Хранит параметры анимации конфетти экрана завершения уровня.
+
 const CONFETTI_SETTINGS = Object.freeze({
   enabled: true,
   revealDuration: 0.3,

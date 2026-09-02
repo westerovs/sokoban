@@ -4,11 +4,28 @@ import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
 import BaseModal from './BaseModal.js'
 
-export default class DialogWindow extends BaseModal {
-  #innerText
-  #size
+// Показывает простой диалог подтверждения с кнопками «да» и «нет».
 
-  constructor({innerText = '', bodyColor = popupColors.body, borderColor = popupColors.border, size = {w: 400, h: 130}} = {}) {
+type DialogWindowOptions = {
+  bodyColor?: number
+  borderColor?: number
+  innerText?: string
+  size?: {w: number; h: number}
+}
+
+type DialogButtonOptions = {
+  name: string
+  text: string
+  textureKey: string
+  x: number
+}
+
+export default class DialogWindow extends BaseModal {
+  #innerText: string
+  #size: {w: number; h: number}
+
+  // Сохраняет параметры диалога и создаёт его содержимое.
+  constructor({innerText = '', bodyColor = popupColors.body, borderColor = popupColors.border, size = {w: 400, h: 130}}: DialogWindowOptions = {}) {
     super({
       w: size.w,
       h: size.h,
@@ -23,6 +40,7 @@ export default class DialogWindow extends BaseModal {
     this.#init()
   }
 
+  // Настраивает положение и создаёт элементы диалога.
   #init = () => {
     this.label = 'dialogWindow'
     this.visible = true
@@ -33,6 +51,7 @@ export default class DialogWindow extends BaseModal {
     this.#createButtonNo()
   }
 
+  // Создаёт основной текст диалога.
   #createDialogText() {
     const dialogText = GameUtils.createText(this.#innerText, {
       name: 'dialogText',
@@ -49,6 +68,7 @@ export default class DialogWindow extends BaseModal {
     this.addChild(dialogText)
   }
 
+  // Создаёт кнопку подтверждения.
   #createButtonYes() {
     const button = this.#createButton({
       name: 'btnYes',
@@ -60,6 +80,7 @@ export default class DialogWindow extends BaseModal {
     this.addChild(button)
   }
 
+  // Создаёт кнопку отмены.
   #createButtonNo() {
     const button = this.#createButton({
       name: 'btnNo',
@@ -71,7 +92,8 @@ export default class DialogWindow extends BaseModal {
     this.addChild(button)
   }
 
-  #createButton({name, textureKey, text, x}) {
+  // Создаёт кнопку диалога по переданным параметрам.
+  #createButton({name, textureKey, text, x}: DialogButtonOptions) {
     const button = new ButtonContainer({
       props: {name, x, y: this.#size.h / 2},
       spriteKeys: [{key: textureKey, scale: 0.5}],
