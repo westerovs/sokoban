@@ -52,10 +52,10 @@ type VisibleBounds = {
 
 export default class Confetti {
   #game = Locator.game
-  #config: ConfettiConfig = null
-  #container: Container = null
-  #fade: Graphics = null
-  #particleContainer: ParticleContainer = null
+  #config!: ConfettiConfig
+  #container: Container | null = null
+  #fade: Graphics | null = null
+  #particleContainer: ParticleContainer | null = null
   #particles: ParticleState[] = []
   #bounds = new Rectangle(0, 0, 1, 1)
   #fadeTween: ReturnType<typeof gsap.to> | null = null
@@ -121,8 +121,8 @@ export default class Confetti {
 
     this.#game.view.addChild(this.#container)
     this.#resize()
-    this.#container.visible = true
-    this.#particleContainer.visible = true
+    this.#container!.visible = true
+    this.#particleContainer!.visible = true
     this.#spawnElapsed = 0
     this.#emissionRemaining = this.#config.emissionDuration
     this.#isRunning = true
@@ -131,8 +131,8 @@ export default class Confetti {
   }
 
   #startFade() {
-    this.#fade.alpha = 0
-    this.#fadeTween = gsap.to(this.#fade, {
+    this.#fade!.alpha = 0
+    this.#fadeTween = gsap.to(this.#fade!, {
       alpha: GAME_STYLES.fadeHalfAlpha,
       duration: this.#config.revealDuration,
       ease: 'linear',
@@ -160,9 +160,9 @@ export default class Confetti {
     const bounds = this.#getVisibleWorldBounds()
     this.#resizeParticles(bounds.width, bounds.height)
     this.#bounds.set(0, 0, bounds.width, bounds.height)
-    this.#particleContainer.position.set(bounds.x, bounds.y)
-    this.#particleContainer.boundsArea = this.#bounds
-    this.#fade.clear().rect(bounds.x, bounds.y, bounds.width, bounds.height).fill(0x000000)
+    this.#particleContainer!.position.set(bounds.x, bounds.y)
+    this.#particleContainer!.boundsArea = this.#bounds
+    this.#fade!.clear().rect(bounds.x, bounds.y, bounds.width, bounds.height).fill(0x000000)
   }
 
   #getVisibleWorldBounds(): VisibleBounds {
@@ -215,13 +215,13 @@ export default class Confetti {
     if (availableCount <= 0) return
 
     for (let index = 0; index < availableCount; index++) this.#spawnParticle()
-    this.#particleContainer.update()
+    this.#particleContainer!.update()
   }
 
   #spawnParticle() {
     const particle = this.#createParticle()
 
-    this.#particleContainer.particleChildren.push(particle)
+    this.#particleContainer!.particleChildren.push(particle)
     this.#particles.push({
       particle,
       velocityX: this.#randomRange(this.#config.velocityX),
@@ -233,7 +233,7 @@ export default class Confetti {
   }
 
   #createParticle(): Particle {
-    const texture = this.#particleContainer.texture
+    const texture = this.#particleContainer!.texture
     const width = this.#randomRange(this.#config.size)
     const height = this.#randomRange(this.#config.size) * 0.55
 
@@ -259,10 +259,10 @@ export default class Confetti {
       if (item.particle.y <= this.#bounds.height + this.#config.size.max) continue
 
       this.#particles.splice(index, 1)
-      this.#particleContainer.particleChildren.splice(index, 1)
+      this.#particleContainer!.particleChildren.splice(index, 1)
       didRemove = true
     }
-    if (didRemove) this.#particleContainer.update()
+    if (didRemove) this.#particleContainer!.update()
   }
 
   #moveParticle(item: ParticleState, delta: number) {
@@ -293,7 +293,7 @@ export default class Confetti {
 
     this.#game.app.ticker.remove(this.#update)
     this.#isRunning = false
-    this.#particleContainer.visible = false
+    this.#particleContainer!.visible = false
   }
 
   #randomRange({min, max}: Range): number {

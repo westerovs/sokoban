@@ -1,5 +1,8 @@
 import {GAME_NAMES} from './gameConfig/constants.js'
 import {GAME_NAME} from './generatedAssets/buildMeta.js'
+import type {TextStyleOptions} from 'pixi.js'
+
+// Содержит общие цвета и стили интерфейса игры.
 
 // todo подумать, мб сделать в настройках выбор темы интерфейса
 const GAME_STYLES = {
@@ -13,8 +16,9 @@ const FONT_COLORS = {
   blackColor: 0x000000,
 
   getIntroSpeechBubbleColor: () => {
-    if (GAME_NAME === GAME_NAMES.adventure) return 0x000000
-    if (GAME_NAME === GAME_NAMES.detectiveGirl) return 0xffffff
+    const gameName: string = GAME_NAME
+    if (gameName === GAME_NAMES.adventure) return 0x000000
+    if (gameName === GAME_NAMES.detectiveGirl) return 0xffffff
 
     return FONT_COLORS.mainFont
   },
@@ -25,7 +29,7 @@ const primaryFontStyle = {
   fontFamily: 'primaryFont',
   fontWeight: '800',
   fontSize: 36,
-}
+} satisfies TextStyleOptions
 
 const COMPASS_TIMER_TEXT_COLOR = () => {
   return 0x471f1f

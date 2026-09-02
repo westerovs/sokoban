@@ -1,5 +1,6 @@
 import i18next from 'i18next'
 import {Cache, Container, Matrix, RenderTexture, Sprite, Spritesheet, Text, Texture} from 'pixi.js'
+import type {Application, ContainerChild, SpritesheetData, TextStyleOptions} from 'pixi.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
@@ -9,16 +10,61 @@ import {FONT_COLORS, primaryFontStyle} from '@/game/styles.js'
 import PurchaseError from '@/game/ui/common/purchaseError/PurchaseError.js'
 import {Logger} from '../Logger.js'
 
+// Содержит общие фабрики PixiJS и небольшие игровые утилиты.
+
+type CreateSpriteOptions = {
+  label?: string
+  name?: string
+  anchorX?: number
+  anchorY?: number
+  scale?: number
+  interactive?: boolean
+}
+
+type CreateCheckboxOptions = {
+  text?: string
+  name?: string
+  interactive?: boolean
+  style?: TextStyleOptions
+}
+
+type CreateTextOptions = {
+  name?: string
+  style?: TextStyleOptions
+  anchorX?: number
+  anchorY?: number
+}
+
+type PopUpOptions = {
+  color?: string
+  duration?: number
+}
+
+type GradientStop = {
+  color: string
+  offset: number
+}
+
+type GradientOptions = {
+  width: number
+  height: number
+  angle?: number
+  stops?: GradientStop[]
+}
+
 export default class GameUtils {
-  static popupEl
-  static popupTimeout
+  static popupEl: HTMLDivElement | null | undefined
+  static popupTimeout: ReturnType<typeof setTimeout> | null | undefined
 
   static get isFirstLevel() {
     const {levelIndex, skinIndex} = Locator.storage.playerData
     return levelIndex === 0 && skinIndex === 1
   }
 
-  static createSprite(textureSource, {label, name, anchorX = 0.5, anchorY = 0.5, scale = 1, interactive} = {}) {
+  static createSprite(
+    textureSource: string | Texture,
+    {label, name, anchorX = 0.5, anchorY = 0.5, scale = 1, interactive}: CreateSpriteOptions = {},
+  ): Sprite {
     let texture = textureSource instanceof Texture ? textureSource : null
 
     if (!texture && Cache.has(textureSource)) {
@@ -59,7 +105,7 @@ export default class GameUtils {
       fill: FONT_COLORS.secondFont,
       fontSize: 26,
     },
-  } = {}) => {
+  }: CreateCheckboxOptions = {}) => {
     const checkboxContainer = new Container({label: name})
     if (interactive) applyInteractive(checkboxContainer)
 
@@ -78,7 +124,7 @@ export default class GameUtils {
     return checkboxContainer
   }
 
-  static createText(text, {name, style = {}, anchorX = 0.5, anchorY = 0.5} = {}) {
+  static createText(text: string | number, {name, style = {}, anchorX = 0.5, anchorY = 0.5}: CreateTextOptions = {}) {
     const textElement = new Text({text, style})
     textElement.anchor.set(anchorX, anchorY)
     if (name) textElement.label = name
@@ -86,14 +132,14 @@ export default class GameUtils {
     return textElement
   }
 
-  static getPositionIndex(parent, view) {
+  static getPositionIndex(parent: Container, view: ContainerChild) {
     console.log(parent.children)
     return parent.children.indexOf(view)
   }
 
-  static getLocalPosition(targetA, targetB) {
+  static getLocalPosition(targetA: Container, targetB: Container) {
     const globalCenter = targetA.toGlobal({x: targetA.width / 2, y: 0})
-    const localPos = targetB.parent.toLocal(globalCenter)
+    const localPos = targetB.parent!.toLocal(globalCenter)
 
     return {
       x: localPos.x,
@@ -101,7 +147,7 @@ export default class GameUtils {
     }
   }
 
-  static getLocalPositionVarB(target, parent) {
+  static getLocalPositionVarB(target: Container, parent: Container) {
     const globalPoint = target.getGlobalPosition()
     const {x, y} = parent.toLocal(globalPoint)
 
@@ -109,11 +155,11 @@ export default class GameUtils {
   }
 
   // пример object_cat_28 -> cat
-  static hasWord(str, word) {
+  static hasWord(str: string, word: string) {
     return new RegExp(word, 'i').test(str)
   }
 
-  static removeTexturesFromCache = (frames) => {
+  static removeTexturesFromCache = (frames: Record<string, unknown>) => {
     for (const key in frames) {
       if (!Cache.has(key)) continue
 
@@ -123,7 +169,7 @@ export default class GameUtils {
     }
   }
 
-  static createSpriteSheet = async (atlasPng, atlasJson, clearCache = false) => {
+  static createSpriteSheet = async (atlasPng: Texture, atlasJson: SpritesheetData, clearCache = false) => {
     if (clearCache) GameUtils.removeTexturesFromCache(atlasJson.frames)
 
     // 2. Создать и распарсить спрайтшит
@@ -137,7 +183,7 @@ export default class GameUtils {
     return spriteSheet
   }
 
-  static destroySpriteSheet = (atlasJson) => {
+  static destroySpriteSheet = (atlasJson: SpritesheetData) => {
     const frameKeys = Object.keys(atlasJson.frames)
     for (const key of frameKeys) {
       if (!Cache.has(key)) continue
@@ -149,17 +195,17 @@ export default class GameUtils {
   }
 
   // Превращает строки 'true' в булево значение true. Нужно для корректного приёма данных из ABTest
-  static isStringTrue = (value) => value === true || value === 'true'
+  static isStringTrue = (value: boolean | string) => value === true || value === 'true'
 
   // возвращает слово после первого нижнего подчеркивания
-  static extractSuffix = (value) => {
+  static extractSuffix = (value?: string | null) => {
     if (!value) return
     const match = value.match(/_(.+)$/)
     return match ? match[1] : null
   }
 
   // пример работы: level131_identical_cup -> levelType: identical / identicalName: cup
-  static extractLevelSuffix = (levelName) => {
+  static extractLevelSuffix = (levelName?: string | null) => {
     if (!levelName) return {levelType: null, identicalName: null}
 
     const firstUnderscoreIndex = levelName.indexOf('_')
@@ -188,16 +234,16 @@ export default class GameUtils {
     return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0 ? 'webp' : fallback
   }
 
-  static showError = (err, {message = `${i18next.t('purchaseError')}`} = {}) => {
+  static showError = (err: unknown, {message = `${i18next.t('purchaseError')}`}: {message?: string} = {}) => {
     new PurchaseError(message)
     console.error('[GameUtils showError]:', err)
   }
 
-  static skipAdInFirstLevel = (levelIndex) => {
+  static skipAdInFirstLevel = (levelIndex: number) => {
     return SdkManager.flags?.skipAdInFirstLevel && levelIndex === 0
   }
 
-  static showTextPreloadAttempts = async (preloadText, attempts, maxAttempts, err) => {
+  static showTextPreloadAttempts = async (preloadText: Text | null, attempts: number, maxAttempts: number, err: unknown) => {
     const baseDelay = 3000 // первая попытка — 1 секунда
     const delay = baseDelay * attempts // вторая — 2с, третья — 3с и т.д.
 
@@ -216,11 +262,11 @@ export default class GameUtils {
     if (attempts < maxAttempts) await new Promise((res) => setTimeout(res, delay))
   }
 
-  static formatKeysToLowerCase = (obj) => {
+  static formatKeysToLowerCase = <Value>(obj: Record<string, Value>) => {
     return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value]))
   }
 
-  static checkLoadTime = (startTime, message = '') => {
+  static checkLoadTime = (startTime: number, message = '') => {
     const endTime = performance.now()
     const loadDuration = Math.trunc(endTime - startTime)
     Logger.log('[checkLoadTime]', `${message} ${loadDuration}ms`)
@@ -229,7 +275,7 @@ export default class GameUtils {
   }
 
   // делает захват спайна и возвращает спрайт
-  static captureToSprite = (app, targetSprite) => {
+  static captureToSprite = (app: Application, targetSprite: Container) => {
     // 1. Берём локальные границы меша
     const {x, y, width, height} = targetSprite.getLocalBounds()
 
@@ -254,7 +300,7 @@ export default class GameUtils {
     return snapshot
   }
 
-  static showPopUp = (text = '', {color = 'green', duration = 1000} = {}) => {
+  static showPopUp = (text: string | number = '', {color = 'green', duration = 1000}: PopUpOptions = {}) => {
     if (!LocalStorage.isDebug) return
     // создаём div только один раз
     if (!GameUtils.popupEl) {
@@ -284,7 +330,7 @@ export default class GameUtils {
     }, duration)
   }
 
-  static capitalize(value = '') {
+  static capitalize(value: unknown = '') {
     const str = String(value)
     return str[0]?.toUpperCase() + str.slice(1)
   }
@@ -314,7 +360,7 @@ const createGradientTexture = ({
     {color: 'transparent', offset: 0.5},
     {color: '#d2ebff', offset: 1},
   ],
-}) => {
+}: GradientOptions) => {
   const canvas = document.createElement('canvas')
   canvas.width = width
   canvas.height = height
@@ -329,17 +375,17 @@ const createGradientTexture = ({
   const x2 = width / 2 + Math.cos(rad) * width
   const y2 = height / 2 + Math.sin(rad) * height
 
-  const gradient = ctx.createLinearGradient(x1, y1, x2, y2)
+  const gradient = ctx!.createLinearGradient(x1, y1, x2, y2)
 
   stops.forEach((s) => gradient.addColorStop(s.offset, s.color))
 
-  ctx.fillStyle = gradient
-  ctx.fillRect(0, 0, width, height)
+  ctx!.fillStyle = gradient
+  ctx!.fillRect(0, 0, width, height)
 
   return Texture.from({resource: canvas, autoGenerateMipmaps: false})
 }
 
-const logReadableTime = (timeMs) => {
+const logReadableTime = (timeMs: number) => {
   const totalSeconds = Math.floor(timeMs / 1000)
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
@@ -350,11 +396,11 @@ const logReadableTime = (timeMs) => {
   }
 }
 
-const eventToggle = (bool) => ({
+const eventToggle = (bool: boolean) => ({
   domAddRemove: bool ? 'addEventListener' : 'removeEventListener',
   gameOnOff: bool ? 'on' : 'off',
   gameOnceOff: bool ? 'once' : 'off',
   gameAddRemove: bool ? 'add' : 'remove',
-})
+}) as const
 
 export {createGradientTexture, eventToggle, logReadableTime}
