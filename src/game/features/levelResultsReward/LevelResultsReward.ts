@@ -1,6 +1,7 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, NineSliceSprite, Text, Texture} from 'pixi.js'
+import type {DestroyOptions} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
@@ -22,13 +23,13 @@ const REWARD = {
 
 export default class LevelResultsReward extends Container {
   #game = Locator.game
-  #innerBody
-  #header
-  #rowBonus
-  #rowReward
-  #buttonsRow
-  #buttonOk
-  #buttonReward
+  #innerBody!: NineSliceSprite
+  #header!: Container
+  #rowBonus!: Container
+  #rowReward!: Container
+  #buttonsRow!: Container
+  #buttonOk!: ButtonContainer
+  #buttonReward!: ButtonContainer
   #rowTextStyle = {
     ...primaryFontStyle,
     fill: rewardWindowStyles.rowTextColor,
@@ -38,30 +39,35 @@ export default class LevelResultsReward extends Container {
     ...primaryFontStyle,
     fontSize: 28,
   }
-  #rewardAnimate
+  #rewardAnimate!: LevelRewardAnimator
   #levelBonusValue = 10
-  #resolve
-  #isMultiple
+  #resolve: (() => void) | null = null
+  #isMultiple = false
 
+  // Создаёт скрытое окно награды в центре игрового мира.
   constructor() {
-    super()
+    super({label: 'level-results-reward'})
 
     this.visible = false
     this.position.set(WORLD.HALF_W, WORLD.HALF_H)
   }
 
+  // Возвращает строку бонуса сложности.
   get rowBonus() {
     return this.#rowBonus
   }
 
+  // Возвращает строку общей награды.
   get rowReward() {
     return this.#rowReward
   }
 
+  // Возвращает базовую награду уровня.
   get levelBonusValue() {
     return this.#levelBonusValue
   }
 
+  // Возвращает награду и подпись текущей сложности.
   get difficultyData() {
     const levelType = LevelConfig.levelType
 
@@ -76,6 +82,7 @@ export default class LevelResultsReward extends Container {
     return {levelType, textBonus: `${i18next.t('rewardWindow.bonus')}`, reward: 0}
   }
 
+  // Создаёт окно и последовательно показывает награду.
   init = async () => {
     this.#createBody()
     this.#createHeader()
@@ -97,19 +104,22 @@ export default class LevelResultsReward extends Container {
       this.#onHandlerOkClick()
     }
 
-    return new Promise((res) => {
+    return new Promise<void>((res) => {
       this.#resolve = res
     })
   }
 
-  destroy(_options) {
+  // Отключает события и уничтожает окно с дочерними элементами.
+  destroy(_options?: DestroyOptions) {
+    const options = typeof _options === 'object' ? _options : {}
     super.destroy({
-      ..._options,
+      ...options,
       children: true,
     })
     this.#setEvents(false)
   }
 
+  // Начисляет игроку обычную или удвоенную награду.
   #updatePlayerCoins = () => {
     const {reward} = this.difficultyData
     let totalSum = this.#levelBonusValue + reward
@@ -119,6 +129,7 @@ export default class LevelResultsReward extends Container {
     Locator.storage.addCoins(totalSum)
   }
 
+  // Показывает окно награды.
   #show = async () => {
     await gsap
       .timeline()
@@ -128,13 +139,15 @@ export default class LevelResultsReward extends Container {
       .timeScale(4)
   }
 
+  // Скрывает окно, начисляет монеты и завершает ожидание.
   #hide = async (delay = 0) => {
     await gsap.timeline().to(this, {alpha: 0, duration: 0.3, delay: delay, visible: false})
     this.destroy()
     this.#updatePlayerCoins()
-    this.#resolve()
+    this.#resolve?.()
   }
 
+  // Показывает кнопки выбора награды.
   #showButtons = async () => {
     if (!SdkManager.isRewardedAvailableNow()) return
 
@@ -147,21 +160,25 @@ export default class LevelResultsReward extends Container {
       .to(this.#buttonsRow, {y: 97, ease: 'back.out'})
   }
 
+  // Запускает поэтапную анимацию начисления.
   #animateRewarding = async () => {
     this.#rewardAnimate = new LevelRewardAnimator(this)
     await this.#rewardAnimate.animate()
   }
 
-  #setEvents = (bool) => {
+  // Подключает или отключает события кнопок.
+  #setEvents = (bool: boolean) => {
     const toggle = eventToggle(bool)
 
     this.#buttonOk[toggle.gameOnceOff]('pointerup', this.#onHandlerOkClick)
     this.#buttonReward[toggle.gameOnceOff]('pointerup', this.#onHandlerRewardClick)
   }
 
+  // Создаёт фон окна награды.
   #createBody = () => {
     const texture = Texture.from('frame-victory')
     const innerBody = new NineSliceSprite({
+      label: 'level-results-reward-body',
       texture,
       leftWidth: 50,
       topHeight: 50,
@@ -177,14 +194,16 @@ export default class LevelResultsReward extends Container {
     this.addChild(innerBody)
   }
 
+  // Создаёт заголовок окна.
   #createHeader = () => {
-    const header = new Container()
+    const header = new Container({label: 'level-results-reward-header'})
     this.#header = header
     header.y = -105
 
     const sprite = GameUtils.createSprite('frame-victory-header')
 
     const text = new Text({
+      label: 'level-results-reward-header-text',
       text: i18next.t('rewardWindow.great'),
       style: {...primaryFontStyle, fontSize: 38, fill: rewardWindowStyles.headerTextColor},
     })
@@ -195,8 +214,9 @@ export default class LevelResultsReward extends Container {
     this.addChild(header)
   }
 
+  // Создаёт строку бонуса сложности.
   #createRowBonus = () => {
-    const row = new Container()
+    const row = new Container({label: 'level-results-reward-bonus-row'})
     this.#rowBonus = row
     row.y = -32
 
@@ -218,8 +238,9 @@ export default class LevelResultsReward extends Container {
     this.addChild(row)
   }
 
+  // Создаёт строку итоговой награды.
   #createRowReward = () => {
-    const row = new Container()
+    const row = new Container({label: 'level-results-reward-total-row'})
     this.#rowReward = row
     row.y = 28
 
@@ -240,12 +261,14 @@ export default class LevelResultsReward extends Container {
     this.addChild(row)
   }
 
+  // Создаёт иконку монеты.
   #createCoin = (name = 'coin') => {
     return GameUtils.createSprite('coin', {name, scale: 0.64})
   }
 
+  // Создаёт контейнер кнопок подтверждения и удвоения.
   #createButtons = () => {
-    this.#buttonsRow = new Container()
+    this.#buttonsRow = new Container({label: 'level-results-reward-buttons'})
     this.#buttonsRow.visible = false
     this.#buttonsRow.zIndex = -1
 
@@ -256,8 +279,9 @@ export default class LevelResultsReward extends Container {
     this.addChild(this.#buttonsRow)
   }
 
+  // Создаёт кнопку обычного получения награды.
   #createButtonOk = () => {
-    const button = new ButtonContainer()
+    const button = new ButtonContainer({props: {label: 'level-results-reward-ok'}})
     button.position.set(-80, 0)
 
     const sprite = GameUtils.createSprite('btn-secondary')
@@ -269,8 +293,9 @@ export default class LevelResultsReward extends Container {
     return button
   }
 
+  // Создаёт кнопку удвоения награды за рекламу.
   #createButtonReward = () => {
-    const button = new ButtonContainer()
+    const button = new ButtonContainer({props: {label: 'level-results-reward-double'}})
     button.position.set(80, 0)
 
     const sprite = GameUtils.createSprite('btn-primary')
@@ -290,11 +315,13 @@ export default class LevelResultsReward extends Container {
     return button
   }
 
+  // Принимает обычную награду.
   #onHandlerOkClick = () => {
     this.#setEvents(false)
     this.#hide()
   }
 
+  // Запускает рекламу для удвоения награды.
   #onHandlerRewardClick = () => {
     this.#setEvents(false)
     gsap.to(this.#buttonsRow, {alpha: 0, visible: false})
@@ -305,12 +332,14 @@ export default class LevelResultsReward extends Container {
     })
   }
 
+  // Удваивает награду после просмотра рекламы.
   #onRewardedAction = async () => {
     this.#isMultiple = true
     await this.#rewardAnimate.multiplyReward()
     await this.#hide(0.5)
   }
 
+  // Показывает ошибку рекламы и закрывает окно.
   #onErrorAction = async () => {
     GameUtils.showError(null, {message: `${i18next.t('errors.ad')}`})
 

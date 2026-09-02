@@ -1,37 +1,45 @@
 import {gsap} from 'gsap'
+import type {Container, Sprite, Text} from 'pixi.js'
 import Locator from '../../engine/Locator.ts'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
 import MathTools from '../../utils/MathTools.js'
+import type LevelResultsReward from './LevelResultsReward.js'
 
-// ------ animate
-// Цифры обновляются динамически
-// 1 этап - поле бонус - монетки вылетают из 0 и там остается то число, которое начисляется
-// 2 этап - бонусные монетки перелетают в счет награды уровня
-// 3 этап - монетки из воздуха появляются и залетают в счёт игрока, увеличивая его
+/**
+ * Анимирует начисление бонусных и базовых монет после завершения уровня.
+ * Цифры обновляются динамически в три последовательных этапа.
+ */
+
+type RewardCoin = Sprite & {
+  _randomPos: {rx: number; ry: number}
+}
+
 export default class LevelRewardAnimator {
-  #view
-  #rowBonus
-  #textBonusCoin
-  #bonusCoin
-  #rowReward
+  #view: LevelResultsReward
+  #rowBonus: Container
+  #textBonusCoin: Text
+  #bonusCoin: Sprite
+  #rowReward: Container
 
-  #generatedCoins = null
-  #difficultyData
+  #generatedCoins: RewardCoin[] = []
+  #difficultyData: {reward: number}
   #totalLevelSum = 0
   #flyDuration = 0.2
   #eachDelay = 0.1
 
-  constructor(view) {
+  // Сохраняет представление и получает его ключевые элементы.
+  constructor(view: LevelResultsReward) {
     this.#view = view
     this.#rowBonus = view.rowBonus
     this.#rowReward = view.rowReward
 
-    this.#textBonusCoin = this.#rowBonus.getChildByLabel('textBonusCoin')
-    this.#bonusCoin = this.#rowBonus.getChildByLabel('bonusCoin')
+    this.#textBonusCoin = this.#rowBonus.getChildByLabel('textBonusCoin') as Text
+    this.#bonusCoin = this.#rowBonus.getChildByLabel('bonusCoin') as Sprite
 
     this.#difficultyData = view.difficultyData
   }
 
+  // Проигрывает последовательность начисления награды.
   animate = async () => {
     const {reward} = this.#difficultyData
     this.#totalLevelSum = reward + this.#view.levelBonusValue
@@ -46,13 +54,14 @@ export default class LevelRewardAnimator {
     await this.#runStep3()
   }
 
+  // Удваивает итог и повторно переносит монеты в общий счётчик.
   multiplyReward = async () => {
     this.#totalLevelSum *= 2
     // 1) переместить монетки в шаг 2
-    const coinBonusSum = this.#rowReward.getChildByLabel('coinBonusSum')
-    const textSumReward = this.#rowReward.getChildByLabel('textSumReward')
-    const textTotalCoins = this.#rowReward.getChildByLabel('textTotalCoins')
-    const coinTotalCoins = this.#rowReward.getChildByLabel('coinTotalCoins')
+    const coinBonusSum = this.#rowReward.getChildByLabel('coinBonusSum')!
+    const textSumReward = this.#rowReward.getChildByLabel('textSumReward') as Text
+    const textTotalCoins = this.#rowReward.getChildByLabel('textTotalCoins') as Text
+    const coinTotalCoins = this.#rowReward.getChildByLabel('coinTotalCoins')!
 
     const startPos = GameUtils.getLocalPositionVarB(coinBonusSum, this.#view)
     const endPos = GameUtils.getLocalPositionVarB(coinTotalCoins, this.#view)
@@ -92,8 +101,9 @@ export default class LevelRewardAnimator {
       })
   }
 
+  // Обрабатывает уровень без бонуса сложности.
   #runNoBonusAction = async () => {
-    const coinBonusSum = this.#rowReward.getChildByLabel('coinBonusSum')
+    const coinBonusSum = this.#rowReward.getChildByLabel('coinBonusSum')!
     const startPos = GameUtils.getLocalPositionVarB(coinBonusSum, this.#view)
 
     this.#totalLevelSum = this.#view.levelBonusValue
@@ -101,13 +111,15 @@ export default class LevelRewardAnimator {
     await this.#runStep3()
   }
 
+  // Создаёт бонусные монеты сложности.
   #runStep1 = async () => {
     await this.#createAndFly(this.#bonusCoin)
   }
 
+  // Перемещает бонусные монеты в итог уровня.
   #runStep2 = async () => {
-    const textSumReward = this.#rowReward.getChildByLabel('textSumReward')
-    const coinBonusSum = this.#rowReward.getChildByLabel('coinBonusSum')
+    const textSumReward = this.#rowReward.getChildByLabel('textSumReward') as Text
+    const coinBonusSum = this.#rowReward.getChildByLabel('coinBonusSum')!
 
     if (this.#generatedCoins) {
       const {x, y} = GameUtils.getLocalPositionVarB(coinBonusSum, this.#view)
@@ -130,9 +142,10 @@ export default class LevelRewardAnimator {
     }
   }
 
+  // Перемещает все монеты в баланс игрока.
   #runStep3 = async () => {
-    const textTotalCoins = this.#rowReward.getChildByLabel('textTotalCoins')
-    const coinTotalCoins = this.#rowReward.getChildByLabel('coinTotalCoins')
+    const textTotalCoins = this.#rowReward.getChildByLabel('textTotalCoins') as Text
+    const coinTotalCoins = this.#rowReward.getChildByLabel('coinTotalCoins')!
 
     const {x, y} = GameUtils.getLocalPositionVarB(coinTotalCoins, this.#view)
     const coins = this.#generatedCoins
@@ -165,19 +178,20 @@ export default class LevelRewardAnimator {
       .set(coins, {visible: false})
   }
 
-  #createAndFly = async (target) => {
+  // Создаёт монеты у цели и разбрасывает их перед сбором.
+  #createAndFly = async (target: Container) => {
     const {reward} = this.#difficultyData
     const {x, y} = GameUtils.getLocalPositionVarB(target, this.#view)
     let coins = this.#createCoins(reward, x, y)
 
     const flyProps = {
-      x: (i, coin) => x + coin._randomPos.rx,
-      y: (i, coin) => y + coin._randomPos.ry,
+      x: (_i: number, coin: RewardCoin) => x + coin._randomPos.rx,
+      y: (_i: number, coin: RewardCoin) => y + coin._randomPos.ry,
       duration: this.#flyDuration,
       ease: 'back.out',
       stagger: {
         each: this.#eachDelay,
-        from: 'end',
+        from: 'end' as const,
         onComplete: () => {
           this.#updateTextValue(this.#textBonusCoin)
           Locator.soundManager.play('sfx_coin')
@@ -188,7 +202,8 @@ export default class LevelRewardAnimator {
     await gsap.timeline().to(coins, {duration: this.#flyDuration, stagger: 0.1}).to(coins, flyProps, '<')
   }
 
-  #updateTextValue = (textElement, {increase = true, setIconPlus = false} = {}) => {
+  // Увеличивает или уменьшает отображаемое значение на единицу.
+  #updateTextValue = (textElement: Text, {increase = true, setIconPlus = false}: {increase?: boolean; setIconPlus?: boolean} = {}) => {
     let value = +textElement.text
     value += increase ? 1 : -1
 
@@ -199,11 +214,12 @@ export default class LevelRewardAnimator {
     textElement.text = value
   }
 
-  #createCoins = (maxCoins, x, y) => {
+  // Создаёт набор монет в указанной позиции.
+  #createCoins = (maxCoins: number, x: number, y: number) => {
     this.#generatedCoins = []
 
     for (let i = 0; i < maxCoins; i++) {
-      const coin = GameUtils.createSprite('coin', {name, scale: 0.64})
+      const coin = GameUtils.createSprite('coin', {label: 'level-reward-coin', scale: 0.64}) as RewardCoin
       coin.position.set(x, y)
 
       const {rx, ry} = MathTools.getRandomPosition({
@@ -223,13 +239,13 @@ export default class LevelRewardAnimator {
 
   // если на 3‑м этапе получили условные 10 монеток за бонус сложности, то нужно создать ещё 10 - число levelBonusValue
   // для того, что бы летели уже 20 монеток
-  #createAdditionalCoins = (coins, x, y) => {
-    const promises = []
+  #createAdditionalCoins = (coins: RewardCoin[], x: number, y: number) => {
+    const promises: Array<Promise<RewardCoin>> = []
 
     for (let i = coins.length; i < this.#totalLevelSum; i++) {
       promises.push(
         Promise.resolve().then(() => {
-          const coin = GameUtils.createSprite('coin', {name, scale: 0.64})
+          const coin = GameUtils.createSprite('coin', {label: 'level-reward-extra-coin', scale: 0.64}) as RewardCoin
           coin.position.set(x, y)
           this.#view.addChild(coin)
           this.#generatedCoins.push(coin)
@@ -241,6 +257,7 @@ export default class LevelRewardAnimator {
     return Promise.all(promises)
   }
 
+  // Возвращает случайное смещение монеты.
   #getRandomPosition = () => {
     const {rx, ry} = MathTools.getRandomPosition({
       minX: -150,
