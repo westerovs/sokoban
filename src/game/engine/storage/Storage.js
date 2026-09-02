@@ -13,6 +13,10 @@ import LocalStorage from './LocalStorage.js'
 import {createProfileProxy, getMaxFreshData, getMaxUserLevelData, parseJsonKey, stringifyJsonKey} from './utils/utils.js'
 import Validation from './utils/Validation.js'
 
+/**
+ * Загружает, изменяет и сохраняет профиль игрока в локальном и платформенном хранилищах.
+ */
+
 export default class Storage {
   #game
   #gameSettings = new GameSettings(this)
@@ -20,6 +24,7 @@ export default class Storage {
   #rawData = {}
   #playerData
   #isDebug = false
+  #isReadOnly = false
 
   constructor(game) {
     if (typeof Storage.instance === 'object') {
@@ -48,6 +53,12 @@ export default class Storage {
     return this.#playerData.levelIndex
   }
 
+  // Переводит профиль в режим без постоянных записей до перезагрузки страницы.
+  enableReadOnlyMode = () => {
+    this.#isReadOnly = true
+  }
+
+  // Загружает и подготавливает наиболее свежий профиль игрока.
   load = async () => {
     try {
       this.#localStorage.init()
@@ -62,7 +73,11 @@ export default class Storage {
     }
   }
 
+  // Сохраняет текущее состояние профиля во все доступные хранилища.
   save = (force) => {
+    // В режиме черновика профиль меняется только в памяти: тестовый прогресс не попадает в постоянные хранилища.
+    if (this.#isReadOnly) return
+
     if (this.#isDebug) {
       console.error('[Storage] save off!')
       return
@@ -89,6 +104,7 @@ export default class Storage {
   get hints() {
     return this.#playerData.hints
   }
+
   // todo добавляет не только хинты, а все товары из магазина и монетки
   addHints = (id, amount, save = true) => {
     if (!id) return
@@ -152,7 +168,11 @@ export default class Storage {
     this.save()
   }
 
+  // Сбрасывает постоянный профиль и перезапускает игру.
   resetAllData = () => {
+    // Режим черновика не позволяет очистить постоянный профиль через инструменты отладки.
+    if (this.#isReadOnly) return
+
     if (LocalStorage._storage) {
       localStorage.clear()
       LocalStorage.clear()
@@ -168,8 +188,13 @@ export default class Storage {
     setTimeout(() => location.reload(), 2500)
   }
 
+  // Повышает рекорд игрока после первого прохождения уровня.
   updateUserRecord = () => {
     this.#playerData.userLevel += 1
+
+    // В режиме черновика новый рекорд остаётся в памяти и не отправляется в таблицу лидеров.
+    if (this.#isReadOnly) return
+
     SdkManager.leaderboard.setScore(this.#playerData.userLevel).catch((e) => {
       console.error('[leaderboard.setScore]', e)
     })

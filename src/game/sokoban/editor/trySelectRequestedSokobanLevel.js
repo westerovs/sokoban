@@ -15,7 +15,9 @@ const trySelectRequestedSokobanLevel = (storage) => {
   const levelId = searchParams.get(LEVEL_QUERY_PARAMETER)
   if (!levelId) return false
 
-  applySokobanLevelDraft(levelId, searchParams)
+  const isDraftApplied = applySokobanLevelDraft(levelId, searchParams)
+  if (isDraftApplied) storage.enableReadOnlyMode()
+
   const progress = new LevelProgress(storage)
   return progress.selectLevel(levelId, {ignoreLock: true, save: false})
 }
