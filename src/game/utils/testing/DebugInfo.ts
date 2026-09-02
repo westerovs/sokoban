@@ -10,13 +10,13 @@ import {
   Rectangle,
   Sprite,
   Text,
-  TilingSprite,
   Ticker,
+  TilingSprite,
 } from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
-import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import type Game from '@/game/Game.js'
+import {GAME_STATES} from '@/game/gameConfig/constants.js'
 
 // Отображает выдвижную панель производительности, памяти, звука и сцены.
 

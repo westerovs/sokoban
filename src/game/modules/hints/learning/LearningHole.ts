@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
-import {Graphics} from 'pixi.js'
 import type {Container} from 'pixi.js'
+import {Graphics} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import type Game from '@/game/Game.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
@@ -39,8 +39,7 @@ export default class LearningHole {
 
   // Показывает затемнение и прозрачную область.
   show = async () => {
-    await this.#timeLine!
-      .set([this.#refs.buttonsHintView, this.#uiFade], {visible: true})
+    await this.#timeLine!.set([this.#refs.buttonsHintView, this.#uiFade], {visible: true})
       .fromTo(this.#uiFade, {alpha: 0}, {alpha: GAME_STYLES.fadeHalfAlpha, duration: 1}, '<')
       .fromTo(this.#holeMask, {alpha: 0}, {alpha: 1}, '<')
   }

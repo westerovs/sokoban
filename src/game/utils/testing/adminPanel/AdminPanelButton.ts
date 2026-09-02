@@ -1,12 +1,12 @@
 import {Container, Graphics} from 'pixi.js'
 import Locator from '../../../engine/Locator.ts'
 import LocalStorage from '../../../engine/storage/LocalStorage.js'
+import type Storage from '../../../engine/storage/Storage.js'
+import type Game from '../../../Game.js'
 import {GAME_STATES, WORLD} from '../../../gameConfig/constants.js'
+import type GameConfig from '../../../gameConfig/GameConfig.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import AdminPanel from './AdminPanel.js'
-import type Game from '../../../Game.js'
-import type Storage from '../../../engine/storage/Storage.js'
-import type GameConfig from '../../../gameConfig/GameConfig.js'
 
 // Открывает панель разработчика после секретной последовательности нажатий.
 

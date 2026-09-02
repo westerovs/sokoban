@@ -1,11 +1,11 @@
 import i18next from 'i18next'
+import type {DestroyOptions} from 'pixi.js'
 import BaseModal from '@/game/ui/common/modal/BaseModal.js'
 import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../engine/Locator.ts'
 import SdkManager from '../../../engine/SdkManager.js'
 import {primaryFontStyle} from '../../../styles.js'
 import GameUtils from '../../../utils/gameUtils/GameUtils.js'
-import type {DestroyOptions} from 'pixi.js'
 
 // Показывает окно входа в платформенный профиль игрока.
 

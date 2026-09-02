@@ -1,5 +1,5 @@
-import {GrayscaleFilter} from 'pixi-filters'
 import type {Container} from 'pixi.js'
+import {GrayscaleFilter} from 'pixi-filters'
 import Locator from '../../engine/Locator.ts'
 import SdkManager from '../../engine/SdkManager.js'
 import {STORAGE_KEYS} from '../../engine/storage/defaultData.js'
@@ -207,6 +207,4 @@ export default class RewardTimer {
   }
 }
 
-export type {
-  RewardTimerKey,
-}
+export type {RewardTimerKey}

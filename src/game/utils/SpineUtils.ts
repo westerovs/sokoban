@@ -358,7 +358,12 @@ export default class SpineUtils {
 
   // осторожно, нужно выгружать данные Assets.load!
   // Загружает JSON, атлас и все текстуры одного Spine-ресурса.
-  static loadAndParseSpineAsset = async ({spineName, folderPath = 'spines', exists = 'webp', basePath = ASSETS_URL.local}: LoadSpineOptions) => {
+  static loadAndParseSpineAsset = async ({
+    spineName,
+    folderPath = 'spines',
+    exists = 'webp',
+    basePath = ASSETS_URL.local,
+  }: LoadSpineOptions) => {
     const jsonUrl = `${basePath}assets/${folderPath}/${spineName}.json`
     const atlasUrl = `${basePath}assets/${folderPath}/${spineName}.atlas`
 
@@ -392,7 +397,13 @@ export default class SpineUtils {
 
   // SpineUtils.js
   // Загружает и создаёт Spine-объект для отладочного просмотра.
-  static createTestSpine = async ({spineName, folderPath = 'spines', loop = true, exists = 'png', animationName = 'animation'}: TestSpineOptions) => {
+  static createTestSpine = async ({
+    spineName,
+    folderPath = 'spines',
+    loop = true,
+    exists = 'png',
+    animationName = 'animation',
+  }: TestSpineOptions) => {
     await SpineUtils.loadAndParseSpineAsset({spineName, folderPath, exists})
 
     const spine = SpineUtils.createSpine({spineName, animationName, autorun: true, loop})

@@ -192,6 +192,4 @@ const viteConfig = defineConfig(({command, mode}) => {
 
 export default viteConfig
 
-export {
-  createViteConfig,
-}
+export {createViteConfig}

@@ -180,7 +180,4 @@ export {
   solveSokoban, // Поиск минимального числа толчков
 }
 
-export type {
-  SolverOptions,
-  SolverResult,
-}
+export type {SolverOptions, SolverResult}

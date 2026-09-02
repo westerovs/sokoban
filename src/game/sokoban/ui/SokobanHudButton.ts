@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
-import {Container, Graphics, Rectangle} from 'pixi.js'
 import type {DestroyOptions, Sprite} from 'pixi.js'
+import {Container, Graphics, Rectangle} from 'pixi.js'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'

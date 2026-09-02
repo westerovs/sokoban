@@ -1,5 +1,5 @@
-import {Container, Sprite, Text} from 'pixi.js'
 import type {ContainerOptions, PointData, TextStyleOptions} from 'pixi.js'
+import {Container, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '../../styles.js'
 import ButtonAnimator from '../../utils/animations/ButtonAnimator.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'

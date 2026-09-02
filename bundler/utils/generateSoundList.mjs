@@ -2,27 +2,32 @@ import fs from 'fs'
 import path from 'path'
 import {fileURLToPath} from 'url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootDir = path.resolve(__dirname, '../..')
+/**
+ * Создаёт типизированный каталог звуковых эффектов из собранных аудиофайлов.
+ */
 
-const AUDIO_DIR = path.resolve(rootDir, 'public/assets/audio')
-const SFX_DIR = path.resolve(AUDIO_DIR, 'sfx')
-const OUTPUT_FILE = path.resolve(rootDir, 'src/game/generatedAssets/soundList.ts')
-const AUDIO_EXTENSIONS = ['.mp3', '.ogg']
+const __dirname = path.dirname(fileURLToPath(import.meta.url)) // Папка текущего генератора
+const rootDir = path.resolve(__dirname, '../..') // Корень проекта
+
+const AUDIO_DIR = path.resolve(rootDir, 'public/assets/audio') // Папка собранного аудио
+const SFX_DIR = path.resolve(AUDIO_DIR, 'sfx') // Папка звуковых эффектов
+const OUTPUT_FILE = path.resolve(rootDir, 'src/game/generatedAssets/soundList.ts') // Путь итогового TypeScript-файла
+const AUDIO_EXTENSIONS = ['.mp3', '.ogg'] // Допустимые расширения аудиофайлов
 
 // проверяет, что файл является аудио
-const isAudioFile = name => {
+const isAudioFile = (name) => {
   const ext = path.extname(name).toLowerCase()
   return AUDIO_EXTENSIONS.includes(ext)
 }
 
 // возвращает список аудиофайлов из директории
-const listAudioFilesInDir = dirAbs => {
+const listAudioFilesInDir = (dirAbs) => {
   if (!fs.existsSync(dirAbs)) return []
-  
-  return fs.readdirSync(dirAbs, {withFileTypes: true})
-    .filter(d => d.isFile())
-    .map(d => d.name)
+
+  return fs
+    .readdirSync(dirAbs, {withFileTypes: true})
+    .filter((d) => d.isFile())
+    .map((d) => d.name)
     .filter(isAudioFile)
     .sort((a, b) => a.localeCompare(b))
 }
@@ -30,7 +35,7 @@ const listAudioFilesInDir = dirAbs => {
 // собирает данные для генерации soundList
 const collectSoundData = () => {
   const sfxFiles = listAudioFilesInDir(SFX_DIR)
-  
+
   return {
     sfxFiles,
   }
@@ -38,9 +43,12 @@ const collectSoundData = () => {
 
 // создаёт содержимое генерируемого soundList файла
 const createSoundListContent = ({sfxFiles}) => {
-  return `// АВТОГЕНЕРИРУЕМЫЙ ФАЙЛ. НЕ РЕДАКТИРОВАТЬ
+  return `/**
+ * Содержит автоматически созданный каталог звуковых эффектов игры.
+ */
 const SFX_FILES = ${JSON.stringify(sfxFiles, null, 2)}
 
+// Возвращает алиас звука без расширения файла.
 const toAlias = (fileName: string) => {
   const dotIndex = fileName.lastIndexOf('.')
   
@@ -49,20 +57,21 @@ const toAlias = (fileName: string) => {
     : fileName.slice(0, dotIndex)
 }
 
+// Создаёт список звуковых эффектов для загрузчика ресурсов.
 const createSfxList = () => SFX_FILES.map((fileName) => ({
   alias: toAlias(fileName),
   src: 'assets/audio/sfx/' + fileName
 }))
 
 export {
-  SFX_FILES,
   createSfxList,
+  SFX_FILES,
 }
 `
 }
 
 // записывает сгенерированный файл
-const writeGeneratedFile = content => {
+const writeGeneratedFile = (content) => {
   fs.mkdirSync(path.dirname(OUTPUT_FILE), {recursive: true})
   fs.writeFileSync(OUTPUT_FILE, content)
 }
@@ -77,11 +86,9 @@ const logSoundData = ({sfxFiles}) => {
 const generateSoundList = () => {
   const soundData = collectSoundData()
   const content = createSoundListContent(soundData)
-  
+
   writeGeneratedFile(content)
   logSoundData(soundData)
 }
 
-export {
-  generateSoundList
-}
+export {generateSoundList}

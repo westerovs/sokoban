@@ -9,6 +9,4 @@ const openSokobanLevelEditor = (levelId: string) => {
   window.open(editorUrl, '_blank', 'noopener')
 }
 
-export {
-  openSokobanLevelEditor,
-}
+export {openSokobanLevelEditor}

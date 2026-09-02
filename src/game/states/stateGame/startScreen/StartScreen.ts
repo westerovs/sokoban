@@ -10,10 +10,10 @@ import LevelProgress from '@/game/gameConfig/levels/LevelProgress.js'
 import {getLocationById, getLocationPageIndex} from '@/game/gameConfig/levels/locationCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
+import type GameView from '../GameView.js'
+import type StateGame from '../StateGame.js'
 import GameMenuView from './GameMenuView.js'
 import StateBadgeController from './statBadge/StateBadgeController.js'
-import type StateGame from '../StateGame.js'
-import type GameView from '../GameView.js'
 
 // Координирует навигацию стартового экрана, прогресс и запуск выбранного уровня.
 

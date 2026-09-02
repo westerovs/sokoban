@@ -1,8 +1,8 @@
 import {Assets, Text} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Logger, {MODULES} from '@/game/utils/Logger.js'
-import {createPreloadList} from '../preloadList.js'
 import type LevelPreload from '../LevelPreload.js'
+import {createPreloadList} from '../preloadList.js'
 import type {LevelPreloadList} from '../preloadTypes.js'
 
 // [STATE 3] Загрузка всех ресурсов уровня

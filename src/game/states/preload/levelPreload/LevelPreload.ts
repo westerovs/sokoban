@@ -7,14 +7,14 @@ import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import BaseState from '@/game/states/BaseState.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Logger, {MODULES} from '@/game/utils/Logger.js'
+import type {PlayerData} from '../../../engine/storage/defaultData.js'
+import type Storage from '../../../engine/storage/Storage.js'
+import type PreloadView from '../PreloadView.js'
+import type {PreloadTextData} from './preloadTypes.js'
 import Finalize from './states/Finalize.js'
 import InitialLoad from './states/InitialLoad.js'
 import LoadLevelResources from './states/LoadLevelResources.js'
 import PreparePreloadText from './states/PreparePreloadText.js'
-import type PreloadView from '../PreloadView.js'
-import type Storage from '../../../engine/storage/Storage.js'
-import type {PlayerData} from '../../../engine/storage/defaultData.js'
-import type {PreloadTextData} from './preloadTypes.js'
 
 // Управляет последовательностью подготовки и загрузки выбранного уровня.
 

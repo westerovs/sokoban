@@ -1,8 +1,8 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
 import Locator from '@/game/engine/Locator.ts'
-import type Game from '@/game/Game.js'
 import SdkManager from '@/game/engine/SdkManager.js'
+import type Game from '@/game/Game.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {HINT_BUTTON_NAMES} from '@/game/modules/hints/HintsController.js'
 import SpeechBubbleView from '@/game/ui/common/speechBubble/SpeechBubbleView.js'
@@ -10,10 +10,10 @@ import {destroyTimeLine, shake} from '@/game/utils/animations/gsapUtils.js'
 import GrayscaleFilter from '@/game/utils/filters/GrayscaleFilter.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
 import Logger from '@/game/utils/Logger.js'
-import LearningArrow from './LearningArrow.js'
-import LearningHole from './LearningHole.js'
 import type HintsController from '../HintsController.js'
 import type {HintButton, HintButtonName} from '../hintTypes.js'
+import LearningArrow from './LearningArrow.js'
+import LearningHole from './LearningHole.js'
 
 /*
  * Для дротиков и компаса используется одинаковое обучение клика по кнопке
@@ -66,7 +66,13 @@ export default class HintsLearning {
   }
 
   // [0] ---------------- prepare ---------------
-  isNewPlayer = async ({hintDartsIsAvailable, hintCompassIsAvailable}: {hintDartsIsAvailable: boolean; hintCompassIsAvailable: boolean}) => {
+  isNewPlayer = async ({
+    hintDartsIsAvailable,
+    hintCompassIsAvailable,
+  }: {
+    hintDartsIsAvailable: boolean
+    hintCompassIsAvailable: boolean
+  }) => {
     const {levelIndex} = Locator.storage.playerData
     const {btnDarts, btnCompass} = this.#controller
 
@@ -96,7 +102,13 @@ export default class HintsLearning {
   }
 
   // [0]
-  isOldPlayer = async ({hintDartsIsAvailable, hintCompassIsAvailable}: {hintDartsIsAvailable: boolean; hintCompassIsAvailable: boolean}) => {
+  isOldPlayer = async ({
+    hintDartsIsAvailable,
+    hintCompassIsAvailable,
+  }: {
+    hintDartsIsAvailable: boolean
+    hintCompassIsAvailable: boolean
+  }) => {
     const {btnDarts, btnCompass} = this.#controller
 
     if (!hintDartsIsAvailable) {
@@ -206,8 +218,7 @@ export default class HintsLearning {
     const padlock = button.getChildByLabel('padlock')!
     const grayscaleFilter = button.grayscaleFilter
 
-    await this.#timeline!
-      .fromTo([this.#speechBubble], {alpha: 0}, {alpha: 1, visible: true})
+    await this.#timeline!.fromTo([this.#speechBubble], {alpha: 0}, {alpha: 1, visible: true})
       .add(this.#speechBubble!.animateBubble(), '<')
       .add(shake(padlock), '<')
       .to(padlock, {y: '+=55', alpha: 0})

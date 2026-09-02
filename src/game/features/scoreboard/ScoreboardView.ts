@@ -1,10 +1,10 @@
 import i18next from 'i18next'
-import {Container, Graphics} from 'pixi.js'
 import type {Text} from 'pixi.js'
+import {Container, Graphics} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {FONT_COLORS, primaryFontStyle} from '@/game/styles.js'
-import BaseModal from '@/game/ui/common/modal/BaseModal.js'
 import type {BaseModalOptions} from '@/game/ui/common/modal/BaseModal.js'
+import BaseModal from '@/game/ui/common/modal/BaseModal.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {ROW_SIZE} from './ScoreRow.js'
 

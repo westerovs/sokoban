@@ -1,8 +1,8 @@
+import type {Container} from 'pixi.js'
 import Locator from '../engine/Locator.ts'
+import type Game from '../Game.js'
 import {GAME_STATES} from '../gameConfig/constants.js'
 import {GAME_EVENTS} from '../gameConfig/gameEvents.js'
-import type {Container} from 'pixi.js'
-import type Game from '../Game.js'
 
 // Задаёт общий жизненный цикл игровых состояний.
 

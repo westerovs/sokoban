@@ -1,5 +1,5 @@
-import {Sprite} from 'pixi.js'
 import type {Container} from 'pixi.js'
+import {Sprite} from 'pixi.js'
 
 // Содержит общие математические операции для игровой логики и сцены.
 

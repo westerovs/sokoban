@@ -1,7 +1,7 @@
 import Locator from '../engine/Locator.ts'
+import type Game from '../Game.js'
 import {GAME_EVENTS} from '../gameConfig/gameEvents.js'
 import Stopwatch from '../ui/level/clock/Stopwatch.js'
-import type Game from '../Game.js'
 
 // Создаёт и очищает подключаемые модули текущего уровня.
 

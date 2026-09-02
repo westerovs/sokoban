@@ -1,5 +1,5 @@
-import {Assets, Texture} from 'pixi.js'
 import type {SpritesheetData} from 'pixi.js'
+import {Assets, Texture} from 'pixi.js'
 import SdkManager from '../../engine/SdkManager.js'
 import {ASSETS_URL} from '../../gameConfig/constants.js'
 import {getAtlasResolutionSuffix} from '../../gameConfig/resolutionConfig.js'
@@ -52,7 +52,8 @@ export default class LoadUtils {
   // Загружает текстуру через совместимый со старым кодом метод PixiJS.
   static loadTexture = async (url: string): Promise<Texture> => {
     return new Promise<Texture>((resolve, reject) => {
-      ;(Texture as TextureWithLegacyLoader)
+      const textureWithLegacyLoader = Texture as TextureWithLegacyLoader
+      textureWithLegacyLoader
         .fromURL(url)
         .then((loadedTexture) => {
           resolve(loadedTexture)

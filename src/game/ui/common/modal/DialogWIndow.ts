@@ -25,7 +25,12 @@ export default class DialogWindow extends BaseModal {
   #size: {w: number; h: number}
 
   // Сохраняет параметры диалога и создаёт его содержимое.
-  constructor({innerText = '', bodyColor = popupColors.body, borderColor = popupColors.border, size = {w: 400, h: 130}}: DialogWindowOptions = {}) {
+  constructor({
+    innerText = '',
+    bodyColor = popupColors.body,
+    borderColor = popupColors.border,
+    size = {w: 400, h: 130},
+  }: DialogWindowOptions = {}) {
     super({
       w: size.w,
       h: size.h,

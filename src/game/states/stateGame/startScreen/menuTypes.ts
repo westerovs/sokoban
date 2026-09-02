@@ -1,4 +1,4 @@
-import type {LevelEntry, LevelDefinition, LocationDefinition} from '../../../gameConfig/levels/levelTypes.js'
+import type {LevelDefinition, LevelEntry, LocationDefinition} from '../../../gameConfig/levels/levelTypes.js'
 
 // Описывает простые данные и обратные вызовы экранов выбора локации и уровня.
 
@@ -28,10 +28,4 @@ type GameMenuCallbacks = {
   onStore: () => void
 }
 
-export type {
-  GameMenuCallbacks,
-  LevelEntry,
-  LevelSelectionState,
-  LocationDefinition,
-  LocationSelectionState,
-}
+export type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition, LocationSelectionState}

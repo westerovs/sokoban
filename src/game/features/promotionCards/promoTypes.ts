@@ -9,7 +9,4 @@ type PromoData = {
 
 type PromoDataCatalog = Record<string, PromoData>
 
-export type {
-  PromoData,
-  PromoDataCatalog,
-}
+export type {PromoData, PromoDataCatalog}

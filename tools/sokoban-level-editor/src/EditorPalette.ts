@@ -165,7 +165,9 @@ export default class EditorPalette {
 
   // Показывает нужную вкладку и восстанавливает её последнюю кисть.
   #selectMode(role: string) {
-    this.#modeElement.querySelectorAll<HTMLButtonElement>('button').forEach((button) => (button.ariaPressed = String(button.dataset.mode === role)))
+    this.#modeElement
+      .querySelectorAll<HTMLButtonElement>('button')
+      .forEach((button) => (button.ariaPressed = String(button.dataset.mode === role)))
     this.#paletteElement
       .querySelectorAll<HTMLElement>('.editor-palette__mode')
       .forEach((panel) => (panel.hidden = panel.dataset.mode !== role))

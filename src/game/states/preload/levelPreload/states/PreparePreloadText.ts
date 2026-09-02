@@ -1,6 +1,6 @@
 import i18next from 'i18next'
-import type Game from '@/game/Game.js'
 import type Storage from '@/game/engine/storage/Storage.js'
+import type Game from '@/game/Game.js'
 import type LevelPreload from '../LevelPreload.js'
 import type {PreloadTextData} from '../preloadTypes.js'
 

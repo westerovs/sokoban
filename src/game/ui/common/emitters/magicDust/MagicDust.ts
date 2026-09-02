@@ -1,13 +1,13 @@
 import {Assets, Container, Particle, ParticleContainer, Rectangle, Texture, Ticker} from 'pixi.js'
 import {LIVE_OPS_ID} from '@/game/components/liveOpsController/LiveOpsController.js'
 import Locator from '@/game/engine/Locator.js'
+import type Game from '@/game/Game.js'
 import {GAME_NAMES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import Logger from '@/game/utils/Logger.js'
 import defaultConfig from './defaultConfig.json'
 import newYearConfig from './newYearConfig.json'
-import type Game from '@/game/Game.js'
 
 // Создаёт лёгкий фоновой эффект частиц для главного экрана.
 

@@ -18,6 +18,4 @@ const applyInteractive = <T extends Container>(target: T, {isButton = false}: In
   return Object.assign(target, props)
 }
 
-export {
-  applyInteractive,
-}
+export {applyInteractive}

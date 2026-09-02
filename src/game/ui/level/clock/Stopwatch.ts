@@ -1,7 +1,7 @@
 import {gsap} from 'gsap'
+import type Game from '../../../Game.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import Logger, {MODULES} from '../../../utils/Logger.js'
-import type Game from '../../../Game.js'
 
 // Измеряет время прохождения уровня и публикует секундные обновления.
 
@@ -103,6 +103,4 @@ export default class Stopwatch {
   }
 }
 
-export {
-  STOPWATCH_LABELS,
-}
+export {STOPWATCH_LABELS}

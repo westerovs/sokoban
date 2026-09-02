@@ -1,5 +1,5 @@
-import {getLevelEntryById} from '../../gameConfig/levels/locationCatalog.js'
 import type {LevelAppearance} from '../../gameConfig/levels/levelTypes.js'
+import {getLevelEntryById} from '../../gameConfig/levels/locationCatalog.js'
 
 /**
  * Подменяет выбранный уровень несохранённым черновиком редактора.
@@ -55,6 +55,4 @@ const applySokobanLevelDraft = (levelId: string, searchParams: URLSearchParams) 
   return true
 }
 
-export {
-  applySokobanLevelDraft,
-}
+export {applySokobanLevelDraft}

@@ -7,12 +7,12 @@ import EditorBoard from './EditorBoard.js'
 import {expandEditorState} from './editorGrid.js'
 import EditorPalette from './EditorPalette.js'
 import EditorSession from './EditorSession.js'
+import type {EditorBrush, EditorData, EditorLevel, EditorState, LevelAppearance, Position, ValidationResult} from './editorTypes.js'
 import {applyEditorBrush} from './levelEditing.js'
 import LevelGeneratorPanel from './LevelGeneratorPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
 import ValidationPanel from './ValidationPanel.js'
-import type {EditorBrush, EditorData, EditorLevel, EditorState, LevelAppearance, Position, ValidationResult} from './editorTypes.js'
 
 /**
  * Инициализирует полноэкранный редактор и связывает прямые кисти с данными уровня.

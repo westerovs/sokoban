@@ -4,7 +4,9 @@ import Locator from '@/game/engine/Locator.js'
 import GamePause from '../../../components/GamePause.js'
 import {LIVE_OPS_ID} from '../../../components/liveOpsController/LiveOpsController.js'
 import SdkManager from '../../../engine/SdkManager.js'
+import type {SdkAdapter} from '../../../engine/sdkTypes.js'
 import LocalStorage from '../../../engine/storage/LocalStorage.js'
+import type Game from '../../../Game.js'
 import {GAME_STATES, PLATFORM_ID} from '../../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import LocaleManager from '../../../modules/LocaleManager.js'
@@ -20,8 +22,6 @@ import DebugInfo from '../../../utils/testing/DebugInfo.js'
 import BaseState from '../../BaseState.js'
 import PreloadView from '../PreloadView.js'
 import {createPreloadList} from './preloadList.js'
-import type Game from '../../../Game.js'
-import type {SdkAdapter} from '../../../engine/sdkTypes.js'
 
 /**
  * Загружает обязательные ресурсы игры и подготавливает стартовое состояние.

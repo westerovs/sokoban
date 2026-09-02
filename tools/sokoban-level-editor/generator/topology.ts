@@ -1,4 +1,4 @@
-import {DIRECTIONS, getAdjacentIndex, randomInteger, shuffle, toIndex, type Random} from './grid.js'
+import {DIRECTIONS, getAdjacentIndex, type Random, randomInteger, shuffle, toIndex} from './grid.js'
 import {createFloorMask, resolveGeneratedShape} from './shapeGeneration.js'
 
 /**
@@ -91,7 +91,8 @@ const createGridFromFloorMask = (mask: boolean[][]): TopologyGrid => {
 const cloneGrid = (grid: TopologyGrid): TopologyGrid => grid.map((row) => [...row])
 
 // Переносит содержимое одной сетки в другую.
-const replaceGrid = (target: TopologyGrid, source: TopologyGrid) => source.forEach((row, y) => row.forEach((value, x) => (target[y][x] = value)))
+const replaceGrid = (target: TopologyGrid, source: TopologyGrid) =>
+  source.forEach((row, y) => row.forEach((value, x) => (target[y][x] = value)))
 
 // Возвращает количество клеток пола в сетке.
 const countFloorCells = (grid: TopologyGrid) => grid.reduce((total, row) => total + row.filter((cell) => cell === false).length, 0)
@@ -340,7 +341,4 @@ export {
   normalizeTopology,
 }
 
-export type {
-  TopologyBoard,
-  TopologyConfig,
-}
+export type {TopologyBoard, TopologyConfig}

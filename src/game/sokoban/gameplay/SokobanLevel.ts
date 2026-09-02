@@ -1,5 +1,5 @@
-import {SOKOBAN_DIRECTIONS, SOKOBAN_SYMBOLS} from '../config/config.js'
 import type {SokobanDirection, SokobanDirectionName} from '../config/config.js'
+import {SOKOBAN_DIRECTIONS, SOKOBAN_SYMBOLS} from '../config/config.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
 
 /**
@@ -352,9 +352,4 @@ export default class SokobanLevel {
   }
 }
 
-export type {
-  PushedBox,
-  SokobanBox,
-  SokobanMoveResult,
-  SokobanPosition,
-}
+export type {PushedBox, SokobanBox, SokobanMoveResult, SokobanPosition}

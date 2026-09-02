@@ -1,7 +1,7 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import {Container, Graphics, Text} from 'pixi.js'
 import type {DestroyOptions, Sprite, TextStyleOptions} from 'pixi.js'
+import {Container, Graphics, Text} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
 import SokobanHudButton from './SokobanHudButton.js'

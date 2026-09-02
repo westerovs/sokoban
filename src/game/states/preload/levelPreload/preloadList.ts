@@ -1,6 +1,6 @@
-import LevelConfig from '../../../gameConfig/levels/LevelConfig.js'
-import type Game from '../../../Game.js'
 import type Storage from '../../../engine/storage/Storage.js'
+import type Game from '../../../Game.js'
+import LevelConfig from '../../../gameConfig/levels/LevelConfig.js'
 import type {LevelPreloadList} from './preloadTypes.js'
 
 // Формирует данные и списки ресурсов для выбранного уровня.

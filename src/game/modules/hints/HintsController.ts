@@ -1,11 +1,11 @@
 import {gsap} from 'gsap'
+import type {FederatedPointerEvent} from 'pixi.js'
 import {Rectangle} from 'pixi.js'
-import type {Container, FederatedPointerEvent} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
-import type Game from '@/game/Game.js'
 import SdkManager from '@/game/engine/SdkManager.js'
 import Store from '@/game/features/store/Store.js'
 import StoreView from '@/game/features/store/StoreView.js'
+import type Game from '@/game/Game.js'
 import {GAME_NAMES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
@@ -14,9 +14,9 @@ import {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
 import Logger, {MODULES} from '@/game/utils/Logger.js'
 import ButtonsHintView from './ButtonsHintView.js'
 import ButtonsStateFX from './ButtonsStateFX.js'
+import type {HintButton, HintButtonName, HintRefs} from './hintTypes.js'
 import HintsLearning from './learning/HintsLearning.js'
 import NoHintsWindow from './NoHintsWindow.js'
-import type {HintButton, HintButtonName, HintRefs} from './hintTypes.js'
 
 // Координирует кнопки, доступность и выполнение игровых подсказок.
 
@@ -318,6 +318,4 @@ export default class HintsController {
   }
 }
 
-export {
-  HINT_BUTTON_NAMES,
-}
+export {HINT_BUTTON_NAMES}

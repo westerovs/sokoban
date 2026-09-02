@@ -7,14 +7,14 @@ import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import OfflineBadge from '@/game/utils/gameUtils/OfflineBadge.js'
 import Logger from '@/game/utils/Logger.js'
 import MathTools from '@/game/utils/MathTools.js'
-import {DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS} from './defaultData.js'
+import type Game from '../../Game.js'
 import type {PlayerData} from './defaultData.js'
+import {DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS} from './defaultData.js'
 import GameSettings from './GameSettings.js'
 import LocalStorage from './LocalStorage.js'
-import {createProfileProxy, getMaxFreshData, getMaxUserLevelData, parseJsonKey, stringifyJsonKey} from './utils/utils.js'
 import type {PlayerSave} from './utils/utils.js'
+import {createProfileProxy, getMaxFreshData, getMaxUserLevelData, parseJsonKey, stringifyJsonKey} from './utils/utils.js'
 import Validation from './utils/Validation.js'
-import type Game from '../../Game.js'
 
 /**
  * Загружает, изменяет и сохраняет профиль игрока в локальном и платформенном хранилищах.

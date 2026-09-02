@@ -18,6 +18,4 @@ const createPreloadAudioList = (): PreloadAudioList => {
   }
 }
 
-export {
-  createPreloadAudioList,
-}
+export {createPreloadAudioList}

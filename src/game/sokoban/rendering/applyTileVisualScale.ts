@@ -1,5 +1,5 @@
-import {ATLAS_RESOLUTIONS} from '../../gameConfig/resolutionConfig.js'
 import type {Sprite} from 'pixi.js'
+import {ATLAS_RESOLUTIONS} from '../../gameConfig/resolutionConfig.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
 
 /**
@@ -15,6 +15,4 @@ const applyTileVisualScale = (sprite: Sprite, tileSize: number) => {
   sprite.scale.set(scale)
 }
 
-export {
-  applyTileVisualScale,
-}
+export {applyTileVisualScale}

@@ -1,8 +1,8 @@
 import {gsap} from 'gsap'
-import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import type Game from '@/game/Game.js'
-import type LevelPreload from '../LevelPreload.js'
+import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import type PreloadView from '../../PreloadView.js'
+import type LevelPreload from '../LevelPreload.js'
 
 // [STATE 4] Завершает предзагрузку и переводит игру в состояние уровня.
 

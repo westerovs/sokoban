@@ -1,8 +1,9 @@
 // Разблокирует AudioContext после первого касания на устройствах iOS.
 
-type AudioWindow = Window & typeof globalThis & {
-  webkitAudioContext?: typeof AudioContext
-}
+type AudioWindow = Window &
+  typeof globalThis & {
+    webkitAudioContext?: typeof AudioContext
+  }
 
 // Создаёт и активирует совместимый браузерный аудиоконтекст.
 const antiMuteIOS = (_silencePath?: string) => {
@@ -31,6 +32,4 @@ const antiMuteIOS = (_silencePath?: string) => {
   })
 }
 
-export {
-  antiMuteIOS,
-}
+export {antiMuteIOS}

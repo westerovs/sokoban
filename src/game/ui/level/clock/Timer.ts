@@ -83,6 +83,4 @@ export default class Timer {
   }
 }
 
-export {
-  TIMER_LABELS,
-}
+export {TIMER_LABELS}

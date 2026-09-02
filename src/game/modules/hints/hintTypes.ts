@@ -15,8 +15,4 @@ type HintButton = Container & {
 
 type HintRefs = Record<string, Container>
 
-export type {
-  HintButton,
-  HintButtonName,
-  HintRefs,
-}
+export type {HintButton, HintButtonName, HintRefs}

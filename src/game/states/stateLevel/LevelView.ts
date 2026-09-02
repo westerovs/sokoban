@@ -1,6 +1,6 @@
 import {Container} from 'pixi.js'
-import CompleteLevelView from '@/game/ui/level/completeLevelScreen/CompleteLevelView.js'
 import type Game from '@/game/Game.js'
+import CompleteLevelView from '@/game/ui/level/completeLevelScreen/CompleteLevelView.js'
 
 // Содержит визуальные элементы игрового уровня и общие ссылки на них.
 

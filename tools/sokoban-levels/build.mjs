@@ -5,7 +5,7 @@ import process from 'node:process'
 import {fileURLToPath} from 'node:url'
 import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
-import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.js'
+import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
@@ -504,9 +504,12 @@ const writeLocationFiles = async (locations, prettierConfig) => {
 
 // Записывает данные через операцию `writeGameIndex`.
 const writeGameIndex = async (locations, prettierConfig) => {
-  const formattedContent = await prettier.format(createGameIndexSource(locations), {...prettierConfig, parser: 'typescript'})
-  const content = formattedContent.replace('export {levels}', 'export {\n  levels,\n}')
-  writeOutput(gameIndexOutputPath, content)
+  const content = await prettier.format(createGameIndexSource(locations), {...prettierConfig, parser: 'typescript'})
+  const multilineExport = content.replace(
+    'export {levels}',
+    '// Формат именованного экспорта сохраняется единым во всём проекте.\n// prettier-ignore\nexport {\n  levels,\n}',
+  )
+  writeOutput(gameIndexOutputPath, multilineExport)
 }
 
 // Собирает и записывает все игровые файлы уровней.

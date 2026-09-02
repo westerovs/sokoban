@@ -1,14 +1,14 @@
 import {Container, Sprite, Texture} from 'pixi.js'
 import Locator from '../../../engine/Locator.ts'
+import type {PlayerData} from '../../../engine/storage/defaultData.js'
 import {STORAGE_KEYS} from '../../../engine/storage/defaultData.js'
+import type Storage from '../../../engine/storage/Storage.js'
+import type Game from '../../../Game.js'
 import {GAME_STATES} from '../../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
-import OptionsView from './OptionsView.js'
-import type {OptionButton} from './OptionsView.js'
-import type Game from '../../../Game.js'
-import type Storage from '../../../engine/storage/Storage.js'
-import type {PlayerData} from '../../../engine/storage/defaultData.js'
 import type StateGame from '../../../states/stateGame/StateGame.js'
+import type {OptionButton} from './OptionsView.js'
+import OptionsView from './OptionsView.js'
 
 // Управляет настройками звука, управления и навигации между экранами.
 
@@ -181,7 +181,8 @@ export default class Options {
     this.#toggleVisibility()
 
     if (this.#game.stateName === GAME_STATES.gameState) {
-      ;(this.#game.currentState as StateGame).stateStartScreen?.showLocations()
+      const state = this.#game.currentState as StateGame
+      state.stateStartScreen?.showLocations()
       return
     }
 
@@ -196,7 +197,8 @@ export default class Options {
     this.#toggleVisibility()
 
     if (this.#game.stateName === GAME_STATES.gameState) {
-      ;(this.#game.currentState as StateGame).stateStartScreen?.showMainScreen()
+      const state = this.#game.currentState as StateGame
+      state.stateStartScreen?.showMainScreen()
       return
     }
 

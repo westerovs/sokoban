@@ -101,7 +101,7 @@ const readEditorData = (paths: EditorPaths) => {
 
 // Выполняет отдельную операцию `runLevelsBuild`.
 const runLevelsBuild = (paths: EditorPaths) => {
-  const result = spawnSync(process.execPath, [paths.levelsBuild], {cwd: paths.projectRoot, encoding: 'utf8'})
+  const result = spawnSync(process.execPath, ['--import', 'tsx', paths.levelsBuild], {cwd: paths.projectRoot, encoding: 'utf8'})
   if (result.status === 0) return
   throw new Error(result.stderr.trim() || result.stdout.trim() || 'Level build failed')
 }

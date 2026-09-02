@@ -4,6 +4,4 @@
 
 declare const URL_PRESET: Record<string, {local: string; remote: string}>
 
-export {
-  URL_PRESET,
-}
+export {URL_PRESET}

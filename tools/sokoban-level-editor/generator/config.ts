@@ -127,9 +127,4 @@ export {
   SHAPE_CONFIG, // Доступные формы внешнего контура
 }
 
-export type {
-  Difficulty,
-  GeneratorOptions,
-  GeneratorRequest,
-  Shape,
-}
+export type {Difficulty, GeneratorOptions, GeneratorRequest, Shape}

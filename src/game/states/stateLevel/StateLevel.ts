@@ -1,10 +1,10 @@
 import {gsap} from 'gsap'
 import Locator from '../../engine/Locator.ts'
+import type Game from '../../Game.js'
 import {GAME_STATES} from '../../gameConfig/constants.js'
 import BaseState from '../BaseState.js'
 import Level from './Level.js'
 import LevelView from './LevelView.js'
-import type Game from '../../Game.js'
 
 // Управляет входом, повторным запуском и завершением состояния уровня.
 

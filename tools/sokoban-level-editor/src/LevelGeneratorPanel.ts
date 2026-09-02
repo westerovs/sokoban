@@ -1,5 +1,4 @@
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
-import type {EditorState} from './editorTypes.js'
 import {
   DEFAULT_BOARD_HEIGHT,
   DEFAULT_BOARD_WIDTH,
@@ -10,13 +9,15 @@ import {
   SHAPE_CONFIG,
 } from '../generator/config.js'
 import {createTopologyBoard, getMaximumBoxCount, normalizeTopology} from '../generator/topology.js'
+import type {EditorState} from './editorTypes.js'
 
 /**
  * Управляет настройками генерации новой структуры и перестановки объектов в текущей геометрии.
  */
 
 // Считает ящики на обычном полу и на целях.
-const countBoxes = (map: string[]) => map.reduce((total, row) => total + Array.from(row).filter((symbol) => '$-'.includes(symbol)).length, 0)
+const countBoxes = (map: string[]) =>
+  map.reduce((total, row) => total + Array.from(row).filter((symbol) => '$-'.includes(symbol)).length, 0)
 
 // Вычисляет вместимость текущей структуры теми же правилами, что и сервер.
 const getCurrentMaximumBoxes = (map: string[]) => getMaximumBoxCount(createTopologyBoard(normalizeTopology(map)))

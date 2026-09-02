@@ -218,14 +218,4 @@ const shakeX = (el: AnimatedTarget) => {
     .to(el, {x: initX, duration: duration, ease: 'linear'})
 }
 
-export {
-  animateCounter,
-  animateDots,
-  checkoutFade,
-  clearTimeLine,
-  destroyTimeLine,
-  jump,
-  shake,
-  shakeX,
-  typewriterEffect,
-}
+export {animateCounter, animateDots, checkoutFade, clearTimeLine, destroyTimeLine, jump, shake, shakeX, typewriterEffect}

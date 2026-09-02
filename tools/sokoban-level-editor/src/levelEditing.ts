@@ -65,14 +65,26 @@ const replaceAppearance = (
 }
 
 // Ставит стену и полностью очищает прежнее содержимое клетки.
-const applyWallBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
+const applyWallBrush = (
+  state: EditorState,
+  brush: EditorBrush,
+  position: Position,
+  positionKey: string,
+  defaults: Record<string, string>,
+) => {
   const map = setMapSymbol(state.map, position, '#')
   const appearance = replaceAppearance(state, brush, positionKey, APPEARANCE_ROLES, defaults)
   return {state: {...state, map, appearance}}
 }
 
 // Ставит выбранный пол, сохраняя находящийся на клетке объект.
-const applyFloorBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
+const applyFloorBrush = (
+  state: EditorState,
+  brush: EditorBrush,
+  position: Position,
+  positionKey: string,
+  defaults: Record<string, string>,
+) => {
   const occupant = getOccupant(state.map[position.y][position.x])
   const roles = occupant === 'box' ? ['wall', 'target'] : ['wall', 'target', 'box']
   const map = setMapSymbol(state.map, position, composeSymbol('floor', occupant))
@@ -81,7 +93,13 @@ const applyFloorBrush = (state: EditorState, brush: EditorBrush, position: Posit
 }
 
 // Ставит выбранную цель, сохраняя находящийся на клетке объект.
-const applyTargetBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
+const applyTargetBrush = (
+  state: EditorState,
+  brush: EditorBrush,
+  position: Position,
+  positionKey: string,
+  defaults: Record<string, string>,
+) => {
   const occupant = getOccupant(state.map[position.y][position.x])
   const roles = occupant === 'box' ? ['wall'] : ['wall', 'box']
   const map = setMapSymbol(state.map, position, composeSymbol('target', occupant))
@@ -90,7 +108,13 @@ const applyTargetBrush = (state: EditorState, brush: EditorBrush, position: Posi
 }
 
 // Ставит выбранный ящик на существующее основание или новый обычный пол.
-const applyBoxBrush = (state: EditorState, brush: EditorBrush, position: Position, positionKey: string, defaults: Record<string, string>) => {
+const applyBoxBrush = (
+  state: EditorState,
+  brush: EditorBrush,
+  position: Position,
+  positionKey: string,
+  defaults: Record<string, string>,
+) => {
   const oldTerrain = getTerrain(state.map[position.y][position.x])
   const terrain = oldTerrain === 'target' ? 'target' : 'floor'
   const roles = terrain === 'target' ? ['wall'] : ['wall', 'target']

@@ -1,6 +1,6 @@
-import {GAME_NAMES} from '../../gameConfig/constants.js'
 import type {PlayerData} from '../../engine/storage/defaultData.js'
 import type Storage from '../../engine/storage/Storage.js'
+import {GAME_NAMES} from '../../gameConfig/constants.js'
 import {GAME_NAME} from '../../generatedAssets/buildMeta.js'
 import Logger, {MODULES} from '../../utils/Logger.js'
 
@@ -368,6 +368,4 @@ export default class YaMetrika {
   }
 }
 
-export {
-  ERROR_TYPES,
-}
+export {ERROR_TYPES}

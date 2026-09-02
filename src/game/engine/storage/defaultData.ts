@@ -160,15 +160,6 @@ const SERIALIZED_ARRAY_KEYS = Object.freeze([
   STORAGE_KEYS.unlockedLocationIds,
 ])
 
-export {
-  DEFAULT_DATA,
-  DEFAULT_DATA_VALUES,
-  SERIALIZED_ARRAY_KEYS,
-  STORAGE_KEYS,
-}
+export {DEFAULT_DATA, DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS}
 
-export type {
-  DataType,
-  PlayerData,
-  StorageKey,
-}
+export type {DataType, PlayerData, StorageKey}

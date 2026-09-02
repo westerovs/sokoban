@@ -1,6 +1,6 @@
 import {SOKOBAN_SETTINGS} from '../../../src/game/sokoban/config/settings.js'
-import {solveSokoban, type SolverResult} from '../solver.js'
-import {DIFFICULTY_CONFIG, normalizeGeneratorOptions, type GeneratorOptions, type GeneratorRequest} from './config.js'
+import {type SolverResult, solveSokoban} from '../solver.js'
+import {DIFFICULTY_CONFIG, type GeneratorOptions, type GeneratorRequest, normalizeGeneratorOptions} from './config.js'
 import {createRandom, type Random} from './grid.js'
 import {createReverseCandidates, type ReverseCandidate} from './reverseSearch.js'
 import {
@@ -133,13 +133,7 @@ const createGenerationStats = (result: EvaluatedCandidate, options: PopulationOp
 })
 
 // Наполняет заданную структуру целями, ящиками и игроком.
-const tryPopulateTopology = (
-  topology: string[],
-  options: PopulationOptions,
-  config: GeneratorConfig,
-  random: Random,
-  seed: number,
-) => {
+const tryPopulateTopology = (topology: string[], options: PopulationOptions, config: GeneratorConfig, random: Random, seed: number) => {
   const board = createTopologyBoard(topology)
   if (!isTopologyConnected(board)) throw new Error('Все клетки пола должны образовывать одну связную область')
   const capacity = resolveBoxCount(options.boxCount, board, config)

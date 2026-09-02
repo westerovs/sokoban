@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
-import {Circle, Container, Graphics} from 'pixi.js'
 import type {DestroyOptions, FederatedPointerEvent} from 'pixi.js'
+import {Circle, Container, Graphics} from 'pixi.js'
 import type {SokobanDirectionName} from '../config/config.js'
 
 /**
@@ -115,13 +115,7 @@ export default class SokobanDpad extends Container {
   }
 
   // Активирует направление выбранной кнопки крестовины.
-  #handlePress(
-    event: FederatedPointerEvent,
-    button: Container,
-    highlight: Graphics,
-    arrow: Graphics,
-    direction: SokobanDirectionName,
-  ) {
+  #handlePress(event: FederatedPointerEvent, button: Container, highlight: Graphics, arrow: Graphics, direction: SokobanDirectionName) {
     event.stopPropagation()
     if (this.#activePointerId !== null) return
 

@@ -1,13 +1,13 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import {Sprite, Texture} from 'pixi.js'
 import type {Text} from 'pixi.js'
+import {Sprite, Texture} from 'pixi.js'
 import SdkManager from '../../engine/SdkManager.js'
 import type {SdkLeaderboardEntry} from '../../engine/sdkTypes.js'
 import LoadUtils from '../../utils/gameUtils/LoadUtils.js'
 import {mockData} from './mockData.js'
-import ScoreRow, {ROW_SIZE} from './ScoreRow.js'
 import type ScoreboardView from './ScoreboardView.js'
+import ScoreRow, {ROW_SIZE} from './ScoreRow.js'
 
 // Загружает данные таблицы лидеров и наполняет её представление.
 

@@ -1,5 +1,5 @@
-import LevelProgress from '../../gameConfig/levels/LevelProgress.js'
 import type Storage from '../../engine/storage/Storage.js'
+import LevelProgress from '../../gameConfig/levels/LevelProgress.js'
 import {applySokobanLevelDraft} from './applySokobanLevelDraft.js'
 
 /**
@@ -23,6 +23,4 @@ const trySelectRequestedSokobanLevel = (storage: Storage) => {
   return progress.selectLevel(levelId, {ignoreLock: true, save: false})
 }
 
-export {
-  trySelectRequestedSokobanLevel,
-}
+export {trySelectRequestedSokobanLevel}

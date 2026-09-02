@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
-import {Assets, Container, Graphics, NineSliceSprite, Sprite, Text, Texture} from 'pixi.js'
 import type {DestroyOptions, FederatedPointerEvent} from 'pixi.js'
+import {Assets, Container, Graphics, NineSliceSprite, Sprite, Text, Texture} from 'pixi.js'
 import Locator from '../../../engine/Locator.ts'
 import {popupColors, primaryFontStyle} from '../../../styles.js'
 import ButtonAnimator from '../../../utils/animations/ButtonAnimator.js'
@@ -316,6 +316,4 @@ export default class BaseModal extends Container {
   }
 }
 
-export type {
-  BaseModalOptions,
-}
+export type {BaseModalOptions}

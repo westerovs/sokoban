@@ -1,10 +1,10 @@
 import i18next from 'i18next'
 import Locator from '@/game/engine/Locator.ts'
+import type Storage from '@/game/engine/storage/Storage.js'
 import PromoCard from '@/game/features/promotionCards/PromoCard.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import PromoCardsTestRenderer from './PromoCardsTestRenderer.js'
-import type Storage from '@/game/engine/storage/Storage.js'
 import type {PromoData, PromoDataCatalog} from './promoTypes.js'
 
 // Выбирает, показывает и закрывает промопредложения по прогрессу игрока.
@@ -177,7 +177,4 @@ export default class PromoManager {
   }
 }
 
-export {
-  PROMO_DATA,
-  promoTooltipFromAdminPanel,
-}
+export {PROMO_DATA, promoTooltipFromAdminPanel}

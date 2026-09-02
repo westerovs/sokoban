@@ -4,11 +4,11 @@ import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import SdkManager from '@/game/engine/SdkManager.js'
 import {GAME_NAMES, WORLD} from '@/game/gameConfig/constants.js'
+import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import CompleteLocationUnlockCelebration from './CompleteLocationUnlockCelebration.js'
-import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 
 // Создаёт экран завершения уровня и кнопки дальнейшей навигации.
 

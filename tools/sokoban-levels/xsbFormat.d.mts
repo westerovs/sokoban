@@ -19,13 +19,6 @@ declare const toRuntimeMap: (standardMap: string[]) => string[]
 // Преобразует внутреннюю карту в стандартный формат XSB.
 declare const toStandardMap: (runtimeMap: string[]) => string[]
 
-export {
-  parseXsb,
-  serializeXsb,
-  toRuntimeMap,
-  toStandardMap,
-}
+export {parseXsb, serializeXsb, toRuntimeMap, toStandardMap}
 
-export type {
-  XsbLevel,
-}
+export type {XsbLevel}

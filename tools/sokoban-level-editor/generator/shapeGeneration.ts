@@ -1,4 +1,4 @@
-import {clamp, randomInteger, type Random} from './grid.js'
+import {clamp, type Random, randomInteger} from './grid.js'
 
 /**
  * Создаёт связные маски пола для разных типов внешнего контура уровня.

@@ -1,4 +1,5 @@
 import {Howl, Howler} from 'howler'
+import type Game from '../../Game.js'
 import {ASSETS_URL} from '../../gameConfig/constants.js'
 import {ADAPTER_EVENTS, GAME_EVENTS} from '../../gameConfig/gameEvents.js'
 import YaMetrika, {ERROR_TYPES} from '../../modules/metrika/YaMetrika.js'
@@ -10,7 +11,6 @@ import {antiMuteIOS} from './antiMuteIOS.js'
 import type {AudioAsset, PreloadAudioList, SoundList} from './audioTypes.js'
 import MusicManager from './MusicManager.js'
 import {createPreloadAudioList} from './preloadAudioList.ts'
-import type Game from '../../Game.js'
 
 // Загружает, воспроизводит и группирует музыку, окружение и звуковые эффекты.
 
@@ -108,7 +108,9 @@ export default class SoundManager {
 
     return sounds.reduce((totalBytes, sound) => {
       const internalSound = sound as HowlWithBuffers
-      const audioBuffer = internalSound._sounds?.map((item) => item._node?.bufferSource?.buffer).find((buffer) => buffer && buffer.length > 1)
+      const audioBuffer = internalSound._sounds
+        ?.map((item) => item._node?.bufferSource?.buffer)
+        .find((buffer) => buffer && buffer.length > 1)
 
       if (audioBuffer) {
         return totalBytes + audioBuffer.length * audioBuffer.numberOfChannels * bytesPerFloatSample

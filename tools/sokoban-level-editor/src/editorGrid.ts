@@ -42,9 +42,7 @@ const shiftRoleAppearance = (roleAppearance: Record<string, string>, offset: Off
 
 // Переносит координаты всех визуальных слоёв уровня.
 const shiftAppearance = (appearance: LevelAppearance, offset: Offset): LevelAppearance => {
-  return Object.fromEntries(
-    Object.entries(appearance).map(([role, values]) => [role, shiftRoleAppearance(values ?? {}, offset)]),
-  )
+  return Object.fromEntries(Object.entries(appearance).map(([role, values]) => [role, shiftRoleAppearance(values ?? {}, offset)]))
 }
 
 // Создаёт состояние уровня на полном поле редактора.

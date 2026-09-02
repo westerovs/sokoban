@@ -1,5 +1,5 @@
-import {Container, Sprite, Text, Texture} from 'pixi.js'
 import type {Graphics} from 'pixi.js'
+import {Container, Sprite, Text, Texture} from 'pixi.js'
 import {FONT_COLORS, primaryFontStyle} from '@/game/styles.js'
 import {createRect} from '@/game/utils/commonUtils.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
@@ -243,6 +243,4 @@ export default class ScoreRow extends Container {
   }
 }
 
-export {
-  ROW_SIZE,
-}
+export {ROW_SIZE}

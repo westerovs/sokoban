@@ -1,5 +1,5 @@
-import {Container} from 'pixi.js'
 import type {Sprite} from 'pixi.js'
+import {Container} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
 import {applyTileVisualScale} from './applyTileVisualScale.js'

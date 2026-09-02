@@ -1,7 +1,7 @@
 import {gsap} from 'gsap'
 import {ASSETS_URL} from '@/game/gameConfig/constants.js'
-import Locator from '../../../../engine/Locator.ts'
 import type {RuntimeLevelConfig} from '@/game/gameConfig/levels/levelTypes.js'
+import Locator from '../../../../engine/Locator.ts'
 
 // Показывает вступление уровня и запускает его фоновую атмосферу.
 

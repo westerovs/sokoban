@@ -16,7 +16,4 @@ type PreloadTextData = {
   userLevel: number
 }
 
-export type {
-  LevelPreloadList,
-  PreloadTextData,
-}
+export type {LevelPreloadList, PreloadTextData}

@@ -3,12 +3,12 @@ import SdkManager from '@/game/engine/SdkManager.js'
 import {STORAGE_KEYS} from '@/game/engine/storage/defaultData.js'
 import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 import PromoManager from '@/game/features/promotionCards/PromoManager.js'
+import type Game from '@/game/Game.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {MAGNIFIERS_IDS, rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Logger from '@/game/utils/Logger.js'
-import type Game from '@/game/Game.js'
 
 // Обрабатывает покупки платформы и выдаёт соответствующие игровые награды.
 

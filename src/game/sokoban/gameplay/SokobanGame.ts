@@ -1,5 +1,5 @@
-import {Container} from 'pixi.js'
 import type {DestroyOptions} from 'pixi.js'
+import {Container} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import type {LevelAppearance} from '@/game/gameConfig/levels/levelTypes.js'
@@ -8,8 +8,8 @@ import SokobanDpad from '../input/SokobanDpad.js'
 import SokobanInput from '../input/SokobanInput.js'
 import SokobanBoard from '../rendering/SokobanBoard.js'
 import SokobanHud from '../ui/SokobanHud.js'
-import SokobanLevel from './SokobanLevel.js'
 import type {SokobanMoveResult} from './SokobanLevel.js'
+import SokobanLevel from './SokobanLevel.js'
 
 /**
  * Координирует модель, ввод и представление одной игровой сессии Sokoban.

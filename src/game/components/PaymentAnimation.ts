@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
-import {Container, Text} from 'pixi.js'
 import type {DestroyOptions, Sprite} from 'pixi.js'
+import {Container, Text} from 'pixi.js'
 import {rewardsCatalog} from '../gameConfig/rewardsCatalog.js'
 import {primaryFontStyle} from '../styles.js'
 import {destroyTimeLine} from '../utils/animations/gsapUtils.js'

@@ -2,10 +2,10 @@ import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import Locator from '../../../../engine/Locator.ts'
 import {primaryFontStyle} from '../../../../styles.js'
+import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectionState} from '../menuTypes.js'
 import LocationCard from './LocationCard.js'
 import LocationTab from './LocationTab.js'
 import LocationUnlockCelebration from './LocationUnlockCelebration.js'
-import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectionState} from '../menuTypes.js'
 
 // Отображает страницы карточек локаций и кнопку продолжения игры.
 

@@ -73,7 +73,4 @@ export {
   toPosition, // Преобразование индекса в координаты
 }
 
-export type {
-  Direction,
-  Random,
-}
+export type {Direction, Random}

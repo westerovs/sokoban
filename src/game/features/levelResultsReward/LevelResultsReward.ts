@@ -1,7 +1,7 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import {Container, NineSliceSprite, Text, Texture} from 'pixi.js'
 import type {DestroyOptions} from 'pixi.js'
+import {Container, NineSliceSprite, Text, Texture} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'

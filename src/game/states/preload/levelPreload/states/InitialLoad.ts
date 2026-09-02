@@ -1,11 +1,11 @@
 import i18next from 'i18next'
+import {Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
+import type Game from '@/game/Game.js'
 import PreloadView from '@/game/states/preload/PreloadView.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
 import SpineUtils from '@/game/utils/SpineUtils.js'
-import {Text} from 'pixi.js'
-import type Game from '@/game/Game.js'
 import type LevelPreload from '../LevelPreload.js'
 
 let onceLoadIsLoaded = false // Показывает, завершена ли одноразовая загрузка

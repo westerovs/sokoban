@@ -1,8 +1,8 @@
+import type {TextStyleOptions} from 'pixi.js'
 import {Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.js'
 import BaseModal from '@/game/ui/common/modal/BaseModal.js'
-import type {TextStyleOptions} from 'pixi.js'
 
 // Показывает модальное сообщение об ошибке покупки.
 

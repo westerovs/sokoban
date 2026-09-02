@@ -14,14 +14,14 @@
     "url": "#"
   },
   "scripts": {
-    "levels": "node tools/sokoban-levels/build.mjs",
-    "levels:check": "node tools/sokoban-levels/build.mjs --check",
+    "levels": "tsx tools/sokoban-levels/build.mjs",
+    "levels:check": "tsx tools/sokoban-levels/build.mjs --check",
     "prelevel-editor": "npm run levels && npm run assets && npm run generate_game_meta",
     "level-editor": "vite --open /tools/sokoban-level-editor/",
     "generate_game_meta": "node bundler/generateGameMeta.mjs",
     "assets": "node bundler/buildAssets.mjs",
     "prebuild": "npm run levels && npm run assets && npm run generate_game_meta",
-    "build": "node bundler/build.mjs",
+    "build": "tsx bundler/build.mjs",
     "prestart": "npm run levels && npm run assets && npm run generate_game_meta",
     "start": "vite",
     "typecheck": "tsc --noEmit",
@@ -50,6 +50,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "prettier": "^3.6.2",
     "tinify": "^1.8.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "vite": "^8.1.4"
   },

@@ -1,7 +1,7 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import {Container, Text} from 'pixi.js'
 import type {DestroyOptions} from 'pixi.js'
+import {Container, Text} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import BtnRewardTimer from '@/game/components/rewardTimer/BtnRewardTimer.js'
 import Locator from '@/game/engine/Locator.ts'

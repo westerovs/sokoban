@@ -83,7 +83,4 @@ export default class Logger {
   }
 }
 
-export {
-  LOG_STATUS,
-  MODULES,
-}
+export {LOG_STATUS, MODULES}

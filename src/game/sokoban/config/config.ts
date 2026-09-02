@@ -39,15 +39,6 @@ type SokobanDirectionName = keyof typeof SOKOBAN_DIRECTIONS
 type SokobanDirection = (typeof SOKOBAN_DIRECTIONS)[SokobanDirectionName]
 type SokobanSymbol = (typeof SOKOBAN_SYMBOLS)[keyof typeof SOKOBAN_SYMBOLS]
 
-export {
-  ROTATED_DIRECTIONS,
-  SOKOBAN_DIRECTIONS,
-  SOKOBAN_SYMBOLS,
-  SOKOBAN_TEXTURES,
-}
+export {ROTATED_DIRECTIONS, SOKOBAN_DIRECTIONS, SOKOBAN_SYMBOLS, SOKOBAN_TEXTURES}
 
-export type {
-  SokobanDirection,
-  SokobanDirectionName,
-  SokobanSymbol,
-}
+export type {SokobanDirection, SokobanDirectionName, SokobanSymbol}

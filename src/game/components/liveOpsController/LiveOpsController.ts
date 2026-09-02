@@ -143,6 +143,4 @@ export default class LiveOpsController {
   }
 }
 
-export {
-  LIVE_OPS_ID,
-}
+export {LIVE_OPS_ID}

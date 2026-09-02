@@ -1,5 +1,5 @@
-import {Application, EventEmitter} from 'pixi.js'
 import type {Container} from 'pixi.js'
+import {Application, EventEmitter} from 'pixi.js'
 import GameContainer from '@/game/engine/GameContainer.js'
 import UiLayer from '@/game/engine/uiLayer/UiLayer.ts'
 // other
@@ -9,10 +9,12 @@ import SoundManager from './engine/audio/SoundManager.js'
 import GameResize from './engine/GameResize.ts'
 // Services
 import Locator, {SERVICES} from './engine/Locator.ts'
+import type {SdkAdapter} from './engine/sdkTypes.js'
 import Storage from './engine/storage/Storage.js'
 import {GAME_STATES} from './gameConfig/constants.js'
 import GameConfig from './gameConfig/GameConfig.js'
 import PaymentManager from './modules/PaymentManager.js'
+import type BaseState from './states/BaseState.js'
 // states
 import GamePreload from './states/preload/gamePreload/GamePreload.js'
 import LevelPreload from './states/preload/levelPreload/LevelPreload.js'
@@ -20,8 +22,6 @@ import StateGame from './states/stateGame/StateGame.js'
 import StateLevel from './states/stateLevel/StateLevel.js'
 import Options from './ui/common/options/Options.js'
 import UIFader from './ui/UIFader.js'
-import type {SdkAdapter} from './engine/sdkTypes.js'
-import type BaseState from './states/BaseState.js'
 
 // Создаёт приложение PixiJS, регистрирует сервисы и запускает игровые состояния.
 

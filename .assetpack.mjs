@@ -98,9 +98,7 @@ const createSizeAwareAudioPipe = (options) => {
       const [compressedAsset] = await transformAudio(asset, resolvedOptions, pipeSystem)
       if (!compressedAsset) return [asset]
 
-      return compressedAsset.buffer.length < asset.buffer.length
-        ? [compressedAsset]
-        : [asset]
+      return compressedAsset.buffer.length < asset.buffer.length ? [compressedAsset] : [asset]
     },
   }
 }
@@ -108,7 +106,7 @@ const createSizeAwareAudioPipe = (options) => {
 const sizeAwareAudioPipe = createSizeAwareAudioPipe(audioConfig)
 
 // Заменяет стандартный FFmpeg-пайп PixiJS на версию с проверкой размера.
-const replaceAudioPipe = (pipe) => pipe.name === 'audio' ? sizeAwareAudioPipe : pipe
+const replaceAudioPipe = (pipe) => (pipe.name === 'audio' ? sizeAwareAudioPipe : pipe)
 
 const tinifyAtlases = {
   name: 'tinify-atlases',
@@ -123,7 +121,7 @@ const tinifyAtlases = {
   async transform(asset) {
     asset.buffer = await tinify.fromBuffer(asset.buffer).toBuffer()
     return [asset]
-  }
+  },
 }
 
 export default {
@@ -142,7 +140,7 @@ export default {
       compression: {
         png: true, // создавать и сжимать текстуры в формате PNG
         webp: true, // создавать и сжимать текстуры в формате WebP
-        jpg: false // не создавать текстуры в формате JPG
+        jpg: false, // не создавать текстуры в формате JPG
       },
       texturePacker: {
         texturePacker: {
@@ -151,16 +149,16 @@ export default {
           allowRotation: true, // разрешить поворот спрайтов для плотной упаковки
           allowTrim: true, // обрезать прозрачные края у изображений
           alphaThreshold: 0, // порог прозрачности при обрезке изображения
-          removeFileExtension: true // убрать расширение файла из имени фрейма
+          removeFileExtension: true, // убрать расширение файла из имени фрейма
         },
         resolutionOptions: {
-          maximumTextureSize: 2048 // максимальная ширина или высота одного атласа
-        }
+          maximumTextureSize: 2048, // максимальная ширина или высота одного атласа
+        },
       },
       manifest: {
-        output: './.assetpack/manifest.json' // путь для сохранения сгенерированного manifest-файла
-      }
+        output: './.assetpack/manifest.json', // путь для сохранения сгенерированного manifest-файла
+      },
     }).map(replaceAudioPipe),
-    ...(tinifyKey ? [tinifyAtlases] : []) // подключить Tinify-сжатие атласов, если задан API-ключ
-  ]
+    ...(tinifyKey ? [tinifyAtlases] : []), // подключить Tinify-сжатие атласов, если задан API-ключ
+  ],
 }

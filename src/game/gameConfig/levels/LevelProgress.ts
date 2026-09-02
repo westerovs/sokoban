@@ -1,6 +1,6 @@
-import {getLevelEntries, getLevelEntryById, getLevelEntryByIndex, getLocationPageIndex, getLocations} from './locationCatalog.js'
 import type Storage from '../../engine/storage/Storage.js'
 import type {LevelEntry, LocationDefinition} from './levelTypes.js'
+import {getLevelEntries, getLevelEntryById, getLevelEntryByIndex, getLocationPageIndex, getLocations} from './locationCatalog.js'
 
 /**
  * Хранит прогресс по стабильным идентификаторам карт и синхронизирует старый числовой levelIndex.

@@ -64,6 +64,4 @@ export default class GameConfig {
   }
 }
 
-export type {
-  Locales,
-}
+export type {Locales}

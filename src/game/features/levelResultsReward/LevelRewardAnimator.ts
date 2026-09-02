@@ -182,7 +182,7 @@ export default class LevelRewardAnimator {
   #createAndFly = async (target: Container) => {
     const {reward} = this.#difficultyData
     const {x, y} = GameUtils.getLocalPositionVarB(target, this.#view)
-    let coins = this.#createCoins(reward, x, y)
+    const coins = this.#createCoins(reward, x, y)
 
     const flyProps = {
       x: (_i: number, coin: RewardCoin) => x + coin._randomPos.rx,

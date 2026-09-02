@@ -1,5 +1,5 @@
-import {Container, Sprite, Texture} from 'pixi.js'
 import type {ContainerOptions} from 'pixi.js'
+import {Container, Sprite, Texture} from 'pixi.js'
 import {applyInteractive} from '../../components/buttons/buttons.js'
 import Locator from '../../engine/Locator.ts'
 import SdkManager from '../../engine/SdkManager.js'

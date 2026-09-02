@@ -5,6 +5,7 @@ import LocalStorage from '@/game/engine/storage/LocalStorage.js'
 import PromoManager from '@/game/features/promotionCards/PromoManager.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import LevelConfig from '@/game/gameConfig/levels/LevelConfig.js'
+import type {RuntimeLevelConfig} from '@/game/gameConfig/levels/levelTypes.js'
 import EntityManager from '@/game/levelRuntime/entities/EntityManager.js'
 import SystemManager from '@/game/levelRuntime/systems/SystemManager.js'
 import ClearLevel from '@/game/modules/ClearLevel.js'
@@ -15,10 +16,9 @@ import Confetti from '@/game/ui/common/emitters/confetti/Confetti.js'
 import {STOPWATCH_LABELS} from '@/game/ui/level/clock/Stopwatch.js'
 import CompleteLevel from '@/game/ui/level/completeLevelScreen/CompleteLevel.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
-import StateIntro from './states/intro/StateIntro.js'
-import type {RuntimeLevelConfig} from '@/game/gameConfig/levels/levelTypes.js'
-import type StateLevel from './StateLevel.js'
 import type LevelView from './LevelView.js'
+import type StateLevel from './StateLevel.js'
+import StateIntro from './states/intro/StateIntro.js'
 
 /**
  * Координирует жизненный цикл игрового уровня и подключает режим Sokoban.
@@ -200,7 +200,6 @@ export default class Level {
 
     CrazyGames.showCrazyGamesBanner()
     // await new LevelResultsReward().init()
-
     ;(this.game.view as LevelView).createCompleteLevelView()
     const completionResult = this.levelConfig.updateSavedLevel()
     this.#completeLevel.init(completionResult)

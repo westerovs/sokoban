@@ -1,9 +1,9 @@
 import i18next from 'i18next'
 import {Container} from 'pixi.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
+import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 import LocationCard from '@/game/states/stateGame/startScreen/locationSelect/LocationCard.js'
 import LocationUnlockCelebration from '@/game/states/stateGame/startScreen/locationSelect/LocationUnlockCelebration.js'
-import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 
 /**
  * Показывает на экране завершения уровня карточку новой локации и эффекты её разблокировки.

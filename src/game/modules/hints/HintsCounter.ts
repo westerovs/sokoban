@@ -1,13 +1,13 @@
 import {gsap} from 'gsap'
-import {GrayscaleFilter} from 'pixi-filters'
 import type {Container, Text} from 'pixi.js'
+import {GrayscaleFilter} from 'pixi-filters'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
 import {STORAGE_KEYS} from '@/game/engine/storage/defaultData.js'
+import type Storage from '@/game/engine/storage/Storage.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {clearTimeLine, destroyTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
-import type Storage from '@/game/engine/storage/Storage.js'
 import type {HintButton} from './hintTypes.js'
 
 /*

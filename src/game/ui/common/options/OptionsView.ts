@@ -324,6 +324,4 @@ export default class OptionsView extends BaseModal {
 
 export {VIEW_SIZE}
 
-export type {
-  OptionButton,
-}
+export type {OptionButton}

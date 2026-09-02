@@ -1,6 +1,6 @@
+import type {TextStyleOptions} from 'pixi.js'
 import {GAME_NAMES} from './gameConfig/constants.js'
 import {GAME_NAME} from './generatedAssets/buildMeta.js'
-import type {TextStyleOptions} from 'pixi.js'
 
 // Содержит общие цвета и стили интерфейса игры.
 

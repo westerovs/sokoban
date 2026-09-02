@@ -1,4 +1,4 @@
-import {DIRECTIONS, getAdjacentIndex, randomInteger, shuffle, toPosition, type Direction, type Random} from './grid.js'
+import {type Direction, DIRECTIONS, getAdjacentIndex, type Random, randomInteger, shuffle, toPosition} from './grid.js'
 import {getEligibleGoalPositions, type TopologyBoard} from './topology.js'
 
 /**
@@ -84,7 +84,7 @@ const getGoalPositionScore = (position: number, selected: number[], board: Topol
 
 // Выбирает цели рядом с геометрическими ограничениями и друг с другом.
 const selectGoals = (board: TopologyBoard, boxCount: number, random: Random) => {
-  let available = shuffle(getEligibleGoalPositions(board), random)
+  const available = shuffle(getEligibleGoalPositions(board), random)
   const selected: number[] = []
   while (selected.length < boxCount && available.length > 0) {
     available.sort((first, second) => getGoalPositionScore(second, selected, board) - getGoalPositionScore(first, selected, board))
@@ -258,8 +258,4 @@ export {
   createReverseCandidates, // Кандидаты, гарантированно достижимые из решения
 }
 
-export type {
-  ReverseCandidate,
-  ReverseConfig,
-  ReverseState,
-}
+export type {ReverseCandidate, ReverseConfig, ReverseState}

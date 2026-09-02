@@ -14,8 +14,4 @@ type PreloadAudioList = {
 
 type SoundList = Howl[] & Record<string, Howl>
 
-export type {
-  AudioAsset,
-  PreloadAudioList,
-  SoundList,
-}
+export type {AudioAsset, PreloadAudioList, SoundList}

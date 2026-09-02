@@ -1,5 +1,5 @@
-import {DEFAULT_DATA, DEFAULT_DATA_VALUES} from '../defaultData.js'
 import type {DataType, PlayerData} from '../defaultData.js'
+import {DEFAULT_DATA, DEFAULT_DATA_VALUES} from '../defaultData.js'
 import {parseJSON} from './utils.js'
 
 // Проверяет входные данные профиля и приводит их к актуальной схеме.

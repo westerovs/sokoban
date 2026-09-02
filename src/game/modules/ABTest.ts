@@ -2,7 +2,7 @@ import LiveOpsController from '../components/liveOpsController/LiveOpsController
 import Locator from '../engine/Locator.ts'
 import SdkManager from '../engine/SdkManager.js'
 import {LEVEL_TYPES, TIMER_REWARD_DURATION_IF_STORE_UNAVAILABLE} from '../gameConfig/constants.js'
-import type {LevelDefinition, LocationDefinition} from '../gameConfig/levels/levelTypes.js'
+import type {LevelDefinition} from '../gameConfig/levels/levelTypes.js'
 import GameUtils from '../utils/gameUtils/GameUtils.js'
 
 // Выбирает игровые настройки и контент с учётом платформенных флагов.

@@ -1,5 +1,5 @@
-import {STORAGE_KEYS} from '../defaultData.js'
 import type {StorageKey} from '../defaultData.js'
+import {STORAGE_KEYS} from '../defaultData.js'
 
 // Содержит преобразования и выбор наиболее актуального профиля игрока.
 
@@ -96,15 +96,6 @@ const parseJSON = (str: string): unknown => {
   return res
 }
 
-export {
-  createProfileProxy,
-  getMaxFreshData,
-  getMaxUserLevelData,
-  parseJSON,
-  parseJsonKey,
-  stringifyJsonKey,
-}
+export {createProfileProxy, getMaxFreshData, getMaxUserLevelData, parseJSON, parseJsonKey, stringifyJsonKey}
 
-export type {
-  PlayerSave,
-}
+export type {PlayerSave}

@@ -1,12 +1,12 @@
 import Locator from '@/game/engine/Locator.ts'
+import type Storage from '@/game/engine/storage/Storage.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
 import Logger, {MODULES} from '@/game/utils/Logger.js'
-import type Storage from '@/game/engine/storage/Storage.js'
 import {ASSETS_URL} from '../constants.js'
 import LevelProgress from './LevelProgress.js'
-import {getLevelEntries, getLevelEntryByIndex} from './locationCatalog.js'
 import type {LevelEntry, RuntimeLevelConfig} from './levelTypes.js'
+import {getLevelEntries, getLevelEntryByIndex} from './locationCatalog.js'
 
 /**
  * Собирает конфигурацию выбранного уровня для загрузки ресурсов, запуска Sokoban и записи результата.

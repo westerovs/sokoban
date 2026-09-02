@@ -1,7 +1,7 @@
 import {Container} from 'pixi.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
-import DebugRect from '../utils/debug/DebugRect.ts'
 import type Game from '../Game.js'
+import DebugRect from '../utils/debug/DebugRect.ts'
 import Locator from './Locator.js'
 
 /**

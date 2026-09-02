@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
-import {Sprite, Texture} from 'pixi.js'
 import type {Container, DestroyOptions} from 'pixi.js'
+import {Sprite, Texture} from 'pixi.js'
 import Locator from '../../../engine/Locator.ts'
 import type Game from '../../../Game.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'

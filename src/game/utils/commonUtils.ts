@@ -81,10 +81,4 @@ const getRandomItem = <T>(array: T[]) => {
   return array[index]
 }
 
-export {
-  createCircle,
-  createDebugRect,
-  createRect,
-  getRandomItem,
-  shuffleArr,
-}
+export {createCircle, createDebugRect, createRect, getRandomItem, shuffleArr}

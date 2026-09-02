@@ -43,9 +43,4 @@ const getAtlasResolutionSuffix = (resolution = ATLAS_RESOLUTION) => {
   return resolution === 1 ? '' : `@${resolution}x`
 }
 
-export {
-  ATLAS_RESOLUTION,
-  ATLAS_RESOLUTIONS,
-  getAtlasResolutionSuffix,
-  getGameResolution,
-}
+export {ATLAS_RESOLUTION, ATLAS_RESOLUTIONS, getAtlasResolutionSuffix, getGameResolution}

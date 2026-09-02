@@ -3,12 +3,12 @@ import {Container, FederatedPointerEvent, Graphics, Text} from 'pixi.js'
 import ButtonContainer from '../../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../../engine/Locator.ts'
 import LocalStorage from '../../../../engine/storage/LocalStorage.js'
+import type {LevelDefinition} from '../../../../gameConfig/levels/levelTypes.js'
 import {openSokobanLevelEditor} from '../../../../sokoban/editor/openSokobanLevelEditor.js'
 import {primaryFontStyle} from '../../../../styles.js'
+import type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition} from '../menuTypes.js'
 import LevelPreview from './LevelPreview.js'
 import LevelSelectButton from './LevelSelectButton.js'
-import type {LevelDefinition} from '../../../../gameConfig/levels/levelTypes.js'
-import type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition} from '../menuTypes.js'
 
 /**
  * Отображает выбор уровня локации и отладочный переход в редактор.

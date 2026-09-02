@@ -1,5 +1,5 @@
+import type {PointData} from 'pixi.js'
 import {Container} from 'pixi.js'
-import type {PointData, Sprite} from 'pixi.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'

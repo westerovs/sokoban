@@ -123,6 +123,4 @@ const TEST_DATA = {
   localData: [{...stringVersion}, {...versionNull}, {...freshVersion2}],
 }
 
-export {
-  TEST_DATA,
-}
+export {TEST_DATA}

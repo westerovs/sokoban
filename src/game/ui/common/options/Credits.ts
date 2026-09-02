@@ -1,6 +1,6 @@
 import i18next from 'i18next'
-import {Container, Text} from 'pixi.js'
 import type {TextStyleOptions} from 'pixi.js'
+import {Container, Text} from 'pixi.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import Locator from '@/game/engine/Locator.ts'
 import {GAME_NAMES} from '@/game/gameConfig/constants.js'

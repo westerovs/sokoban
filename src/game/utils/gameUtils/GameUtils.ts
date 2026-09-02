@@ -1,6 +1,6 @@
 import i18next from 'i18next'
-import {Cache, Container, Matrix, RenderTexture, Sprite, Spritesheet, Text, Texture} from 'pixi.js'
 import type {Application, ContainerChild, SpritesheetData, TextStyleOptions} from 'pixi.js'
+import {Cache, Container, Matrix, RenderTexture, Sprite, Spritesheet, Text, Texture} from 'pixi.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
@@ -398,11 +398,12 @@ const logReadableTime = (timeMs: number) => {
   }
 }
 
-const eventToggle = (bool: boolean) => ({
-  domAddRemove: bool ? 'addEventListener' : 'removeEventListener',
-  gameOnOff: bool ? 'on' : 'off',
-  gameOnceOff: bool ? 'once' : 'off',
-  gameAddRemove: bool ? 'add' : 'remove',
-}) as const
+const eventToggle = (bool: boolean) =>
+  ({
+    domAddRemove: bool ? 'addEventListener' : 'removeEventListener',
+    gameOnOff: bool ? 'on' : 'off',
+    gameOnceOff: bool ? 'once' : 'off',
+    gameAddRemove: bool ? 'add' : 'remove',
+  }) as const
 
 export {createGradientTexture, eventToggle, logReadableTime}

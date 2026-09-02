@@ -1,8 +1,8 @@
 import {gsap} from 'gsap'
-import Locator from '@/game/engine/Locator.js'
-import {GAME_STYLES} from '@/game/styles.js'
 import type {Container} from 'pixi.js'
+import Locator from '@/game/engine/Locator.js'
 import type Game from '@/game/Game.js'
+import {GAME_STYLES} from '@/game/styles.js'
 
 // Плавно показывает и скрывает слои игрового интерфейса.
 

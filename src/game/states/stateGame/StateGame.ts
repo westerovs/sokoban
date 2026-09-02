@@ -1,14 +1,14 @@
 import {gsap} from 'gsap'
+import type SoundManager from '../../engine/audio/SoundManager.js'
 import Locator from '../../engine/Locator.ts'
 import SdkManager from '../../engine/SdkManager.js'
+import type Game from '../../Game.js'
 import {GAME_STATES} from '../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
 import MagicDust from '../../ui/common/emitters/magicDust/MagicDust.js'
 import BaseState from '../BaseState.js'
 import GameView from './GameView.js'
 import StartScreen from './startScreen/StartScreen.js'
-import type Game from '../../Game.js'
-import type SoundManager from '../../engine/audio/SoundManager.js'
 
 // Управляет главным меню игры и переходом к загрузке уровня.
 

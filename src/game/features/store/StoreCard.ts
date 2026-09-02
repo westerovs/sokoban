@@ -1,6 +1,6 @@
 import i18next from 'i18next'
-import {Container} from 'pixi.js'
 import type {Text} from 'pixi.js'
+import {Container} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import {primaryFontStyle} from '@/game/styles.js'
@@ -202,11 +202,6 @@ export default class StoreCard extends Container {
   }
 }
 
-export {
-  CARDS_DATA,
-  CARD_SIZE,
-}
+export {CARD_SIZE, CARDS_DATA}
 
-export type {
-  StoreCardData,
-}
+export type {StoreCardData}

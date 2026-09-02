@@ -1,11 +1,11 @@
 import {gsap} from 'gsap'
+import type {DestroyOptions, Sprite, TextStyleOptions} from 'pixi.js'
 import {Container, NineSliceSprite, Text, Texture} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {WORLD} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
-import type {DestroyOptions, Sprite, TextStyleOptions} from 'pixi.js'
 
 // Отображает адаптивное облако речи с аватаром и анимацией появления.
 

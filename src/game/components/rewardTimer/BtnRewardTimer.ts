@@ -1,13 +1,13 @@
 import i18next from 'i18next'
-import {Sprite, Text} from 'pixi.js'
 import type {Container} from 'pixi.js'
+import {Sprite, Text} from 'pixi.js'
 import {STORAGE_KEYS} from '../../engine/storage/defaultData.js'
 import {HINT_BUTTON_NAMES} from '../../modules/hints/HintsController.js'
 import {TIMER_LABELS} from '../../ui/level/clock/Timer.js'
 import DateUtils from '../../utils/DateUtils.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
-import RewardTimer from './RewardTimer.js'
 import type {RewardTimerKey} from './RewardTimer.js'
+import RewardTimer from './RewardTimer.js'
 
 // Связывает таймер рекламной награды с визуальным состоянием кнопки.
 

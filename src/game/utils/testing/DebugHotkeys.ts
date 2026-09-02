@@ -1,9 +1,9 @@
 import Locator from '../../engine/Locator.ts'
 import {GAME_STATES} from '../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
+import type StateLevel from '../../states/stateLevel/StateLevel.js'
 import GameUtils from '../gameUtils/GameUtils.js'
 import AdminPanel from './adminPanel/AdminPanel.js'
-import type StateLevel from '../../states/stateLevel/StateLevel.js'
 
 // Обрабатывает отладочные горячие клавиши выбора облика и перехода между уровнями.
 
