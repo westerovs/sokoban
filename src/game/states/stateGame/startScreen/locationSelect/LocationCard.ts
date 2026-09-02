@@ -1,29 +1,33 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
-import {Container, Graphics, Text} from 'pixi.js'
+import {Container, Graphics, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '../../../../styles.js'
 import GameUtils from '../../../../utils/gameUtils/GameUtils.js'
+import type {LocationSelectionState} from '../menuTypes.js'
 
-const CARD_WIDTH = 250
-const CARD_HEIGHT = 350
+// Отображает карточку локации, её доступность и прогресс игрока.
+
+const CARD_WIDTH = 250 // Ширина карточки
+const CARD_HEIGHT = 350 // Высота карточки
 const CARD_BACKGROUND_ALPHA = 0.7 // Прозрачность чёрной подложки карточки
 const CARD_ART_HOVER_SCALE = 1.25 // Увеличение изображения карточки при наведении на 25%
 const CARD_ART_ZOOM_DURATION = 0.25 // Длительность плавного зума изображения в секундах
 const LOCKED_ART_TINT = 0x616161 // Затемнение изображения заблокированной карточки
 
 export default class LocationCard extends Container {
-  #background
-  #backgroundMask
-  #backgroundScale
-  #frame
-  #location
-  #lockIcon
-  #onSelect
-  #progressText
-  #status
-  #title
+  #background!: Sprite
+  #backgroundMask!: Graphics
+  #backgroundScale!: {x: number; y: number}
+  #frame!: Graphics
+  #location: LocationSelectionState
+  #lockIcon!: Sprite
+  #onSelect: (locationId: string) => void
+  #progressText!: Text
+  #status!: Graphics
+  #title!: Text
 
-  constructor(location, onSelect) {
+  // Сохраняет данные локации и создаёт интерактивную карточку.
+  constructor(location: LocationSelectionState, onSelect: (locationId: string) => void) {
     super({label: `location-card-${location.id}`})
 
     this.#location = location
@@ -32,11 +36,13 @@ export default class LocationCard extends Container {
     this.#init()
   }
 
+  // Возвращает стабильный идентификатор локации.
   get locationId() {
     return this.#location.id
   }
 
-  setState = (state) => {
+  // Обновляет доступность, прогресс и визуальное состояние карточки.
+  setState = (state: LocationSelectionState) => {
     this.#drawFrame(state)
     this.#drawStatus(state)
     this.#lockIcon.visible = !state.isUnlocked
@@ -48,6 +54,7 @@ export default class LocationCard extends Container {
     if (!state.isUnlocked) this.#resetBackgroundScale()
   }
 
+  // Создаёт все слои карточки и подписывает события.
   #init = () => {
     this.#frame = new Graphics({label: `${this.label}-frame`})
     this.addChild(this.#frame)
@@ -61,6 +68,7 @@ export default class LocationCard extends Container {
     this.on('pointerleave', this.#handlePointerLeave)
   }
 
+  // Создаёт изображение локации и маску скругления.
   #createBackground = () => {
     this.#background = GameUtils.createSprite(this.#location.cardTexture, {label: `${this.label}-art`})
     this.#background.width = CARD_WIDTH
@@ -71,13 +79,15 @@ export default class LocationCard extends Container {
     this.addChild(this.#background, this.#backgroundMask)
   }
 
+  // Создаёт заголовок и подпись прогресса.
   #createTexts = () => {
     this.#title = this.#createText(i18next.t(this.#location.titleKey), -142, 29)
     this.#progressText = this.#createText('', 143, 24)
     this.addChild(this.#title, this.#progressText)
   }
 
-  #createText = (text, y, fontSize) => {
+  // Создаёт текстовый элемент карточки.
+  #createText = (text: string, y: number, fontSize: number) => {
     const label = y < 0 ? 'title' : 'progress'
     const view = new Text({
       label: `${this.label}-${label}`,
@@ -89,7 +99,8 @@ export default class LocationCard extends Container {
     return view
   }
 
-  #drawFrame = ({isCurrent, isUnlocked}) => {
+  // Рисует рамку согласно состоянию локации.
+  #drawFrame = ({isCurrent, isUnlocked}: LocationSelectionState) => {
     const color = isCurrent ? 0xd9ff5d : isUnlocked ? 0xb99951 : 0x655f4b
     const width = isCurrent ? 6 : 4
     this.#frame
@@ -100,7 +111,8 @@ export default class LocationCard extends Container {
     this.#drawBackgroundMask(width)
   }
 
-  #drawBackgroundMask = (frameWidth) => {
+  // Перерисовывает маску изображения под толщину рамки.
+  #drawBackgroundMask = (frameWidth: number) => {
     const inset = frameWidth / 2
 
     this.#backgroundMask
@@ -109,29 +121,35 @@ export default class LocationCard extends Container {
       .fill(0xffffff)
   }
 
-  #drawStatus = ({isCompleted, isUnlocked}) => {
+  // Рисует отметку завершённой локации.
+  #drawStatus = ({isCompleted, isUnlocked}: LocationSelectionState) => {
     this.#status.clear()
     if (isUnlocked && isCompleted) this.#drawCheck()
   }
 
+  // Рисует значок завершения.
   #drawCheck = () => {
     this.#status.circle(101, 151, 24).fill({color: 0x71972c}).stroke({color: 0xe9d084, width: 4})
     this.#status.moveTo(90, 151).lineTo(99, 160).lineTo(114, 141).stroke({color: 0xffffff, width: 6})
   }
 
+  // Передаёт выбор локации контроллеру.
   #handleSelect = () => {
     this.#onSelect(this.#location.id)
   }
 
+  // Увеличивает изображение при наведении.
   #handlePointerEnter = () => {
     this.#animateBackgroundScale(CARD_ART_HOVER_SCALE)
   }
 
+  // Возвращает изображение к исходному масштабу.
   #handlePointerLeave = () => {
     this.#animateBackgroundScale(1)
   }
 
-  #animateBackgroundScale = (multiplier) => {
+  // Анимирует масштаб изображения карточки.
+  #animateBackgroundScale = (multiplier: number) => {
     gsap.to(this.#background.scale, {
       x: this.#backgroundScale.x * multiplier,
       y: this.#backgroundScale.y * multiplier,
@@ -141,6 +159,7 @@ export default class LocationCard extends Container {
     })
   }
 
+  // Немедленно восстанавливает исходный масштаб изображения.
   #resetBackgroundScale = () => {
     gsap.killTweensOf(this.#background.scale)
     this.#background.scale.set(this.#backgroundScale.x, this.#backgroundScale.y)

@@ -1,5 +1,5 @@
 import i18next from 'i18next'
-import {Container, Graphics, Text} from 'pixi.js'
+import {Container, FederatedPointerEvent, Graphics, Text} from 'pixi.js'
 import ButtonContainer from '../../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../../engine/Locator.ts'
 import LocalStorage from '../../../../engine/storage/LocalStorage.js'
@@ -7,6 +7,8 @@ import {openSokobanLevelEditor} from '../../../../sokoban/editor/openSokobanLeve
 import {primaryFontStyle} from '../../../../styles.js'
 import LevelPreview from './LevelPreview.js'
 import LevelSelectButton from './LevelSelectButton.js'
+import type {LevelDefinition} from '../../../../gameConfig/levels/levelTypes.js'
+import type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition} from '../menuTypes.js'
 
 /**
  * Отображает выбор уровня локации и отладочный переход в редактор.
@@ -21,18 +23,18 @@ const PREVIEW_HEIGHT = 390 // Высота области предпросмот
 const PREVIEW_WIDTH = 500 // Ширина области предпросмотра
 
 export default class LocationLevelSelectView extends Container {
-  #backButton
-  #levelButtons = []
-  #levelsContainer
-  #onLevelSelect
-  #playButton
-  #preview
-  #record
-  #selectedEntry
-  #title
+  #backButton!: ButtonContainer
+  #levelButtons: LevelSelectButton[] = []
+  #levelsContainer!: Container
+  #onLevelSelect: GameMenuCallbacks['onLevelSelect']
+  #playButton!: ButtonContainer
+  #preview!: LevelPreview
+  #record!: Text
+  #selectedEntry: LevelEntry | null = null
+  #title!: Text
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({onBack, onLevelSelect, onPlay}) {
+  constructor({onBack, onLevelSelect, onPlay}: Pick<GameMenuCallbacks, 'onBack' | 'onLevelSelect' | 'onPlay'>) {
     super({label: 'location-level-select-view'})
 
     this.#onLevelSelect = onLevelSelect
@@ -40,7 +42,7 @@ export default class LocationLevelSelectView extends Container {
   }
 
   // Обновляет состояние через операцию `setData`.
-  setData = (location, levels, selectedEntry) => {
+  setData = (location: LocationDefinition, levels: LevelSelectionState[], selectedEntry: LevelEntry) => {
     this.#selectedEntry = selectedEntry
     this.#title.text = i18next.t(location.titleKey)
     this.#preview.setLevel(selectedEntry.level)
@@ -50,7 +52,7 @@ export default class LocationLevelSelectView extends Container {
   }
 
   // Обновляет состояние через операцию `updateSelectedLevel`.
-  updateSelectedLevel = (levels, selectedEntry) => {
+  updateSelectedLevel = (levels: LevelSelectionState[], selectedEntry: LevelEntry) => {
     this.#selectedEntry = selectedEntry
     this.#preview.setLevel(selectedEntry.level)
     this.#setRecord(selectedEntry.level)
@@ -70,7 +72,7 @@ export default class LocationLevelSelectView extends Container {
   }
 
   // Инициализирует внутреннее состояние и зависимости.
-  #init = (onBack, onPlay) => {
+  #init = (onBack: GameMenuCallbacks['onBack'], onPlay: GameMenuCallbacks['onPlay']) => {
     this.#createHeader()
     this.#preview = new LevelPreview()
     this.#preview.eventMode = 'static'
@@ -111,7 +113,7 @@ export default class LocationLevelSelectView extends Container {
   }
 
   // Создаёт данные или представление для операции `createBackButton`.
-  #createBackButton = (onBack) => {
+  #createBackButton = (onBack: GameMenuCallbacks['onBack']) => {
     const button = new ButtonContainer({
       props: {name: 'btnLocationBack'},
       spriteKeys: ['btn-ui-1', {key: 'icon-skin-back', scale: 0.8}],
@@ -122,7 +124,7 @@ export default class LocationLevelSelectView extends Container {
   }
 
   // Создаёт данные или представление для операции `createPlayButton`.
-  #createPlayButton = (onPlay) => {
+  #createPlayButton = (onPlay: GameMenuCallbacks['onPlay']) => {
     const button = new ButtonContainer({
       props: {name: 'btnPlaySelectedLevel'},
       spriteKeys: ['btn-primary'],
@@ -132,12 +134,12 @@ export default class LocationLevelSelectView extends Container {
       text: i18next.t('levelSelect.play'),
       style: {...primaryFontStyle, fill: 0x303b12, fontSize: 42},
     })
-    button.on('pointertap', () => onPlay(this.#selectedEntry.level.id))
+    button.on('pointertap', () => onPlay(this.#selectedEntry!.level.id))
     return button
   }
 
   // Выполняет отдельную операцию `replaceLevelButtons`.
-  #replaceLevelButtons = (levels, selectedLevelId) => {
+  #replaceLevelButtons = (levels: LevelSelectionState[], selectedLevelId: string) => {
     this.#levelButtons.forEach((button) => button.destroy({children: true}))
     this.#levelButtons = levels.map((level) => {
       const button = new LevelSelectButton(level, this.#onLevelSelect)
@@ -174,12 +176,12 @@ export default class LocationLevelSelectView extends Container {
   }
 
   // Обновляет состояние через операцию `setRecord`.
-  #setRecord = (level) => {
+  #setRecord = (level: LevelDefinition) => {
     this.#record.text = level.pushRecord ? i18next.t('sokoban.record', {record: level.pushRecord}) : ''
   }
 
   // Выполняет отдельную операцию `openLevelEditor`.
-  #openLevelEditor = (event) => {
+  #openLevelEditor = (event: FederatedPointerEvent) => {
     if (!LocalStorage.isDebug || !event.ctrlKey || !this.#selectedEntry) return
 
     event.stopPropagation()

@@ -1,18 +1,22 @@
-import {Container} from 'pixi.js'
+import {Container, Sprite} from 'pixi.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
 
-export default class GameView extends Container {
-  #background
-  #backgroundName
+// Отображает общий фон главного игрового состояния.
 
+export default class GameView extends Container {
+  #background: Sprite | null = null
+  #backgroundName: string | null = null
+  refs: Record<string, any> = {}
+
+  // Создаёт контейнер главного экрана и его начальный фон.
   constructor() {
     super({label: 'game-view', sortableChildren: true})
 
-    this.refs = {}
     this.#init()
   }
 
-  setBackground = (textureName) => {
+  // Заменяет фоновую текстуру, если она действительно изменилась.
+  setBackground = (textureName: string) => {
     if (textureName === this.#backgroundName) return
 
     this.#background?.destroy()
@@ -25,10 +29,12 @@ export default class GameView extends Container {
     this.addChildAt(this.#background, 0)
   }
 
+  // Создаёт начальное содержимое представления.
   #init = () => {
     this.#createBackground()
   }
 
+  // Устанавливает фон стартового экрана.
   #createBackground() {
     this.setBackground('startScreen')
   }
