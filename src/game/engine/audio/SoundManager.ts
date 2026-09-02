@@ -7,20 +7,60 @@ import Locator from '../Locator.ts'
 import SdkManager from '../SdkManager.js'
 import {STORAGE_KEYS} from '../storage/defaultData.js'
 import {antiMuteIOS} from './antiMuteIOS.js'
+import type {AudioAsset, PreloadAudioList, SoundList} from './audioTypes.js'
 import MusicManager from './MusicManager.js'
 import {createPreloadAudioList} from './preloadAudioList.ts'
+import type Game from '../../Game.js'
+
+// Загружает, воспроизводит и группирует музыку, окружение и звуковые эффекты.
+
+type HowlerWithSounds = typeof Howler & {
+  _howls?: Howl[]
+}
+
+type HowlWithBuffers = Howl & {
+  _sounds?: Array<{
+    _node?: {
+      bufferSource?: {
+        buffer?: AudioBuffer
+      }
+    }
+  }>
+}
+
+type PlayOptions = {
+  loop?: boolean
+  volume?: number
+  isMusic?: boolean
+}
+
+type InternalPlayOptions = PlayOptions & {
+  stopMusic?: boolean
+  volumeMultiplier?: number
+}
+
+type AmbientOptions = {
+  loop?: boolean
+  volume?: number
+}
+
+type VolumeSetting = typeof STORAGE_KEYS.option_isPlayMusic | typeof STORAGE_KEYS.option_isPlaySFX
+
+// Создаёт совместимую с прежним кодом ассоциативную коллекцию звуков.
+const createSoundList = (): SoundList => [] as unknown as SoundList
 
 export default class SoundManager {
-  #game
-  #preloadAudioList
+  static instance: SoundManager | undefined
+  #game!: Game
+  #preloadAudioList!: PreloadAudioList
   #musicManager = new MusicManager(this)
   #musicVolume = 1
   #sfxVolume = 1
   #isInit = false
-  #musicList = []
-  #ambienceList = []
-  #sfxList = []
-  #levelMusicAliases = []
+  #musicList = createSoundList()
+  #ambienceList = createSoundList()
+  #sfxList = createSoundList()
+  #levelMusicAliases: string[] = []
 
   get preloadAudioList() {
     return this.#preloadAudioList
@@ -31,14 +71,14 @@ export default class SoundManager {
   }
 
   getAudioDebugStats = () => {
-    const allSounds = [...new Set(Howler._howls ?? [])].filter((sound) => sound?.state?.() !== 'unloaded')
+    const allSounds = [...new Set((Howler as HowlerWithSounds)._howls ?? [])].filter((sound) => sound.state() !== 'unloaded')
     const musicSounds = [
       ...new Set(
         Object.entries(this.#musicList)
           .filter(([alias]) => alias !== 'silence')
           .map(([, sound]) => sound),
       ),
-    ].filter((sound) => sound?.state?.() !== 'unloaded')
+    ].filter((sound) => sound.state() !== 'unloaded')
 
     return {
       totalFiles: allSounds.length,
@@ -48,7 +88,8 @@ export default class SoundManager {
     }
   }
 
-  constructor(game) {
+  // Сохраняет игровую шину событий и поддерживает один экземпляр аудиосистемы.
+  constructor(game: Game) {
     if (typeof SoundManager.instance === 'object') {
       return SoundManager.instance
     }
@@ -59,13 +100,15 @@ export default class SoundManager {
     return SoundManager.instance
   }
 
-  #calcDecodedAudioBytes = (sounds) => {
+  // Оценивает объём декодированных аудиобуферов.
+  #calcDecodedAudioBytes = (sounds: Howl[]) => {
     const sampleRate = Howler.ctx?.sampleRate ?? 44100
     const bytesPerFloatSample = 4
     const fallbackChannels = 2
 
     return sounds.reduce((totalBytes, sound) => {
-      const audioBuffer = sound?._sounds?.map((item) => item?._node?.bufferSource?.buffer).find((buffer) => buffer?.length > 1)
+      const internalSound = sound as HowlWithBuffers
+      const audioBuffer = internalSound._sounds?.map((item) => item._node?.bufferSource?.buffer).find((buffer) => buffer && buffer.length > 1)
 
       if (audioBuffer) {
         return totalBytes + audioBuffer.length * audioBuffer.numberOfChannels * bytesPerFloatSample
@@ -86,7 +129,7 @@ export default class SoundManager {
     document.addEventListener('click', this.#onFirstClick, {once: true})
   }
 
-  clearSoundList = (soundList) => {
+  clearSoundList = (soundList: SoundList) => {
     Object.entries(soundList).forEach(([key, sound]) => {
       sound?.unload?.()
       delete soundList[key]
@@ -143,7 +186,7 @@ export default class SoundManager {
     this.#musicManager.stopLevelMusic()
   }
 
-  preloadLevelMusic = async (trackAlias) => {
+  preloadLevelMusic = async (trackAlias: string) => {
     this.unloadLevelMusic()
 
     const basePath = ASSETS_URL.local
@@ -187,9 +230,9 @@ export default class SoundManager {
     }
   }
 
-  preload = (array, assets, preload = true, callBack) => {
+  preload = (array: SoundList, assets: AudioAsset[], preload = true, callBack?: () => void) => {
     const promises = assets.map((audio) => {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         try {
           if (array[audio.alias]) {
             resolve() // Если звук уже существует, сразу разрешаем промис
@@ -207,13 +250,13 @@ export default class SoundManager {
               Logger.log(MODULES.SOUND_MANAGER, `sound is loaded:  ${audio.alias}`)
               resolve()
             } catch (e) {
-              YaMetrika.preloadError(ERROR_TYPES?.SOUND_PRELOAD?.loading, e)
+              YaMetrika.preloadError(ERROR_TYPES?.SOUND_PRELOAD?.preload, e)
               resolve()
             }
           })
 
           // Обработка ошибок при загрузке
-          sound.once('loaderror', (id, err) => {
+          sound.once('loaderror', (_id, err) => {
             // hardcode проверка для теста
             if (audio.alias === 'm_start-screen') {
               const backupUrl = ''
@@ -229,7 +272,7 @@ export default class SoundManager {
                 resolve()
               })
 
-              fallbackSound.once('loaderror', (id2, err2) => {
+              fallbackSound.once('loaderror', (_id2, err2) => {
                 console.log(`[fallback] Failed to load backup for ${audio.alias}:`, err2)
                 YaMetrika.soundLoadErr(audio, err2)
                 resolve()
@@ -242,7 +285,7 @@ export default class SoundManager {
           })
         } catch (err) {
           console.error('[preload] Error during sound setup', err)
-          YaMetrika.preloadError(ERROR_TYPES?.SOUND_PRELOAD?.loading, err)
+          YaMetrika.preloadError(ERROR_TYPES?.SOUND_PRELOAD?.preload, err)
           resolve() // Пропускаем ошибку
         }
       })
@@ -255,7 +298,7 @@ export default class SoundManager {
   }
 
   // Мгновенно загружает и воспроизводит амбиент с громкостью музыкальной группы
-  loadAndPlayAmbient = (keySound, src, {loop = true, volume = 1.0} = {}) => {
+  loadAndPlayAmbient = (keySound: string, src: string, {loop = true, volume = 1.0}: AmbientOptions = {}) => {
     if (this.#ambienceList[keySound]) {
       this.#playSound(this.#ambienceList[keySound], {
         loop,
@@ -276,13 +319,13 @@ export default class SoundManager {
       })
     })
 
-    sound.once('loaderror', (id, err) => {
+    sound.once('loaderror', (_id, err) => {
       Logger.warn(MODULES.SOUND_MANAGER, `[loadAndPlayAmbient] Load error: ${keySound}`, err)
     })
   }
 
   // ----------------- play / stop -----------------
-  async play(keySound, {loop = false, volume = 1.0} = {}) {
+  async play(keySound: string, {loop = false, volume = 1.0}: PlayOptions = {}) {
     try {
       if (!this.#isInit) return Promise.resolve(false) // Возвращаем resolved промис, если звук не инициализирован
 
@@ -309,8 +352,8 @@ export default class SoundManager {
         }
 
         // Возвращаем промис, который разрешится по завершению звука
-        return new Promise((resolve) => {
-          sound.once('end', resolve)
+        return new Promise<void>((resolve) => {
+          sound.once('end', () => resolve())
         })
       } else {
         console.log('No found sound', keySound)
@@ -321,7 +364,7 @@ export default class SoundManager {
     }
   }
 
-  #playSound(sound, {loop = false, volume = 1.0, stopMusic = false, volumeMultiplier = this.#sfxVolume}) {
+  #playSound(sound: Howl, {loop = false, volume = 1.0, stopMusic = false, volumeMultiplier = this.#sfxVolume}: InternalPlayOptions) {
     if (stopMusic) {
       Object.values(this.#musicList).forEach((music) => music.stop())
     }
@@ -331,11 +374,11 @@ export default class SoundManager {
     sound.play()
   }
 
-  #getSound(keySound) {
+  #getSound(keySound: string) {
     return this.#musicList[keySound] || this.#ambienceList[keySound] || this.#sfxList[keySound]
   }
 
-  stop(keySound, fadeDuration = 0) {
+  stop(keySound: string, fadeDuration = 0) {
     const sound = this.#getSound(keySound)
     if (sound) {
       if (sound.playing()) {
@@ -354,23 +397,23 @@ export default class SoundManager {
     })
   }
 
-  isPlaying(keySound) {
+  isPlaying(keySound: string) {
     const sound = this.#getSound(keySound)
     return sound ? sound.playing() : false
   }
 
   // ------------- mute / unmute / volume -------------
-  #mute = (bool) => {
+  #mute = (bool: boolean) => {
     Howler.mute(bool)
   }
 
-  #setVolume = (type, isMute) => {
+  #setVolume = (type: VolumeSetting, isMute: boolean) => {
     const volume = isMute ? 1 : 0
 
     if (type === STORAGE_KEYS.option_isPlayMusic) this.#musicVolume = volume
     if (type === STORAGE_KEYS.option_isPlaySFX) this.#sfxVolume = volume
 
-    const soundMap = {
+    const soundMap: Record<VolumeSetting, SoundList[]> = {
       [STORAGE_KEYS.option_isPlaySFX]: [this.#sfxList],
       [STORAGE_KEYS.option_isPlayMusic]: [this.#musicList, this.#ambienceList],
     }

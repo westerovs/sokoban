@@ -4,18 +4,21 @@ import LevelConfig from '../../gameConfig/levels/LevelConfig.js'
 import {Logger, MODULES} from '../../utils/Logger.js'
 import Locator from '../Locator.ts'
 import {STORAGE_KEYS} from '../storage/defaultData.js'
+import type Game from '../../Game.js'
+import type SoundManager from './SoundManager.js'
 
 /*
  * Отвечает за запуск и приостановку музыки на конкретном уровне
  * */
 
 export default class MusicManager {
-  #game
-  #soundManager
+  #game: Game
+  #soundManager: SoundManager
   #levelMusicRequestId = 0
-  #currentLevelTrack = null
+  #currentLevelTrack: string | null = null
 
-  constructor(soundManager) {
+  // Сохраняет аудиосистему и игровую шину событий.
+  constructor(soundManager: SoundManager) {
     this.#game = Locator.game
     this.#soundManager = soundManager
   }
@@ -26,23 +29,27 @@ export default class MusicManager {
     this.#loadStartMusic()
   }
 
+  // Подключает события смены состояния и громкости.
   #setEvents = () => {
     this.#game.on(GAME_EVENTS.checkoutState, this.#play)
     this.#game.once(GAME_EVENTS.firstClick, this.#onFirstClick)
-    this.#game.on(GAME_EVENTS.Options.toggleAudioVolume, (type, isMute) => {
+    this.#game.on(GAME_EVENTS.Options.toggleAudioVolume, (type: string, isMute: boolean) => {
       if (type === STORAGE_KEYS.option_isPlayMusic && !isMute) this.#play()
     })
   }
 
+  // Запускает предварительную загрузку музыки главного экрана.
   #loadStartMusic() {
     const {START_MUSIC} = this.#soundManager.preloadAudioList
     this.#soundManager.preload(this.#soundManager.musicList, START_MUSIC)
   }
 
+  // Запускает музыку после первого пользовательского действия.
   #onFirstClick = () => {
     this.#play()
   }
 
+  // Загружает и запускает музыку текущего уровня.
   startLevelMusic = async () => {
     this.stopLevelMusic()
 
@@ -59,12 +66,14 @@ export default class MusicManager {
     this.#play()
   }
 
+  // Останавливает и выгружает музыку уровня.
   stopLevelMusic = () => {
     this.#levelMusicRequestId++
     this.#currentLevelTrack = null
     this.#soundManager.unloadLevelMusic()
   }
 
+  // Возвращает имя музыкального трека текущего уровня.
   #getLevelTrackName = () => {
     const levelIndex = Locator.storage.playerData.levelIndex
     const {music: trackName} = LevelConfig.getGameLevelData(levelIndex)
@@ -77,13 +86,14 @@ export default class MusicManager {
     return trackName
   }
 
+  // Выбирает и запускает музыку активного состояния игры.
   #play = () => {
     const stateName = this.#game.currentStateName
     if (!stateName) return
 
     Logger.log(MODULES.SOUND_MANAGER, `[MusicManager state]: ${stateName}`)
 
-    const musicMap = {
+    const musicMap: Record<string, string | null> = {
       [GAME_STATES.gameState]: 'm_start-screen',
       [GAME_STATES.levelState]: this.#currentLevelTrack,
     }
@@ -103,7 +113,7 @@ export default class MusicManager {
         sound.on('load', () => this.#soundManager.play(musicName, {loop: true, isMusic: true}))
       }
     } catch (e) {
-      console.log('MusicManager play', e)
+      console.error('[MusicManager]: playback failed', e)
     }
   }
 }
