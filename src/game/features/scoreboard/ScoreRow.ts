@@ -1,40 +1,58 @@
 import {Container, Sprite, Text, Texture} from 'pixi.js'
+import type {Graphics} from 'pixi.js'
 import {FONT_COLORS, primaryFontStyle} from '@/game/styles.js'
 import {createRect} from '@/game/utils/commonUtils.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+import type ScoreboardView from './ScoreboardView.js'
 
-export const ROW_SIZE = {
-  rowHeight: 80,
-  avatarSize: 80,
-  offsetBetweenRows: 6,
+// Отображает одну строку игрока в таблице лидеров.
+
+const ROW_SIZE = {
+  rowHeight: 80, // Высота строки игрока.
+  avatarSize: 80, // Размер области аватара.
+  offsetBetweenRows: 6, // Вертикальный промежуток между строками.
 }
 
 export default class ScoreRow extends Container {
   // params
-  #view
-  #id
-  #title
-  #rank
-  #score
+  #view: ScoreboardView
+  #id: string
+  #title: string
+  #rank: number
+  #score: number
   // view
-  #rowWrapper
-  #avatarContainer
-  #textUserName
-  #textScore
-  #textRank
+  #rowWrapper!: Graphics
+  #avatarContainer!: Container
+  #textUserName!: Text
+  #textScore!: Text
+  #textRank!: Text
   // other
-  #viewWidth
-  #viewPadding
+  #viewWidth: number
+  #viewPadding: number
   #height = 80
-  #rowWidth
+  #rowWidth: number
   #baseTextStyle = {
     ...primaryFontStyle,
     fill: 0xffffff,
     fontSize: 26,
   }
 
-  constructor({view, id, title, rank, score = 0} = {}) {
-    super()
+  // Сохраняет данные игрока и создаёт визуальную строку.
+  constructor({
+    view,
+    id,
+    title,
+    rank,
+    score = 0,
+  }: {
+    view: ScoreboardView
+    id: string
+    title: string
+    rank: number
+    score?: number
+    y?: number
+  }) {
+    super({label: `score-row-${id}`})
 
     this.#view = view
     this.#id = id
@@ -49,25 +67,30 @@ export default class ScoreRow extends Container {
     this.#create()
   }
 
+  // Возвращает идентификатор игрока.
   get id() {
     return this.#id
   }
 
+  // Возвращает контейнер аватара.
   get avatarContainer() {
     return this.#avatarContainer
   }
 
+  // Возвращает текст имени игрока.
   get textUserName() {
     return this.#textUserName
   }
 
+  // Возвращает текст места игрока.
   get textRank() {
     return this.#textRank
   }
 
+  // Создаёт резервный аватар.
   createFallBackTexture = () => {
     const fallbackTexture = Texture.from('avatar-user-default') // Заглушка (белая текстура)
-    const avatar = new Sprite(fallbackTexture)
+    const avatar = new Sprite({texture: fallbackTexture, label: 'scoreboard-fallback-avatar'})
     avatar.anchor.set(0.5)
     avatar.width = ROW_SIZE.avatarSize - 10
     avatar.height = ROW_SIZE.avatarSize - 10
@@ -75,7 +98,8 @@ export default class ScoreRow extends Container {
     this.#avatarContainer.addChild(avatar)
   }
 
-  createMedal = (row, textureKey) => {
+  // Добавляет строке медаль за место в пятёрке лидеров.
+  createMedal = (row: ScoreRow, textureKey: string) => {
     const textRank = row.textRank
     textRank.visible = false
 
@@ -87,12 +111,13 @@ export default class ScoreRow extends Container {
     row.addChild(medal)
   }
 
+  // Окрашивает фон строки.
   fillRow = (color = FONT_COLORS.accentFont) => {
     this.#rowWrapper.tint = color
   }
 
   // вычисляет свободное расстояние между rank и score
-  trimUserNameByAvailableWidth = (text, gap = 14) => {
+  trimUserNameByAvailableWidth = (text: string, gap = 14) => {
     const scoreLeftX = this.#textScore.x - this.#textScore.width
     const maxWidth = Math.max(0, scoreLeftX - this.#textUserName.x - gap)
 
@@ -100,7 +125,7 @@ export default class ScoreRow extends Container {
   }
 
   // если это лидеры после 5-го, то уменьшает размер их rank + корректирует отступ
-  changeFontSizeAfterTop = (row, i) => {
+  changeFontSizeAfterTop = (row: ScoreRow, i: number) => {
     if (i >= 5) {
       const textRank = row.textRank
       textRank.scale.set(0.7)
@@ -110,6 +135,7 @@ export default class ScoreRow extends Container {
   }
 
   // --------------- create ---------------
+  // Создаёт все визуальные элементы строки.
   #create = () => {
     this.#createRowWrapper()
     this.#createAvatarContainer()
@@ -119,6 +145,7 @@ export default class ScoreRow extends Container {
     this.#createIconCup()
   }
 
+  // Создаёт фоновую подложку строки.
   #createRowWrapper = () => {
     this.#rowWrapper = createRect({
       w: this.#rowWidth,
@@ -129,8 +156,9 @@ export default class ScoreRow extends Container {
     this.addChild(this.#rowWrapper)
   }
 
+  // Создаёт контейнер и подложку аватара.
   #createAvatarContainer = () => {
-    const avatarContainer = new Container()
+    const avatarContainer = new Container({label: 'scoreboard-avatar-container'})
     this.#avatarContainer = avatarContainer
     avatarContainer.x = -(this.#rowWidth / 2) + ROW_SIZE.avatarSize / 2
 
@@ -145,8 +173,9 @@ export default class ScoreRow extends Container {
     this.addChild(avatarContainer)
   }
 
+  // Создаёт текст места игрока.
   #createTextRank = () => {
-    const textRank = new Text({text: this.#rank, style: {...this.#baseTextStyle}})
+    const textRank = new Text({label: 'scoreboard-rank', text: this.#rank, style: {...this.#baseTextStyle}})
     this.#textRank = textRank
     textRank.anchor.set(0, 0.5)
     textRank.x = -(this.#rowWidth / 2) + ROW_SIZE.avatarSize + 10
@@ -154,21 +183,23 @@ export default class ScoreRow extends Container {
     this.addChild(textRank)
   }
 
+  // Создаёт текст имени игрока.
   #createTextUserName = () => {
     const textUserName = new Text({
+      label: 'userName',
       text: this.#title,
       style: {...this.#baseTextStyle, fill: FONT_COLORS.secondFont},
     })
     this.#textUserName = textUserName
-    textUserName.label = 'userName'
     textUserName.anchor.set(0, 0.5)
     textUserName.x = this.#textRank.x + this.#textRank.width + 10
 
     this.addChild(textUserName)
   }
 
+  // Создаёт текст результата игрока.
   #createTextScore = () => {
-    const textScore = new Text({text: this.#score, style: {...this.#baseTextStyle}})
+    const textScore = new Text({label: 'scoreboard-score', text: this.#score, style: {...this.#baseTextStyle}})
     this.#textScore = textScore
     textScore.anchor.set(1, 0.5)
     textScore.x = this.#rowWidth / 2 - ROW_SIZE.avatarSize + 10
@@ -176,6 +207,7 @@ export default class ScoreRow extends Container {
     this.addChild(textScore)
   }
 
+  // Создаёт иконку кубка рядом с результатом.
   #createIconCup = () => {
     const iconCup = GameUtils.createSprite('icon-cup')
     iconCup.x = this.#viewWidth / 2 - iconCup.width - this.#viewPadding
@@ -183,7 +215,8 @@ export default class ScoreRow extends Container {
     this.addChild(iconCup)
   }
 
-  #trimTextByWidth = (textField, text, maxWidth = 300, ellipsis = '...') => {
+  // Обрезает текст двоичным поиском до доступной ширины.
+  #trimTextByWidth = (textField: Text, text: string, maxWidth = 300, ellipsis = '...') => {
     textField.text = text
 
     if (textField.width <= maxWidth) return
@@ -208,4 +241,8 @@ export default class ScoreRow extends Container {
 
     textField.text = result
   }
+}
+
+export {
+  ROW_SIZE,
 }
