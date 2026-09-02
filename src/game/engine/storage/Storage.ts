@@ -8,25 +8,33 @@ import OfflineBadge from '@/game/utils/gameUtils/OfflineBadge.js'
 import {Logger} from '@/game/utils/Logger.js'
 import MathTools from '@/game/utils/MathTools.js'
 import {DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS} from './defaultData.js'
+import type {PlayerData} from './defaultData.js'
 import GameSettings from './GameSettings.js'
 import LocalStorage from './LocalStorage.js'
 import {createProfileProxy, getMaxFreshData, getMaxUserLevelData, parseJsonKey, stringifyJsonKey} from './utils/utils.js'
+import type {PlayerSave} from './utils/utils.js'
 import Validation from './utils/Validation.js'
+import type Game from '../../Game.js'
 
 /**
  * Загружает, изменяет и сохраняет профиль игрока в локальном и платформенном хранилищах.
  */
 
+type HintKey = 'hintCompass' | 'hintDarts' | 'hints'
+type PurchasableCounterKey = HintKey | 'coins'
+
 export default class Storage {
-  #game
+  static instance: Storage | undefined
+  #game!: Game
   #gameSettings = new GameSettings(this)
   #localStorage = new LocalStorage()
-  #rawData = {}
-  #playerData
+  #rawData: Record<string, unknown> = {}
+  #playerData!: PlayerData
   #isDebug = false
   #isReadOnly = false
 
-  constructor(game) {
+  // Сохраняет игровую шину событий и поддерживает единственный экземпляр хранилища.
+  constructor(game: Game) {
     if (typeof Storage.instance === 'object') {
       return Storage.instance
     }
@@ -74,7 +82,7 @@ export default class Storage {
   }
 
   // Сохраняет текущее состояние профиля во все доступные хранилища.
-  save = (force) => {
+  save = (force?: boolean) => {
     // В режиме черновика профиль меняется только в памяти: тестовый прогресс не попадает в постоянные хранилища.
     if (this.#isReadOnly) return
 
@@ -97,7 +105,7 @@ export default class Storage {
     this.#localStorage.save(this.#rawData)
 
     if (!SdkManager.isPlatform(PLATFORM_ID.base)) {
-      SdkManager.adapter.storage.set(this.#rawData, force).catch((err) => console.error('[save]', err))
+      SdkManager.adapter.storage.set(this.#rawData, force).catch((err: unknown) => console.error('[Storage]: platform save failed', err))
     }
   }
 
@@ -106,7 +114,7 @@ export default class Storage {
   }
 
   // todo добавляет не только хинты, а все товары из магазина и монетки
-  addHints = (id, amount, save = true) => {
+  addHints = (id: PurchasableCounterKey, amount: number, save = true) => {
     if (!id) return
     if (!MathTools.isNumber(amount)) {
       console.error(`[addHints] id ${id} not a number: ${amount}`)
@@ -133,7 +141,7 @@ export default class Storage {
     if (save) this.save(true)
   }
 
-  addCoins = (amount) => {
+  addCoins = (amount: number) => {
     if (!MathTools.isNumber(amount)) {
       console.error(`[addCoins] id not a number: ${amount}`)
       return
@@ -144,7 +152,7 @@ export default class Storage {
   }
 
   // todo проверка на меньше 0, т.к текущая не гарантирует уход в минус, если списание большое
-  spendCoins = (amount, save = true) => {
+  spendCoins = (amount: number, save = true) => {
     if (!MathTools.isNumber(amount)) {
       console.error(`[spendCoins] id not a number: ${amount}`)
       return
@@ -158,7 +166,7 @@ export default class Storage {
     if (save) this.save(true)
   }
 
-  spendHints = (hintName) => {
+  spendHints = (hintName: HintKey) => {
     if (this.#playerData[hintName] <= 0) return
 
     YaMetrika.useHint(this.#playerData, hintName)
@@ -179,7 +187,7 @@ export default class Storage {
     }
 
     this.#playerData = {...DEFAULT_DATA_VALUES}
-    SdkManager.leaderboard.setScore(this.#playerData.userLevel).catch((e) => {
+    SdkManager.leaderboard.setScore(this.#playerData.userLevel).catch((e: unknown) => {
       console.error('[leaderboard.setScore]', e)
     })
 
@@ -195,7 +203,7 @@ export default class Storage {
     // В режиме черновика новый рекорд остаётся в памяти и не отправляется в таблицу лидеров.
     if (this.#isReadOnly) return
 
-    SdkManager.leaderboard.setScore(this.#playerData.userLevel).catch((e) => {
+    SdkManager.leaderboard.setScore(this.#playerData.userLevel).catch((e: unknown) => {
       console.error('[leaderboard.setScore]', e)
     })
   }
@@ -204,7 +212,7 @@ export default class Storage {
   #loadSaves = async () => {
     const [serverData, localData] = await Promise.all([SdkManager.getData(), this.#localStorage.getData()])
 
-    const saves = []
+    const saves: PlayerSave[] = []
     if (Array.isArray(serverData)) saves.push(...serverData.flat(1))
     if (Array.isArray(localData)) saves.push(...localData.flat(1))
 
@@ -213,7 +221,7 @@ export default class Storage {
     return saves
   }
 
-  #selectFreshestData = (saves) => {
+  #selectFreshestData = (saves: PlayerSave[]) => {
     const freshestData = getMaxFreshData(saves)
 
     if (freshestData === null) return getMaxUserLevelData(saves)
@@ -221,7 +229,7 @@ export default class Storage {
     return freshestData
   }
 
-  #preparePlayerData = (data) => {
+  #preparePlayerData = (data: PlayerSave | null) => {
     this.#handleSpecialRulesIfFirstInit(data)
 
     const validatedData = Validation.validate(data)
@@ -233,7 +241,7 @@ export default class Storage {
     return validatedData
   }
 
-  #setProxyData = (freshestData) => {
+  #setProxyData = (freshestData: PlayerData) => {
     freshestData.version = PACKAGE_VERSION
     freshestData.playerId = SdkManager.getPlayerId()
     this.#rawData = freshestData
@@ -242,7 +250,7 @@ export default class Storage {
     Logger.log('[LoadSaveManager.setProxyData]', freshestData)
   }
 
-  #handleSpecialRulesIfFirstInit = (data) => {
+  #handleSpecialRulesIfFirstInit = (data: PlayerSave | null) => {
     if (!data) return
 
     if (data.option_zoom === null || data.option_zoom === undefined) {

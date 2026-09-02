@@ -1,5 +1,7 @@
 /* eslint-disable */
 
+// Содержит тестовые варианты старых и повреждённых профилей игрока.
+
 const versionNull = {
   version: null,
   userLevel: null,
@@ -116,7 +118,11 @@ const stringVersion = {
   savedAt: '2026-06-23T02:15:12.753Z',
 }
 
-export const TEST_DATA = {
+const TEST_DATA = {
   serverData: [null, {...versionUndefined}],
   localData: [{...stringVersion}, {...versionNull}, {...freshVersion2}],
+}
+
+export {
+  TEST_DATA,
 }

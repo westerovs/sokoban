@@ -1,7 +1,11 @@
 import {DEFAULT_DATA, DEFAULT_DATA_VALUES} from '../defaultData.js'
+import type {DataType, PlayerData} from '../defaultData.js'
 import {parseJSON} from './utils.js'
 
-const formatDataTo = (type, value) => {
+// Проверяет входные данные профиля и приводит их к актуальной схеме.
+
+// Приводит значение профиля к типу из схемы.
+const formatDataTo = (type: DataType, value: unknown): unknown => {
   if (type === 'number') return Number(value) || 0
   if (type === 'string') return String(value) || ''
 
@@ -35,28 +39,31 @@ const formatDataTo = (type, value) => {
 }
 
 export default class Validation {
-  static validate = (data) => {
+  // Объединяет входной профиль со значениями по умолчанию.
+  static validate = (data: unknown): PlayerData => {
     if (!data || typeof data !== 'object') return {...DEFAULT_DATA_VALUES}
 
-    const merged = {}
+    const source = data as Record<string, unknown>
+    const merged: Record<string, unknown> = {}
 
     for (const [key, dataValue] of Object.entries(DEFAULT_DATA)) {
-      const incoming = data[key]
+      const incoming = source[key]
 
       if (incoming === undefined || incoming === null) {
-        merged[key] = DEFAULT_DATA[key].value
+        merged[key] = dataValue.value
         continue
       }
 
       merged[key] = formatDataTo(dataValue.type, incoming)
     }
 
-    Validation.checkDeprecatedKeys(data)
+    Validation.checkDeprecatedKeys(source)
 
-    return merged
+    return merged as PlayerData
   }
 
-  static checkDeprecatedKeys = (data) => {
+  // Сообщает о полях, отсутствующих в актуальной схеме.
+  static checkDeprecatedKeys = (data: Record<string, unknown>) => {
     const unknownKeys = Object.keys(data).filter((key) => !(key in DEFAULT_DATA))
 
     if (unknownKeys.length) {
