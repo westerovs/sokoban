@@ -6,7 +6,7 @@ import {getSokobanTileCatalog} from './getSokobanTileCatalog.mjs'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(scriptDirectory, '..', '..')
-const outputPath = path.resolve(projectRoot, 'src', 'game', 'generatedAssets', 'sokobanTileCatalog.js')
+const outputPath = path.resolve(projectRoot, 'src', 'game', 'generatedAssets', 'sokobanTileCatalog.ts')
 
 const createSource = (catalog) => {
   return `/** Автоматически созданный каталог тайлов Sokoban. Не редактировать вручную. */
@@ -30,7 +30,7 @@ const expandExportBlock = (source) => {
 const generateSokobanTileCatalog = async () => {
   const catalog = getSokobanTileCatalog(projectRoot)
   const prettierConfig = await prettier.resolveConfig(outputPath)
-  const formattedSource = await prettier.format(createSource(catalog), {...prettierConfig, parser: 'babel'})
+  const formattedSource = await prettier.format(createSource(catalog), {...prettierConfig, parser: 'typescript'})
   const source = expandExportBlock(formattedSource)
 
   fs.mkdirSync(path.dirname(outputPath), {recursive: true})

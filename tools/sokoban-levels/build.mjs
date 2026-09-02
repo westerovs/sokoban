@@ -22,7 +22,7 @@ const appearanceSourceDirectory = path.resolve(levelsDirectory, 'appearance')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
 const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels')
 const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
-const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.js')
+const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.ts')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
 const appearanceRoles = Object.freeze(['wall', 'floor', 'box', 'target'])
@@ -504,7 +504,7 @@ const writeLocationFiles = async (locations, prettierConfig) => {
 
 // Записывает данные через операцию `writeGameIndex`.
 const writeGameIndex = async (locations, prettierConfig) => {
-  const formattedContent = await prettier.format(createGameIndexSource(locations), {...prettierConfig, parser: 'babel'})
+  const formattedContent = await prettier.format(createGameIndexSource(locations), {...prettierConfig, parser: 'typescript'})
   const content = formattedContent.replace('export {levels}', 'export {\n  levels,\n}')
   writeOutput(gameIndexOutputPath, content)
 }

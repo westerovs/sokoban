@@ -7,7 +7,7 @@ const rootDir = path.resolve(__dirname, '../..')
 
 const AUDIO_DIR = path.resolve(rootDir, 'public/assets/audio')
 const SFX_DIR = path.resolve(AUDIO_DIR, 'sfx')
-const OUTPUT_FILE = path.resolve(rootDir, 'src/game/generatedAssets/soundList.js')
+const OUTPUT_FILE = path.resolve(rootDir, 'src/game/generatedAssets/soundList.ts')
 const AUDIO_EXTENSIONS = ['.mp3', '.ogg']
 
 // проверяет, что файл является аудио
@@ -41,7 +41,7 @@ const createSoundListContent = ({sfxFiles}) => {
   return `// АВТОГЕНЕРИРУЕМЫЙ ФАЙЛ. НЕ РЕДАКТИРОВАТЬ
 const SFX_FILES = ${JSON.stringify(sfxFiles, null, 2)}
 
-const toAlias = fileName => {
+const toAlias = (fileName: string) => {
   const dotIndex = fileName.lastIndexOf('.')
   
   return dotIndex === -1
@@ -49,7 +49,7 @@ const toAlias = fileName => {
     : fileName.slice(0, dotIndex)
 }
 
-const createSfxList = () => SFX_FILES.map(fileName => ({
+const createSfxList = () => SFX_FILES.map((fileName) => ({
   alias: toAlias(fileName),
   src: 'assets/audio/sfx/' + fileName
 }))

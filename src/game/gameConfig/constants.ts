@@ -1,6 +1,8 @@
 import {URL_PRESET} from '../../../utils/getAssetsUrl.js'
 import {GAME_NAME} from '../generatedAssets/buildMeta.js'
 
+// Содержит основные размеры, состояния, платформы и флаги игры.
+
 // ---------- game app settings ----------
 const width = 2560
 const height = 1080
