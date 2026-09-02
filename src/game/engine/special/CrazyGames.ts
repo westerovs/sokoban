@@ -2,15 +2,20 @@ import {WORLD} from '../../gameConfig/constants.js'
 import {Logger} from '../../utils/Logger.js'
 import Locator from '../Locator.ts'
 import SdkManager from '../SdkManager.js'
+import type {AdvertisingArea} from '../sdkTypes.js'
 import LocalStorage from '../storage/LocalStorage.js'
+
+// Управляет адаптивными рекламными баннерами платформы CrazyGames.
 
 export default class CrazyGames {
   static isInit = false
 
+  // Отмечает интеграцию CrazyGames готовой к работе.
   static init = () => {
     CrazyGames.isInit = true
   }
 
+  // Показывает и обновляет адаптивный баннер.
   static showCrazyGamesBanner = () => {
     if (!CrazyGames.isInit) return
     Logger.warn('', 'show CrazyGames Banner')
@@ -19,6 +24,7 @@ export default class CrazyGames {
     window.addEventListener('resize', CrazyGames.createCrazyGamesBanner)
   }
 
+  // Скрывает все адаптивные баннеры.
   static hideAllAdaptiveBanners = () => {
     if (!CrazyGames.isInit) return
     Logger.warn('', 'hideAllAdaptiveBanners')
@@ -27,6 +33,7 @@ export default class CrazyGames {
     SdkManager.adapter.advertising.hideAllAdaptiveBanners()
   }
 
+  // Передаёт платформе актуальную область баннера.
   static createCrazyGamesBanner = () => {
     if (LocalStorage.isDebug) SdkManager.adapter.advertising.debugAdaptiveBanners()
 
@@ -35,6 +42,7 @@ export default class CrazyGames {
     SdkManager.adapter.advertising.showAllAdaptiveBanners()
   }
 
+  // Рассчитывает область баннера по текущему размеру окна.
   static resizeCGBanner = () => {
     const {scaleFactor} = Locator.gameResize.resizeData
 
@@ -50,10 +58,12 @@ export default class CrazyGames {
     }
   }
 
-  static setAdaptiveBannersAreas = (areas = []) => {
+  // Передаёт платформе произвольные области баннеров.
+  static setAdaptiveBannersAreas = (areas: AdvertisingArea[] = []) => {
     SdkManager.adapter.advertising.setAdaptiveBannersAreas(areas)
   }
 
+  // Показывает все ранее настроенные баннеры.
   static showAllAdaptiveBanners = () => {
     SdkManager.adapter.advertising.showAllAdaptiveBanners()
   }

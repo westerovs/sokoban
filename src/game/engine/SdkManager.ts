@@ -4,14 +4,17 @@ import CrazyGames from '@/game/engine/special/CrazyGames.js'
 import {DEFAULT_DATA} from '@/game/engine/storage/defaultData.js'
 import {DEFAULT_FLAGS, GAME_STATES, PLATFORM_ID} from '@/game/gameConfig/constants.js'
 import {Logger, MODULES} from '@/game/utils/Logger.js'
+import type {AdCallbacks, SdkAdapter, SdkLeaderboard, SdkPlayer, SdkPurchase, SdkReview} from './sdkTypes.js'
+
+// Предоставляет игре единый типизированный доступ к платформенному SDK.
 
 export default class SdkManager {
-  static sdk
-  static makeReview
-  static leaderboard
-  static purchase
-  static player
-  static adapter
+  static sdk: SdkAdapter | undefined
+  static makeReview: SdkReview | undefined
+  static leaderboard: SdkLeaderboard
+  static purchase: SdkPurchase
+  static player: SdkPlayer
+  static adapter: SdkAdapter
   static gameplayIsStarted = false
   static gameplayIsStopped = true
   static isGameReady = false
@@ -34,7 +37,7 @@ export default class SdkManager {
   }
 
   // ------------- ↓ main ↓ -------------
-  static initSdk = async (adapter) => {
+  static initSdk = async (adapter: SdkAdapter) => {
     SdkManager.adapter = adapter
 
     await adapter.init()
@@ -61,13 +64,13 @@ export default class SdkManager {
     if (!isReady) {
       console.error('[SdkManager]: SDK is not initialized')
       // попытка повторной инициализации
-      SdkManager.initSdk()
+      void SdkManager.initSdk(SdkManager.adapter)
     }
     return isReady
   }
 
   static gameplayStart = () => {
-    if (Locator.game.stateName === GAME_STATES.gameState) return
+    if (Locator.game.currentStateName === GAME_STATES.gameState) return
     if (SdkManager.gameplayIsStarted) return
 
     SdkManager.gameplayIsStarted = true
@@ -77,7 +80,7 @@ export default class SdkManager {
   }
 
   static gameplayStop = () => {
-    if (Locator.game.stateName === GAME_STATES.gameState) return
+    if (Locator.game.currentStateName === GAME_STATES.gameState) return
     if (SdkManager.gameplayIsStopped) return
 
     SdkManager.gameplayIsStarted = false
@@ -128,8 +131,8 @@ export default class SdkManager {
     return SdkManager.adapter.advertising.isRewardedAvailableNow()
   }
 
-  static showInterstitial = ({onOpen, onClosed, onFinally, onError} = {}) => {
-    return new Promise((resolve) => {
+  static showInterstitial = ({onOpen, onClosed, onFinally, onError}: AdCallbacks = {}) => {
+    return new Promise<void>((resolve) => {
       if (Locator?.storage?.playerData?.hasAdPass) {
         resolve()
         return
@@ -143,9 +146,9 @@ export default class SdkManager {
         .then(() => {
           if (onClosed) onClosed()
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
           // Base/no-adapters reject without a reason when interstitials are unsupported.
-          if (err) console.error('[showInterstitial]', err)
+          if (err) console.error('[SdkManager]: interstitial failed', err)
           if (onError) onError()
         })
         .finally(() => {
@@ -155,7 +158,7 @@ export default class SdkManager {
     })
   }
 
-  static showRewarded = ({onOpen, onRewarded, onFinally, onError} = {}) => {
+  static showRewarded = ({onOpen, onRewarded, onFinally, onError}: AdCallbacks = {}) => {
     Logger.log(null, '--- show Rewarded ---')
 
     if (onOpen) onOpen()
@@ -166,8 +169,8 @@ export default class SdkManager {
       .then(() => {
         if (onRewarded) onRewarded()
       })
-      .catch((err) => {
-        console.error('[showRewarded]', err)
+      .catch((err: unknown) => {
+        console.error('[SdkManager]: rewarded ad failed', err)
         if (onError) onError()
       })
       .finally(() => {
@@ -181,17 +184,17 @@ export default class SdkManager {
       .then(() => {
         Logger.log('[showBanner]')
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         // Base/no-adapters reject without a reason when banners are unsupported.
-        if (error) console.error('[showBanner]', error)
+        if (error) console.error('[SdkManager]: banner failed', error)
       })
   }
 
   static initSessionControl = () => {
     SdkManager.adapter.session
       .open()
-      .catch((error) => {
-        console.error('session control error', error)
+      .catch((error: unknown) => {
+        console.error('[SdkManager]: session control failed', error)
         SdkManager.adapter.session.showPopup()
       })
       .finally(() => {
@@ -220,7 +223,7 @@ export default class SdkManager {
     return id.toLowerCase()
   }
 
-  static isPlatform = (platformName) => {
+  static isPlatform = (platformName: string) => {
     return SdkManager.getPlatformId().includes(platformName)
   }
 }
