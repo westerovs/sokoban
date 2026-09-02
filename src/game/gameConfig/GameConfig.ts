@@ -63,3 +63,7 @@ export default class GameConfig {
     this.locales = (await LoadUtils.loadJson(url)) as Locales
   }
 }
+
+export type {
+  Locales,
+}

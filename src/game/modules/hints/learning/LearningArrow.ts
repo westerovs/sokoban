@@ -1,23 +1,28 @@
 import {gsap} from 'gsap'
 import {Sprite, Texture} from 'pixi.js'
+import type {Container, DestroyOptions} from 'pixi.js'
 import Locator from '../../../engine/Locator.ts'
+import type Game from '../../../Game.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
 import {destroyTimeLine} from '../../../utils/animations/gsapUtils.js'
 
-// todo адаптировать под step FirstLearning
+// Показывает анимированную стрелку рядом с выбранной кнопкой подсказки.
+
 export default class LearningArrow extends Sprite {
   #game = Locator.game
-  #arrowTimeLine
-  #btnTargetName
+  #arrowTimeLine: gsap.core.Timeline | null = null
+  #btnTargetName: string
 
-  constructor(btnTargetName) {
-    super(Texture.from('learning-arrow'))
+  // Создаёт стрелку для указанной кнопки подсказки.
+  constructor(btnTargetName: string) {
+    super({texture: Texture.from('learning-arrow'), label: 'learning-arrow'})
     this.#btnTargetName = btnTargetName
 
     this.#init()
   }
 
-  destroy = (props) => {
+  // Удаляет стрелку, события и анимацию.
+  destroy = (props?: DestroyOptions) => {
     if (this.destroyed) return
     super.destroy(props)
 
@@ -28,6 +33,7 @@ export default class LearningArrow extends Sprite {
     Locator.uiLayer.stateUiLayer.removeChild(this)
   }
 
+  // Инициализирует стрелку и её позиционирование.
   #init = () => {
     if (!this.#btnTargetName) return
 
@@ -39,6 +45,7 @@ export default class LearningArrow extends Sprite {
     this.#arrowUpdatePosition()
   }
 
+  // Обновляет позицию и запускает циклическую анимацию.
   #arrowUpdatePosition = () => {
     destroyTimeLine(this.#arrowTimeLine)
 
@@ -53,14 +60,15 @@ export default class LearningArrow extends Sprite {
       .fromTo(this, {alpha: 0}, {alpha: 1}, '<'))
   }
 
+  // Вычисляет позицию стрелки относительно целевой кнопки.
   #getArrowHintPosition = () => {
-    const {buttonsHintView} = this.#game.refs
-    const btnLoupe = buttonsHintView.getChildByLabel(this.#btnTargetName)
+    const {buttonsHintView} = (this.#game as Game & {refs: {buttonsHintView: Container}}).refs
+    const btnLoupe = buttonsHintView.getChildByLabel(this.#btnTargetName)!
 
     this.angle = -90
 
     const globalCenter = btnLoupe.toGlobal({x: btnLoupe.width / 2, y: 0})
-    const localPos = this.parent.toLocal(globalCenter)
+    const localPos = this.parent!.toLocal(globalCenter)
 
     return {
       x: localPos.x + 10 - btnLoupe.width,
@@ -68,6 +76,7 @@ export default class LearningArrow extends Sprite {
     }
   }
 
+  // Пересчитывает положение стрелки после изменения размеров игры.
   #resize = () => {
     this.#arrowUpdatePosition()
   }

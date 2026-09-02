@@ -2,32 +2,41 @@ import LiveOpsController from '../components/liveOpsController/LiveOpsController
 import Locator from '../engine/Locator.ts'
 import SdkManager from '../engine/SdkManager.js'
 import {LEVEL_TYPES, TIMER_REWARD_DURATION_IF_STORE_UNAVAILABLE} from '../gameConfig/constants.js'
+import type {LevelDefinition, LocationDefinition} from '../gameConfig/levels/levelTypes.js'
 import GameUtils from '../utils/gameUtils/GameUtils.js'
 
+// Выбирает игровые настройки и контент с учётом платформенных флагов.
+
 export default class ABTest {
+  static instance: ABTest | null = null
+
+  // Возвращает общий экземпляр конфигуратора экспериментов.
   constructor() {
-    if (typeof ABTest.instance === 'object') {
+    if (ABTest.instance) {
       return ABTest.instance
     }
 
     ABTest.instance = this
-    return ABTest.instance
+    return this
   }
 
+  // Возвращает длительность таймера рекламной награды.
   static getTimerRewardDuration = () => {
     if (!SdkManager.adapter.purchase.isAvailable()) {
       return TIMER_REWARD_DURATION_IF_STORE_UNAVAILABLE
     }
 
-    return +SdkManager.adapter.options.flags.timerRewardDuration
+    return Number(SdkManager.adapter.options.flags.timerRewardDuration)
   }
 
+  // Возвращает задержку рекламы между уровнями.
   static get levelAdDelay() {
-    return +SdkManager.adapter.options.flags.levelAdDelay
+    return Number(SdkManager.adapter.options.flags.levelAdDelay)
   }
 
+  // Возвращает длительность таймера подсказки-компаса.
   static get timerCompassDuration() {
-    return +SdkManager.adapter.options.flags.timerCompassDuration
+    return Number(SdkManager.adapter.options.flags.timerCompassDuration)
   }
 
   // получает отфильтрованный список уровней, исключая уровни под флагом
@@ -36,6 +45,7 @@ export default class ABTest {
     return Object.fromEntries(levels.map((level) => [level.levelName, level]))
   }
 
+  // Возвращает локации без отключённых экспериментом уровней.
   static getFilteredLocations = () => {
     const disabledModes = ABTest.#getDisabledModes()
     const locations = Locator.gameConfig.levels?.locations ?? []
@@ -56,7 +66,8 @@ export default class ABTest {
       .map(([mode]) => mode.toLowerCase())
   }
 
-  static #isDisabledLevel = (level, disabledModes) => {
+  // Проверяет, относится ли уровень к отключённому режиму.
+  static #isDisabledLevel = (level: LevelDefinition, disabledModes: string[]) => {
     return disabledModes.some((mode) => level.levelName.toLowerCase().includes(mode))
   }
 }

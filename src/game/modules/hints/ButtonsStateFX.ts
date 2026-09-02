@@ -1,18 +1,27 @@
 import {gsap} from 'gsap'
+import type {Container} from 'pixi.js'
 import DarkenFilter from '../../utils/filters/DarkenFilter.js'
 
-export default class ButtonsStateFX {
-  #buttons
+// Затемняет неактивные кнопки подсказок и восстанавливает их состояние.
 
-  constructor(buttons) {
+type HintButton = Container & {
+  darkenFilter?: DarkenFilter | null
+}
+
+export default class ButtonsStateFX {
+  #buttons: HintButton[]
+
+  // Сохраняет список кнопок подсказок.
+  constructor(buttons: HintButton[]) {
     this.#buttons = buttons
   }
 
-  checkoutBtnState = (button, isDisabled) => {
+  // Анимирует состояние остальных кнопок относительно выбранной.
+  checkoutBtnState = (button: HintButton, isDisabled: boolean) => {
     try {
       if (button.destroyed) return
 
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         const tl = gsap.timeline({onComplete: resolve})
 
         for (const itemBtn of this.#buttons) {
@@ -28,7 +37,8 @@ export default class ButtonsStateFX {
     }
   }
 
-  #applyDarken = (btn, tl) => {
+  // Добавляет кнопке фильтр затемнения.
+  #applyDarken = (btn: HintButton, tl: gsap.core.Timeline) => {
     try {
       if (btn.destroyed) return
 
@@ -43,14 +53,15 @@ export default class ButtonsStateFX {
     }
   }
 
-  #removeDarken = (btn, tl) => {
+  // Убирает фильтр затемнения с кнопки.
+  #removeDarken = (btn: HintButton, tl: gsap.core.Timeline) => {
     try {
       if (btn.destroyed) return
       if (!btn.darkenFilter) return
 
       tl.to(btn.darkenFilter, {duration: 0.3, darkness: 0}, 0).add(() => {
         if (btn.filters) {
-          btn.filters = btn.filters.filter((f) => f !== btn.darkenFilter)
+          btn.filters = btn.filters.filter((filter) => filter !== btn.darkenFilter)
         }
         btn.darkenFilter = null
       }, 0.3)
