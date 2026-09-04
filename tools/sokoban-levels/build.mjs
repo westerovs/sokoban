@@ -25,7 +25,7 @@ const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.ts')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
-const appearanceRoles = Object.freeze(['wall', 'floor', 'box', 'target'])
+const appearanceRoles = Object.freeze(['wall', 'decor', 'floor', 'box', 'target'])
 const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
 const lurdDirections = Object.freeze({
   u: Object.freeze({x: 0, y: -1}),
@@ -287,33 +287,34 @@ const assignDifficulty = (levels) => {
 }
 
 // Проверяет условие, описанное операцией `isAppearanceRoleCell`.
-const isAppearanceRoleCell = (role, symbol) => {
-  if (role === 'wall') return symbol === '#'
-  if (role === 'floor') return Boolean(symbol) && symbol !== '_' && symbol !== '#'
+const isAppearanceRoleCell = (role, symbol, isDecor) => {
+  if (role === 'wall' || role === 'decor') return symbol === '#'
+  if (role === 'floor') return (Boolean(symbol) && symbol !== '_' && symbol !== '#') || isDecor
   if (role === 'box') return '$-'.includes(symbol)
   if (role === 'target') return '.-*'.includes(symbol)
   return false
 }
 
 // Проверяет условие, описанное операцией `validateAppearancePosition`.
-const validateAppearancePosition = (level, role, positionKey) => {
+const validateAppearancePosition = (level, appearance, role, positionKey) => {
   if (!positionKeyPattern.test(positionKey)) throw new Error(`${level.id}: недопустимая координата оформления ${positionKey}`)
 
   const [x, y] = positionKey.split(':').map(Number)
   const symbol = toRuntimeMap(level.map)[y]?.[x]
-  if (!isAppearanceRoleCell(role, symbol)) {
+  const isDecor = Boolean(appearance.decor?.[positionKey])
+  if (!isAppearanceRoleCell(role, symbol, isDecor)) {
     throw new Error(`${level.id}: оформление ${role} нельзя применить к клетке ${positionKey}`)
   }
 }
 
 // Проверяет условие, описанное операцией `validateAppearanceRole`.
-const validateAppearanceRole = (level, role, overrides, tileCatalog) => {
+const validateAppearanceRole = (level, appearance, role, overrides, tileCatalog) => {
   if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides)) {
     throw new Error(`${level.id}: оформление ${role} должно быть объектом`)
   }
 
   Object.entries(overrides).forEach(([positionKey, texture]) => {
-    validateAppearancePosition(level, role, positionKey)
+    validateAppearancePosition(level, appearance, role, positionKey)
     if (!tileCatalog.groups[role].includes(texture)) {
       throw new Error(`${level.id}: текстура ${texture} не входит в каталог ${role}`)
     }
@@ -329,7 +330,7 @@ const validateLevelAppearance = (level, appearance, tileCatalog) => {
   const unknownRoles = Object.keys(appearance).filter((role) => !appearanceRoles.includes(role))
   if (unknownRoles.length > 0) throw new Error(`${level.id}: неизвестный слой оформления ${unknownRoles[0]}`)
   appearanceRoles.forEach((role) => {
-    if (appearance[role] !== undefined) validateAppearanceRole(level, role, appearance[role], tileCatalog)
+    if (appearance[role] !== undefined) validateAppearanceRole(level, appearance, role, appearance[role], tileCatalog)
   })
 }
 

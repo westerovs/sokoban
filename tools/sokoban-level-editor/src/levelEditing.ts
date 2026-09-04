@@ -5,7 +5,7 @@ import type {EditorBrush, EditorState, Position} from './editorTypes.js'
  * Сразу изменяет тип клетки и назначает выбранную пользователем текстуру.
  */
 
-const APPEARANCE_ROLES = Object.freeze(['wall', 'floor', 'box', 'target']) // Визуальные слои, привязанные к клетке
+const APPEARANCE_ROLES = Object.freeze(['wall', 'decor', 'floor', 'box', 'target']) // Визуальные слои, привязанные к клетке
 
 // Возвращает тип основания клетки по символу карты.
 const getTerrain = (symbol: string) => {
@@ -64,8 +64,8 @@ const replaceAppearance = (
   return setTileAppearance(cleared, brush, positionKey, defaults)
 }
 
-// Ставит стену и полностью очищает прежнее содержимое клетки.
-const applyWallBrush = (
+// Ставит обычную или декоративную стену и полностью очищает прежнее содержимое клетки.
+const applyBlockingBrush = (
   state: EditorState,
   brush: EditorBrush,
   position: Position,
@@ -85,9 +85,12 @@ const applyFloorBrush = (
   positionKey: string,
   defaults: Record<string, string>,
 ) => {
-  const occupant = getOccupant(state.map[position.y][position.x])
-  const roles = occupant === 'box' ? ['wall', 'target'] : ['wall', 'target', 'box']
-  const map = setMapSymbol(state.map, position, composeSymbol('floor', occupant))
+  const oldSymbol = state.map[position.y][position.x]
+  const occupant = getOccupant(oldSymbol)
+  const isDecor = Boolean(state.appearance.decor?.[positionKey])
+  const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'floor'
+  const roles = isDecor ? ['wall', 'box', 'target'] : ['wall', 'decor', ...(occupant === 'box' ? [] : ['box'])]
+  const map = isDecor ? state.map : setMapSymbol(state.map, position, composeSymbol(terrain, occupant))
   const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
   return {state: {...state, map, appearance}}
 }
@@ -101,7 +104,7 @@ const applyTargetBrush = (
   defaults: Record<string, string>,
 ) => {
   const occupant = getOccupant(state.map[position.y][position.x])
-  const roles = occupant === 'box' ? ['wall'] : ['wall', 'box']
+  const roles = occupant === 'box' ? ['wall', 'decor'] : ['wall', 'decor', 'box']
   const map = setMapSymbol(state.map, position, composeSymbol('target', occupant))
   const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
   return {state: {...state, map, appearance}}
@@ -117,7 +120,7 @@ const applyBoxBrush = (
 ) => {
   const oldTerrain = getTerrain(state.map[position.y][position.x])
   const terrain = oldTerrain === 'target' ? 'target' : 'floor'
-  const roles = terrain === 'target' ? ['wall'] : ['wall', 'target']
+  const roles = terrain === 'target' ? ['wall', 'decor'] : ['wall', 'decor', 'target']
   const map = setMapSymbol(state.map, position, composeSymbol(terrain, 'box'))
   const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
   return {state: {...state, map, appearance}}
@@ -129,7 +132,7 @@ const applyPlayerBrush = (state: EditorState, position: Position, positionKey: s
   const oldSymbol = map[position.y][position.x]
   const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'floor'
   map = setMapSymbol(map, position, composeSymbol(terrain, 'player'))
-  const roles = terrain === 'target' ? ['wall', 'box'] : ['wall', 'box', 'target']
+  const roles = terrain === 'target' ? ['wall', 'decor', 'box'] : ['wall', 'decor', 'box', 'target']
   const appearance = removeTileAppearances(state.appearance, positionKey, roles)
   return {state: {...state, map, appearance}}
 }
@@ -146,7 +149,7 @@ const applyEditorBrush = (state: EditorState, brush: EditorBrush, position: Posi
   const positionKey = `${position.x}:${position.y}`
   if (brush.mode === 'void') return applyVoidBrush(state, position, positionKey)
   if (brush.mode === 'player') return applyPlayerBrush(state, position, positionKey)
-  if (brush.role === 'wall') return applyWallBrush(state, brush, position, positionKey, defaults)
+  if (brush.role === 'wall' || brush.role === 'decor') return applyBlockingBrush(state, brush, position, positionKey, defaults)
   if (brush.role === 'floor') return applyFloorBrush(state, brush, position, positionKey, defaults)
   if (brush.role === 'target') return applyTargetBrush(state, brush, position, positionKey, defaults)
   return applyBoxBrush(state, brush, position, positionKey, defaults)

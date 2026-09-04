@@ -26,6 +26,7 @@ const BOARD_Z_INDEX = {
 }
 
 type TileTextureType = Exclude<keyof typeof SOKOBAN_TEXTURES, 'player'>
+type TileVisualType = TileTextureType | 'decor'
 type MovementOptions = {isContinuous?: boolean}
 
 export default class SokobanBoard extends Container {
@@ -205,7 +206,14 @@ export default class SokobanBoard extends Container {
     if (this.#level.isVoid(position)) return
 
     if (this.#level.isWall(position)) {
-      wallTiles.addChild(this.#createTileSprite(this.#getTextureName('wall', position), position, 'wall'))
+      const decorTexture = this.#getDecorTextureName(position)
+      if (!decorTexture) {
+        wallTiles.addChild(this.#createTileSprite(this.#getTextureName('wall', position), position, 'wall'))
+        return
+      }
+
+      groundTiles.addChild(this.#createTileSprite(this.#getTextureName('floor', position), position, 'floor'))
+      wallTiles.addChild(this.#createTileSprite(decorTexture, position, 'decor'))
       return
     }
 
@@ -216,7 +224,7 @@ export default class SokobanBoard extends Container {
   }
 
   // Создаёт и позиционирует спрайт тайла.
-  #createTileSprite(textureName: string, position: SokobanPosition, type: TileTextureType) {
+  #createTileSprite(textureName: string, position: SokobanPosition, type: TileVisualType) {
     const tile = GameUtils.createSprite(textureName, {
       label: `sokoban-${type}-${position.x}-${position.y}`,
       anchorY: 1,
@@ -241,6 +249,11 @@ export default class SokobanBoard extends Container {
   #getTextureName(type: TileTextureType, position: SokobanPosition) {
     const positionKey = `${position.x}:${position.y}`
     return this.#appearance[type]?.[positionKey] ?? SOKOBAN_TEXTURES[type]
+  }
+
+  // Возвращает текстуру декоративной стены только для явно оформленной клетки.
+  #getDecorTextureName(position: SokobanPosition) {
+    return this.#appearance.decor?.[`${position.x}:${position.y}`] ?? null
   }
 
   // Создаёт и размещает спрайт игрока.

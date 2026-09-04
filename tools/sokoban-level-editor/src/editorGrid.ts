@@ -103,4 +103,8 @@ const compactEditorState = (state: EditorState): EditorState => {
   return {...state, map: cropMap(state.map, bounds), appearance: cropAppearance(state.appearance, bounds)}
 }
 
-export {compactEditorState, expandEditorState}
+export {
+  compactEditorState,
+  expandEditorState,
+  getContentBounds,
+}

@@ -126,9 +126,11 @@ const selectBrush = (brush: EditorBrush) => {
   if (!elements.manualToolsPanel.hidden) elements.brushLabel.textContent = selectedBrushLabel
 }
 
-// Оставляет оформление стен и пола при перестановке игровых объектов.
+// Оставляет оформление стен, декора и пола при перестановке игровых объектов.
 const getStructuralAppearance = (appearance: LevelAppearance): LevelAppearance => {
-  return Object.fromEntries(['wall', 'floor'].filter((role) => appearance[role]).map((role) => [role, structuredClone(appearance[role])]))
+  return Object.fromEntries(
+    ['wall', 'decor', 'floor'].filter((role) => appearance[role]).map((role) => [role, structuredClone(appearance[role])]),
+  )
 }
 
 // Создаёт полное состояние редактора из компактного результата генератора.
@@ -314,7 +316,7 @@ const isEditableTarget = (target: EventTarget | null) => {
 // Обрабатывает сочетания отмены, повтора и сохранения.
 const handleControlShortcut = (event: KeyboardEvent) => {
   if (!event.ctrlKey && !event.metaKey) return false
-  const key = event.key.toLowerCase()
+  const key = event.code.startsWith('Key') ? event.code.slice(3).toLowerCase() : event.key.toLowerCase()
   if (key === 's') save()
   else if (key === 'z' && event.shiftKey) redo()
   else if (key === 'z') undo()
@@ -328,7 +330,7 @@ const handleKeyboard = (event: KeyboardEvent) => {
   if (isEditableTarget(event.target)) return
   if (handleControlShortcut(event)) return event.preventDefault()
   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
-  if (['1', '2', '3', '4'].includes(event.key)) {
+  if (['1', '2', '3', '4', '5'].includes(event.key)) {
     selectSidebarPanel('manual')
     palette.selectModeByShortcut(event.key)
   }

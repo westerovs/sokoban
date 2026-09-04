@@ -1,6 +1,8 @@
 import Locator from '../../engine/Locator.ts'
+import LocalStorage from '../../engine/storage/LocalStorage.js'
 import {GAME_STATES} from '../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
+import {openSokobanLevelEditor} from '../../sokoban/editor/openSokobanLevelEditor.js'
 import type StateLevel from '../../states/stateLevel/StateLevel.js'
 import GameUtils from '../gameUtils/GameUtils.js'
 import AdminPanel from './adminPanel/AdminPanel.js'
@@ -37,10 +39,23 @@ export default class DebugHotkeys {
     if (this.#game.stateName !== GAME_STATES.levelState) return
     if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return
 
+    this.#openCurrentLevelEditor(event)
     this.#checkoutSkin(numKey)
     this.#runNextPart(numKey)
     this.#runFastWin(numKey)
     this.#runNextLevel(numKey)
+  }
+
+  // Открывает текущий уровень в редакторе по Ctrl+Shift+Alt+L.
+  #openCurrentLevelEditor = (event: KeyboardEvent) => {
+    const isEditorShortcut = event.ctrlKey && event.shiftKey && event.altKey && event.code === 'KeyL'
+    if (!LocalStorage.isDebug || !isEditorShortcut) return
+
+    const levelId = this.#game.level?.config?.id
+    if (!levelId) return
+
+    event.preventDefault()
+    openSokobanLevelEditor(levelId)
   }
 
   // Открывает панель разработчика по клавише 0.

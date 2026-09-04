@@ -1,7 +1,8 @@
 import {Container, Graphics, Rectangle, Sprite, type Texture} from 'pixi.js'
 import {SOKOBAN_TEXTURES} from '@/game/sokoban/config/config.js'
 import {applyTileVisualScale} from '@/game/sokoban/rendering/applyTileVisualScale.js'
-import type {EditorBrush, EditorLevel, LevelAppearance, Position} from './editorTypes.js'
+import {getContentBounds} from './editorGrid.js'
+import type {Bounds, EditorBrush, EditorLevel, LevelAppearance, Position} from './editorTypes.js'
 
 /**
  * Отображает редактируемую карту настоящими PixiJS-тайлами и принимает рисование.
@@ -9,6 +10,7 @@ import type {EditorBrush, EditorLevel, LevelAppearance, Position} from './editor
 
 const TILE_SIZE = 100 // Логический размер клетки редактора
 const BOARD_PADDING = 44 // Минимальный отступ карты от краёв рабочей области
+const INITIAL_VERTICAL_PADDING = 1 // Число видимых клеток над и под содержимым при открытии
 const MIN_ZOOM = 1 // Минимальный масштаб относительно полного поля
 const MAX_ZOOM = 4 // Максимальное увеличение рабочего поля
 const ZOOM_SENSITIVITY = 0.0014 // Скорость изменения масштаба колёсиком мыши
@@ -21,6 +23,7 @@ export default class EditorBoard extends Container {
   #paintingBrush: EditorBrush | null = null
   #lastPaintedPosition: string | null = null
   #level: EditorLevel | null = null
+  #needsInitialFocus = true
   #onPaint: (payload: {brush: EditorBrush; position: Position; positionKey: string}) => void
   #textures: Record<string, Texture>
   #viewportHeight = 0
@@ -45,6 +48,7 @@ export default class EditorBoard extends Container {
   setState(level: EditorLevel | null, appearance: LevelAppearance, invalidPositions: Position[] = []) {
     if (level?.id !== this.#level?.id) {
       this.#zoom = MIN_ZOOM
+      this.#needsInitialFocus = true
       this.#viewportWidth = 0
       this.#viewportHeight = 0
     }
@@ -65,6 +69,11 @@ export default class EditorBoard extends Container {
     if (width === this.#viewportWidth && height === this.#viewportHeight) return
     this.#viewportWidth = width
     this.#viewportHeight = height
+    if (this.#needsInitialFocus) {
+      this.#needsInitialFocus = false
+      this.#focusInitialContent()
+      return
+    }
     this.#centerBoard()
   }
 
@@ -115,6 +124,41 @@ export default class EditorBoard extends Container {
     this.position.set((this.#viewportWidth - boardWidth * scale) / 2, (this.#viewportHeight - boardHeight * scale) / 2)
   }
 
+  // Вписывает непустую часть уровня с вертикальным запасом в одну клетку.
+  #focusInitialContent() {
+    const bounds = this.#getInitialViewBounds()
+    if (!bounds) return this.#centerBoard()
+
+    const fitScale = this.#getFitScale()
+    const contentWidth = (bounds.maxX - bounds.minX + 1) * TILE_SIZE
+    const contentHeight = (bounds.maxY - bounds.minY + 1) * TILE_SIZE
+    const contentScale = Math.min((this.#viewportWidth - BOARD_PADDING * 2) / contentWidth, this.#viewportHeight / contentHeight)
+    this.#zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, contentScale / fitScale))
+    this.#applyViewBounds(bounds, fitScale * this.#zoom)
+  }
+
+  // Возвращает границы содержимого с дополнительными рядами сверху и снизу.
+  #getInitialViewBounds(): Bounds | null {
+    const level = this.#level
+    if (!level) return null
+    const bounds = getContentBounds(level.map)
+    if (!bounds) return null
+
+    return {
+      ...bounds,
+      minY: Math.max(0, bounds.minY - INITIAL_VERTICAL_PADDING),
+      maxY: Math.min(level.map.length - 1, bounds.maxY + INITIAL_VERTICAL_PADDING),
+    }
+  }
+
+  // Центрирует выбранные границы рабочего поля при заданном масштабе.
+  #applyViewBounds(bounds: Bounds, scale: number) {
+    const centerX = ((bounds.minX + bounds.maxX + 1) * TILE_SIZE) / 2
+    const centerY = ((bounds.minY + bounds.maxY + 1) * TILE_SIZE) / 2
+    this.scale.set(scale)
+    this.position.set(this.#viewportWidth / 2 - centerX * scale, this.#viewportHeight / 2 - centerY * scale)
+  }
+
   // Сохраняет выбранную точку поля под курсором во время увеличения.
   #applyZoomAtPoint(nextZoom: number, point: Position) {
     const localX = (point.x - this.x) / this.scale.x
@@ -154,7 +198,13 @@ export default class EditorBoard extends Container {
   // Добавляет данные или представление через операцию `addCell`.
   #addCell(scene: Container, symbol: string, position: Position) {
     if (symbol === '_') return scene.addChild(this.#createVoidCell(position))
-    if (symbol === '#') return scene.addChild(this.#createRoleSprite('wall', position, this.#getTextureName('wall', position)))
+    if (symbol === '#') {
+      const decorTexture = this.#getDecorTextureName(position)
+      if (!decorTexture) return scene.addChild(this.#createRoleSprite('wall', position, this.#getTextureName('wall', position)))
+
+      scene.addChild(this.#createRoleSprite('floor', position, this.#getTextureName('floor', position)))
+      return scene.addChild(this.#createRoleSprite('decor', position, decorTexture))
+    }
 
     scene.addChild(this.#createRoleSprite('floor', position, this.#getTextureName('floor', position)))
     if ('.-*'.includes(symbol)) scene.addChild(this.#createRoleSprite('target', position, this.#getTextureName('target', position)))
@@ -186,7 +236,7 @@ export default class EditorBoard extends Container {
   #getRoleDepth(role: string, row: number) {
     if (role === 'floor' || role === 'target') return 0
     if (role === 'box') return 1
-    if (role === 'wall') return 2 + row * 2
+    if (role === 'wall' || role === 'decor') return 2 + row * 2
     return 3 + row * 2
   }
 
@@ -215,6 +265,11 @@ export default class EditorBoard extends Container {
   // Возвращает данные, за которые отвечает операция `getTextureName`.
   #getTextureName(role: string, position: Position) {
     return this.#appearance[role]?.[`${position.x}:${position.y}`] ?? this.#defaults[role]
+  }
+
+  // Возвращает текстуру декоративной стены только для явно оформленной клетки.
+  #getDecorTextureName(position: Position) {
+    return this.#appearance.decor?.[`${position.x}:${position.y}`] ?? null
   }
 
   // Выполняет отдельную операцию `startPainting`.

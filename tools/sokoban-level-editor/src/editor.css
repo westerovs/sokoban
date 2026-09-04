@@ -211,13 +211,21 @@ select:focus-visible {
 
 .editor-mode-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 5px;
   margin-bottom: 20px;
   padding: 4px;
   background: #111b15;
   border: 1px solid #2c4033;
   border-radius: 11px;
+}
+
+.editor-mode-button:nth-child(-n + 2) {
+  grid-column: span 3;
+}
+
+.editor-mode-button:nth-child(n + 3) {
+  grid-column: span 2;
 }
 
 .editor-mode-button {
@@ -658,6 +666,6 @@ select:focus-visible {
   }
 
   .editor-mode-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }

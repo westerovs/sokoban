@@ -7,6 +7,7 @@ import path from 'node:path'
 
 const TILE_GROUP_DIRECTORIES = Object.freeze({
   wall: 'walls', // Папка вариантов стен
+  decor: 'decor', // Папка декоративных стен
   floor: 'floors', // Папка вариантов пола
   box: 'boxes', // Папка вариантов ящиков
   target: 'targets', // Папка вариантов целей
