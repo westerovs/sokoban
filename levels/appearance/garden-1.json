@@ -37,21 +37,6 @@
         "7:3": "wall-bush",
         "8:3": "wall-bush"
       },
-      "ground": {
-        "1:4": "ground2",
-        "2:4": "ground2",
-        "3:4": "ground2",
-        "4:4": "ground2",
-        "5:4": "ground2",
-        "6:4": "ground2",
-        "7:4": "ground2",
-        "4:1": "ground2",
-        "4:2": "ground2",
-        "4:3": "ground2",
-        "4:5": "ground2",
-        "4:6": "ground2",
-        "4:7": "ground2"
-      },
       "box": {"2:4": "box2", "4:3": "box2", "6:4": "box2", "4:6": "box2"}
     },
     "sokoban-005": {
@@ -145,6 +130,50 @@
         "7:7": "wall-bush"
       },
       "box": {"2:2": "box2", "2:5": "box2", "3:5": "box2"}
+    },
+    "sokoban-003": {
+      "box": {"2:2": "box2", "3:2": "box2", "2:3": "box2"},
+      "wall": {
+        "0:0": "wall-bush",
+        "1:0": "wall-bush",
+        "2:0": "wall-bush",
+        "3:0": "wall-bush",
+        "4:0": "wall-bush",
+        "0:1": "wall-bush",
+        "4:1": "wall-bush",
+        "0:2": "wall-bush",
+        "4:2": "wall-bush",
+        "6:2": "wall-bush",
+        "7:2": "wall-bush",
+        "8:2": "wall-bush",
+        "0:3": "wall-bush",
+        "4:3": "wall-bush",
+        "6:3": "wall-bush",
+        "8:3": "wall-bush",
+        "0:4": "wall-bush",
+        "1:4": "wall-bush",
+        "2:4": "wall-bush",
+        "4:4": "wall-bush",
+        "5:4": "wall-bush",
+        "6:4": "wall-bush",
+        "8:4": "wall-bush",
+        "1:5": "wall-bush",
+        "2:5": "wall-bush",
+        "8:5": "wall-bush",
+        "1:6": "wall-bush",
+        "5:6": "wall-bush",
+        "8:6": "wall-bush",
+        "1:7": "wall-bush",
+        "5:7": "wall-bush",
+        "6:7": "wall-bush",
+        "7:7": "wall-bush",
+        "8:7": "wall-bush",
+        "1:8": "wall-bush",
+        "2:8": "wall-bush",
+        "3:8": "wall-bush",
+        "4:8": "wall-bush",
+        "5:8": "wall-bush"
+      }
     }
   }
 }
