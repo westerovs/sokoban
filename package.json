@@ -18,7 +18,7 @@
     "build": "npm run prepare && tsx bundler/build.mjs",
     "prepare": "npm run levels && npm run assets && npm run generate_game_meta",
 
-    "assets": "node bundler/buildAssets.mjs",
+    "assets": "npm run levels && node bundler/buildAssets.mjs",
     "generate_game_meta": "node bundler/generateGameMeta.mjs",
 
     "levels": "tsx tools/sokoban-levels/build.mjs",
