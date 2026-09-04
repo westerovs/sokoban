@@ -69,7 +69,14 @@ select:focus-visible {
   line-height: 1.1;
 }
 
+.editor-heading-group {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
 .editor-title__eyebrow,
+.editor-tools__title,
 .editor-sidebar__caption,
 .editor-field span {
   color: #90ad98;
@@ -77,6 +84,26 @@ select:focus-visible {
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+.editor-tools {
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+}
+
+.editor-fill-button {
+  color: #d7eea0;
+}
+
+.editor-fill-button svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .editor-field {
@@ -658,6 +685,10 @@ select:focus-visible {
 
   .editor-title {
     display: none;
+  }
+
+  .editor-heading-group {
+    justify-content: center;
   }
 
   .editor-button {

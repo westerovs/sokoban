@@ -8,7 +8,7 @@ import {expandEditorState} from './editorGrid.js'
 import EditorPalette from './EditorPalette.js'
 import EditorSession from './EditorSession.js'
 import type {EditorBrush, EditorData, EditorLevel, EditorState, LevelAppearance, Position, ValidationResult} from './editorTypes.js'
-import {applyEditorBrush} from './levelEditing.js'
+import {applyEditorBrush, applyEditorFill} from './levelEditing.js'
 import LevelGeneratorPanel from './LevelGeneratorPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
@@ -29,6 +29,7 @@ const elements = {
   brushLabel: getElement<HTMLElement>('#brush-label'),
   canvasHost: getElement<HTMLElement>('#canvas-host'),
   emptyState: getElement<HTMLElement>('#empty-state'),
+  fillButton: getElement<HTMLButtonElement>('#fill-button'),
   generatorPanel: getElement<HTMLElement>('#generator-panel'),
   generatorTab: getElement<HTMLButtonElement>('#generator-tab'),
   launchButton: getElement<HTMLButtonElement>('#launch-button'),
@@ -52,6 +53,7 @@ let board: EditorBoard
 let editorData: EditorData
 let generatorPanel: LevelGeneratorPanel | null = null
 let palette: EditorPalette
+let selectedBrush: EditorBrush | null = null
 let selectedLevel: EditorLevel | null = null
 let selectedBrushLabel = 'Выберите кисть'
 let session: EditorSession | null = null
@@ -75,9 +77,22 @@ const getExportState = (): EditorState | null => {
   return session?.getExportState() ?? null
 }
 
+// Проверяет, поддерживает ли выбранная кисть массовую заливку.
+const isFillBrush = (brush: EditorBrush | null): brush is EditorBrush => {
+  return brush?.mode === 'tile' && ['wall', 'box', 'ground'].includes(brush.role ?? '')
+}
+
+// Синхронизирует доступность заливки с текущей сессией и режимом редактора.
+const updateFillButton = () => {
+  elements.fillButton.disabled = !session || elements.manualToolsPanel.hidden || !isFillBrush(selectedBrush)
+}
+
 // Отрисовывает карту, проверку и доступность команд истории.
 const renderSession = () => {
-  if (!session || !selectedLevel) return board.setState(null, {})
+  if (!session || !selectedLevel) {
+    updateFillButton()
+    return board.setState(null, {})
+  }
   const validation = validateLevelMap(session.state.map)
   const level = {...selectedLevel, map: session.state.map}
   board.setState(level, session.state.appearance, validation.invalidPositions)
@@ -87,6 +102,7 @@ const renderSession = () => {
   elements.undoButton.disabled = !session.canUndo
   elements.redoButton.disabled = !session.canRedo
   elements.saveButton.dataset.dirty = String(session.isDirty)
+  updateFillButton()
   generatorPanel?.setCurrentLevel(getExportState())
 }
 
@@ -122,8 +138,19 @@ const handlePaint = ({brush, position}: {brush: EditorBrush; position: Position}
 // Передаёт выбранную кисть доске и обновляет подпись интерфейса.
 const selectBrush = (brush: EditorBrush) => {
   board.setBrush(brush)
+  selectedBrush = brush
   selectedBrushLabel = brush.label
   if (!elements.manualToolsPanel.hidden) elements.brushLabel.textContent = selectedBrushLabel
+  updateFillButton()
+}
+
+// Заливает все подходящие клетки текстурой выбранной кисти.
+const fillSelectedRole = () => {
+  if (!session || !isFillBrush(selectedBrush)) return
+  const result = applyEditorFill(session.state, selectedBrush, SOKOBAN_TILE_CATALOG.defaults)
+  if (!session.apply(result.state)) return showStatus('Все подходящие тайлы уже используют эту текстуру')
+  renderSession()
+  showStatus('Выбранная текстура применена ко всем подходящим тайлам')
 }
 
 // Оставляет оформление стен, декора и пола при перестановке игровых объектов.
@@ -181,6 +208,7 @@ const selectSidebarPanel = (mode: string) => {
   elements.manualToolsTab.ariaSelected = String(!isGenerator)
   elements.generatorTab.ariaSelected = String(isGenerator)
   elements.brushLabel.textContent = isGenerator ? 'Автогенерация' : selectedBrushLabel
+  updateFillButton()
 }
 
 // Проверяет текущую карту и показывает ошибки перед внешним действием.
@@ -344,6 +372,7 @@ const bindSidebarTabs = () => {
 
 // Подключает кнопки интерфейса и защиту несохранённой сессии.
 const bindActions = () => {
+  elements.fillButton.addEventListener('click', fillSelectedRole)
   elements.saveButton.addEventListener('click', save)
   elements.launchButton.addEventListener('click', launchDraft)
   elements.validateButton.addEventListener('click', checkSolvability)

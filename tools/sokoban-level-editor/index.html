@@ -10,9 +10,21 @@
   <body>
     <div class="editor-shell">
       <header class="editor-header">
-        <div class="editor-title">
-          <span class="editor-title__eyebrow">Sokoban tools</span>
-          <h1>Редактор уровней</h1>
+        <div class="editor-heading-group">
+          <div class="editor-title">
+            <span class="editor-title__eyebrow">Sokoban tools</span>
+            <h1>Редактор уровней</h1>
+          </div>
+          <div class="editor-tools">
+            <span class="editor-tools__title">Инструменты</span>
+            <button id="fill-button" class="editor-button editor-button--compact editor-fill-button" type="button" title="Залить выбранным тайлом" aria-label="Залить выбранным тайлом" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m4 12 7.5-7.5L19 12l-7.5 7.5L4 12Z" />
+                <path d="m7.5 8.5 7 7" />
+                <path d="M20 16.5c0 1.1-.9 2-2 2s-2-.9-2-2c0-.8 1.1-2.3 2-3.5.9 1.2 2 2.7 2 3.5Z" />
+              </svg>
+            </button>
+          </div>
         </div>
         <label class="editor-field">
           <span>Локация</span>

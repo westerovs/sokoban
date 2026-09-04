@@ -6,6 +6,7 @@ import type {EditorBrush, EditorState, Position} from './editorTypes.js'
  */
 
 const APPEARANCE_ROLES = Object.freeze(['wall', 'decor', 'ground', 'box', 'target']) // Визуальные слои, привязанные к клетке
+const FILLABLE_ROLES = Object.freeze(['wall', 'box', 'ground']) // Роли, поддерживающие массовую заливку текстурой
 
 // Возвращает тип основания клетки по символу карты.
 const getTerrain = (symbol: string) => {
@@ -155,4 +156,29 @@ const applyEditorBrush = (state: EditorState, brush: EditorBrush, position: Posi
   return applyBoxBrush(state, brush, position, positionKey, defaults)
 }
 
-export {applyEditorBrush, composeSymbol, getOccupant, getTerrain}
+// Проверяет, относится ли клетка к выбранной роли массовой заливки.
+const isFillPosition = (state: EditorState, role: string, position: Position) => {
+  const symbol = state.map[position.y][position.x]
+  if (role === 'wall') return symbol === '#'
+  if (role === 'box') return '$-'.includes(symbol)
+  const positionKey = `${position.x}:${position.y}`
+  return symbol !== '_' && (symbol !== '#' || Boolean(state.appearance.decor?.[positionKey]))
+}
+
+// Возвращает все клетки, к которым применима выбранная роль заливки.
+const getFillPositions = (state: EditorState, role: string) => {
+  return state.map.flatMap((row, y) => {
+    return Array.from(row, (_, x) => ({x, y})).filter((position) => isFillPosition(state, role, position))
+  })
+}
+
+// Применяет выбранную текстуру ко всем клеткам её роли одним состоянием.
+const applyEditorFill = (state: EditorState, brush: EditorBrush, defaults: Record<string, string>) => {
+  if (!brush.role || !FILLABLE_ROLES.includes(brush.role)) return {state}
+  const nextState = getFillPositions(state, brush.role).reduce((currentState, position) => {
+    return applyEditorBrush(currentState, brush, position, defaults).state
+  }, state)
+  return {state: nextState}
+}
+
+export {applyEditorBrush, applyEditorFill, composeSymbol, getOccupant, getTerrain}
