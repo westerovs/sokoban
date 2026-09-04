@@ -14,16 +14,16 @@
     "url": "#"
   },
   "scripts": {
+    "start": "npm run prepare && vite",
+    "build": "npm run prepare && tsx bundler/build.mjs",
+    "prepare": "npm run levels && npm run assets && npm run generate_game_meta",
+
+    "assets": "node bundler/buildAssets.mjs",
+    "generate_game_meta": "node bundler/generateGameMeta.mjs",
+
     "levels": "tsx tools/sokoban-levels/build.mjs",
     "levels:check": "tsx tools/sokoban-levels/build.mjs --check",
-    "prelevel-editor": "npm run levels && npm run assets && npm run generate_game_meta",
-    "level-editor": "vite --open /tools/sokoban-level-editor/",
-    "generate_game_meta": "node bundler/generateGameMeta.mjs",
-    "assets": "node bundler/buildAssets.mjs",
-    "prebuild": "npm run levels && npm run assets && npm run generate_game_meta",
-    "build": "tsx bundler/build.mjs",
-    "prestart": "npm run levels && npm run assets && npm run generate_game_meta",
-    "start": "vite",
+
     "typecheck": "tsc --noEmit",
     "eslint": "eslint src",
     "eslint:fix": "eslint src --fix",
