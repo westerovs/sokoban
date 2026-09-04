@@ -129,7 +129,7 @@ const selectBrush = (brush: EditorBrush) => {
 // Оставляет оформление стен, декора и пола при перестановке игровых объектов.
 const getStructuralAppearance = (appearance: LevelAppearance): LevelAppearance => {
   return Object.fromEntries(
-    ['wall', 'decor', 'floor'].filter((role) => appearance[role]).map((role) => [role, structuredClone(appearance[role])]),
+    ['wall', 'decor', 'ground'].filter((role) => appearance[role]).map((role) => [role, structuredClone(appearance[role])]),
   )
 }
 

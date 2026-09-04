@@ -25,7 +25,7 @@ const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.ts')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
-const appearanceRoles = Object.freeze(['wall', 'decor', 'floor', 'box', 'target'])
+const appearanceRoles = Object.freeze(['wall', 'decor', 'ground', 'box', 'target'])
 const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
 const lurdDirections = Object.freeze({
   u: Object.freeze({x: 0, y: -1}),
@@ -289,7 +289,7 @@ const assignDifficulty = (levels) => {
 // Проверяет условие, описанное операцией `isAppearanceRoleCell`.
 const isAppearanceRoleCell = (role, symbol, isDecor) => {
   if (role === 'wall' || role === 'decor') return symbol === '#'
-  if (role === 'floor') return (Boolean(symbol) && symbol !== '_' && symbol !== '#') || isDecor
+  if (role === 'ground') return (Boolean(symbol) && symbol !== '_' && symbol !== '#') || isDecor
   if (role === 'box') return '$-'.includes(symbol)
   if (role === 'target') return '.-*'.includes(symbol)
   return false

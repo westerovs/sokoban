@@ -191,7 +191,7 @@ export default class SokobanLevel {
   // Добавляет один символ карты в соответствующую коллекцию.
   #parseSymbol(symbol: string, position: SokobanPosition) {
     if (symbol === SOKOBAN_SYMBOLS.void) return this.#addPosition(this.#voids, position)
-    if (symbol === SOKOBAN_SYMBOLS.floor) return
+    if (symbol === SOKOBAN_SYMBOLS.ground) return
     if (symbol === SOKOBAN_SYMBOLS.wall) return this.#addPosition(this.#walls, position)
     if (symbol === SOKOBAN_SYMBOLS.target) return this.#addPosition(this.#targets, position)
     if (symbol === SOKOBAN_SYMBOLS.box) return this.#addBox(position)

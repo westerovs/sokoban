@@ -212,12 +212,12 @@ export default class SokobanBoard extends Container {
         return
       }
 
-      groundTiles.addChild(this.#createTileSprite(this.#getTextureName('floor', position), position, 'floor'))
+      groundTiles.addChild(this.#createTileSprite(this.#getTextureName('ground', position), position, 'ground'))
       wallTiles.addChild(this.#createTileSprite(decorTexture, position, 'decor'))
       return
     }
 
-    groundTiles.addChild(this.#createTileSprite(this.#getTextureName('floor', position), position, 'floor'))
+    groundTiles.addChild(this.#createTileSprite(this.#getTextureName('ground', position), position, 'ground'))
     if (this.#level.isTarget(position)) {
       groundTiles.addChild(this.#createTileSprite(this.#getTextureName('target', position), position, 'target'))
     }

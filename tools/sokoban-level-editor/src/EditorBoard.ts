@@ -202,11 +202,11 @@ export default class EditorBoard extends Container {
       const decorTexture = this.#getDecorTextureName(position)
       if (!decorTexture) return scene.addChild(this.#createRoleSprite('wall', position, this.#getTextureName('wall', position)))
 
-      scene.addChild(this.#createRoleSprite('floor', position, this.#getTextureName('floor', position)))
+      scene.addChild(this.#createRoleSprite('ground', position, this.#getTextureName('ground', position)))
       return scene.addChild(this.#createRoleSprite('decor', position, decorTexture))
     }
 
-    scene.addChild(this.#createRoleSprite('floor', position, this.#getTextureName('floor', position)))
+    scene.addChild(this.#createRoleSprite('ground', position, this.#getTextureName('ground', position)))
     if ('.-*'.includes(symbol)) scene.addChild(this.#createRoleSprite('target', position, this.#getTextureName('target', position)))
     if ('$-'.includes(symbol)) scene.addChild(this.#createRoleSprite('box', position, this.#getTextureName('box', position)))
     if ('@*'.includes(symbol)) scene.addChild(this.#createRoleSprite('player', position, SOKOBAN_TEXTURES.player))
@@ -234,7 +234,7 @@ export default class EditorBoard extends Container {
 
   // Возвращает данные, за которые отвечает операция `getRoleDepth`.
   #getRoleDepth(role: string, row: number) {
-    if (role === 'floor' || role === 'target') return 0
+    if (role === 'ground' || role === 'target') return 0
     if (role === 'box') return 1
     if (role === 'wall' || role === 'decor') return 2 + row * 2
     return 3 + row * 2

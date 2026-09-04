@@ -8,8 +8,8 @@ const COLORS = Object.freeze({
   border: 0xb6964f, // Цвет рамки панели
   box: 0xb96f25, // Цвет ящика
   boxBorder: 0xf0b45c, // Цвет рамки ящика
-  floor: 0x756a43, // Цвет пола
-  floorBorder: 0x4d482f, // Цвет границы клетки пола
+  ground: 0x756a43, // Цвет пола
+  groundBorder: 0x4d482f, // Цвет границы клетки пола
   player: 0x93ae4a, // Цвет игрока
   target: 0x99bd3f, // Цвет цели
   wall: 0x777667, // Цвет стены
@@ -82,7 +82,7 @@ export default class LevelPreview extends Container {
 
     const left = offsetX + x * cell
     const top = offsetY + y * cell
-    this.#drawFloor(left, top, cell)
+    this.#drawGround(left, top, cell)
     if (symbol === '#') return this.#drawWall(left, top, cell)
     if ('.-*'.includes(symbol)) this.#drawTarget(left, top, cell)
     if ('$-'.includes(symbol)) this.#drawBox(left, top, cell)
@@ -90,8 +90,8 @@ export default class LevelPreview extends Container {
   }
 
   // Рисует клетку пола.
-  #drawFloor = (x: number, y: number, size: number) => {
-    this.#board.rect(x, y, size, size).fill({color: COLORS.floor}).stroke({color: COLORS.floorBorder, width: 1})
+  #drawGround = (x: number, y: number, size: number) => {
+    this.#board.rect(x, y, size, size).fill({color: COLORS.ground}).stroke({color: COLORS.groundBorder, width: 1})
   }
 
   // Рисует стену.

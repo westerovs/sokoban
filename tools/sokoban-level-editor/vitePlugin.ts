@@ -18,7 +18,7 @@ import {solveSokoban} from './solver.js'
 const DATA_API_PATH = '/__sokoban-level-editor/data' // Путь API чтения и сохранения уровней
 const GENERATOR_API_PATH = '/__sokoban-level-editor/generate' // Путь API процедурной генерации
 const SOLVER_API_PATH = '/__sokoban-level-editor/solve' // Путь API проверки решаемости
-const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|decor|floor|box|target)\/([^/]+)\.png$/ // Шаблон адреса исходного тайла
+const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|decor|ground|box|target)\/([^/]+)\.png$/ // Шаблон адреса исходного тайла
 const MAX_BODY_SIZE = 1024 * 1024 // Максимальный размер запроса редактора в байтах
 
 type EditorPaths = {

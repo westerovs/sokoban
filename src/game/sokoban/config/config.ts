@@ -5,7 +5,7 @@
 const SOKOBAN_SYMBOLS = Object.freeze({
   void: '_', // Пустая клетка вне доступного игрового поля
   wall: '#', // Непроходимая стена
-  floor: ' ', // Проходимая клетка пола
+  ground: ' ', // Проходимая клетка пола
   player: '@', // Игрок на обычном полу
   box: '$', // Ящик на обычном полу
   target: '.', // Свободная цель
@@ -28,7 +28,7 @@ const ROTATED_DIRECTIONS = Object.freeze({
 } as const)
 
 const SOKOBAN_TEXTURES = Object.freeze({
-  floor: 'floor1', // Текстура пола по умолчанию
+  ground: 'ground1', // Текстура пола по умолчанию
   wall: 'wall1', // Текстура стены по умолчанию
   target: 'target1', // Текстура цели
   box: 'box1', // Текстура ящика по умолчанию

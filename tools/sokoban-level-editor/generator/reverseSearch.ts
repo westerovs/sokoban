@@ -42,7 +42,7 @@ const getReachablePositions = (player: number, occupied: Set<number>, board: Top
   for (let index = 0; index < queue.length; index++) {
     DIRECTIONS.forEach((direction) => {
       const next = getAdjacentIndex(queue[index], direction, board.width, board.height)
-      if (next !== null && board.floors.has(next) && !occupied.has(next) && !visited.has(next)) {
+      if (next !== null && board.grounds.has(next) && !occupied.has(next) && !visited.has(next)) {
         visited.add(next)
         queue.push(next)
       }
@@ -68,7 +68,7 @@ const getDistance = (first: number, second: number, width: number) => {
 const countBlockedNeighbors = (position: number, board: TopologyBoard) => {
   return DIRECTIONS.filter((direction) => {
     const neighbor = getAdjacentIndex(position, direction, board.width, board.height)
-    return neighbor === null || !board.floors.has(neighbor)
+    return neighbor === null || !board.grounds.has(neighbor)
   }).length
 }
 
@@ -98,7 +98,7 @@ const selectGoals = (board: TopologyBoard, boxCount: number, random: Random) => 
 // Выбирает начальную позицию игрока вне решённых ящиков.
 const selectInitialPlayer = (board: TopologyBoard, goals: number[], random: Random) => {
   const blocked = new Set(goals)
-  const positions = Array.from(board.floors).filter((position) => !blocked.has(position))
+  const positions = Array.from(board.grounds).filter((position) => !blocked.has(position))
   return positions[randomInteger(random, 0, positions.length)]
 }
 
@@ -152,7 +152,7 @@ const tryCreatePull = (
   const nextBoxPosition = getAdjacentIndex(boxPosition, direction, board.width, board.height)
   const nextPlayer = getAdjacentIndex(boxPosition, direction, board.width, board.height, 2)
   if (nextBoxPosition === null || nextPlayer === null || !reachable.has(nextBoxPosition)) return null
-  if (!board.floors.has(nextPlayer) || occupied.has(nextPlayer)) return null
+  if (!board.grounds.has(nextPlayer) || occupied.has(nextPlayer)) return null
   return createPullState(state, boxIndex, direction, nextBoxPosition, nextPlayer)
 }
 
@@ -186,8 +186,8 @@ const getBeamWidth = (config: ReverseConfig, boxCount: number) => {
 }
 
 // Возвращает глубину обратного поиска для выбранной сложности.
-const getPullLimit = (config: ReverseConfig, boxCount: number, floorCount: number) => {
-  const desired = boxCount * config.pullsPerBox + Math.round(Math.sqrt(floorCount))
+const getPullLimit = (config: ReverseConfig, boxCount: number, groundCount: number) => {
+  const desired = boxCount * config.pullsPerBox + Math.round(Math.sqrt(groundCount))
   return Math.min(240, Math.max(10, desired))
 }
 
@@ -211,7 +211,7 @@ const searchFromGoals = (board: TopologyBoard, goals: number[], config: ReverseC
   const visited = new Set([createStateKey(initial)])
   const candidates: ReverseState[] = []
   let frontier = [initial]
-  const pullLimit = getPullLimit(config, goals.length, board.floors.size)
+  const pullLimit = getPullLimit(config, goals.length, board.grounds.size)
   for (let depth = 0; depth < pullLimit && frontier.length > 0; depth++) {
     const nextStates = frontier.flatMap((state) => getPullStates(state, board))
     const uniqueStates = nextStates.filter((state) => {

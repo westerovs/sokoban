@@ -1,6 +1,6 @@
 // Описывает структуру локаций, уровней и подготовленной конфигурации Sokoban.
 
-type LevelAppearance = Partial<Record<'box' | 'decor' | 'floor' | 'target' | 'wall', Record<string, string>>>
+type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, string>>>
 
 type LevelSolver = {
   verified: boolean

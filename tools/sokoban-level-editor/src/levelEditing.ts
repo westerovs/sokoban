@@ -5,14 +5,14 @@ import type {EditorBrush, EditorState, Position} from './editorTypes.js'
  * Сразу изменяет тип клетки и назначает выбранную пользователем текстуру.
  */
 
-const APPEARANCE_ROLES = Object.freeze(['wall', 'decor', 'floor', 'box', 'target']) // Визуальные слои, привязанные к клетке
+const APPEARANCE_ROLES = Object.freeze(['wall', 'decor', 'ground', 'box', 'target']) // Визуальные слои, привязанные к клетке
 
 // Возвращает тип основания клетки по символу карты.
 const getTerrain = (symbol: string) => {
   if (symbol === '_') return 'void'
   if (symbol === '#') return 'wall'
   if ('.-*'.includes(symbol)) return 'target'
-  return 'floor'
+  return 'ground'
 }
 
 // Возвращает объект, занимающий клетку карты.
@@ -78,7 +78,7 @@ const applyBlockingBrush = (
 }
 
 // Ставит выбранный пол, сохраняя находящийся на клетке объект.
-const applyFloorBrush = (
+const applyGroundBrush = (
   state: EditorState,
   brush: EditorBrush,
   position: Position,
@@ -88,7 +88,7 @@ const applyFloorBrush = (
   const oldSymbol = state.map[position.y][position.x]
   const occupant = getOccupant(oldSymbol)
   const isDecor = Boolean(state.appearance.decor?.[positionKey])
-  const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'floor'
+  const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'ground'
   const roles = isDecor ? ['wall', 'box', 'target'] : ['wall', 'decor', ...(occupant === 'box' ? [] : ['box'])]
   const map = isDecor ? state.map : setMapSymbol(state.map, position, composeSymbol(terrain, occupant))
   const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
@@ -119,7 +119,7 @@ const applyBoxBrush = (
   defaults: Record<string, string>,
 ) => {
   const oldTerrain = getTerrain(state.map[position.y][position.x])
-  const terrain = oldTerrain === 'target' ? 'target' : 'floor'
+  const terrain = oldTerrain === 'target' ? 'target' : 'ground'
   const roles = terrain === 'target' ? ['wall', 'decor'] : ['wall', 'decor', 'target']
   const map = setMapSymbol(state.map, position, composeSymbol(terrain, 'box'))
   const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
@@ -130,7 +130,7 @@ const applyBoxBrush = (
 const applyPlayerBrush = (state: EditorState, position: Position, positionKey: string) => {
   let map = removePlayer(state.map)
   const oldSymbol = map[position.y][position.x]
-  const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'floor'
+  const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'ground'
   map = setMapSymbol(map, position, composeSymbol(terrain, 'player'))
   const roles = terrain === 'target' ? ['wall', 'decor', 'box'] : ['wall', 'decor', 'box', 'target']
   const appearance = removeTileAppearances(state.appearance, positionKey, roles)
@@ -150,7 +150,7 @@ const applyEditorBrush = (state: EditorState, brush: EditorBrush, position: Posi
   if (brush.mode === 'void') return applyVoidBrush(state, position, positionKey)
   if (brush.mode === 'player') return applyPlayerBrush(state, position, positionKey)
   if (brush.role === 'wall' || brush.role === 'decor') return applyBlockingBrush(state, brush, position, positionKey, defaults)
-  if (brush.role === 'floor') return applyFloorBrush(state, brush, position, positionKey, defaults)
+  if (brush.role === 'ground') return applyGroundBrush(state, brush, position, positionKey, defaults)
   if (brush.role === 'target') return applyTargetBrush(state, brush, position, positionKey, defaults)
   return applyBoxBrush(state, brush, position, positionKey, defaults)
 }

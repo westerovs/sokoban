@@ -1,5 +1,5 @@
 import {DIRECTIONS, getAdjacentIndex, type Random, randomInteger, shuffle, toIndex} from './grid.js'
-import {createFloorMask, resolveGeneratedShape} from './shapeGeneration.js'
+import {createGroundMask, resolveGeneratedShape} from './shapeGeneration.js'
 
 /**
  * Создаёт связную геометрию произвольной формы с внутренними стенами и оценивает её вместимость.
@@ -21,7 +21,7 @@ type TopologyGrid = Array<Array<boolean | null>>
 type TopologyBoard = {
   width: number
   height: number
-  floors: Set<number>
+  grounds: Set<number>
   topology: string[]
 }
 
@@ -68,7 +68,7 @@ const OPEN_RECTANGLE_SIZES = Object.freeze([
 const SHAPE_ATTEMPTS = 18 // Число попыток получить пригодный внешний контур
 
 // Проверяет наличие пола рядом с клеткой, включая диагонали.
-const hasNeighboringFloor = (mask: boolean[][], x: number, y: number) => {
+const hasNeighboringGround = (mask: boolean[][], x: number, y: number) => {
   for (let offsetY = -1; offsetY <= 1; offsetY++) {
     for (let offsetX = -1; offsetX <= 1; offsetX++) {
       if (mask[y + offsetY]?.[x + offsetX]) return true
@@ -78,11 +78,11 @@ const hasNeighboringFloor = (mask: boolean[][], x: number, y: number) => {
 }
 
 // Превращает маску пола в сетку пола, стен и внешней пустоты.
-const createGridFromFloorMask = (mask: boolean[][]): TopologyGrid => {
+const createGridFromGroundMask = (mask: boolean[][]): TopologyGrid => {
   return mask.map((row, y) => {
-    return row.map((isFloor, x) => {
-      if (isFloor) return false
-      return hasNeighboringFloor(mask, x, y) ? true : null
+    return row.map((isGround, x) => {
+      if (isGround) return false
+      return hasNeighboringGround(mask, x, y) ? true : null
     })
   })
 }
@@ -95,24 +95,24 @@ const replaceGrid = (target: TopologyGrid, source: TopologyGrid) =>
   source.forEach((row, y) => row.forEach((value, x) => (target[y][x] = value)))
 
 // Возвращает количество клеток пола в сетке.
-const countFloorCells = (grid: TopologyGrid) => grid.reduce((total, row) => total + row.filter((cell) => cell === false).length, 0)
+const countGroundCells = (grid: TopologyGrid) => grid.reduce((total, row) => total + row.filter((cell) => cell === false).length, 0)
 
 // Возвращает соседние клетки пола для заданной позиции.
-const getFloorNeighbors = (grid: TopologyGrid, x: number, y: number) => {
+const getGroundNeighbors = (grid: TopologyGrid, x: number, y: number) => {
   return DIRECTIONS.filter((direction) => grid[y + direction.y]?.[x + direction.x] === false)
 }
 
 // Проверяет отсутствие бесполезных тупиков шириной в одну клетку.
-const hasFloorDeadEnd = (grid: TopologyGrid) => {
-  return grid.some((row, y) => row.some((cell, x) => cell === false && getFloorNeighbors(grid, x, y).length < 2))
+const hasGroundDeadEnd = (grid: TopologyGrid) => {
+  return grid.some((row, y) => row.some((cell, x) => cell === false && getGroundNeighbors(grid, x, y).length < 2))
 }
 
 // Считает клетки связной области пола от указанной позиции.
-const countReachableFloor = (grid: TopologyGrid, start: Position) => {
+const countReachableGround = (grid: TopologyGrid, start: Position) => {
   const visited = new Set([`${start.x}:${start.y}`])
   const queue = [start]
   for (let index = 0; index < queue.length; index++) {
-    getFloorNeighbors(grid, queue[index].x, queue[index].y).forEach((direction) => {
+    getGroundNeighbors(grid, queue[index].x, queue[index].y).forEach((direction) => {
       const next = {x: queue[index].x + direction.x, y: queue[index].y + direction.y}
       const key = `${next.x}:${next.y}`
       if (!visited.has(key)) {
@@ -125,16 +125,16 @@ const countReachableFloor = (grid: TopologyGrid, start: Position) => {
 }
 
 // Проверяет связность всего пола в сетке.
-const isFloorConnected = (grid: TopologyGrid) => {
+const isGroundConnected = (grid: TopologyGrid) => {
   const y = grid.findIndex((row) => row.includes(false))
   if (y < 0) return false
   const start = {x: grid[y].indexOf(false), y}
-  return countReachableFloor(grid, start) === countFloorCells(grid)
+  return countReachableGround(grid, start) === countGroundCells(grid)
 }
 
 // Проверяет пригодность сетки после добавления стен.
-const isUsableGrid = (grid: TopologyGrid, minimumFloorCount: number) => {
-  return countFloorCells(grid) >= minimumFloorCount && isFloorConnected(grid) && !hasFloorDeadEnd(grid)
+const isUsableGrid = (grid: TopologyGrid, minimumGroundCount: number) => {
+  return countGroundCells(grid) >= minimumGroundCount && isGroundConnected(grid) && !hasGroundDeadEnd(grid)
 }
 
 // Поворачивает точку шаблона на четверть оборота.
@@ -163,7 +163,7 @@ const getPatternSize = (pattern: readonly Position[]): Size => ({
 })
 
 // Пытается поставить один шаблон, не разрушая связность комнаты.
-const tryPlacePattern = (grid: TopologyGrid, pattern: readonly Position[], random: Random, minimumFloorCount: number) => {
+const tryPlacePattern = (grid: TopologyGrid, pattern: readonly Position[], random: Random, minimumGroundCount: number) => {
   const size = getPatternSize(pattern)
   const originX = randomInteger(random, 1, grid[0].length - size.width)
   const originY = randomInteger(random, 1, grid.length - size.height)
@@ -172,21 +172,21 @@ const tryPlacePattern = (grid: TopologyGrid, pattern: readonly Position[], rando
   if (cells.some((cell) => cell === null)) return false
   const changed = cells.some((cell) => cell === false)
   pattern.forEach(({x, y}) => (candidate[originY + y][originX + x] = true))
-  if (!changed || !isUsableGrid(candidate, minimumFloorCount)) return false
+  if (!changed || !isUsableGrid(candidate, minimumGroundCount)) return false
   replaceGrid(grid, candidate)
   return true
 }
 
 // Добавляет набор внутренних стен из базовых шаблонов.
 const addWallPatterns = (grid: TopologyGrid, wallDensity: number, random: Random) => {
-  const initialFloorCount = countFloorCells(grid)
-  const targetWalls = Math.round(initialFloorCount * wallDensity)
-  const minimumFloorCount = Math.max(8, Math.round(initialFloorCount * 0.72))
+  const initialGroundCount = countGroundCells(grid)
+  const targetWalls = Math.round(initialGroundCount * wallDensity)
+  const minimumGroundCount = Math.max(8, Math.round(initialGroundCount * 0.72))
   let placedWalls = 0
-  for (let attempt = 0; attempt < initialFloorCount * 12 && placedWalls < targetWalls; attempt++) {
+  for (let attempt = 0; attempt < initialGroundCount * 12 && placedWalls < targetWalls; attempt++) {
     const source = WALL_PATTERNS[randomInteger(random, 0, WALL_PATTERNS.length)]
     const pattern = createPatternVariant(source, random)
-    if (tryPlacePattern(grid, pattern, random, minimumFloorCount)) placedWalls += pattern.length
+    if (tryPlacePattern(grid, pattern, random, minimumGroundCount)) placedWalls += pattern.length
   }
 }
 
@@ -211,7 +211,7 @@ const findOpenRectangle = (grid: TopologyGrid): Rectangle | null => {
 }
 
 // Пытается разделить открытую площадку одной внутренней стеной.
-const tryBreakOpenRectangle = (grid: TopologyGrid, rectangle: Rectangle, random: Random, minimumFloorCount: number) => {
+const tryBreakOpenRectangle = (grid: TopologyGrid, rectangle: Rectangle, random: Random, minimumGroundCount: number) => {
   const positions: Position[] = []
   for (let y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
     for (let x = rectangle.x; x < rectangle.x + rectangle.width; x++) positions.push({x, y})
@@ -219,7 +219,7 @@ const tryBreakOpenRectangle = (grid: TopologyGrid, rectangle: Rectangle, random:
   return shuffle(positions, random).some(({x, y}) => {
     const candidate = cloneGrid(grid)
     candidate[y][x] = true
-    if (!isUsableGrid(candidate, minimumFloorCount)) return false
+    if (!isUsableGrid(candidate, minimumGroundCount)) return false
     replaceGrid(grid, candidate)
     return true
   })
@@ -227,10 +227,10 @@ const tryBreakOpenRectangle = (grid: TopologyGrid, rectangle: Rectangle, random:
 
 // Разбивает крупные открытые зоны, которые дают много простых вариантов ходов.
 const breakOpenAreas = (grid: TopologyGrid, random: Random) => {
-  const minimumFloorCount = Math.max(8, Math.round(countFloorCells(grid) * 0.82))
+  const minimumGroundCount = Math.max(8, Math.round(countGroundCells(grid) * 0.82))
   for (let attempt = 0; attempt < grid.length * grid[0].length; attempt++) {
     const rectangle = findOpenRectangle(grid)
-    if (!rectangle || !tryBreakOpenRectangle(grid, rectangle, random, minimumFloorCount)) return
+    if (!rectangle || !tryBreakOpenRectangle(grid, rectangle, random, minimumGroundCount)) return
   }
 }
 
@@ -240,9 +240,9 @@ const serializeGrid = (grid: TopologyGrid) => {
 }
 
 // Проверяет достаточный размер полезной области внешней формы.
-const hasEnoughFloor = (grid: TopologyGrid, width: number, height: number) => {
+const hasEnoughGround = (grid: TopologyGrid, width: number, height: number) => {
   const innerArea = (width - 2) * (height - 2)
-  return countFloorCells(grid) >= Math.max(12, Math.round(innerArea * 0.32))
+  return countGroundCells(grid) >= Math.max(12, Math.round(innerArea * 0.32))
 }
 
 // Проверяет, что внешний контур действительно отличается от прямоугольника.
@@ -250,8 +250,8 @@ const hasOuterVoid = (grid: TopologyGrid) => grid.some((row) => row.includes(nul
 
 // Создаёт одну пригодную сетку выбранной внешней формы.
 const tryCreateShapeGrid = (width: number, height: number, shape: string, random: Random): TopologyGrid | null => {
-  const grid = createGridFromFloorMask(createFloorMask(width, height, shape, random))
-  if (!hasOuterVoid(grid) || !hasEnoughFloor(grid, width, height) || !isUsableGrid(grid, 8)) return null
+  const grid = createGridFromGroundMask(createGroundMask(width, height, shape, random))
+  if (!hasOuterVoid(grid) || !hasEnoughGround(grid, width, height) || !isUsableGrid(grid, 8)) return null
   return grid
 }
 
@@ -281,13 +281,13 @@ const normalizeTopology = (map: string[]): string[] => {
 // Создаёт индексированное представление проходимых клеток структуры.
 const createTopologyBoard = (topology: string[]): TopologyBoard => {
   const width = topology[0].length
-  const floors = new Set<number>()
+  const grounds = new Set<number>()
   topology.forEach((row, y) => {
     Array.from(row).forEach((symbol, x) => {
-      if (!'_#'.includes(symbol)) floors.add(toIndex(x, y, width))
+      if (!'_#'.includes(symbol)) grounds.add(toIndex(x, y, width))
     })
   })
-  return {width, height: topology.length, floors, topology}
+  return {width, height: topology.length, grounds, topology}
 }
 
 // Проверяет наличие прямой для обратного вытягивания ящика с цели.
@@ -295,40 +295,40 @@ const hasPullLane = (position: number, board: TopologyBoard) => {
   return DIRECTIONS.some((direction) => {
     const first = getAdjacentIndex(position, direction, board.width, board.height)
     const second = getAdjacentIndex(position, direction, board.width, board.height, 2)
-    return first !== null && second !== null && board.floors.has(first) && board.floors.has(second)
+    return first !== null && second !== null && board.grounds.has(first) && board.grounds.has(second)
   })
 }
 
 // Возвращает клетки, подходящие для начального размещения целей.
-const getEligibleGoalPositions = (board: TopologyBoard) => Array.from(board.floors).filter((position) => hasPullLane(position, board))
+const getEligibleGoalPositions = (board: TopologyBoard) => Array.from(board.grounds).filter((position) => hasPullLane(position, board))
 
 // Возвращает безопасный максимум ящиков для текущей структуры.
 const getMaximumBoxCount = (board: TopologyBoard) => {
-  const movementCapacity = Math.floor((board.floors.size - 1) / 5)
+  const movementCapacity = Math.floor((board.grounds.size - 1) / 5)
   return Math.max(1, Math.min(movementCapacity, getEligibleGoalPositions(board).length))
 }
 
 // Подбирает количество ящиков по площади и выбранной сложности.
 const getRecommendedBoxCount = (board: TopologyBoard, config: TopologyConfig) => {
-  const desired = Math.max(config.minimumBoxes, Math.round(board.floors.size / config.boxAreaRatio))
+  const desired = Math.max(config.minimumBoxes, Math.round(board.grounds.size / config.boxAreaRatio))
   return Math.min(desired, getMaximumBoxCount(board))
 }
 
 // Проверяет, что все клетки пола принадлежат одной связной области.
 const isTopologyConnected = (board: TopologyBoard) => {
-  const start = board.floors.values().next().value
+  const start = board.grounds.values().next().value
   if (start === undefined) return false
   const visited = new Set([start])
   const queue = [start]
   for (let index = 0; index < queue.length; index++) {
     DIRECTIONS.forEach((direction) => {
       const next = getAdjacentIndex(queue[index], direction, board.width, board.height)
-      if (next === null || !board.floors.has(next) || visited.has(next)) return
+      if (next === null || !board.grounds.has(next) || visited.has(next)) return
       visited.add(next)
       queue.push(next)
     })
   }
-  return visited.size === board.floors.size
+  return visited.size === board.grounds.size
 }
 
 export {

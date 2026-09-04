@@ -14,17 +14,17 @@ type Rectangle = Position & {
   height: number
 }
 
-type FloorMask = boolean[][]
+type GroundMask = boolean[][]
 
 const GENERATED_SHAPES = Object.freeze(['compact', 'rooms', 'winding']) // Конкретные формы для случайного режима
 const MIN_ROOM_SIZE = 3 // Минимальная сторона отдельной комнаты
 const CORRIDOR_WIDTH = 2 // Ширина соединений, безопасная для движения ящиков
 
 // Создаёт пустую маску доступного пространства.
-const createEmptyMask = (width: number, height: number): FloorMask => Array.from({length: height}, () => Array<boolean>(width).fill(false))
+const createEmptyMask = (width: number, height: number): GroundMask => Array.from({length: height}, () => Array<boolean>(width).fill(false))
 
 // Заполняет прямоугольный участок маски заданным значением.
-const fillRectangle = (mask: FloorMask, rectangle: Rectangle, value = true) => {
+const fillRectangle = (mask: GroundMask, rectangle: Rectangle, value = true) => {
   for (let y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
     for (let x = rectangle.x; x < rectangle.x + rectangle.width; x++) mask[y][x] = value
   }
@@ -57,7 +57,7 @@ const createRandomRoom = (width: number, height: number, random: Random): Rectan
 const getCorridorOrigin = (coordinate: number, limit: number) => clamp(coordinate - 1, 1, limit - CORRIDOR_WIDTH - 1)
 
 // Прокладывает горизонтальный проход между двумя координатами.
-const carveHorizontalCorridor = (mask: FloorMask, firstX: number, secondX: number, y: number) => {
+const carveHorizontalCorridor = (mask: GroundMask, firstX: number, secondX: number, y: number) => {
   const startX = Math.min(firstX, secondX)
   fillRectangle(mask, {
     x: startX,
@@ -68,7 +68,7 @@ const carveHorizontalCorridor = (mask: FloorMask, firstX: number, secondX: numbe
 }
 
 // Прокладывает вертикальный проход между двумя координатами.
-const carveVerticalCorridor = (mask: FloorMask, firstY: number, secondY: number, x: number) => {
+const carveVerticalCorridor = (mask: GroundMask, firstY: number, secondY: number, x: number) => {
   const startY = Math.min(firstY, secondY)
   fillRectangle(mask, {
     x: getCorridorOrigin(x, mask[0].length),
@@ -79,7 +79,7 @@ const carveVerticalCorridor = (mask: FloorMask, firstY: number, secondY: number,
 }
 
 // Соединяет две точки Г-образным широким проходом.
-const connectPoints = (mask: FloorMask, first: Position, second: Position, random: Random) => {
+const connectPoints = (mask: GroundMask, first: Position, second: Position, random: Random) => {
   if (random() < 0.5) {
     carveHorizontalCorridor(mask, first.x, second.x, first.y)
     carveVerticalCorridor(mask, first.y, second.y, second.x)
@@ -106,7 +106,7 @@ const createEdgeNotch = (width: number, height: number, side: number, random: Ra
 }
 
 // Создаёт единую область с асимметричными выемками по краям.
-const createCompactMask = (width: number, height: number, random: Random): FloorMask => {
+const createCompactMask = (width: number, height: number, random: Random): GroundMask => {
   const mask = createEmptyMask(width, height)
   fillRectangle(mask, {x: 1, y: 1, width: width - 2, height: height - 2})
   const notchCount = Math.max(2, Math.round((width + height) / 8))
@@ -123,7 +123,7 @@ const getRoomCount = (width: number, height: number) => {
 }
 
 // Создаёт несколько перекрывающихся комнат с широкими переходами.
-const createRoomsMask = (width: number, height: number, random: Random): FloorMask => {
+const createRoomsMask = (width: number, height: number, random: Random): GroundMask => {
   const mask = createEmptyMask(width, height)
   let previousCenter: Position | null = null
   for (let index = 0; index < getRoomCount(width, height); index++) {
@@ -137,7 +137,7 @@ const createRoomsMask = (width: number, height: number, random: Random): FloorMa
 }
 
 // Создаёт небольшую комнату вокруг узловой точки извилистой структуры.
-const carveWaypointRoom = (mask: FloorMask, point: Position, random: Random) => {
+const carveWaypointRoom = (mask: GroundMask, point: Position, random: Random) => {
   const width = randomBetween(random, MIN_ROOM_SIZE, Math.min(5, mask[0].length - 2))
   const height = randomBetween(random, MIN_ROOM_SIZE, Math.min(5, mask.length - 2))
   const x = clamp(point.x - Math.floor(width / 2), 1, mask[0].length - width - 1)
@@ -158,7 +158,7 @@ const getWaypointCount = (width: number, height: number) => {
 }
 
 // Создаёт ветвистую область из широких коридоров и небольших комнат.
-const createWindingMask = (width: number, height: number, random: Random): FloorMask => {
+const createWindingMask = (width: number, height: number, random: Random): GroundMask => {
   const mask = createEmptyMask(width, height)
   let current = {x: Math.floor(width / 2), y: Math.floor(height / 2)}
   carveWaypointRoom(mask, current, random)
@@ -178,13 +178,13 @@ const resolveGeneratedShape = (shape: string, random: Random) => {
 }
 
 // Создаёт маску пола выбранной формы.
-const createFloorMask = (width: number, height: number, shape: string, random: Random): FloorMask => {
+const createGroundMask = (width: number, height: number, shape: string, random: Random): GroundMask => {
   if (shape === 'compact') return createCompactMask(width, height, random)
   if (shape === 'rooms') return createRoomsMask(width, height, random)
   return createWindingMask(width, height, random)
 }
 
 export {
-  createFloorMask, // Создание маски пола выбранной формы
+  createGroundMask, // Создание маски пола выбранной формы
   resolveGeneratedShape, // Выбор конкретной формы
 }
