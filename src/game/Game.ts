@@ -35,7 +35,7 @@ export default class Game extends EventEmitter {
   clearLevelCache?: () => void
   #app!: Application
   #states: BaseState[] = []
-  #stateAfterPreload = GAME_STATES.gameState
+  #stateAfterPreload = GAME_STATES.levelPreload
   #gameContainer!: GameContainer
   #locale: string | undefined
   #currentStateName: string | undefined
