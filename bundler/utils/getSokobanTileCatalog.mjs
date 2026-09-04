@@ -19,16 +19,47 @@ const TILE_SOURCE_ROUTE = '/__sokoban-level-editor/tile'
 // Возвращает имя текстуры без расширения файла.
 const getTextureName = (fileName) => path.basename(fileName, path.extname(fileName))
 
-// Возвращает отсортированные имена PNG-текстур из папки.
-const getTextureNames = (directoryPath) => {
-  if (!fs.existsSync(directoryPath)) return []
+// Рекурсивно собирает PNG-текстуры из папки и всех её подпапок.
+const readTextureFiles = (rootPath, currentPath = rootPath) => {
+  if (!fs.existsSync(currentPath)) return []
 
-  return fs
-    .readdirSync(directoryPath, {withFileTypes: true})
-    .filter((entry) => entry.isFile() && TILE_FILE_PATTERN.test(entry.name))
-    .map((entry) => getTextureName(entry.name))
-    .sort((first, second) => first.localeCompare(second, 'en', {numeric: true}))
+  return fs.readdirSync(currentPath, {withFileTypes: true}).flatMap((entry) => {
+    const entryPath = path.join(currentPath, entry.name)
+    if (entry.isDirectory()) return readTextureFiles(rootPath, entryPath)
+    if (!entry.isFile() || !TILE_FILE_PATTERN.test(entry.name)) return []
+
+    return [
+      {
+        texture: getTextureName(entry.name),
+        filePath: entryPath,
+        relativePath: path.relative(rootPath, entryPath),
+      },
+    ]
+  })
 }
+
+// Проверяет уникальность коротких имён, используемых TexturePacker в атласе.
+const getTextureFiles = (directoryPath) => {
+  const files = readTextureFiles(directoryPath)
+  const fileByTexture = new Map()
+
+  files.forEach((file) => {
+    const existing = fileByTexture.get(file.texture)
+    if (!existing) {
+      fileByTexture.set(file.texture, file)
+      return
+    }
+
+    throw new Error(
+      `[SokobanTileCatalog]: duplicate texture '${file.texture}': ${existing.relativePath} and ${file.relativePath}`,
+    )
+  })
+
+  return files.sort((first, second) => first.texture.localeCompare(second.texture, 'en', {numeric: true}))
+}
+
+// Возвращает отсортированные имена PNG-текстур из папки и её подпапок.
+const getTextureNames = (directoryPath) => getTextureFiles(directoryPath).map(({texture}) => texture)
 
 // Выбирает нумерованную первую текстуру роли или первый найденный вариант.
 const getDefaultTexture = (role, textures) => {
@@ -65,14 +96,14 @@ const getSokobanTileCatalog = (projectRoot) => {
   }
 }
 
-// Безопасно разрешает путь к исходному тайлу редактора.
+// Безопасно разрешает путь к исходному тайлу редактора, включая вложенные папки.
 const getSokobanTileSourcePath = (projectRoot, role, texture) => {
   const directory = TILE_GROUP_DIRECTORIES[role]
   if (!directory || getTextureName(texture) !== texture) return null
 
-  const catalog = getSokobanTileCatalog(projectRoot)
-  if (!catalog.groups[role].includes(texture)) return null
-  return path.resolve(projectRoot, 'raw-assets', 'ui', 'levelUi{m}{tps}', 'tiles', directory, `${texture}.png`)
+  const directoryPath = path.resolve(projectRoot, 'raw-assets', 'ui', 'levelUi{m}{tps}', 'tiles', directory)
+  const file = getTextureFiles(directoryPath).find((entry) => entry.texture === texture)
+  return file?.filePath ?? null
 }
 
 export {getSokobanTileCatalog, getSokobanTileSourcePath}
