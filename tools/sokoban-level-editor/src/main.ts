@@ -12,7 +12,9 @@ import {applyEditorBrush, applyEditorFill} from './levelEditing.js'
 import LevelGeneratorPanel from './LevelGeneratorPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
+import TileTransformControls from './TileTransformControls.js'
 import ValidationPanel from './ValidationPanel.js'
+import './tileTransforms.css'
 
 /**
  * Инициализирует полноэкранный редактор и связывает прямые кисти с данными уровня.
@@ -58,6 +60,7 @@ let selectedLevel: EditorLevel | null = null
 let selectedBrushLabel = 'Выберите кисть'
 let session: EditorSession | null = null
 let statusTimer: ReturnType<typeof setTimeout> | null = null
+let transformControls: TileTransformControls | null = null
 let validationPanel: ValidationPanel
 
 // Возвращает безопасный текст перехваченной ошибки.
@@ -85,6 +88,7 @@ const isFillBrush = (brush: EditorBrush | null): brush is EditorBrush => {
 // Синхронизирует доступность заливки с текущей сессией и режимом редактора.
 const updateFillButton = () => {
   elements.fillButton.disabled = !session || elements.manualToolsPanel.hidden || !isFillBrush(selectedBrush)
+  transformControls?.update(selectedBrush, Boolean(session), !elements.manualToolsPanel.hidden)
 }
 
 // Отрисовывает карту, проверку и доступность команд истории.
@@ -393,6 +397,7 @@ const init = async () => {
     validationPanel = new ValidationPanel(elements.validationSummary)
     await createBoard()
     palette = new EditorPalette(elements.utilityPalette, elements.modeTabs, elements.palette, SOKOBAN_TILE_CATALOG, selectBrush)
+    transformControls = new TileTransformControls(elements.fillButton, elements.palette, selectBrush)
     generatorPanel = new LevelGeneratorPanel(elements.generatorPanel, generateLevel)
     const navigation = new LevelNavigation(
       elements.locationSelect,

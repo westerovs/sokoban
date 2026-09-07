@@ -1,3 +1,5 @@
+import type {TileAppearance, TileTransform} from '../../../src/game/sokoban/appearance/tileAppearance.js'
+
 /**
  * Описывает простые структуры данных браузерного редактора уровней Sokoban.
  */
@@ -16,7 +18,7 @@ type Bounds = {
   maxY: number
 }
 
-type LevelAppearance = Record<string, Record<string, string> | undefined>
+type LevelAppearance = Record<string, Record<string, TileAppearance> | undefined>
 
 type AppearanceCatalog = {
   levels: Record<string, LevelAppearance>
@@ -40,6 +42,7 @@ type EditorBrush = {
   label: string
   role?: string
   texture?: string
+  transform?: TileTransform
 }
 
 type ValidationIssue = {

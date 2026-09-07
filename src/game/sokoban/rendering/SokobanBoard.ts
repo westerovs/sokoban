@@ -5,11 +5,13 @@ import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '../../engine/Locator.ts'
 import {WORLD} from '../../gameConfig/constants.js'
 import type {LevelAppearance} from '../../gameConfig/levels/levelTypes.js'
+import {getTileTexture} from '../appearance/tileAppearance.js'
 import type {SokobanDirectionName} from '../config/config.js'
 import {ROTATED_DIRECTIONS, SOKOBAN_TEXTURES} from '../config/config.js'
 import {SOKOBAN_SETTINGS} from '../config/settings.js'
 import type {PushedBox, SokobanMoveResult, SokobanPosition} from '../gameplay/SokobanLevel.js'
 import SokobanLevel from '../gameplay/SokobanLevel.js'
+import {applyTileTransform} from './applyTileTransform.js'
 import {applyTileVisualScale} from './applyTileVisualScale.js'
 import SokobanBoxView from './SokobanBoxView.js'
 
@@ -232,6 +234,7 @@ export default class SokobanBoard extends Container {
 
     tile.position.copyFrom(this.#getTileVisualPosition(position))
     applyTileVisualScale(tile, this.#tileSize)
+    applyTileTransform(tile, this.#appearance[type]?.[`${position.x}:${position.y}`])
     return tile
   }
 
@@ -239,7 +242,8 @@ export default class SokobanBoard extends Container {
   #createBoxes() {
     this.#level.boxes.forEach((box) => {
       const textureName = this.#getTextureName('box', box)
-      const boxView = new SokobanBoxView(box.id, this.#tileSize, textureName)
+      const appearance = this.#appearance.box?.[`${box.x}:${box.y}`]
+      const boxView = new SokobanBoxView(box.id, this.#tileSize, textureName, appearance)
       this.#boxViews.set(box.id, boxView)
       this.#boxesContainer.addChild(boxView)
     })
@@ -248,12 +252,12 @@ export default class SokobanBoard extends Container {
   // Возвращает назначенную клетке текстуру или значение по умолчанию.
   #getTextureName(type: TileTextureType, position: SokobanPosition) {
     const positionKey = `${position.x}:${position.y}`
-    return this.#appearance[type]?.[positionKey] ?? SOKOBAN_TEXTURES[type]
+    return getTileTexture(this.#appearance[type]?.[positionKey]) ?? SOKOBAN_TEXTURES[type]
   }
 
   // Возвращает текстуру декоративной стены только для явно оформленной клетки.
   #getDecorTextureName(position: SokobanPosition) {
-    return this.#appearance.decor?.[`${position.x}:${position.y}`] ?? null
+    return getTileTexture(this.#appearance.decor?.[`${position.x}:${position.y}`]) ?? null
   }
 
   // Создаёт и размещает спрайт игрока.

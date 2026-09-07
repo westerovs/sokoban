@@ -1,3 +1,4 @@
+import {createTileAppearance} from '../../../src/game/sokoban/appearance/tileAppearance.js'
 import type {AppearanceCatalog, EditorBrush, LevelAppearance} from './editorTypes.js'
 
 /**
@@ -22,10 +23,11 @@ const setTileAppearance = (appearance: LevelAppearance, brush: EditorBrush, posi
   const nextAppearance = cloneAppearance(appearance)
   const role = brush.role as string
   const texture = brush.texture as string
+  const tileAppearance = createTileAppearance(texture, brush.transform)
   const roleAppearance = (nextAppearance[role] ??= {})
 
-  if (texture === defaults[role] && role !== 'decor') delete roleAppearance[positionKey]
-  else roleAppearance[positionKey] = texture
+  if (tileAppearance === defaults[role] && role !== 'decor') delete roleAppearance[positionKey]
+  else roleAppearance[positionKey] = tileAppearance
   removeEmptyRole(nextAppearance, role)
   return nextAppearance
 }

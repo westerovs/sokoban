@@ -1,0 +1,30 @@
+.editor-tools__buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.editor-tools__buttons > .editor-button {
+  flex: none;
+  padding: 0;
+}
+
+.editor-transform-button[aria-pressed='true'] {
+  color: #1c2915;
+  background: #b8df61;
+  border-color: #d4f28d;
+}
+
+.editor-tools {
+  flex-shrink: 0;
+}
+
+.editor-title {
+  min-width: 0;
+}
+
+@media (min-width: 1201px) {
+  .editor-header {
+    grid-template-columns: max-content minmax(140px, 230px) minmax(160px, 300px) minmax(0, 1fr);
+  }
+}

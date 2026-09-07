@@ -1,6 +1,8 @@
+import type {TileAppearance} from '../../sokoban/appearance/tileAppearance.js'
+
 // Описывает структуру локаций, уровней и подготовленной конфигурации Sokoban.
 
-type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, string>>>
+type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, TileAppearance>>>
 
 type LevelSolver = {
   verified: boolean

@@ -1,5 +1,7 @@
 import {Container, Graphics, Rectangle, Sprite, type Texture} from 'pixi.js'
+import {getTileTexture} from '@/game/sokoban/appearance/tileAppearance.js'
 import {SOKOBAN_TEXTURES} from '@/game/sokoban/config/config.js'
+import {applyTileTransform} from '@/game/sokoban/rendering/applyTileTransform.js'
 import {applyTileVisualScale} from '@/game/sokoban/rendering/applyTileVisualScale.js'
 import {getContentBounds} from './editorGrid.js'
 import type {Bounds, EditorBrush, EditorLevel, LevelAppearance, Position} from './editorTypes.js'
@@ -229,6 +231,7 @@ export default class EditorBoard extends Container {
     sprite.position.set((position.x + 0.5) * TILE_SIZE, (position.y + 1) * TILE_SIZE)
     sprite.zIndex = this.#getRoleDepth(role, position.y)
     applyTileVisualScale(sprite, TILE_SIZE)
+    applyTileTransform(sprite, this.#appearance[role]?.[`${position.x}:${position.y}`])
     return sprite
   }
 
@@ -264,12 +267,12 @@ export default class EditorBoard extends Container {
 
   // Возвращает данные, за которые отвечает операция `getTextureName`.
   #getTextureName(role: string, position: Position) {
-    return this.#appearance[role]?.[`${position.x}:${position.y}`] ?? this.#defaults[role]
+    return getTileTexture(this.#appearance[role]?.[`${position.x}:${position.y}`]) ?? this.#defaults[role]
   }
 
   // Возвращает текстуру декоративной стены только для явно оформленной клетки.
   #getDecorTextureName(position: Position) {
-    return this.#appearance.decor?.[`${position.x}:${position.y}`] ?? null
+    return getTileTexture(this.#appearance.decor?.[`${position.x}:${position.y}`]) ?? null
   }
 
   // Выполняет отдельную операцию `startPainting`.

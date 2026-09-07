@@ -5,6 +5,7 @@ import process from 'node:process'
 import {fileURLToPath} from 'node:url'
 import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
+import {getTileTexture, isTileAppearance} from '../../src/game/sokoban/appearance/tileAppearance.ts'
 import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
@@ -313,8 +314,12 @@ const validateAppearanceRole = (level, appearance, role, overrides, tileCatalog)
     throw new Error(`${level.id}: оформление ${role} должно быть объектом`)
   }
 
-  Object.entries(overrides).forEach(([positionKey, texture]) => {
+  Object.entries(overrides).forEach(([positionKey, tileAppearance]) => {
     validateAppearancePosition(level, appearance, role, positionKey)
+    if (!isTileAppearance(tileAppearance)) {
+      throw new Error(`${level.id}: недопустимое оформление ${role} в клетке ${positionKey}`)
+    }
+    const texture = getTileTexture(tileAppearance)
     if (!tileCatalog.groups[role].includes(texture)) {
       throw new Error(`${level.id}: текстура ${texture} не входит в каталог ${role}`)
     }
