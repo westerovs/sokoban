@@ -87,6 +87,8 @@ export default class SokobanBoard extends Container {
 
     this.#isRotated = shouldRotate
     this.rotation = shouldRotate ? Math.PI / 2 : 0
+    this.#updatePlayerRotation()
+    this.#updatePlayer()
     this.scale.set(boardScale)
     this.position.set(WORLD.HALF_W, this.#getBoardCenterY())
   }
@@ -138,6 +140,11 @@ export default class SokobanBoard extends Container {
   // Проверяет, требуется ли визуально повернуть высокую доску.
   #shouldRotate() {
     return SOKOBAN_SETTINGS.rotateTallBoardInLandscape && this.#level.height > this.#level.width && WORLD.isLandscape
+  }
+
+  // Компенсирует поворот доски, чтобы игрок всегда оставался вертикальным.
+  #updatePlayerRotation() {
+    this.#player.rotation = -this.rotation
   }
 
   // Возвращает отображаемые размеры с учётом поворота доски.
@@ -301,7 +308,17 @@ export default class SokobanBoard extends Container {
 
   // Возвращает экранную позицию игрока.
   #getPlayerPixelPosition() {
+    if (this.#isRotated) return this.#getRotatedPlayerPixelPosition()
     return this.#getTileVisualPosition(this.#level.playerPosition)
+  }
+
+  // Возвращает позицию якоря игрока у нижней границы экранной клетки после поворота.
+  #getRotatedPlayerPixelPosition() {
+    const {x, y} = this.#level.playerPosition
+    return {
+      x: (x + 1) * this.#tileSize,
+      y: (y + 0.5) * this.#tileSize,
+    }
   }
 
   // Возвращает экранную позицию ящика.
@@ -355,9 +372,12 @@ export default class SokobanBoard extends Container {
     this.#updatePlayerDepth()
   }
 
-  // zIndex обновляется на каждом ходу, чтобы игрок корректно проходил между рядами стен.
-  // Устанавливает глубину игрока по текущему ряду.
+  // Устанавливает глубину игрока с учётом ориентации доски.
   #updatePlayerDepth() {
+    if (this.#isRotated) {
+      this.#player.zIndex = this.#getWallRowDepth(this.#level.height)
+      return
+    }
     this.#player.zIndex = this.#getWallRowDepth(this.#level.playerPosition.y) + BOARD_Z_INDEX.playerRowOffset
   }
 
