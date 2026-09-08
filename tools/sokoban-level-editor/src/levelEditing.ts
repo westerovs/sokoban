@@ -65,7 +65,7 @@ const replaceAppearance = (
   return setTileAppearance(cleared, brush, positionKey, defaults)
 }
 
-// Ставит обычную или декоративную стену и полностью очищает прежнее содержимое клетки.
+// Ставит стену, сохраняя явно выбранный пол под обычной стеной.
 const applyBlockingBrush = (
   state: EditorState,
   brush: EditorBrush,
@@ -74,7 +74,8 @@ const applyBlockingBrush = (
   defaults: Record<string, string>,
 ) => {
   const map = setMapSymbol(state.map, position, '#')
-  const appearance = replaceAppearance(state, brush, positionKey, APPEARANCE_ROLES, defaults)
+  const roles = brush.role === 'wall' ? APPEARANCE_ROLES.filter((role) => role !== 'ground') : APPEARANCE_ROLES
+  const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
   return {state: {...state, map, appearance}}
 }
 
@@ -88,10 +89,10 @@ const applyGroundBrush = (
 ) => {
   const oldSymbol = state.map[position.y][position.x]
   const occupant = getOccupant(oldSymbol)
-  const isDecor = Boolean(state.appearance.decor?.[positionKey])
+  const isWall = oldSymbol === '#'
   const terrain = getTerrain(oldSymbol) === 'target' ? 'target' : 'ground'
-  const roles = isDecor ? ['wall', 'box', 'target'] : ['wall', 'decor', ...(occupant === 'box' ? [] : ['box'])]
-  const map = isDecor ? state.map : setMapSymbol(state.map, position, composeSymbol(terrain, occupant))
+  const roles = isWall ? ['box', 'target'] : ['wall', 'decor', ...(occupant === 'box' ? [] : ['box'])]
+  const map = isWall ? state.map : setMapSymbol(state.map, position, composeSymbol(terrain, occupant))
   const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
   return {state: {...state, map, appearance}}
 }
@@ -162,7 +163,7 @@ const isFillPosition = (state: EditorState, role: string, position: Position) =>
   if (role === 'wall') return symbol === '#'
   if (role === 'box') return '$-'.includes(symbol)
   const positionKey = `${position.x}:${position.y}`
-  return symbol !== '_' && (symbol !== '#' || Boolean(state.appearance.decor?.[positionKey]))
+  return symbol !== '_' && (symbol !== '#' || Boolean(state.appearance.decor?.[positionKey] || state.appearance.ground?.[positionKey]))
 }
 
 // Возвращает все клетки, к которым применима выбранная роль заливки.
@@ -181,4 +182,10 @@ const applyEditorFill = (state: EditorState, brush: EditorBrush, defaults: Recor
   return {state: nextState}
 }
 
-export {applyEditorBrush, applyEditorFill, composeSymbol, getOccupant, getTerrain}
+export {
+  applyEditorBrush,
+  applyEditorFill,
+  composeSymbol,
+  getOccupant,
+  getTerrain,
+}

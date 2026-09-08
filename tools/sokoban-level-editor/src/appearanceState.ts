@@ -24,7 +24,7 @@ const setTileAppearance = (appearance: LevelAppearance, brush: EditorBrush, posi
   const texture = brush.texture as string
   const roleAppearance = (nextAppearance[role] ??= {})
 
-  if (texture === defaults[role] && role !== 'decor') delete roleAppearance[positionKey]
+  if (texture === defaults[role] && role !== 'decor' && role !== 'ground') delete roleAppearance[positionKey]
   else roleAppearance[positionKey] = texture
   removeEmptyRole(nextAppearance, role)
   return nextAppearance
@@ -40,4 +40,8 @@ const removeTileAppearances = (appearance: LevelAppearance, positionKey: string,
   return nextAppearance
 }
 
-export {getLevelAppearance, removeTileAppearances, setTileAppearance}
+export {
+  getLevelAppearance,
+  removeTileAppearances,
+  setTileAppearance,
+}
