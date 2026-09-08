@@ -72,6 +72,7 @@ const PLATFORM_SCENARIOS = {
   // режим для сайтов, собирается из base адаптера
   BASE: {
     noStore: true,
+    skipFirstScreen: true, // если true - грузится сразу уровень
   },
   CRAZY_GAMES: {
     noStore: true,
