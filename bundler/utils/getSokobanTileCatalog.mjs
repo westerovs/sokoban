@@ -85,7 +85,7 @@ const getSokobanTileCatalog = (projectRoot) => {
 
   validateTileGroups(groups)
   return {
-    atlas: '/assets/ui/tiles/tiles.webp.json', // Путь к атласу внутри исходной папки тайлов
+    atlas: '/assets/ui/tiles/tiles.png.json', // PNG сохраняет цвета краёв тайлов при загрузке редактора
     groups,
     sources: Object.fromEntries(
       Object.entries(groups).map(([role, textures]) => {

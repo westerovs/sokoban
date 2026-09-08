@@ -88,7 +88,7 @@ export default class InitialLoad {
   #createUiSpriteSheet = async () => {
     await Promise.all([
       LoadUtils.loadSpriteSheet({spriteSheetName: 'levelUi'}),
-      LoadUtils.loadSpriteSheet({spriteSheetName: 'tiles'}),
+      LoadUtils.loadSpriteSheet({spriteSheetName: 'tiles', exists: 'png'}), // Исключает искажение краёв тайлов сжатием WebP
     ])
 
     // фоновая загрузка

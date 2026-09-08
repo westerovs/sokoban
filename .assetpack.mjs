@@ -2,6 +2,7 @@ import {createRequire} from 'node:module'
 import {audio as createAudioPipe} from '@assetpack/core/ffmpeg'
 import {pixiPipes} from '@assetpack/core/pixi'
 import {atlasFolders} from './bundler/utils/atlasFolders.mjs'
+import {withTileAtlasExtrusion} from './bundler/utils/extrudeTileAtlas.mjs'
 import {ATLAS_RESOLUTIONS} from './src/game/gameConfig/resolutionConfig.ts'
 
 /**
@@ -147,7 +148,7 @@ export default {
       texturePacker: {
         texturePacker: {
           nameStyle: 'short', // использовать короткие имена фреймов в атласе
-          padding: 1, // отступ между спрайтами в атласе в пикселях
+          padding: 2, // отступ между спрайтами в атласе в пикселях
           allowRotation: true, // разрешить поворот спрайтов для плотной упаковки
           allowTrim: true, // обрезать прозрачные края у изображений
           alphaThreshold: 0, // порог прозрачности при обрезке изображения
@@ -160,7 +161,7 @@ export default {
       manifest: {
         output: './.assetpack/manifest.json', // путь для сохранения сгенерированного manifest-файла
       },
-    }).map(replaceAudioPipe),
+    }).map(replaceAudioPipe).map(withTileAtlasExtrusion),
     ...(tinifyKey ? [tinifyAtlases] : []), // подключить Tinify-сжатие атласов, если задан API-ключ
   ],
 }
