@@ -1,6 +1,7 @@
 import {createRequire} from 'node:module'
 import {audio as createAudioPipe} from '@assetpack/core/ffmpeg'
 import {pixiPipes} from '@assetpack/core/pixi'
+import {atlasFolders} from './bundler/utils/atlasFolders.mjs'
 import {ATLAS_RESOLUTIONS} from './src/game/gameConfig/resolutionConfig.ts'
 
 /**
@@ -132,6 +133,7 @@ export default {
   strict: true,
   assetSettings: audioAssetSettings,
   pipes: [
+    atlasFolders,
     ...pixiPipes({
       cacheBust: false, // не добавляет хеш версии к именам файлов
       resolutions: ATLAS_RESOLUTIONS, // список разрешений атласов, например 1x, 0.5x, 0.25x

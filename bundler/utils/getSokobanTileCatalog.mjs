@@ -85,7 +85,7 @@ const getSokobanTileCatalog = (projectRoot) => {
 
   validateTileGroups(groups)
   return {
-    atlas: '/assets/ui/tiles.webp.json',
+    atlas: '/assets/ui/tiles/tiles.webp.json', // Путь к атласу внутри исходной папки тайлов
     groups,
     sources: Object.fromEntries(
       Object.entries(groups).map(([role, textures]) => {

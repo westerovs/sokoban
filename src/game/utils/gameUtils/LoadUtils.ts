@@ -66,7 +66,11 @@ export default class LoadUtils {
   }
 
   // Загружает и кеширует спрайтшит по имени и папке.
-  static loadSpriteSheet = async ({spriteSheetName, folderPath = 'ui', exists = GameUtils.checkWebp('png')}: SpriteSheetOptions) => {
+  static loadSpriteSheet = async ({
+    spriteSheetName,
+    folderPath = `ui/${spriteSheetName}`,
+    exists = GameUtils.checkWebp('png'),
+  }: SpriteSheetOptions) => {
     const basePath = ASSETS_URL.local
     const atlasName = `${spriteSheetName}${getAtlasResolutionSuffix()}.${exists}`
     const cacheKey = `${folderPath}/${atlasName}`
