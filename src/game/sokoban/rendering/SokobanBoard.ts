@@ -1,6 +1,6 @@
 import {gsap} from 'gsap'
 import type {DestroyOptions, Sprite} from 'pixi.js'
-import {Container, Graphics, Rectangle} from 'pixi.js'
+import {Container, Rectangle} from 'pixi.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import Locator from '../../engine/Locator.ts'
 import {WORLD} from '../../gameConfig/constants.js'
@@ -22,7 +22,6 @@ const BOARD_Z_INDEX = {
   boxes: 1, // Базовая глубина контейнера ящиков
   firstDepthRow: 2, // Глубина первого ряда стен
   playerRowOffset: 1, // Смещение игрока поверх стены текущего ряда
-  deadlockHighlight: SOKOBAN_SETTINGS.maxBoardRows * 2 + 2, // Глубина подсветки тупика поверх всей доски
 }
 
 type TileTextureType = Exclude<keyof typeof SOKOBAN_TEXTURES, 'player'>
@@ -39,8 +38,7 @@ export default class SokobanBoard extends Container {
   #boxViews = new Map<string, SokobanBoxView>()
   #player!: Sprite
   #movementTimeline: gsap.core.Timeline | null = null
-  #deadlockHighlight!: Graphics
-  #deadlockTimeline: gsap.core.Timeline | null = null
+  #deadlockedBoxView: SokobanBoxView | null = null
   #isRotated = false
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
@@ -58,17 +56,19 @@ export default class SokobanBoard extends Container {
   // Синхронизирует положение игрока и ящиков с моделью.
   update() {
     this.#killMovementTimeline()
-    this.#hideDeadlockHighlight()
+    this.#clearDeadlock()
     this.#updateBoxes()
     this.#updatePlayer()
   }
 
-  // Показывает подсветку клетки с застрявшим ящиком.
+  // Показывает предупреждающее окрашивание застрявшего ящика.
   showDeadlock(position: SokobanPosition) {
-    this.#hideDeadlockHighlight()
-    this.#deadlockHighlight.position.set(position.x * this.#tileSize, position.y * this.#tileSize)
-    this.#deadlockHighlight.visible = true
-    this.#deadlockTimeline = this.#createDeadlockTimeline()
+    this.#clearDeadlock()
+    const box = this.#level.boxes.find(({x, y}) => x === position.x && y === position.y)
+    if (!box) return
+
+    this.#deadlockedBoxView = this.#boxViews.get(box.id) ?? null
+    this.#deadlockedBoxView?.showDeadlock()
   }
 
   // Анимирует перемещение игрока и при необходимости ящика.
@@ -116,7 +116,7 @@ export default class SokobanBoard extends Container {
   // Освобождает обработчики, анимации и ресурсы экземпляра.
   destroy(options?: DestroyOptions) {
     this.#killMovementTimeline()
-    this.#hideDeadlockHighlight()
+    this.#clearDeadlock()
     super.destroy(options)
   }
 
@@ -125,13 +125,11 @@ export default class SokobanBoard extends Container {
     const {groundTiles, wallRows} = this.#createTileLayers()
     this.#boxesContainer = new Container({label: 'sokoban-boxes'})
     this.#player = this.#createPlayer()
-    this.#deadlockHighlight = this.#createDeadlockHighlight()
     groundTiles.zIndex = BOARD_Z_INDEX.ground
     this.#boxesContainer.zIndex = BOARD_Z_INDEX.boxes
-    this.#deadlockHighlight.zIndex = BOARD_Z_INDEX.deadlockHighlight
 
     this.#createBoxes()
-    this.addChild(groundTiles, this.#boxesContainer, ...wallRows, this.#player, this.#deadlockHighlight)
+    this.addChild(groundTiles, this.#boxesContainer, ...wallRows, this.#player)
     this.pivot.set(this.#boardWidth / 2, this.#boardHeight / 2)
     this.update()
     this.resize()
@@ -270,18 +268,6 @@ export default class SokobanBoard extends Container {
     return player
   }
 
-  // Создаёт подсветку клетки с застрявшим ящиком.
-  #createDeadlockHighlight() {
-    const inset = this.#tileSize * 0.06
-    const size = this.#tileSize - inset * 2
-    const cornerRadius = this.#tileSize * 0.12
-
-    return new Graphics({label: 'sokoban-deadlock-highlight', visible: false})
-      .roundRect(inset, inset, size, size, cornerRadius)
-      .fill({color: 0xff2f3d, alpha: 0.34})
-      .stroke({color: 0xff6b75, width: this.#tileSize * 0.05})
-  }
-
   // Создаёт таймлайн одного игрового перемещения.
   #createMovementTimeline(moveResult: SokobanMoveResult, isContinuous: boolean, resolve: () => void) {
     const timeline = gsap.timeline({
@@ -341,36 +327,16 @@ export default class SokobanBoard extends Container {
     resolve()
   }
 
-  // Создаёт анимацию предупреждения о тупике.
-  #createDeadlockTimeline() {
-    return gsap
-      .timeline({
-        onComplete: () => this.#hideDeadlockHighlight(),
-      })
-      .fromTo(this.#deadlockHighlight, {alpha: 0}, {alpha: 1, duration: 0.14})
-      .to(this.#deadlockHighlight, {
-        alpha: 0.28,
-        duration: 0.22,
-        repeat: 5,
-        yoyo: true,
-      })
-      .to(this.#deadlockHighlight, {alpha: 0, duration: 0.3})
-  }
-
   // Останавливает незавершённую анимацию перемещения.
   #killMovementTimeline() {
     this.#movementTimeline?.kill()
     this.#movementTimeline = null
   }
 
-  // Скрывает подсветку тупиковой клетки.
-  #hideDeadlockHighlight() {
-    this.#deadlockTimeline?.kill()
-    this.#deadlockTimeline = null
-    if (!this.#deadlockHighlight) return
-
-    this.#deadlockHighlight.alpha = 0
-    this.#deadlockHighlight.visible = false
+  // Останавливает предупреждение на ранее заблокированном ящике.
+  #clearDeadlock() {
+    this.#deadlockedBoxView?.clearDeadlock()
+    this.#deadlockedBoxView = null
   }
 
   // Обновляет позиции всех ящиков по данным модели.

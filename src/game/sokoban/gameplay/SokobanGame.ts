@@ -176,7 +176,7 @@ export default class SokobanGame extends Container {
     this.#isAnimatingMove = false
     if (result.deadlockedBox) {
       this.#board.showDeadlock(result.deadlockedBox)
-      this.#hud.showDeadlockFeedback()
+      this.#hud.pulseUndoButton()
     }
     if (result.completed) {
       this.#complete()
@@ -188,7 +188,7 @@ export default class SokobanGame extends Container {
 
   // Синхронизирует доску и HUD после изменения модели.
   #updateViews() {
-    this.#hud.clearDeadlockFeedback()
+    this.#hud.stopUndoButtonPulse()
     this.#board.update()
     this.#hud.setSteps(this.#level.steps)
   }

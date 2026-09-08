@@ -20,22 +20,25 @@ import mine3Location from './generated/mine-3.json'
 /** Автоматически созданный индекс игровых локаций. Не редактировать вручную. */
 const levels = {
   locations: [
-    // chapter1
+    // journey 1
     garden1Location,
     forest1Location,
-    garden2Location,
-    antarctica1Location,
-    // chapter2
+    // garden2Location,
+    // antarctica1Location,
+
+    // journey 2
     // mine1Location,
     // factory1Location,
     // antarctica2Location,
     // forest2Location,
-    // chapter3
+
+    // journey 3
     // garden3Location,
     // mine2Location,
     // factory2Location,
     // antarctica3Location,
-    // chapter4
+
+    // journey 4
     // forest3Location,
     // garden4Location,
     // mine3Location,

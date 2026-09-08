@@ -1,4 +1,3 @@
-import {gsap} from 'gsap'
 import i18next from 'i18next'
 import type {DestroyOptions, Sprite, TextStyleOptions} from 'pixi.js'
 import {Container, Graphics, Text} from 'pixi.js'
@@ -25,10 +24,6 @@ export default class SokobanHud extends Container {
   #panel!: Graphics
   #backButton!: SokobanHudButton
   #restartButton!: SokobanHudButton
-  #deadlockWarning!: Container
-  #deadlockWarningBackground!: Graphics
-  #deadlockWarningY = 0
-  #deadlockTimeline: gsap.core.Timeline | null = null
   #isEnabled = false
   #steps = 0
 
@@ -66,24 +61,14 @@ export default class SokobanHud extends Container {
     this.#updateButtons()
   }
 
-  // Показывает анимированное предупреждение о тупике.
-  showDeadlockFeedback() {
-    this.clearDeadlockFeedback()
-    this.#deadlockWarning.visible = true
+  // Привлекает внимание к кнопке отмены хода.
+  pulseUndoButton() {
     this.#backButton.pulse()
-    this.#deadlockTimeline = this.#createDeadlockTimeline()
   }
 
-  // Останавливает и скрывает предупреждение о тупике.
-  clearDeadlockFeedback() {
-    this.#deadlockTimeline?.kill()
-    this.#deadlockTimeline = null
+  // Останавливает пульсацию кнопки отмены хода.
+  stopUndoButtonPulse() {
     this.#backButton?.stopPulse()
-    if (!this.#deadlockWarning) return
-
-    this.#deadlockWarning.alpha = 0
-    this.#deadlockWarning.visible = false
-    this.#deadlockWarning.y = this.#deadlockWarningY
   }
 
   // Рассчитывает и применяет расположение представления.
@@ -108,13 +93,12 @@ export default class SokobanHud extends Container {
 
     this.#drawPanel(width, height)
     this.#layoutContent(width, height)
-    this.#layoutDeadlockWarning(width, height)
     this.#positionHud(centerX, availableHeight, height)
   }
 
   // Освобождает обработчики, анимации и ресурсы экземпляра.
   destroy(options?: DestroyOptions) {
-    this.clearDeadlockFeedback()
+    this.stopUndoButtonPulse()
     super.destroy(options)
   }
 
@@ -124,8 +108,6 @@ export default class SokobanHud extends Container {
     this.#stepsView = this.#createStepsView()
     this.#levelText = this.#createLevelText()
     this.#recordText = this.#createRecordText()
-    this.#deadlockWarning = this.#createDeadlockWarning()
-
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
@@ -136,38 +118,8 @@ export default class SokobanHud extends Container {
       this.#levelText,
       this.#recordText,
       this.#restartButton,
-      this.#deadlockWarning,
     )
     this.setSteps(0)
-  }
-
-  // Создаёт контейнер предупреждения о тупике.
-  #createDeadlockWarning() {
-    const warning = new Container({
-      label: 'sokoban-deadlock-warning',
-      alpha: 0,
-      visible: false,
-    })
-    this.#deadlockWarningBackground = new Graphics({label: 'sokoban-deadlock-warning-background'})
-    const text = this.#createDeadlockWarningText()
-
-    warning.addChild(this.#deadlockWarningBackground, text)
-    return warning
-  }
-
-  // Создаёт текст предупреждения о тупике.
-  #createDeadlockWarningText() {
-    const text = new Text({
-      label: 'sokoban-deadlock-warning-text',
-      text: i18next.t('sokoban.deadlock'),
-      style: {
-        ...this.#createTextStyle(22),
-        fill: 0xffffff,
-      },
-    })
-
-    text.anchor.set(0.5)
-    return text
   }
 
   // Создаёт блок иконки и счётчика шагов.
@@ -247,21 +199,6 @@ export default class SokobanHud extends Container {
     this.#recordText.y = height * settings.recordOffsetRatio
   }
 
-  // Размещает предупреждение о тупике над HUD.
-  #layoutDeadlockWarning(width: number, hudHeight: number) {
-    const warningHeight = Math.max(hudHeight, 44)
-    const warningWidth = Math.min(width, 520)
-    const cornerRadius = warningHeight * 0.28
-
-    this.#deadlockWarningBackground
-      .clear()
-      .roundRect(-warningWidth / 2, -warningHeight / 2, warningWidth, warningHeight, cornerRadius)
-      .fill({color: 0x8f2634, alpha: 0.94})
-      .stroke({color: 0xff8c96, width: 2})
-    this.#deadlockWarningY = -hudHeight / 2 - warningHeight / 2 - 12
-    this.#deadlockWarning.y = this.#deadlockWarningY
-  }
-
   // Выравнивает крайние элементы и блок шагов внутри HUD.
   #positionContent(width: number) {
     this.#alignLeft(this.#backButton, width)
@@ -325,26 +262,6 @@ export default class SokobanHud extends Container {
   // Создаёт интерактивную кнопку с заданной иконкой.
   #createButton(iconName: string, label: string, onPress: () => void) {
     return new SokobanHudButton({iconName, label, onPress})
-  }
-
-  // Создаёт анимацию предупреждения о тупике.
-  #createDeadlockTimeline() {
-    return gsap
-      .timeline({onComplete: () => this.#finishDeadlockFeedback()})
-      .fromTo(this.#deadlockWarning, {alpha: 0, y: this.#deadlockWarningY + 10}, {alpha: 1, y: this.#deadlockWarningY, duration: 0.2})
-      .to(this.#deadlockWarning, {
-        alpha: 0,
-        y: this.#deadlockWarningY - 6,
-        duration: 0.3,
-        delay: 1.7,
-      })
-  }
-
-  // Завершает показ предупреждения и освобождает таймлайн.
-  #finishDeadlockFeedback() {
-    this.#deadlockTimeline = null
-    this.#backButton.stopPulse()
-    this.#deadlockWarning.visible = false
   }
 
   // Обновляет доступность кнопок HUD.
