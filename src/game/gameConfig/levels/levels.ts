@@ -22,24 +22,24 @@ const levels = {
   locations: [
     // chapter1
     garden1Location,
-    antarctica1Location,
     forest1Location,
     garden2Location,
+    antarctica1Location,
     // chapter2
-    mine1Location,
-    factory1Location,
-    antarctica2Location,
-    forest2Location,
+    // mine1Location,
+    // factory1Location,
+    // antarctica2Location,
+    // forest2Location,
     // chapter3
-    garden3Location,
-    mine2Location,
-    factory2Location,
-    antarctica3Location,
+    // garden3Location,
+    // mine2Location,
+    // factory2Location,
+    // antarctica3Location,
     // chapter4
-    forest3Location,
-    garden4Location,
-    mine3Location,
-    factory3Location,
+    // forest3Location,
+    // garden4Location,
+    // mine3Location,
+    // factory3Location,
   ],
 }
 

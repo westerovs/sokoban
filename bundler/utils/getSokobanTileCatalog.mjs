@@ -61,10 +61,12 @@ const getTextureFiles = (directoryPath) => {
 // Возвращает отсортированные имена PNG-текстур из папки и её подпапок.
 const getTextureNames = (directoryPath) => getTextureFiles(directoryPath).map(({texture}) => texture)
 
-// Выбирает нумерованную первую текстуру роли или первый найденный вариант.
+// Выбирает явно обозначенную текстуру роли или первый декоративный вариант.
 const getDefaultTexture = (role, textures) => {
-  const numberedDefault = `${role}1`
-  return textures.includes(numberedDefault) ? numberedDefault : textures[0]
+  const defaultTexture = `${role}-default`
+  if (textures.includes(defaultTexture)) return defaultTexture
+  if (role === 'decor') return textures[0]
+  throw new Error(`[SokobanTileCatalog]: default texture '${defaultTexture}' is missing`)
 }
 
 // Проверяет, что для каждой поддерживаемой роли найден хотя бы один тайл.
