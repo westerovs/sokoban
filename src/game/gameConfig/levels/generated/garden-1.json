@@ -28,7 +28,40 @@
       "id": "sokoban-004",
       "levelName": "level3",
       "difficulty": "custom",
-      "map": ["_####_", "##  #_", "#@$ #_", "##$ ##", "## $ #", "#.$  #", "#..-.#", "######"]
+      "appearance": {
+        "wall": {
+          "1:0": "wall-bush",
+          "2:0": "wall-bush",
+          "3:0": "wall-bush",
+          "4:0": "wall-bush",
+          "0:1": "wall-bush",
+          "1:1": "wall-bush",
+          "4:1": "wall-bush",
+          "0:2": "wall-bush",
+          "4:2": "wall-bush",
+          "0:3": "wall-bush",
+          "1:3": "wall-bush",
+          "4:3": "wall-bush",
+          "5:3": "wall-bush",
+          "0:4": "wall-bush",
+          "1:4": "wall-bush",
+          "5:4": "wall-bush",
+          "0:5": "wall-bush",
+          "5:5": "wall-bush",
+          "0:6": "wall-bush",
+          "5:6": "wall-bush",
+          "0:7": "wall-bush",
+          "1:7": "wall-bush",
+          "2:7": "wall-bush",
+          "3:7": "wall-bush",
+          "4:7": "wall-bush",
+          "5:7": "wall-bush"
+        },
+        "ground": {"4:6": "ground-default"},
+        "box": {"2:2": "box-pumpkin", "2:3": "box-pumpkin", "3:4": "box-pumpkin", "2:5": "box-pumpkin"},
+        "decor": {"0:0": "decor5"}
+      },
+      "map": ["#####_", "##  #_", "#@$ #_", "##$ ##", "## $ #", "#.$  #", "#... #", "######"]
     },
     {
       "id": "sokoban-005",

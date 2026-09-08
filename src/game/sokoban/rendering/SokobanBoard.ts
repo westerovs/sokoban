@@ -27,6 +27,7 @@ const BOARD_Z_INDEX = {
 type TileTextureType = Exclude<keyof typeof SOKOBAN_TEXTURES, 'player'>
 type TileVisualType = TileTextureType | 'decor'
 type MovementOptions = {isContinuous?: boolean}
+type TileView = {position: SokobanPosition; sprite: Sprite}
 
 export default class SokobanBoard extends Container {
   #level: SokobanLevel
@@ -36,6 +37,7 @@ export default class SokobanBoard extends Container {
   #boardHeight: number
   #boxesContainer!: Container
   #boxViews = new Map<string, SokobanBoxView>()
+  #tileViews: TileView[] = []
   #player!: Sprite
   #movementTimeline: gsap.core.Timeline | null = null
   #deadlockedBoxView: SokobanBoxView | null = null
@@ -87,6 +89,8 @@ export default class SokobanBoard extends Container {
 
     this.#isRotated = shouldRotate
     this.rotation = shouldRotate ? Math.PI / 2 : 0
+    this.#updateTileOrientations()
+    this.#updateBoxOrientations()
     this.#updatePlayerRotation()
     this.#updatePlayer()
     this.scale.set(boardScale)
@@ -240,6 +244,7 @@ export default class SokobanBoard extends Container {
 
     tile.position.set((position.x + 0.5) * this.#tileSize, (position.y + anchorY) * this.#tileSize)
     applyTileVisualScale(tile, this.#tileSize)
+    this.#tileViews.push({position, sprite: tile})
     return tile
   }
 
@@ -308,16 +313,16 @@ export default class SokobanBoard extends Container {
 
   // Возвращает экранную позицию игрока.
   #getPlayerPixelPosition() {
-    if (this.#isRotated) return this.#getRotatedPlayerPixelPosition()
-    return this.#getTileVisualPosition(this.#level.playerPosition)
+    return this.#getAnchoredVisualPosition(this.#level.playerPosition, this.#player.anchor.y)
   }
 
-  // Возвращает позицию якоря игрока у нижней границы экранной клетки после поворота.
-  #getRotatedPlayerPixelPosition() {
-    const {x, y} = this.#level.playerPosition
+  // Возвращает позицию визуала с сохранением экранной стороны его якоря.
+  #getAnchoredVisualPosition(position: SokobanPosition, anchorY: number) {
+    const xOffset = this.#isRotated ? anchorY : 0.5
+    const yOffset = this.#isRotated ? 0.5 : anchorY
     return {
-      x: (x + 1) * this.#tileSize,
-      y: (y + 0.5) * this.#tileSize,
+      x: (position.x + xOffset) * this.#tileSize,
+      y: (position.y + yOffset) * this.#tileSize,
     }
   }
 
@@ -329,12 +334,18 @@ export default class SokobanBoard extends Container {
     }
   }
 
-  // Возвращает позицию визуала с учётом якоря тайла.
-  #getTileVisualPosition(position: SokobanPosition) {
-    return {
-      x: (position.x + 0.5) * this.#tileSize,
-      y: (position.y + 1) * this.#tileSize,
-    }
+  // Сохраняет исходную ориентацию всех тайлов доски.
+  #updateTileOrientations() {
+    this.#tileViews.forEach(({position, sprite}) => {
+      const {x, y} = this.#getAnchoredVisualPosition(position, sprite.anchor.y)
+      sprite.rotation = -this.rotation
+      sprite.position.set(x, y)
+    })
+  }
+
+  // Сохраняет вертикальную ориентацию всех ящиков.
+  #updateBoxOrientations() {
+    this.#boxViews.forEach((boxView) => boxView.setBoardRotation(this.rotation))
   }
 
   // Завершает таймлайн движения и сообщает об окончании анимации.

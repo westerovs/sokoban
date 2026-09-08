@@ -57,6 +57,11 @@ export default class SokobanBoxView extends Container {
     this.#applyTint()
   }
 
+  // Компенсирует поворот игровой доски для внутреннего спрайта ящика.
+  setBoardRotation(rotation: number) {
+    this.#box.rotation = -rotation
+  }
+
   // Инициализирует внутреннее состояние и зависимости.
   #init(id: string, textureName: string) {
     this.#box = this.#createBox(id, textureName)
