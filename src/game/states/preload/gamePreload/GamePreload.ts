@@ -9,6 +9,7 @@ import LocalStorage from '../../../engine/storage/LocalStorage.js'
 import type Game from '../../../Game.js'
 import {GAME_STATES, PLATFORM_ID} from '../../../gameConfig/constants.js'
 import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
+import LevelProgress from '../../../gameConfig/levels/LevelProgress.js'
 import LocaleManager from '../../../modules/LocaleManager.js'
 import GameTimeTrackerCounter from '../../../modules/metrika/GameTimeTrackerCounter.js'
 import YaMetrika, {ERROR_TYPES} from '../../../modules/metrika/YaMetrika.js'
@@ -188,6 +189,9 @@ export default class GamePreload extends BaseState {
 
   // Выполняет отдельную операцию `startGame`.
   #startGame = async () => {
+    await Locator.gameConfig.loadLevelConfiguration()
+    new LevelProgress(Locator.storage).initialize()
+
     this.terminate()
     new AdminPanelButton(this.game, Locator.storage, Locator.gameConfig)
 
