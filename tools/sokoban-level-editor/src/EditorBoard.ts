@@ -225,8 +225,9 @@ export default class EditorBoard extends Container {
     if (!texture) throw new Error(`[EditorBoard]: texture ${textureName} is missing`)
 
     const sprite = new Sprite({label: `editor-${role}-${position.x}-${position.y}`, texture})
-    sprite.anchor.set(0.5, 1)
-    sprite.position.set((position.x + 0.5) * TILE_SIZE, (position.y + 1) * TILE_SIZE)
+    const anchorY = role === 'wall' || role === 'box' ? 0.5 : 1
+    sprite.anchor.set(0.5, anchorY)
+    sprite.position.set((position.x + 0.5) * TILE_SIZE, (position.y + anchorY) * TILE_SIZE)
     sprite.zIndex = this.#getRoleDepth(role, position.y)
     applyTileVisualScale(sprite, TILE_SIZE)
     return sprite

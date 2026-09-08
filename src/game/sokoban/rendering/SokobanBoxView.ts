@@ -35,10 +35,10 @@ export default class SokobanBoxView extends Container {
   #createBox(id: string, textureName: string) {
     const box = GameUtils.createSprite(textureName, {
       label: 'sokoban-box-sprite-' + id,
-      anchorY: 1,
+      anchorY: 0.5,
     })
 
-    box.position.set(this.#tileSize / 2, this.#tileSize)
+    box.position.set(this.#tileSize / 2, this.#tileSize / 2)
     applyTileVisualScale(box, this.#tileSize)
 
     return box

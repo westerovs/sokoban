@@ -225,12 +225,13 @@ export default class SokobanBoard extends Container {
 
   // Создаёт и позиционирует спрайт тайла.
   #createTileSprite(textureName: string, position: SokobanPosition, type: TileVisualType) {
+    const anchorY = type === 'wall' || type === 'box' ? 0.5 : 1
     const tile = GameUtils.createSprite(textureName, {
       label: `sokoban-${type}-${position.x}-${position.y}`,
-      anchorY: 1,
+      anchorY,
     })
 
-    tile.position.copyFrom(this.#getTileVisualPosition(position))
+    tile.position.set((position.x + 0.5) * this.#tileSize, (position.y + anchorY) * this.#tileSize)
     applyTileVisualScale(tile, this.#tileSize)
     return tile
   }
