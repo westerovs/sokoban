@@ -113,7 +113,7 @@ export default class LevelNavigation {
   #createLocationOption = (location: EditorLocation) => {
     const option = document.createElement('option')
     option.value = location.id
-    option.textContent = `${location.id} · ${location.titleKey}`
+    option.textContent = location.id
     return option
   }
 
@@ -121,7 +121,7 @@ export default class LevelNavigation {
   #createLevelOption = (level: EditorLevel) => {
     const option = document.createElement('option')
     option.value = level.id
-    option.textContent = `${level.number}. ${level.id}`
+    option.textContent = level.id
     return option
   }
 }

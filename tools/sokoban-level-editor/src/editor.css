@@ -53,7 +53,7 @@ select:focus-visible {
   z-index: 2;
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: minmax(190px, 0.75fr) minmax(180px, 230px) minmax(210px, 300px) auto;
+  grid-template-columns: minmax(190px, 0.75fr) 120px 120px auto;
   gap: 14px;
   align-items: center;
   padding: 12px 22px;
@@ -62,20 +62,12 @@ select:focus-visible {
   box-shadow: 0 10px 32px rgb(0 0 0 / 24%);
 }
 
-.editor-title h1 {
-  margin: 1px 0 0;
-  color: #f4f0d4;
-  font-size: 24px;
-  line-height: 1.1;
-}
-
 .editor-heading-group {
   display: flex;
   gap: 28px;
   align-items: center;
 }
 
-.editor-title__eyebrow,
 .editor-tools__title,
 .editor-sidebar__caption,
 .editor-field span {
@@ -89,7 +81,7 @@ select:focus-visible {
 .editor-tools {
   display: grid;
   gap: 5px;
-  justify-items: center;
+  justify-items: start;
 }
 
 .editor-fill-button {
@@ -109,12 +101,13 @@ select:focus-visible {
 .editor-field {
   display: grid;
   gap: 5px;
+  width: 120px;
 }
 
 .editor-field select {
-  width: 100%;
-  height: 42px;
-  padding: 0 36px 0 12px;
+  width: 120px;
+  height: 30px;
+  padding: 0 5px;
   color: #f5f4e7;
   background: #223028;
   border: 1px solid #405649;
@@ -129,15 +122,31 @@ select:focus-visible {
 }
 
 .editor-button {
-  min-height: 42px;
-  padding: 0 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 5px;
   color: #eef5e8;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
+  text-align: center;
   transition:
     transform 120ms ease,
     filter 120ms ease;
+}
+
+.editor-button svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .editor-button:hover {
@@ -165,6 +174,11 @@ select:focus-visible {
   box-shadow: 0 0 0 3px rgb(208 241 127 / 28%);
 }
 
+.editor-button--icon {
+  width: 46px;
+  padding: 0;
+}
+
 .editor-button--compact {
   width: 42px;
   padding: 0;
@@ -190,6 +204,11 @@ select:focus-visible {
   background: #70572d;
   border-color: #a88648;
   font-weight: 750;
+}
+
+.editor-button--launch svg {
+  fill: currentcolor;
+  stroke: none;
 }
 
 .editor-sidebar {
@@ -681,10 +700,6 @@ select:focus-visible {
   .editor-header {
     grid-template-columns: 1fr 1fr;
     padding: 10px;
-  }
-
-  .editor-title {
-    display: none;
   }
 
   .editor-heading-group {

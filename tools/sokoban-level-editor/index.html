@@ -11,10 +11,6 @@
     <div class="editor-shell">
       <header class="editor-header">
         <div class="editor-heading-group">
-          <div class="editor-title">
-            <span class="editor-title__eyebrow">Sokoban tools</span>
-            <h1>Редактор уровней</h1>
-          </div>
           <div class="editor-tools">
             <span class="editor-tools__title">Инструменты</span>
             <button id="fill-button" class="editor-button editor-button--compact editor-fill-button" type="button" title="Залить выбранным тайлом" aria-label="Залить выбранным тайлом" disabled>
@@ -46,8 +42,18 @@
           <button id="undo-button" class="editor-button editor-button--compact" type="button" title="Отменить (Ctrl+Z)">↶</button>
           <button id="redo-button" class="editor-button editor-button--compact" type="button" title="Повторить (Ctrl+Shift+Z)">↷</button>
           <button id="validate-button" class="editor-button editor-button--secondary" type="button">Проверить</button>
-          <button id="launch-button" class="editor-button editor-button--launch" type="button">Запустить черновик</button>
-          <button id="save-button" class="editor-button editor-button--primary" type="button">Сохранить</button>
+          <button id="launch-button" class="editor-button editor-button--launch" type="button" title="Запустить черновик">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7Z" />
+            </svg>
+            <span>Черновик</span>
+          </button>
+          <button id="save-button" class="editor-button editor-button--primary editor-button--icon" type="button" title="Сохранить" aria-label="Сохранить">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 3h12l2 2v16H5Z" />
+              <path d="M8 3v6h8V3M8 21v-8h8v8" />
+            </svg>
+          </button>
         </div>
       </header>
 
