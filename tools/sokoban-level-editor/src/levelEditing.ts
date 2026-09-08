@@ -65,7 +65,7 @@ const replaceAppearance = (
   return setTileAppearance(cleared, brush, positionKey, defaults)
 }
 
-// Ставит стену, сохраняя явно выбранный пол под обычной стеной.
+// Ставит стену или декор, сохраняя существующий нижний слой.
 const applyBlockingBrush = (
   state: EditorState,
   brush: EditorBrush,
@@ -74,8 +74,13 @@ const applyBlockingBrush = (
   defaults: Record<string, string>,
 ) => {
   const map = setMapSymbol(state.map, position, '#')
-  const roles = brush.role === 'wall' ? APPEARANCE_ROLES.filter((role) => role !== 'ground') : APPEARANCE_ROLES
+  const roles = APPEARANCE_ROLES.filter((role) => role !== 'ground')
   const appearance = replaceAppearance(state, brush, positionKey, roles, defaults)
+  const oldSymbol = state.map[position.y][position.x]
+  if (brush.role === 'decor' && !'_#'.includes(oldSymbol)) {
+    const ground = (appearance.ground ??= {})
+    ground[positionKey] ??= defaults.ground
+  }
   return {state: {...state, map, appearance}}
 }
 
@@ -163,7 +168,7 @@ const isFillPosition = (state: EditorState, role: string, position: Position) =>
   if (role === 'wall') return symbol === '#'
   if (role === 'box') return '$-'.includes(symbol)
   const positionKey = `${position.x}:${position.y}`
-  return symbol !== '_' && (symbol !== '#' || Boolean(state.appearance.decor?.[positionKey] || state.appearance.ground?.[positionKey]))
+  return symbol !== '_' && (symbol !== '#' || Boolean(state.appearance.ground?.[positionKey]))
 }
 
 // Возвращает все клетки, к которым применима выбранная роль заливки.

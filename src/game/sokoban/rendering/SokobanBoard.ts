@@ -207,7 +207,7 @@ export default class SokobanBoard extends Container {
 
     if (this.#level.isWall(position)) {
       const decorTexture = this.#getDecorTextureName(position)
-      if (decorTexture || this.#appearance.ground?.[`${position.x}:${position.y}`]) {
+      if (this.#appearance.ground?.[`${position.x}:${position.y}`]) {
         groundTiles.addChild(this.#createTileSprite(this.#getTextureName('ground', position), position, 'ground'))
       }
       if (!decorTexture) {

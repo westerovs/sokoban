@@ -200,7 +200,7 @@ export default class EditorBoard extends Container {
     if (symbol === '_') return scene.addChild(this.#createVoidCell(position))
     if (symbol === '#') {
       const decorTexture = this.#getDecorTextureName(position)
-      if (decorTexture || this.#appearance.ground?.[`${position.x}:${position.y}`]) {
+      if (this.#appearance.ground?.[`${position.x}:${position.y}`]) {
         scene.addChild(this.#createRoleSprite('ground', position, this.#getTextureName('ground', position)))
       }
       if (!decorTexture) return scene.addChild(this.#createRoleSprite('wall', position, this.#getTextureName('wall', position)))
