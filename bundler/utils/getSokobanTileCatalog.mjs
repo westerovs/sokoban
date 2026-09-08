@@ -76,7 +76,7 @@ const validateTileGroups = (groups) => {
 
 // Формирует полный каталог тайлов для игры и редактора.
 const getSokobanTileCatalog = (projectRoot) => {
-  const tilesDirectory = path.resolve(projectRoot, 'raw-assets', 'ui', 'levelUi{m}{tps}', 'tiles')
+  const tilesDirectory = path.resolve(projectRoot, 'raw-assets', 'ui', 'tiles{m}{tps}')
   const groups = Object.fromEntries(
     Object.entries(TILE_GROUP_DIRECTORIES).map(([role, directory]) => {
       return [role, getTextureNames(path.join(tilesDirectory, directory))]
@@ -85,7 +85,7 @@ const getSokobanTileCatalog = (projectRoot) => {
 
   validateTileGroups(groups)
   return {
-    atlas: '/assets/ui/levelUi.webp.json',
+    atlas: '/assets/ui/tiles.webp.json',
     groups,
     sources: Object.fromEntries(
       Object.entries(groups).map(([role, textures]) => {
@@ -101,7 +101,7 @@ const getSokobanTileSourcePath = (projectRoot, role, texture) => {
   const directory = TILE_GROUP_DIRECTORIES[role]
   if (!directory || getTextureName(texture) !== texture) return null
 
-  const directoryPath = path.resolve(projectRoot, 'raw-assets', 'ui', 'levelUi{m}{tps}', 'tiles', directory)
+  const directoryPath = path.resolve(projectRoot, 'raw-assets', 'ui', 'tiles{m}{tps}', directory)
   const file = getTextureFiles(directoryPath).find((entry) => entry.texture === texture)
   return file?.filePath ?? null
 }

@@ -86,7 +86,10 @@ export default class InitialLoad {
 
   // Загружает основной UI-атлас и запускает фоновые загрузки.
   #createUiSpriteSheet = async () => {
-    await LoadUtils.loadSpriteSheet({spriteSheetName: 'levelUi'})
+    await Promise.all([
+      LoadUtils.loadSpriteSheet({spriteSheetName: 'levelUi'}),
+      LoadUtils.loadSpriteSheet({spriteSheetName: 'tiles'}),
+    ])
 
     // фоновая загрузка
     InitialLoad.promoSpriteSheetPromise()
