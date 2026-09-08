@@ -10,7 +10,7 @@ const COLORS = Object.freeze({
   boxBorder: 0xf0b45c, // Цвет рамки ящика
   ground: 0x756a43, // Цвет пола
   groundBorder: 0x4d482f, // Цвет границы клетки пола
-  player: 0xF07427, // Цвет игрока
+  player: 0xf07427, // Цвет игрока
   target: 0x99bd3f, // Цвет цели
   wall: 0x777667, // Цвет стены
   wallBorder: 0xb4ad91, // Цвет рамки стены
@@ -119,8 +119,6 @@ export default class LevelPreview extends Container {
   // Рисует игрока.
   #drawPlayer = (x: number, y: number, size: number) => {
     this.#board.circle(x + size / 2, y + size / 2, size * 0.3)
-    this.#board
-      .fill({color: COLORS.player})
-      .stroke({color: 0xFDF5E6, width: Math.max(size * 0.05, 1)})
+    this.#board.fill({color: COLORS.player}).stroke({color: 0xfdf5e6, width: Math.max(size * 0.05, 1)})
   }
 }

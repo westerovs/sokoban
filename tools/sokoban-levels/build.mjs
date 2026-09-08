@@ -22,7 +22,6 @@ const appearanceSourceDirectory = path.resolve(levelsDirectory, 'appearance')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
 const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels')
 const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
-const gameIndexOutputPath = path.resolve(gameLevelsDirectory, 'levels.ts')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
 const appearanceRoles = Object.freeze(['wall', 'decor', 'ground', 'box', 'target'])
@@ -454,35 +453,6 @@ const removeGeneratedFile = (filePath) => {
   fs.unlinkSync(filePath)
 }
 
-// Возвращает данные, за которые отвечает операция `getLocationVariableName`.
-const getLocationVariableName = (locationId) => {
-  const camelCaseId = locationId.replace(/-([a-z0-9])/g, (_, character) => character.toUpperCase())
-  return `${camelCaseId}Location`
-}
-
-// Создаёт данные или представление для операции `createGameIndexSource`.
-const createGameIndexSource = (locations) => {
-  const imports = [...locations]
-    .sort((first, second) => first.id.localeCompare(second.id, 'en', {numeric: true}))
-    .map((location) => `import ${getLocationVariableName(location.id)} from './generated/${location.id}.json'`)
-    .join('\n')
-  const locationNames = locations.map((location) => `    ${getLocationVariableName(location.id)},`).join('\n')
-
-  return `${imports}
-
-/** Автоматически созданный индекс игровых локаций. Не редактировать вручную. */
-const levels = {
-  locations: [
-${locationNames}
-  ],
-}
-
-export {
-  levels,
-}
-`
-}
-
 // Удаляет или очищает состояние через операцию `removeStaleLocationFiles`.
 const removeStaleLocationFiles = (locations) => {
   if (!fs.existsSync(gameLocationsDirectory)) return
@@ -502,16 +472,6 @@ const writeLocationFiles = async (locations, prettierConfig) => {
   }
 }
 
-// Записывает данные через операцию `writeGameIndex`.
-const writeGameIndex = async (locations, prettierConfig) => {
-  const content = await prettier.format(createGameIndexSource(locations), {...prettierConfig, parser: 'typescript'})
-  const multilineExport = content.replace(
-    'export {levels}',
-    '// Формат именованного экспорта сохраняется единым во всём проекте.\n// prettier-ignore\nexport {\n  levels,\n}',
-  )
-  writeOutput(gameIndexOutputPath, multilineExport)
-}
-
 // Собирает и записывает все игровые файлы уровней.
 const buildLevels = async () => {
   const sourceLocations = loadLocationDefinitions()
@@ -521,9 +481,8 @@ const buildLevels = async () => {
   const appearances = loadAppearances(levels, locations)
 
   const gameCatalog = createRuntimeCatalog(levels, locations, appearances)
-  const prettierConfig = await prettier.resolveConfig(gameIndexOutputPath)
+  const prettierConfig = await prettier.resolveConfig(path.resolve(projectRoot, 'package.json'))
   await writeLocationFiles(gameCatalog.locations, prettierConfig)
-  await writeGameIndex(gameCatalog.locations, prettierConfig)
   removeStaleLocationFiles(gameCatalog.locations)
   removeGeneratedFile(obsoleteGameOutputPath)
   console.log(`Уровни собраны: ${levels.length} карт в ${locations.length} отдельных файлах локаций.`)

@@ -17,28 +17,28 @@ import mine1Location from './generated/mine-1.json'
 import mine2Location from './generated/mine-2.json'
 import mine3Location from './generated/mine-3.json'
 
-/** Автоматически созданный индекс игровых локаций. Не редактировать вручную. */
+// Список доступных в игре локаций в порядке их прохождения.
 const levels = {
   locations: [
-    // journey 1
+    // Путешествие 1
     garden1Location,
     forest1Location,
     // garden2Location,
     // antarctica1Location,
 
-    // journey 2
+    // Путешествие 2
     // mine1Location,
     // factory1Location,
     // antarctica2Location,
     // forest2Location,
 
-    // journey 3
+    // Путешествие 3
     // garden3Location,
     // mine2Location,
     // factory2Location,
     // antarctica3Location,
 
-    // journey 4
+    // Путешествие 4
     // forest3Location,
     // garden4Location,
     // mine3Location,
@@ -46,8 +46,4 @@ const levels = {
   ],
 }
 
-// Формат именованного экспорта сохраняется единым во всём проекте.
-// prettier-ignore
-export {
-  levels,
-}
+export {levels}
