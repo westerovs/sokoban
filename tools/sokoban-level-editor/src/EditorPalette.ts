@@ -95,9 +95,17 @@ export default class EditorPalette {
     panel.className = 'editor-palette__mode'
     panel.dataset.mode = config.role
     panel.hidden = true
-    tiles.append(...this.#catalog.groups[config.role].map((texture: string) => this.#createTextureButton(config, texture)))
+    tiles.append(...this.#getOrderedTextures(config.role).map((texture: string) => this.#createTextureButton(config, texture)))
     panel.append(section)
     return panel
+  }
+
+  // Возвращает текстуры роли с базовым вариантом на первой позиции.
+  #getOrderedTextures(role: string) {
+    const textures: string[] = this.#catalog.groups[role]
+    const defaultTexture: string = this.#catalog.defaults[role]
+    if (!textures.includes(defaultTexture)) return textures
+    return [defaultTexture, ...textures.filter((texture) => texture !== defaultTexture)]
   }
 
   // Создаёт секцию палитры с заголовком и сеткой кнопок.

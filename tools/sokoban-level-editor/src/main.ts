@@ -12,7 +12,6 @@ import {applyEditorBrush, applyEditorFill} from './levelEditing.js'
 import LevelGeneratorPanel from './LevelGeneratorPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
-import ValidationPanel from './ValidationPanel.js'
 
 /**
  * Инициализирует полноэкранный редактор и связывает прямые кисти с данными уровня.
@@ -26,7 +25,6 @@ const getElement = <T extends Element>(selector: string): T => {
 }
 
 const elements = {
-  brushLabel: getElement<HTMLElement>('#brush-label'),
   canvasHost: getElement<HTMLElement>('#canvas-host'),
   emptyState: getElement<HTMLElement>('#empty-state'),
   fillButton: getElement<HTMLButtonElement>('#fill-button'),
@@ -46,7 +44,6 @@ const elements = {
   undoButton: getElement<HTMLButtonElement>('#undo-button'),
   utilityPalette: getElement<HTMLElement>('#utility-palette'),
   validateButton: getElement<HTMLButtonElement>('#validate-button'),
-  validationSummary: getElement<HTMLElement>('#validation-summary'),
 }
 
 let board: EditorBoard
@@ -55,10 +52,8 @@ let generatorPanel: LevelGeneratorPanel | null = null
 let palette: EditorPalette
 let selectedBrush: EditorBrush | null = null
 let selectedLevel: EditorLevel | null = null
-let selectedBrushLabel = 'Выберите кисть'
 let session: EditorSession | null = null
 let statusTimer: ReturnType<typeof setTimeout> | null = null
-let validationPanel: ValidationPanel
 
 // Возвращает безопасный текст перехваченной ошибки.
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error))
@@ -97,7 +92,6 @@ const renderSession = () => {
   const level = {...selectedLevel, map: session.state.map}
   board.setState(level, session.state.appearance, validation.invalidPositions)
   board.layout(elements.canvasHost.clientWidth, elements.canvasHost.clientHeight)
-  validationPanel.update(validation)
   elements.resetButton.disabled = !session.isDirty
   elements.undoButton.disabled = !session.canUndo
   elements.redoButton.disabled = !session.canRedo
@@ -139,8 +133,6 @@ const handlePaint = ({brush, position}: {brush: EditorBrush; position: Position}
 const selectBrush = (brush: EditorBrush) => {
   board.setBrush(brush)
   selectedBrush = brush
-  selectedBrushLabel = brush.label
-  if (!elements.manualToolsPanel.hidden) elements.brushLabel.textContent = selectedBrushLabel
   updateFillButton()
 }
 
@@ -207,14 +199,12 @@ const selectSidebarPanel = (mode: string) => {
   elements.generatorPanel.hidden = !isGenerator
   elements.manualToolsTab.ariaSelected = String(!isGenerator)
   elements.generatorTab.ariaSelected = String(isGenerator)
-  elements.brushLabel.textContent = isGenerator ? 'Автогенерация' : selectedBrushLabel
   updateFillButton()
 }
 
 // Проверяет текущую карту и показывает ошибки перед внешним действием.
 const getValidation = (): ValidationResult => {
   const validation = validateLevelMap((session as EditorSession).state.map)
-  validationPanel.update(validation)
   if (!validation.isValid) showStatus('Исправьте ошибки структуры перед этим действием', 'error')
   return validation
 }
@@ -390,7 +380,6 @@ const bindActions = () => {
 const init = async () => {
   try {
     editorData = await loadEditorData()
-    validationPanel = new ValidationPanel(elements.validationSummary)
     await createBoard()
     palette = new EditorPalette(elements.utilityPalette, elements.modeTabs, elements.palette, SOKOBAN_TILE_CATALOG, selectBrush)
     generatorPanel = new LevelGeneratorPanel(elements.generatorPanel, generateLevel)

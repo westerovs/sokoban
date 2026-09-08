@@ -10,18 +10,6 @@
   <body>
     <div class="editor-shell">
       <header class="editor-header">
-        <div class="editor-heading-group">
-          <div class="editor-tools">
-            <span class="editor-tools__title">Инструменты</span>
-            <button id="fill-button" class="editor-button editor-button--compact editor-fill-button" type="button" title="Залить выбранным тайлом" aria-label="Залить выбранным тайлом" disabled>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m4 12 7.5-7.5L19 12l-7.5 7.5L4 12Z" />
-                <path d="m7.5 8.5 7 7" />
-                <path d="M20 16.5c0 1.1-.9 2-2 2s-2-.9-2-2c0-.8 1.1-2.3 2-3.5.9 1.2 2 2.7 2 3.5Z" />
-              </svg>
-            </button>
-          </div>
-        </div>
         <label class="editor-field">
           <span>Локация</span>
           <select id="location-select"></select>
@@ -30,6 +18,16 @@
           <span>Уровень</span>
           <select id="level-select"></select>
         </label>
+        <div class="editor-tools">
+          <span class="editor-tools__title">Инструменты</span>
+          <button id="fill-button" class="editor-button editor-button--compact editor-fill-button" type="button" title="Залить выбранным тайлом" aria-label="Залить выбранным тайлом" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m4 12 7.5-7.5L19 12l-7.5 7.5L4 12Z" />
+              <path d="m7.5 8.5 7 7" />
+              <path d="M20 16.5c0 1.1-.9 2-2 2s-2-.9-2-2c0-.8 1.1-2.3 2-3.5.9 1.2 2 2.7 2 3.5Z" />
+            </svg>
+          </button>
+        </div>
         <div class="editor-actions">
           <button
             id="reset-button"
@@ -58,10 +56,6 @@
       </header>
 
       <aside class="editor-sidebar">
-        <div class="editor-sidebar__heading">
-          <span class="editor-sidebar__caption">Инструмент</span>
-          <strong id="brush-label">Выберите кисть</strong>
-        </div>
         <div class="editor-sidebar-tabs" role="tablist" aria-label="Режим редактора">
           <button id="manual-tools-tab" type="button" role="tab" aria-selected="true">Редактирование</button>
           <button id="generator-tab" type="button" role="tab" aria-selected="false">Автогенерация</button>
@@ -72,14 +66,6 @@
           <div id="palette" class="editor-palette"></div>
         </div>
         <section id="generator-panel" class="editor-generator" role="tabpanel" hidden></section>
-        <section class="editor-validation">
-          <div class="editor-sidebar__caption">Проверка структуры</div>
-          <div id="validation-summary" class="editor-validation__summary"></div>
-        </section>
-        <div class="editor-help">
-          <p>Левая кнопка ставит выбранный тайл сразу вместе с его текстурой. Правая кнопка стирает клетку.</p>
-          <p>Клавиши 1–4 переключают стены, ящики, пол и цели. Колесо мыши меняет масштаб поля.</p>
-        </div>
       </aside>
 
       <main class="editor-workspace">
