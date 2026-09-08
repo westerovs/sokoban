@@ -19,8 +19,10 @@ export default class LocationSelectView extends Container {
   #continueSubtitle!: Text
   #continueTitle!: Text
   #onLocationSelect: GameMenuCallbacks['onLocationSelect']
+  #onPageSelect: GameMenuCallbacks['onPageSelect']
   #pageIndex = 0 // Текущая страница локаций
   #tabs: LocationTab[] = []
+  #tabsContainer!: Container
   #unlockCelebration!: LocationUnlockCelebration
 
   // Сохраняет обработчики и создаёт содержимое выбора локаций.
@@ -28,7 +30,8 @@ export default class LocationSelectView extends Container {
     super({label: 'location-select-view'})
 
     this.#onLocationSelect = onLocationSelect
-    this.#init(onContinue, onPageSelect)
+    this.#onPageSelect = onPageSelect
+    this.#init(onContinue)
   }
 
   // Показывает указанную страницу локаций и актуальный прогресс.
@@ -40,6 +43,7 @@ export default class LocationSelectView extends Container {
   ) => {
     this.#unlockCelebration.stop()
     this.#pageIndex = pageIndex
+    this.#replaceTabs(locations.length)
     this.#replaceCards(locations.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE))
     this.#tabs.forEach((tab, index) => tab.setActive(index === pageIndex))
     this.#setContinueEntry(continueEntry)
@@ -72,9 +76,9 @@ export default class LocationSelectView extends Container {
   }
 
   // Создаёт постоянные элементы экрана.
-  #init = (onContinue: GameMenuCallbacks['onContinue'], onPageSelect: GameMenuCallbacks['onPageSelect']) => {
+  #init = (onContinue: GameMenuCallbacks['onContinue']) => {
     this.#createTitle()
-    this.#createTabs(onPageSelect)
+    this.#createTabsContainer()
     this.#cardsContainer = new Container({label: 'location-cards'})
     this.addChild(this.#cardsContainer)
     this.#continueButton = this.#createContinueButton(onContinue)
@@ -94,18 +98,26 @@ export default class LocationSelectView extends Container {
     this.addChild(title)
   }
 
-  // Создаёт вкладки страниц локаций.
-  #createTabs = (onPageSelect: GameMenuCallbacks['onPageSelect']) => {
-    const tabsContainer = new Container({label: 'location-tabs'})
-    this.#tabs = Array.from({length: 4}, (_, pageIndex) => {
+  // Создаёт контейнер вкладок страниц локаций.
+  #createTabsContainer = () => {
+    this.#tabsContainer = new Container({label: 'location-tabs'})
+    this.#tabsContainer.y = -300
+    this.addChild(this.#tabsContainer)
+  }
+
+  // Заменяет вкладки согласно количеству доступных страниц.
+  #replaceTabs = (locationCount: number) => {
+    const pageCount = Math.ceil(locationCount / PAGE_SIZE)
+    if (this.#tabs.length === pageCount) return
+
+    this.#tabs.forEach((tab) => tab.destroy({children: true}))
+    this.#tabs = Array.from({length: pageCount}, (_, pageIndex) => {
       const from = pageIndex * PAGE_SIZE + 1
       const text = i18next.t('locationSelect.chapters', {from, to: from + PAGE_SIZE - 1})
-      const tab = new LocationTab(pageIndex, text, onPageSelect)
-      tabsContainer.addChild(tab)
+      const tab = new LocationTab(pageIndex, text, this.#onPageSelect)
+      this.#tabsContainer.addChild(tab)
       return tab
     })
-    tabsContainer.y = -300
-    this.addChild(tabsContainer)
   }
 
   // Создаёт кнопку продолжения игры.
@@ -178,11 +190,11 @@ export default class LocationSelectView extends Container {
 
   // Располагает вкладки для широкой или узкой раскладки.
   #layoutTabs = (isNarrow: boolean) => {
-    const tabsContainer = this.getChildByLabel('location-tabs')!
     const gap = isNarrow ? 136 : 270
     const scale = isNarrow ? 0.5 : 1
-    tabsContainer.scale.set(scale)
-    this.#tabs.forEach((tab, index) => tab.position.set(((index - 1.5) * gap) / scale, 0))
+    const centerIndex = (this.#tabs.length - 1) / 2
+    this.#tabsContainer.scale.set(scale)
+    this.#tabs.forEach((tab, index) => tab.position.set(((index - centerIndex) * gap) / scale, 0))
   }
 
   // Располагает карточки для широкой или узкой раскладки.
