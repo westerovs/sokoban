@@ -1,4 +1,5 @@
 import {Application, Assets} from 'pixi.js'
+import {levels} from '@/game/gameConfig/levels/levels.js'
 import {SOKOBAN_TILE_CATALOG} from '@/game/generatedAssets/sokobanTileCatalog.js'
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
 import {getLevelAppearance} from './appearanceState.js'
@@ -438,6 +439,14 @@ const bindActions = () => {
   })
 }
 
+// Выбирает доступные локации редактора в порядке активного списка игры.
+const getActiveEditorLocations = (data: EditorData) => {
+  return levels.locations.flatMap(({id}) => {
+    const location = data.locations.find((location) => location.id === id)
+    return location ? [location] : []
+  })
+}
+
 // Загружает данные и создаёт компоненты редактора в правильном порядке.
 const init = async () => {
   try {
@@ -448,7 +457,7 @@ const init = async () => {
     const navigation = new LevelNavigation(
       elements.locationSelect,
       elements.levelSelect,
-      editorData.locations,
+      getActiveEditorLocations(editorData),
       updateSelectedLevel,
       canChangeLevel,
     )
