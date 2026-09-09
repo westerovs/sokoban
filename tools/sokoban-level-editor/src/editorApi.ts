@@ -1,4 +1,4 @@
-import type {EditorLevel, LevelAppearance} from './editorTypes.js'
+import type {EditorBrush, EditorLevel, LevelAppearance} from './editorTypes.js'
 
 /**
  * Связывает браузерный редактор с API сохранения, решателя и запуска черновика.
@@ -7,6 +7,7 @@ import type {EditorLevel, LevelAppearance} from './editorTypes.js'
 const EDITOR_API_URL = '/__sokoban-level-editor/data' // Путь чтения и сохранения данных редактора
 const GENERATOR_API_URL = '/__sokoban-level-editor/generate' // Путь процедурной генерации уровня
 const SOLVER_API_URL = '/__sokoban-level-editor/solve' // Путь отдельной проверки решаемости
+const LOCATION_FILL_API_URL = '/__sokoban-level-editor/fill-location' // Путь заливки всей локации
 const DRAFT_STORAGE_PREFIX = 'sokoban-level-editor-draft:' // Префикс временных черновиков в общем хранилище вкладок
 
 // Разбирает входные данные через операцию `parseResponse`.
@@ -27,6 +28,16 @@ const saveEditorLevel = async (levelId: string, map: string[], appearance: Level
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({levelId, map, appearance}),
+  })
+  return await parseResponse(response)
+}
+
+// Сохраняет выбранную текстуру на всех уровнях локации.
+const fillEditorLocation = async (locationId: string, brush: EditorBrush) => {
+  const response = await fetch(LOCATION_FILL_API_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({locationId, brush}),
   })
   return await parseResponse(response)
 }
@@ -65,6 +76,7 @@ const storeLevelDraft = (levelId: EditorLevel['id'], map: string[], appearance: 
 
 export {
   checkLevelSolvability, // Проверка карты решателем
+  fillEditorLocation,
   generateEditorLevel, // Процедурная генерация карты
   loadEditorData, // Загрузка каталога уровней
   saveEditorLevel, // Перезапись открытого уровня

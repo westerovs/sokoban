@@ -6,10 +6,12 @@ import path from 'node:path'
 import process from 'node:process'
 import prettier from 'prettier'
 import type {Plugin} from 'vite'
-import {getSokobanTileSourcePath} from '../../bundler/utils/getSokobanTileCatalog.mjs'
+import {getSokobanTileCatalog, getSokobanTileSourcePath} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {parseXsb, serializeXsb, toRuntimeMap, toStandardMap} from '../sokoban-levels/xsbFormat.mjs'
 import {generateSokobanLevel} from './generator/generateSokobanLevel.js'
 import {solveSokoban} from './solver.js'
+import type {EditorBrush, EditorLocation, LevelAppearance} from './src/editorTypes.js'
+import {applyEditorFill, FILLABLE_ROLES} from './src/levelEditing.js'
 
 /**
  * Предоставляет Vite API редактора, доступ к тайлам и безопасное сохранение уровней.
@@ -18,6 +20,7 @@ import {solveSokoban} from './solver.js'
 const DATA_API_PATH = '/__sokoban-level-editor/data' // Путь API чтения и сохранения уровней
 const GENERATOR_API_PATH = '/__sokoban-level-editor/generate' // Путь API процедурной генерации
 const SOLVER_API_PATH = '/__sokoban-level-editor/solve' // Путь API проверки решаемости
+const LOCATION_FILL_API_PATH = '/__sokoban-level-editor/fill-location' // Путь API заливки всей локации
 const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|decor|ground|box|target)\/([^/]+)\.png$/ // Шаблон адреса исходного тайла
 const MAX_BODY_SIZE = 1024 * 1024 // Максимальный размер запроса редактора в байтах
 
@@ -171,6 +174,37 @@ const saveLevel = async (request: IncomingMessage, paths: EditorPaths) => {
   writeAndBuild(paths, files)
 }
 
+// Обновляет оформление уровней локации общей операцией заливки.
+const fillLocationAppearance = (source: any, location: EditorLocation, brush: EditorBrush, defaults: Record<string, string>) => {
+  location.levels.forEach((level) => {
+    const appearance: LevelAppearance = source.levels[level.id] ?? {}
+    const state = {levelId: level.id, map: level.map, appearance}
+    const result = applyEditorFill(state, brush, defaults).state.appearance
+    if (Object.keys(result).length) source.levels[level.id] = result
+    else delete source.levels[level.id]
+  })
+}
+
+// Проверяет запрос и сохраняет заливку одним файлом оформления и одной сборкой.
+const handleLocationFillRequest = async (request: IncomingMessage, response: ServerResponse, paths: EditorPaths) => {
+  if (request.method !== 'POST') return sendJson(response, 405, {error: 'Method not allowed'})
+  const {locationId, brush} = JSON.parse(await readBody(request))
+  const location = readEditorData(paths).locations.find((entry: EditorLocation) => entry.id === locationId)
+  const catalog = getSokobanTileCatalog(paths.projectRoot)
+  if (!location || brush?.mode !== 'tile' || !FILLABLE_ROLES.includes(brush.role) || !catalog.groups[brush.role]?.includes(brush.texture)) {
+    throw new Error('Unsupported location fill data')
+  }
+  const filePath = path.resolve(paths.appearanceSourceDirectory, `${location.id}.json`)
+  const previousContent = fs.readFileSync(filePath, 'utf8')
+  const source = JSON.parse(previousContent)
+  if (!source.levels || typeof source.levels !== 'object') throw new Error('Unsupported appearance format')
+  fillLocationAppearance(source, location, brush, catalog.defaults)
+  const config = await prettier.resolveConfig(filePath)
+  const nextContent = await prettier.format(JSON.stringify(source), {...config, parser: 'json'})
+  writeAndBuild(paths, [{path: filePath, previousContent, nextContent}])
+  sendJson(response, 200, readEditorData(paths))
+}
+
 // Обрабатывает событие, за которое отвечает операция `handleDataRequest`.
 const handleDataRequest = async (request: IncomingMessage, response: ServerResponse, paths: EditorPaths) => {
   if (request.method === 'GET') return sendJson(response, 200, readEditorData(paths))
@@ -222,9 +256,10 @@ const tryServeTile = (request: IncomingMessage, response: ServerResponse, projec
 // Обрабатывает событие, за которое отвечает операция `handleEditorApi`.
 const handleEditorApi = async (request: IncomingMessage, response: ServerResponse, next: () => void, paths: EditorPaths) => {
   const requestPath = request.url?.split('?')[0]
-  if (!requestPath || ![DATA_API_PATH, GENERATOR_API_PATH, SOLVER_API_PATH].includes(requestPath)) return next()
+  if (!requestPath || ![DATA_API_PATH, GENERATOR_API_PATH, SOLVER_API_PATH, LOCATION_FILL_API_PATH].includes(requestPath)) return next()
   try {
     if (requestPath === DATA_API_PATH) await handleDataRequest(request, response, paths)
+    else if (requestPath === LOCATION_FILL_API_PATH) await handleLocationFillRequest(request, response, paths)
     else if (requestPath === GENERATOR_API_PATH) await handleGeneratorRequest(request, response)
     else await handleSolverRequest(request, response)
   } catch (error) {

@@ -6,7 +6,7 @@ import type {EditorBrush, EditorState, Position} from './editorTypes.js'
  */
 
 const APPEARANCE_ROLES = Object.freeze(['wall', 'decor', 'ground', 'box', 'target']) // Визуальные слои, привязанные к клетке
-const FILLABLE_ROLES = Object.freeze(['wall', 'box', 'ground']) // Роли, поддерживающие массовую заливку текстурой
+const FILLABLE_ROLES = Object.freeze(['wall', 'box', 'ground', 'target']) // Роли, поддерживающие массовую заливку текстурой
 
 // Возвращает тип основания клетки по символу карты.
 const getTerrain = (symbol: string) => {
@@ -167,6 +167,7 @@ const isFillPosition = (state: EditorState, role: string, position: Position) =>
   const symbol = state.map[position.y][position.x]
   if (role === 'wall') return symbol === '#'
   if (role === 'box') return '$-'.includes(symbol)
+  if (role === 'target') return '.-*'.includes(symbol)
   const positionKey = `${position.x}:${position.y}`
   return symbol !== '_' && (symbol !== '#' || Boolean(state.appearance.ground?.[positionKey]))
 }
@@ -187,10 +188,4 @@ const applyEditorFill = (state: EditorState, brush: EditorBrush, defaults: Recor
   return {state: nextState}
 }
 
-export {
-  applyEditorBrush,
-  applyEditorFill,
-  composeSymbol,
-  getOccupant,
-  getTerrain,
-}
+export {applyEditorBrush, applyEditorFill, FILLABLE_ROLES, composeSymbol, getOccupant, getTerrain}

@@ -121,7 +121,7 @@ select:focus-visible {
   gap: 8px;
   min-height: 30px;
   padding: 5px;
-  color: #eef5e8;
+  color: black;
   border: 1px solid transparent;
   border-radius: 5px;
   cursor: pointer;
@@ -627,4 +627,50 @@ select:focus-visible {
   .editor-sidebar {
     padding-inline: 14px;
   }
+}
+
+.editor-tools__buttons,
+.editor-confirm-dialog__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.editor-button.editor-fill-button--location {
+  color: #fff1ef;
+  background: #a33737;
+  border-color: #d56262;
+  font-weight: bold !important;
+}
+
+.editor-button.editor-fill-button--location:hover:not(:disabled) {
+  background: #be4545;
+}
+
+.editor-confirm-dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 24px;
+  color: #edf5ec;
+  background: #1a2920;
+  border: 2px solid red;
+  border-radius: 16px;
+  box-shadow: 0 20px 80px #0008;
+}
+
+.editor-confirm-dialog::backdrop {
+  background: rgb(0 0 0 / 65%);
+}
+
+.editor-confirm-dialog h2 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+.editor-confirm-dialog p {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.editor-confirm-dialog__actions {
+  justify-content: flex-end;
+  margin-top: 24px;
 }

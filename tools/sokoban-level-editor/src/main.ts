@@ -2,13 +2,20 @@ import {Application, Assets} from 'pixi.js'
 import {SOKOBAN_TILE_CATALOG} from '@/game/generatedAssets/sokobanTileCatalog.js'
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
 import {getLevelAppearance} from './appearanceState.js'
-import {checkLevelSolvability, generateEditorLevel, loadEditorData, saveEditorLevel, storeLevelDraft} from './editorApi.js'
+import {
+  checkLevelSolvability,
+  fillEditorLocation,
+  generateEditorLevel,
+  loadEditorData,
+  saveEditorLevel,
+  storeLevelDraft,
+} from './editorApi.js'
 import EditorBoard from './EditorBoard.js'
 import {expandEditorState} from './editorGrid.js'
 import EditorPalette from './EditorPalette.js'
 import EditorSession from './EditorSession.js'
 import type {EditorBrush, EditorData, EditorLevel, EditorState, LevelAppearance, Position, ValidationResult} from './editorTypes.js'
-import {applyEditorBrush, applyEditorFill} from './levelEditing.js'
+import {applyEditorBrush, applyEditorFill, FILLABLE_ROLES} from './levelEditing.js'
 import LevelGeneratorPanel from './LevelGeneratorPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
@@ -28,6 +35,11 @@ const elements = {
   canvasHost: getElement<HTMLElement>('#canvas-host'),
   emptyState: getElement<HTMLElement>('#empty-state'),
   fillButton: getElement<HTMLButtonElement>('#fill-button'),
+  fillLocationButton: getElement<HTMLButtonElement>('#fill-location-button'),
+  fillLocationDialog: getElement<HTMLDialogElement>('#fill-location-dialog'),
+  fillLocationMessage: getElement<HTMLElement>('#fill-location-message'),
+  fillLocationApply: getElement<HTMLButtonElement>('#fill-location-apply'),
+  fillLocationCancel: getElement<HTMLButtonElement>('#fill-location-cancel'),
   generatorPanel: getElement<HTMLElement>('#generator-panel'),
   generatorTab: getElement<HTMLButtonElement>('#generator-tab'),
   launchButton: getElement<HTMLButtonElement>('#launch-button'),
@@ -74,12 +86,60 @@ const getExportState = (): EditorState | null => {
 
 // Проверяет, поддерживает ли выбранная кисть массовую заливку.
 const isFillBrush = (brush: EditorBrush | null): brush is EditorBrush => {
-  return brush?.mode === 'tile' && ['wall', 'box', 'ground'].includes(brush.role ?? '')
+  return brush?.mode === 'tile' && FILLABLE_ROLES.includes(brush.role ?? '')
 }
 
 // Синхронизирует доступность заливки с текущей сессией и режимом редактора.
 const updateFillButton = () => {
   elements.fillButton.disabled = !session || elements.manualToolsPanel.hidden || !isFillBrush(selectedBrush)
+  elements.fillLocationButton.disabled = elements.fillButton.disabled
+}
+
+// Показывает область перезаписи перед сохранением всей локации.
+const confirmLocationFill = () => {
+  if (!session || !isFillBrush(selectedBrush)) return
+  const location = editorData.locations.find(({levels}) => levels.some(({id}) => id === selectedLevel?.id))
+  if (!location) return
+  const roleNames: Record<string, string> = {wall: 'стен', box: 'ящиков', ground: 'земли', target: 'целей'} // Названия слоёв предупреждения
+  elements.fillLocationMessage.textContent = `Это действие перезапишет текстуры всех ${roleNames[selectedBrush.role!]} на всех уровнях локации «${location.id}» (уровней: ${location.levels.length}) текстурой «${selectedBrush.texture}». Изменения сразу сохранятся. Остальные несохранённые правки открытого уровня останутся в редакторе. Отмена редактора не отменяет заливку всей локации.`
+  elements.fillLocationDialog.showModal()
+}
+
+// Обновляет сохранённую основу сессии, сохраняя остальные правки открытого уровня.
+const applyLocationFillData = (data: EditorData, brush: EditorBrush) => {
+  const nextState = applyEditorFill(session!.state, brush, SOKOBAN_TILE_CATALOG.defaults).state
+  applySavedData(data)
+  session!.apply(nextState)
+  renderSession()
+}
+
+// Сохраняет подтверждённую заливку и блокирует повторное применение на время запроса.
+const fillSelectedLocation = async () => {
+  if (!session || !isFillBrush(selectedBrush) || elements.fillLocationApply.disabled) return
+  const brush = {...selectedBrush}
+  elements.fillLocationApply.disabled = true
+  elements.fillLocationCancel.disabled = true
+  try {
+    const data = await fillEditorLocation(elements.locationSelect.value, brush)
+    applyLocationFillData(data, brush)
+    elements.fillLocationDialog.close()
+    showStatus('Текстура сохранена на всех уровнях локации')
+  } catch (error) {
+    elements.fillLocationMessage.textContent = `Не удалось применить заливку: ${getErrorMessage(error)}`
+  } finally {
+    elements.fillLocationApply.disabled = false
+    elements.fillLocationCancel.disabled = false
+  }
+}
+
+// Подключает подтверждение заливки и защиту диалога во время сохранения.
+const bindLocationFill = () => {
+  elements.fillLocationButton.addEventListener('click', confirmLocationFill)
+  elements.fillLocationApply.addEventListener('click', fillSelectedLocation)
+  elements.fillLocationCancel.addEventListener('click', () => elements.fillLocationDialog.close())
+  elements.fillLocationDialog.addEventListener('cancel', (event) => {
+    if (elements.fillLocationApply.disabled) event.preventDefault()
+  })
 }
 
 // Отрисовывает карту, проверку и доступность команд истории.
@@ -345,6 +405,7 @@ const handleControlShortcut = (event: KeyboardEvent) => {
 
 // Переключает палитры цифрами и передаёт служебные сочетания.
 const handleKeyboard = (event: KeyboardEvent) => {
+  if (elements.fillLocationDialog.open) return
   if (isEditableTarget(event.target)) return
   if (handleControlShortcut(event)) return event.preventDefault()
   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
@@ -362,6 +423,7 @@ const bindSidebarTabs = () => {
 
 // Подключает кнопки интерфейса и защиту несохранённой сессии.
 const bindActions = () => {
+  bindLocationFill()
   elements.fillButton.addEventListener('click', fillSelectedRole)
   elements.saveButton.addEventListener('click', save)
   elements.launchButton.addEventListener('click', launchDraft)
