@@ -44,7 +44,8 @@
           "3:8": "wall-bush",
           "4:8": "wall-bush",
           "5:8": "wall-bush"
-        }
+        },
+        "box": {"4:3": "box-pumpkin", "2:4": "box-pumpkin", "6:4": "box-pumpkin", "4:6": "box-pumpkin"}
       },
       "map": ["___###___", "___#.#___", "___# #___", "####$####", "#.$   $.#", "####@####", "___#$#___", "___#.#___", "___###___"]
     },
@@ -88,7 +89,8 @@
           "5:7": "wall-bush",
           "6:7": "wall-bush",
           "7:7": "wall-bush"
-        }
+        },
+        "box": {"2:2": "box-pumpkin", "2:5": "box-pumpkin", "3:5": "box-pumpkin"}
       },
       "map": ["########", "#   #..#", "# $    #", "# #    #", "#   # .#", "# $$  ##", "# @  ###", "########"]
     },
@@ -137,7 +139,8 @@
           "3:8": "wall-bush",
           "4:8": "wall-bush",
           "5:8": "wall-bush"
-        }
+        },
+        "box": {"2:2": "box-pumpkin", "3:2": "box-pumpkin", "2:3": "box-pumpkin"}
       },
       "map": ["#####____", "#@  #____", "# $$#_###", "# $ #_#.#", "### ###.#", "_##    .#", "_#   #  #", "_#   ####", "_#####___"]
     },
@@ -146,6 +149,8 @@
       "levelName": "level3",
       "difficulty": "custom",
       "appearance": {
+        "ground": {"4:6": "ground-default"},
+        "box": {"2:2": "box-pumpkin", "2:3": "box-pumpkin", "3:4": "box-pumpkin", "2:5": "box-pumpkin"},
         "wall": {
           "0:0": "wall-bush",
           "1:0": "wall-bush",
@@ -174,9 +179,7 @@
           "3:7": "wall-bush",
           "4:7": "wall-bush",
           "5:7": "wall-bush"
-        },
-        "ground": {"4:6": "ground-default"},
-        "box": {"2:2": "box-pumpkin", "2:3": "box-pumpkin", "3:4": "box-pumpkin", "2:5": "box-pumpkin"}
+        }
       },
       "map": ["#####_", "##  #_", "#@$ #_", "##$ ##", "## $ #", "#.$  #", "#... #", "######"]
     },
@@ -207,12 +210,10 @@
           "9:3": "wall-bush",
           "0:4": "wall-bush",
           "4:4": "wall-bush",
-          "8:4": "wall-bush",
           "9:4": "wall-bush",
           "0:5": "wall-bush",
           "4:5": "wall-bush",
           "8:5": "wall-bush",
-          "9:5": "wall-bush",
           "0:6": "wall-bush",
           "1:6": "wall-bush",
           "2:6": "wall-bush",
@@ -221,10 +222,13 @@
           "5:6": "wall-bush",
           "6:6": "wall-bush",
           "7:6": "wall-bush",
-          "8:6": "wall-bush"
-        }
+          "8:6": "wall-bush",
+          "8:4": "wall-bush"
+        },
+        "box": {"2:2": "box-pumpkin", "4:3": "box-pumpkin", "7:3": "box-pumpkin", "6:4": "box-pumpkin"},
+        "ground": {"8:4": "ground-default"}
       },
-      "map": ["_########_", "_#      ##", "##$###   #", "# @ $  $ #", "# ..# $ ##", "# ..#   ##", "#########_"]
+      "map": ["_########_", "_#      ##", "##$###   #", "# @ $  $ #", "# ..# $ ##", "# ..#   #_", "#########_"]
     },
     {
       "id": "sokoban-006",
@@ -266,7 +270,8 @@
           "5:7": "wall-bush",
           "6:7": "wall-bush",
           "7:7": "wall-bush"
-        }
+        },
+        "box": {"3:2": "box-pumpkin", "2:5": "box-pumpkin", "5:6": "box-pumpkin"}
       },
       "map": ["_#####__", "_#@ ###_", "_# $  #_", "### # ##", "#.# #  #", "#.$  # #", "#.   $ #", "########"]
     },
@@ -275,6 +280,7 @@
       "levelName": "level6",
       "difficulty": "custom",
       "appearance": {
+        "decor": {"11:6": "decor9"},
         "wall": {
           "3:0": "wall-bush",
           "4:0": "wall-bush",
@@ -310,7 +316,6 @@
           "3:6": "wall-bush",
           "8:6": "wall-bush",
           "10:6": "wall-bush",
-          "11:6": "wall-bush",
           "0:7": "wall-bush",
           "1:7": "wall-bush",
           "6:7": "wall-bush",
@@ -339,7 +344,8 @@
           "10:10": "wall-bush",
           "11:10": "wall-bush",
           "12:10": "wall-bush"
-        }
+        },
+        "box": {"4:4": "box-pumpkin", "6:4": "box-pumpkin", "5:5": "box-pumpkin", "4:6": "box-pumpkin", "6:6": "box-pumpkin"}
       },
       "map": [
         "___#######___",

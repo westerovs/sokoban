@@ -165,10 +165,10 @@ const applyEditorBrush = (state: EditorState, brush: EditorBrush, position: Posi
 // Проверяет, относится ли клетка к выбранной роли массовой заливки.
 const isFillPosition = (state: EditorState, role: string, position: Position) => {
   const symbol = state.map[position.y][position.x]
-  if (role === 'wall') return symbol === '#'
+  const positionKey = `${position.x}:${position.y}`
+  if (role === 'wall') return symbol === '#' && !state.appearance.decor?.[positionKey]
   if (role === 'box') return '$-'.includes(symbol)
   if (role === 'target') return '.-*'.includes(symbol)
-  const positionKey = `${position.x}:${position.y}`
   return symbol !== '_' && (symbol !== '#' || Boolean(state.appearance.ground?.[positionKey]))
 }
 
