@@ -164,6 +164,8 @@ const renderSession = () => {
 // Открывает выбранный уровень на полном рабочем поле редактора.
 const updateSelectedLevel = (level: EditorLevel | null) => {
   selectedLevel = level
+  const location = editorData.locations.find(({levels}) => levels.some(({id}) => id === level?.id))
+  palette.setLocation(location?.id ?? '')
   elements.emptyState.hidden = Boolean(level)
   if (!level) {
     session = null
@@ -452,7 +454,13 @@ const init = async () => {
   try {
     editorData = await loadEditorData()
     await createBoard()
-    palette = new EditorPalette(elements.utilityPalette, elements.modeTabs, elements.palette, SOKOBAN_TILE_CATALOG, selectBrush)
+    palette = new EditorPalette(
+      elements.utilityPalette,
+      elements.modeTabs,
+      elements.palette,
+      {...SOKOBAN_TILE_CATALOG, decorGroups: editorData.decorGroups},
+      selectBrush,
+    )
     generatorPanel = new LevelGeneratorPanel(elements.generatorPanel, generateLevel)
     const navigation = new LevelNavigation(
       elements.locationSelect,

@@ -108,4 +108,21 @@ const getSokobanTileSourcePath = (projectRoot, role, texture) => {
   return file?.filePath ?? null
 }
 
-export {getSokobanTileCatalog, getSokobanTileSourcePath}
+// Группирует декор по относительным папкам, сохраняя тайлы корневой папки.
+const getSokobanDecorGroups = (projectRoot) => {
+  const directory = path.resolve(projectRoot, 'raw-assets', 'ui', 'tiles{m}{tps}', 'decor')
+  const groups = new Map()
+  getTextureFiles(directory).forEach(({texture, relativePath}) => {
+    const folder = path.dirname(relativePath).split(path.sep).join('/')
+    const name = folder === '.' ? 'Без папки' : folder
+    if (!groups.has(name)) groups.set(name, [])
+    groups.get(name).push(texture)
+  })
+  return Array.from(groups, ([name, textures]) => ({name, textures})).sort((first, second) => first.name.localeCompare(second.name))
+}
+
+export {
+  getSokobanDecorGroups,
+  getSokobanTileCatalog,
+  getSokobanTileSourcePath,
+}

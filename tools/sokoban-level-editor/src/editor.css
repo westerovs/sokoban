@@ -466,6 +466,36 @@ select:focus-visible {
   gap: 8px;
 }
 
+.editor-decor-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.editor-decor-group {
+  min-width: 0;
+  padding: 10px;
+  background: #111b15;
+  border: 1px solid #3b5142;
+  border-radius: 10px;
+}
+
+.editor-decor-group summary {
+  color: #edf5ec;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.editor-decor-group summary:focus-visible {
+  outline: 3px solid #caed71;
+  outline-offset: 3px;
+}
+
+.editor-decor-group[open] > summary {
+  margin-bottom: 10px;
+}
+
 .editor-tile-button {
   position: relative;
   display: grid;

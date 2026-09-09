@@ -6,7 +6,7 @@ import path from 'node:path'
 import process from 'node:process'
 import prettier from 'prettier'
 import type {Plugin} from 'vite'
-import {getSokobanTileCatalog, getSokobanTileSourcePath} from '../../bundler/utils/getSokobanTileCatalog.mjs'
+import {getSokobanDecorGroups, getSokobanTileCatalog, getSokobanTileSourcePath} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {parseXsb, serializeXsb, toRuntimeMap, toStandardMap} from '../sokoban-levels/xsbFormat.mjs'
 import {generateSokobanLevel} from './generator/generateSokobanLevel.js'
 import {solveSokoban} from './solver.js'
@@ -99,7 +99,11 @@ const createAppearanceCatalog = (catalog: any) => {
 // Возвращает данные, за которые отвечает операция `readEditorData`.
 const readEditorData = (paths: EditorPaths) => {
   const catalog = readRuntimeCatalog(paths)
-  return {locations: createEditorLocations(catalog), appearance: createAppearanceCatalog(catalog)}
+  return {
+    locations: createEditorLocations(catalog),
+    appearance: createAppearanceCatalog(catalog),
+    decorGroups: getSokobanDecorGroups(paths.projectRoot),
+  }
 }
 
 // Выполняет отдельную операцию `runLevelsBuild`.

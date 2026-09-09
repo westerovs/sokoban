@@ -61,6 +61,7 @@ type EditorLocation = {
 }
 
 type EditorData = {
+  decorGroups: {name: string; textures: string[]}[]
   locations: EditorLocation[]
   appearance: AppearanceCatalog
 }

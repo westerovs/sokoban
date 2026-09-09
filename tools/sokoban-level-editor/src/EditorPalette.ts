@@ -27,6 +27,7 @@ export default class EditorPalette {
   #paletteElement: HTMLElement
   #selectedButtons = new Map<string, HTMLButtonElement>()
   #utilityElement: HTMLElement
+  #locationId: string | null = null
 
   // Создаёт палитру и сохраняет её DOM-зависимости.
   constructor(
@@ -53,6 +54,22 @@ export default class EditorPalette {
   selectModeByShortcut(shortcut: string) {
     const config = MODE_CONFIG.find((item) => item.shortcut === shortcut)
     if (config) this.#selectMode(config.role)
+  }
+
+  // Раскрывает совпадающие с локацией папки и перемещает их перед остальными.
+  setLocation(locationId: string) {
+    if (this.#locationId === locationId) return
+    this.#locationId = locationId
+    const theme = locationId.replace(/-\d+$/, '')
+    const groups = Array.from(this.#paletteElement.querySelectorAll<HTMLDetailsElement>('.editor-decor-group'))
+    groups.sort((first, second) => {
+      const priority = Number(second.dataset.folder === theme) - Number(first.dataset.folder === theme)
+      return priority || first.dataset.folder!.localeCompare(second.dataset.folder!)
+    })
+    groups.forEach((group) => {
+      group.open = group.dataset.folder === theme
+      group.parentElement?.append(group)
+    })
   }
 
   // Создаёт общие инструменты, вкладки и панели текстур.
@@ -99,9 +116,35 @@ export default class EditorPalette {
     panel.className = 'editor-palette__mode'
     panel.dataset.mode = config.role
     panel.hidden = true
-    tiles.append(...this.#getOrderedTextures(config.role).map((texture: string) => this.#createTextureButton(config, texture)))
+    this.#populateTiles(tiles, config)
     panel.append(section)
     return panel
+  }
+
+  // Наполняет палитру обычной сеткой или раскрывающимися папками декора.
+  #populateTiles(tiles: HTMLElement, config: ModeConfig) {
+    if (config.role !== 'decor') {
+      tiles.append(...this.#getOrderedTextures(config.role).map((texture) => this.#createTextureButton(config, texture)))
+      return
+    }
+    tiles.className = 'editor-decor-groups'
+    this.#catalog.decorGroups.forEach((group: {name: string; textures: string[]}) => {
+      tiles.append(this.#createDecorGroup(config, group))
+    })
+  }
+
+  // Создаёт доступную с клавиатуры раскрывающуюся папку декора.
+  #createDecorGroup(config: ModeConfig, group: {name: string; textures: string[]}) {
+    const details = document.createElement('details')
+    const summary = document.createElement('summary')
+    const tiles = document.createElement('div')
+    details.className = 'editor-decor-group'
+    details.dataset.folder = group.name
+    summary.textContent = group.name
+    tiles.className = 'editor-palette__tiles'
+    tiles.append(...group.textures.map((texture) => this.#createTextureButton(config, texture)))
+    details.append(summary, tiles)
+    return details
   }
 
   // Возвращает текстуры роли с базовым вариантом на первой позиции.
@@ -169,7 +212,7 @@ export default class EditorPalette {
 
   // Отмечает текстуру, используемую игрой по умолчанию.
   #addDefaultBadge(button: HTMLButtonElement, role: string, texture: string) {
-    if (this.#catalog.defaults[role] !== texture) return
+    if (role === 'decor' || this.#catalog.defaults[role] !== texture) return
     const badge = document.createElement('span')
     badge.className = 'editor-tile-button__default'
     badge.textContent = 'BASE'
@@ -190,6 +233,9 @@ export default class EditorPalette {
 
   // Возвращает кнопку основной текстуры выбранной роли.
   #getDefaultButton(role: string) {
+    if (role === 'decor') {
+      return this.#paletteElement.querySelector<HTMLButtonElement>('.editor-decor-group[open] button, .editor-decor-group button')
+    }
     return this.#paletteElement.querySelector<HTMLButtonElement>(`[data-role="${role}"][data-texture="${this.#catalog.defaults[role]}"]`)
   }
 
