@@ -253,6 +253,10 @@ select:focus-visible {
   border-radius: 11px;
 }
 
+.editor-palette__title + .editor-mode-tabs {
+  margin-top: 10px;
+}
+
 .editor-mode-button:nth-child(-n + 2) {
   grid-column: span 3;
 }
@@ -439,9 +443,21 @@ select:focus-visible {
 }
 
 .editor-palette__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0;
   color: #b8c8bc;
   font-size: 13px;
+}
+
+.editor-palette__texture-name {
+  min-width: 0;
+  color: #edf5ec;
+  font-weight: 400;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .editor-palette__tiles {

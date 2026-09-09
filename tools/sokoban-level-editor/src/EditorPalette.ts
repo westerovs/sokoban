@@ -90,6 +90,10 @@ export default class EditorPalette {
   #createModePanel(config: ModeConfig) {
     const panel = document.createElement('div')
     const section = this.#createSection(config.title)
+    const textureName = document.createElement('span')
+    textureName.className = 'editor-palette__texture-name'
+    textureName.setAttribute('aria-live', 'polite')
+    section.querySelector('.editor-palette__title')?.append(textureName)
     const tiles = section.querySelector<HTMLElement>('.editor-palette__tiles')
     if (!tiles) throw new Error('[EditorPalette]: mode tiles are missing')
     panel.className = 'editor-palette__mode'
@@ -189,12 +193,20 @@ export default class EditorPalette {
     return this.#paletteElement.querySelector<HTMLButtonElement>(`[data-role="${role}"][data-texture="${this.#catalog.defaults[role]}"]`)
   }
 
+  // Обновляет имя выбранной текстуры справа от названия категории.
+  #updateTextureName(button: HTMLButtonElement, brush: EditorBrush) {
+    this.#paletteElement.querySelectorAll<HTMLElement>('.editor-palette__texture-name').forEach((name) => (name.textContent = ''))
+    const name = button.closest('.editor-palette__section')?.querySelector<HTMLElement>('.editor-palette__texture-name')
+    if (name) name.textContent = brush.texture ?? ''
+  }
+
   // Делает кнопку единственной активной кистью и сообщает о выборе.
   #selectBrush(button: HTMLButtonElement, brush: EditorBrush) {
     this.#utilityElement.querySelectorAll<HTMLButtonElement>('button').forEach((item) => (item.ariaPressed = 'false'))
     this.#paletteElement.querySelectorAll<HTMLButtonElement>('button').forEach((item) => (item.ariaPressed = 'false'))
     button.ariaPressed = 'true'
     if (brush.role) this.#selectedButtons.set(brush.role, button)
+    this.#updateTextureName(button, brush)
     this.#onSelect(brush)
   }
 }
