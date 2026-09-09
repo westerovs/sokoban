@@ -50,24 +50,20 @@ body {
 .sokoban-draft-banner {
   position: fixed;
   z-index: 10000;
-  top: 18px;
+  top: 10px;
   left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  min-height: 48px;
   align-items: center;
-  padding: 8px 24px;
+  padding: 5px 10px;
   color: #fff7cf;
-  background: rgb(154 35 31 / 94%);
+  background: rgb(154 35 31);
   border: 3px solid #ffd75c;
   border-radius: 12px;
-  box-shadow: 0 6px 24px rgb(0 0 0 / 55%);
   font-family: Arial, Helvetica, sans-serif;
-  font-size: clamp(22px, 3vw, 36px);
+  font-size: 16px;
   font-weight: 900;
-  letter-spacing: 0.12em;
   pointer-events: none;
-  text-shadow: 0 2px 4px rgb(0 0 0 / 70%);
-  transform: translateX(-50%);
 }
 
 .sokoban-draft-banner[hidden] {

@@ -20,10 +20,9 @@ export default class DebugHotkeys {
 
   // Сохраняет текущий облик и регистрирует клавиатурное событие.
   #init = () => {
-    const {levelIndex, skinIndex} = Locator.storage.playerData
+    const {skinIndex} = Locator.storage.playerData
     this.#skinIndex = skinIndex
 
-    GameUtils.showPopUp(`level ${levelIndex} / skin ${skinIndex}`)
     window.addEventListener('keydown', this.#onKeysHandler)
   }
 
