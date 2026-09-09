@@ -22,9 +22,9 @@ const levels = {
   locations: [
     // Путешествие 1
     garden1Location,
-    forest1Location,
+    // forest1Location,
     // garden2Location,
-    // antarctica1Location,
+    antarctica1Location,
 
     // Путешествие 2
     // mine1Location,

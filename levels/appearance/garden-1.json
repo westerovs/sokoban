@@ -36,7 +36,6 @@
       }
     },
     "sokoban-007": {
-      "decor": {"11:6": "decor9"},
       "wall": {
         "3:0": "wall-bush",
         "4:0": "wall-bush",
