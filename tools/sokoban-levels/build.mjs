@@ -5,18 +5,19 @@ import process from 'node:process'
 import {fileURLToPath} from 'node:url'
 import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
+import {LEVEL_DIFFICULTIES} from '../../src/game/gameConfig/levels/levelDifficulty.ts'
 import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
- * Собирает канонические XSB-файлы локаций в отдельные игровые JSON.
+ * Собирает библиотеку XSB-карт с ручной сложностью в отдельные игровые JSON локаций.
  * Внешние пробелы карт превращаются во внутренний символ пустоты `_`.
  */
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(scriptDirectory, '..', '..')
 const levelsDirectory = path.resolve(projectRoot, 'levels')
-const mapsSourceDirectory = path.resolve(levelsDirectory, 'maps')
+const levelLibraryDirectory = path.resolve(levelsDirectory, 'library')
 const locationsSourcePath = path.resolve(levelsDirectory, 'locations.json')
 const appearanceSourceDirectory = path.resolve(levelsDirectory, 'appearance')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
@@ -25,6 +26,12 @@ const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
 const appearanceRoles = Object.freeze(['wall', 'decor', 'ground', 'box', 'target'])
+const difficultyDirectories = Object.freeze({
+  easy: 'easy', // Каталог лёгких карт
+  medium: 'medium', // Каталог средних карт
+  hard: 'hard', // Каталог тяжёлых карт
+  'very-hard': 'veryHard', // Каталог очень тяжёлых карт
+})
 const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
 const lurdDirections = Object.freeze({
   u: Object.freeze({x: 0, y: -1}),
@@ -85,27 +92,19 @@ const getStatsById = () => {
   }
 }
 
-// Выполняет отдельную операцию `calculateDifficultyScore`.
-const calculateDifficultyScore = (stats) => {
-  const timeWeight = Math.log2(stats.timeSeconds + 1) * 20
-  const score = stats.pushes + stats.moves * 0.15 + stats.boxCount * 4 + timeWeight
-
-  return Number(score.toFixed(2))
-}
-
 // Создаёт данные или представление для операции `createLevel`.
-const createLevel = (parsedLevel, index, statsData) => {
-  const id = parsedLevel.metadata.id || `sokoban-${String(index + 1).padStart(3, '0')}`
-  const isCustom = parsedLevel.metadata.custom === 'true'
-  const stats = isCustom ? null : statsData.levels.get(id) || null
+const createLevel = (parsedLevel, difficulty, statsData) => {
+  const id = parsedLevel.metadata.id
+  const isUnverified = parsedLevel.metadata.unverified === 'true'
+  const stats = isUnverified ? null : statsData.levels.get(id) || null
 
   return {
     id,
     map: parsedLevel.map,
-    isCustom,
+    difficulty,
+    isUnverified,
     stats,
     solver: stats ? {name: statsData.solver.name, version: stats.solverVersion} : null,
-    difficultyScore: stats ? calculateDifficultyScore(stats) : null,
   }
 }
 
@@ -195,11 +194,36 @@ const loadLocationDefinitions = () => {
   return locations
 }
 
-// Возвращает данные, за которые отвечает операция `loadParsedLevels`.
-const loadParsedLevels = (sourceLocations) => {
-  return sourceLocations.flatMap((location) => {
-    const filePath = path.resolve(mapsSourceDirectory, `${location.id}.xsb`)
-    return parseXsb(readText(filePath), path.relative(projectRoot, filePath))
+// Возвращает XSB-файлы одной категории сложности.
+const getDifficultyFiles = (directoryName) => {
+  const directoryPath = path.resolve(levelLibraryDirectory, directoryName)
+  if (!fs.existsSync(directoryPath)) throw new Error(`Папка сложности не найдена: levels/library/${directoryName}`)
+
+  return fs
+    .readdirSync(directoryPath, {withFileTypes: true})
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.xsb'))
+    .sort((first, second) => first.name.localeCompare(second.name))
+    .map((entry) => path.resolve(directoryPath, entry.name))
+}
+
+// Читает единственную карту из отдельного файла библиотеки.
+const loadLibraryLevel = (filePath, difficulty, statsData) => {
+  const sourceLabel = path.relative(projectRoot, filePath)
+  const parsedLevels = parseXsb(readText(filePath), sourceLabel)
+  if (parsedLevels.length !== 1) throw new Error(`${sourceLabel}: файл должен содержать ровно один уровень`)
+
+  const parsedLevel = parsedLevels[0]
+  const id = parsedLevel.metadata.id
+  if (!id) throw new Error(`${sourceLabel}: не указан id уровня`)
+  if (path.basename(filePath, '.xsb') !== id) throw new Error(`${sourceLabel}: имя файла должно совпадать с id ${id}`)
+  return createLevel(parsedLevel, difficulty, statsData)
+}
+
+// Загружает библиотеку уровней и получает сложность из имени папки.
+const loadLibraryLevels = (statsData) => {
+  return Object.entries(difficultyDirectories).flatMap(([directoryName, difficulty]) => {
+    if (!LEVEL_DIFFICULTIES.includes(difficulty)) throw new Error(`Неизвестная сложность ${difficulty}`)
+    return getDifficultyFiles(directoryName).map((filePath) => loadLibraryLevel(filePath, difficulty, statsData))
   })
 }
 
@@ -211,16 +235,15 @@ const validateStatsLinks = (levels, statsData) => {
 }
 
 // Возвращает данные, за которые отвечает операция `loadLevels`.
-const loadLevels = (sourceLocations) => {
-  const parsedLevels = loadParsedLevels(sourceLocations)
+const loadLevels = () => {
   const statsData = getStatsById()
-  const levels = parsedLevels.map((level, index) => createLevel(level, index, statsData))
+  const levels = loadLibraryLevels(statsData)
 
-  if (levels.length === 0) throw new Error('Папка levels/maps не содержит карт')
+  if (levels.length === 0) throw new Error('Папка levels/library не содержит карт')
   levels.forEach((level) => validateStats(level, validateStandardMap(level)))
   validateStatsLinks(levels, statsData)
 
-  return assignDifficulty(levels)
+  return levels
 }
 
 // Возвращает данные, за которые отвечает операция `getLocationLevels`.
@@ -230,7 +253,7 @@ const getLocationLevels = (location, levelsById, assignedIds) => {
   return location.levelIds.map((levelId) => {
     if (assignedIds.has(levelId)) throw new Error(`${levelId}: уровень добавлен более чем в одну локацию`)
     const level = levelsById.get(levelId)
-    if (!level) throw new Error(`${location.id}: уровень ${levelId} не найден в levels/maps/${location.id}.xsb`)
+    if (!level) throw new Error(`${location.id}: уровень ${levelId} не найден в levels/library`)
     assignedIds.add(levelId)
     return level
   })
@@ -251,38 +274,9 @@ const loadLocations = (levels, sourceLocations) => {
   const levelsById = new Map(levels.map((level) => [level.id, level]))
   const assignedIds = new Set()
   const locations = sourceLocations.map((location, index) => createLocation(location, index, levelsById, assignedIds))
-  if (assignedIds.size !== levels.length) throw new Error('Не все карты из levels/maps распределены по локациям')
+  if (assignedIds.size !== levels.length) throw new Error('Не все карты из levels/library распределены по локациям')
 
   return locations
-}
-
-// Проверяет условие, описанное операцией `validateDifficultyOrder`.
-const validateDifficultyOrder = (levels) => {
-  const verifiedLevels = levels.filter((level) => level.stats)
-
-  verifiedLevels.slice(1).forEach((level, index) => {
-    if (verifiedLevels[index].difficultyScore > level.difficultyScore) throw new Error('Проверенные уровни расположены не по сложности')
-  })
-}
-
-// Возвращает данные, за которые отвечает операция `getDifficulty`.
-const getDifficulty = (rank, total) => {
-  if (rank <= total / 3) return 'easy'
-  if (rank <= (total * 2) / 3) return 'medium'
-  return 'hard'
-}
-
-// Выполняет отдельную операцию `assignDifficulty`.
-const assignDifficulty = (levels) => {
-  validateDifficultyOrder(levels)
-  const verifiedCount = levels.filter((level) => level.stats).length
-  let difficultyRank = 0
-
-  return levels.map((level) => {
-    if (!level.stats) return {...level, difficulty: 'custom'}
-    difficultyRank++
-    return {...level, difficulty: getDifficulty(difficultyRank, verifiedCount), difficultyRank}
-  })
 }
 
 // Проверяет условие, описанное операцией `isAppearanceRoleCell`.
@@ -344,11 +338,13 @@ const readLocationAppearance = (location) => {
 
 // Добавляет данные или представление через операцию `addLocationAppearances`.
 const addLocationAppearances = (result, location, levelsById, tileCatalog) => {
-  const locationLevelIds = new Set(location.levels.map((level) => level.id))
+  const assignedLevelIds = new Set(location.levels.map((level) => level.id))
   Object.entries(readLocationAppearance(location)).forEach(([levelId, appearance]) => {
-    if (!locationLevelIds.has(levelId)) throw new Error(`${levelId}: оформление находится не в своей локации ${location.id}`)
+    if (!assignedLevelIds.has(levelId)) return
 
     const level = levelsById.get(levelId)
+    if (!level) throw new Error(`${levelId}: оформление ссылается на неизвестный уровень`)
+
     validateLevelAppearance(level, appearance, tileCatalog)
     result.set(levelId, appearance)
   })
@@ -396,8 +392,6 @@ const createRuntimeLevel = (level, index, appearance) => {
     id: level.id,
     levelName: `level${index}`,
     difficulty: level.difficulty,
-    ...(level.difficultyRank && {difficultyRank: level.difficultyRank}),
-    ...(level.difficultyScore && {difficultyScore: level.difficultyScore}),
     ...(solver && {solver}),
     ...(pushRecord && {pushRecord}),
     ...(appearance && {appearance}),
@@ -419,8 +413,9 @@ const createRuntimeLocation = (location, levelIndexes, appearances) => {
 }
 
 // Создаёт данные или представление для операции `createRuntimeCatalog`.
-const createRuntimeCatalog = (levels, locations, appearances) => {
-  const levelIndexes = new Map(levels.map((level, index) => [level.id, index]))
+const createRuntimeCatalog = (locations, appearances) => {
+  const orderedLevels = locations.flatMap((location) => location.levels)
+  const levelIndexes = new Map(orderedLevels.map((level, index) => [level.id, index]))
   return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes, appearances))}
 }
 
@@ -475,12 +470,12 @@ const writeLocationFiles = async (locations, prettierConfig) => {
 // Собирает и записывает все игровые файлы уровней.
 const buildLevels = async () => {
   const sourceLocations = loadLocationDefinitions()
-  const levels = loadLevels(sourceLocations)
+  const levels = loadLevels()
   validateUniqueIds(levels)
   const locations = loadLocations(levels, sourceLocations)
   const appearances = loadAppearances(levels, locations)
 
-  const gameCatalog = createRuntimeCatalog(levels, locations, appearances)
+  const gameCatalog = createRuntimeCatalog(locations, appearances)
   const prettierConfig = await prettier.resolveConfig(path.resolve(projectRoot, 'package.json'))
   await writeLocationFiles(gameCatalog.locations, prettierConfig)
   removeStaleLocationFiles(gameCatalog.locations)

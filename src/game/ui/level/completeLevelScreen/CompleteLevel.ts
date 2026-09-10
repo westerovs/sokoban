@@ -20,7 +20,6 @@ import type StateLevel from '@/game/states/stateLevel/StateLevel.js'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import GrayscaleFilter from '@/game/utils/filters/GrayscaleFilter.js'
-import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import BtnBadge from './BtnBadge.js'
 import type CompleteLevelView from './CompleteLevelView.js'
 
@@ -39,7 +38,6 @@ export default class CompleteLevel {
   #btnNext!: Container
   #showTimeline: gsap.core.Timeline | null = null
   #canPlaySounds = true // Разрешает звуки экрана завершения
-  #levelType: string | null = null
   levelEntity: Level
   state: StateLevel
   btnBuyLoupe: Container | null = null
@@ -131,7 +129,7 @@ export default class CompleteLevel {
 
     try {
       const btnNextArrow = btnNext.getChildByLabel('btnNextArrow')
-      const btnBadge = btnNext.getChildByLabel('btnBadge')
+      const btnBadge = btnNext.getChildByLabel('level-difficulty-badge')
 
       this.#showTimeline = gsap
         .timeline()
@@ -171,14 +169,11 @@ export default class CompleteLevel {
 
   // Добавляет метку сложности следующего уровня.
   #createBtnBadge = () => {
-    // 1 определить какой следующий уровень
     const nextLevel = LevelConfig.getGameLevelData(this.#storage.playerData.levelIndex)
-    const {levelType} = GameUtils.extractLevelSuffix(nextLevel.levelName)
-    // ничего не делаем если тип уровня не определен
-    if (!levelType) return
-    this.#levelType = levelType
-
-    const badge = new BtnBadge({type: levelType})
+    const badge = new BtnBadge({difficulty: nextLevel.difficulty})
+    badge.position.set(90, 46)
+    badge.angle = -10
+    badge.visible = false
     this.#btnNext.addChild(badge)
   }
 

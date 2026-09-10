@@ -9,7 +9,7 @@
     {
       "id": "sokoban-001",
       "levelName": "level0",
-      "difficulty": "custom",
+      "difficulty": "easy",
       "appearance": {
         "wall": {
           "3:0": "wall-bush",
@@ -52,7 +52,7 @@
     {
       "id": "sokoban-002",
       "levelName": "level1",
-      "difficulty": "custom",
+      "difficulty": "easy",
       "appearance": {
         "wall": {
           "0:0": "wall-bush",
@@ -97,7 +97,7 @@
     {
       "id": "sokoban-003",
       "levelName": "level2",
-      "difficulty": "custom",
+      "difficulty": "easy",
       "appearance": {
         "wall": {
           "0:0": "wall-bush",
@@ -147,7 +147,7 @@
     {
       "id": "sokoban-004",
       "levelName": "level3",
-      "difficulty": "custom",
+      "difficulty": "easy",
       "appearance": {
         "ground": {"4:6": "ground-default"},
         "box": {"2:2": "box-pumpkin", "2:3": "box-pumpkin", "3:4": "box-pumpkin", "2:5": "box-pumpkin"},
@@ -186,7 +186,7 @@
     {
       "id": "sokoban-005",
       "levelName": "level4",
-      "difficulty": "custom",
+      "difficulty": "easy",
       "appearance": {
         "wall": {
           "1:0": "wall-bush",
@@ -233,7 +233,7 @@
     {
       "id": "sokoban-006",
       "levelName": "level5",
-      "difficulty": "custom",
+      "difficulty": "easy",
       "appearance": {
         "wall": {
           "1:0": "wall-bush",
@@ -276,89 +276,10 @@
       "map": ["_#####__", "_#@ ###_", "_# $  #_", "### # ##", "#.# #  #", "#.$  # #", "#.   $ #", "########"]
     },
     {
-      "id": "sokoban-007",
+      "id": "sokoban-009",
       "levelName": "level6",
-      "difficulty": "custom",
-      "appearance": {
-        "wall": {
-          "3:0": "wall-bush",
-          "4:0": "wall-bush",
-          "5:0": "wall-bush",
-          "6:0": "wall-bush",
-          "7:0": "wall-bush",
-          "8:0": "wall-bush",
-          "9:0": "wall-bush",
-          "0:1": "wall-bush",
-          "1:1": "wall-bush",
-          "2:1": "wall-bush",
-          "3:1": "wall-bush",
-          "9:1": "wall-bush",
-          "0:2": "wall-bush",
-          "5:2": "wall-bush",
-          "6:2": "wall-bush",
-          "7:2": "wall-bush",
-          "9:2": "wall-bush",
-          "0:3": "wall-bush",
-          "2:3": "wall-bush",
-          "4:3": "wall-bush",
-          "9:3": "wall-bush",
-          "10:3": "wall-bush",
-          "0:4": "wall-bush",
-          "2:4": "wall-bush",
-          "7:4": "wall-bush",
-          "10:4": "wall-bush",
-          "0:5": "wall-bush",
-          "2:5": "wall-bush",
-          "8:5": "wall-bush",
-          "10:5": "wall-bush",
-          "0:6": "wall-bush",
-          "3:6": "wall-bush",
-          "8:6": "wall-bush",
-          "10:6": "wall-bush",
-          "0:7": "wall-bush",
-          "1:7": "wall-bush",
-          "6:7": "wall-bush",
-          "8:7": "wall-bush",
-          "10:7": "wall-bush",
-          "11:7": "wall-bush",
-          "12:7": "wall-bush",
-          "1:8": "wall-bush",
-          "3:8": "wall-bush",
-          "4:8": "wall-bush",
-          "5:8": "wall-bush",
-          "12:8": "wall-bush",
-          "1:9": "wall-bush",
-          "7:9": "wall-bush",
-          "8:9": "wall-bush",
-          "12:9": "wall-bush",
-          "1:10": "wall-bush",
-          "2:10": "wall-bush",
-          "3:10": "wall-bush",
-          "4:10": "wall-bush",
-          "5:10": "wall-bush",
-          "6:10": "wall-bush",
-          "7:10": "wall-bush",
-          "8:10": "wall-bush",
-          "9:10": "wall-bush",
-          "10:10": "wall-bush",
-          "11:10": "wall-bush",
-          "12:10": "wall-bush"
-        },
-        "box": {"4:4": "box-pumpkin", "6:4": "box-pumpkin", "5:5": "box-pumpkin", "4:6": "box-pumpkin", "6:6": "box-pumpkin"}
-      },
-      "map": [
-        "___#######___",
-        "####     #___",
-        "#   .### #___",
-        "# # #    ##__",
-        "# # $ $#. #__",
-        "# #  -  # #__",
-        "# .#$ $ # #__",
-        "##    # # ###",
-        "_# ###.    @#",
-        "_#     ##   #",
-        "_############"
-      ]
+      "difficulty": "easy",
+      "map": ["___######_", "_###    #_", "##. $## ##", "#..$ $  @#", "#.. $ $ ##", "######  #_", "_____####_"]
     }
   ]
 }

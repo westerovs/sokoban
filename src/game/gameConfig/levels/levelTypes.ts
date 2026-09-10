@@ -1,3 +1,5 @@
+import type {LevelDifficulty} from './levelDifficulty.js'
+
 // Описывает структуру локаций, уровней и подготовленной конфигурации Sokoban.
 
 type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, string>>>
@@ -15,9 +17,7 @@ type LevelSolver = {
 type LevelDefinition = {
   id: string
   levelName: string
-  difficulty: string
-  difficultyRank?: number
-  difficultyScore?: number
+  difficulty: LevelDifficulty
   pushRecord?: number
   isRemote?: boolean
   appearance?: LevelAppearance

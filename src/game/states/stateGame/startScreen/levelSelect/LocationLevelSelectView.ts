@@ -24,6 +24,7 @@ const PREVIEW_WIDTH = 500 // Ширина области предпросмот�
 
 export default class LocationLevelSelectView extends Container {
   #backButton!: ButtonContainer
+  #difficultyText!: Text
   #levelButtons: LevelSelectButton[] = []
   #levelsContainer!: Container
   #onLevelSelect: GameMenuCallbacks['onLevelSelect']
@@ -46,6 +47,7 @@ export default class LocationLevelSelectView extends Container {
     this.#selectedEntry = selectedEntry
     this.#title.text = i18next.t(location.titleKey)
     this.#preview.setLevel(selectedEntry.level)
+    this.#setDifficulty(selectedEntry.level)
     this.#setRecord(selectedEntry.level)
     this.#replaceLevelButtons(levels, selectedEntry.level.id)
     this.updateAdaptive()
@@ -55,6 +57,7 @@ export default class LocationLevelSelectView extends Container {
   updateSelectedLevel = (levels: LevelSelectionState[], selectedEntry: LevelEntry) => {
     this.#selectedEntry = selectedEntry
     this.#preview.setLevel(selectedEntry.level)
+    this.#setDifficulty(selectedEntry.level)
     this.#setRecord(selectedEntry.level)
     this.#levelButtons.forEach((button, index) => {
       button.setState({...levels[index], isSelected: levels[index].id === selectedEntry.level.id})
@@ -102,14 +105,21 @@ export default class LocationLevelSelectView extends Container {
       .roundRect(-LEVELS_PANEL_WIDTH / 2, -LEVELS_PANEL_HEIGHT / 2, LEVELS_PANEL_WIDTH, LEVELS_PANEL_HEIGHT, 28)
       .fill({color: 0x132319, alpha: 0.92})
     panel.stroke({color: 0xa98c48, width: 5})
+    this.#difficultyText = new Text({
+      label: 'level-preview-difficulty',
+      text: '',
+      style: {...primaryFontStyle, fill: 0xffffff, fontSize: 34},
+    })
+    this.#difficultyText.anchor.set(0.5)
+    this.#difficultyText.y = -125
     this.#record = new Text({
       label: 'level-preview-record',
       text: '',
       style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 25},
     })
     this.#record.anchor.set(0.5)
-    this.#record.y = -125
-    this.#levelsContainer.addChild(panel, this.#record)
+    this.#record.y = -88
+    this.#levelsContainer.addChild(panel, this.#difficultyText, this.#record)
   }
 
   // Создаёт данные или представление для операции `createBackButton`.
@@ -178,6 +188,11 @@ export default class LocationLevelSelectView extends Container {
   // Обновляет состояние через операцию `setRecord`.
   #setRecord = (level: LevelDefinition) => {
     this.#record.text = level.pushRecord ? i18next.t('sokoban.record', {record: level.pushRecord}) : ''
+  }
+
+  // Показывает локализованную сложность выбранного уровня.
+  #setDifficulty(level: LevelDefinition) {
+    this.#difficultyText.text = i18next.t(`difficultyLevels.${level.difficulty}`)
   }
 
   // Выполняет отдельную операцию `openLevelEditor`.

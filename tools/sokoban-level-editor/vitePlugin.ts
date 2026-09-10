@@ -23,14 +23,15 @@ const SOLVER_API_PATH = '/__sokoban-level-editor/solve' // Путь API пров
 const LOCATION_FILL_API_PATH = '/__sokoban-level-editor/fill-location' // Путь API заливки всей локации
 const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|decor|ground|box|target)\/([^/]+)\.png$/ // Шаблон адреса исходного тайла
 const MAX_BODY_SIZE = 1024 * 1024 // Максимальный размер запроса редактора в байтах
+const LEVEL_DIFFICULTY_DIRECTORIES = ['easy', 'medium', 'hard', 'very-hard'] // Папки библиотеки уровней
 
 type EditorPaths = {
   projectRoot: string
   appearanceSourceDirectory: string
+  levelLibraryDirectory: string
   levelsBuild: string
   locationsSource: string
   locationsOutputDirectory: string
-  mapsSourceDirectory: string
 }
 
 type WritableFile = {
@@ -119,15 +120,24 @@ const findLocationForLevel = (paths: EditorPaths, levelId: string) => {
   return locations.find((location: any) => location.levelIds.includes(levelId)) ?? null
 }
 
-// Обновляет состояние через операцию `updateLocationMap`.
-const updateLocationMap = (content: string, levelId: string, runtimeMap: string[], sourceLabel: string) => {
+// Находит отдельный XSB-файл уровня в библиотеке сложности.
+const findLevelSourcePath = (paths: EditorPaths, levelId: string) => {
+  return LEVEL_DIFFICULTY_DIRECTORIES.map((directory) => path.resolve(paths.levelLibraryDirectory, directory, `${levelId}.xsb`)).find(
+    (filePath) => fs.existsSync(filePath),
+  )
+}
+
+// Обновляет геометрию отдельного файла уровня.
+const updateLevelMap = (content: string, levelId: string, runtimeMap: string[], sourceLabel: string) => {
   const levels = parseXsb(content, sourceLabel)
+  if (levels.length !== 1) throw new Error(`${sourceLabel}: файл должен содержать ровно один уровень`)
   const level = levels.find((entry) => entry.metadata.id === levelId)
   if (!level) throw new Error(`Level ${levelId} is missing in ${sourceLabel}`)
 
   const isMapChanged = JSON.stringify(toRuntimeMap(level.map)) !== JSON.stringify(runtimeMap)
   level.map = toStandardMap(runtimeMap)
-  if (isMapChanged) level.metadata.custom = 'true'
+  delete level.metadata.custom
+  if (isMapChanged) level.metadata.unverified = 'true'
   return serializeXsb(levels)
 }
 
@@ -157,9 +167,11 @@ const writeAndBuild = (paths: EditorPaths, files: WritableFile[]) => {
 const saveLevel = async (request: IncomingMessage, paths: EditorPaths) => {
   const {levelId, map, appearance} = JSON.parse(await readBody(request))
   const location = findLocationForLevel(paths, levelId)
-  if (!location || !Array.isArray(map) || !appearance || typeof appearance !== 'object') throw new Error('Unsupported level data')
+  const mapPath = findLevelSourcePath(paths, levelId)
+  if (!location || !mapPath || !Array.isArray(map) || !appearance || typeof appearance !== 'object') {
+    throw new Error('Unsupported level data')
+  }
 
-  const mapPath = path.resolve(paths.mapsSourceDirectory, `${location.id}.xsb`)
   const appearancePath = path.resolve(paths.appearanceSourceDirectory, `${location.id}.json`)
   const mapContent = fs.readFileSync(mapPath, 'utf8')
   const appearanceContent = fs.readFileSync(appearancePath, 'utf8')
@@ -167,7 +179,7 @@ const saveLevel = async (request: IncomingMessage, paths: EditorPaths) => {
     {
       path: mapPath,
       previousContent: mapContent,
-      nextContent: updateLocationMap(mapContent, levelId, map, path.relative(paths.projectRoot, mapPath)),
+      nextContent: updateLevelMap(mapContent, levelId, map, path.relative(paths.projectRoot, mapPath)),
     },
     {
       path: appearancePath,
@@ -236,10 +248,10 @@ const handleGeneratorRequest = async (request: IncomingMessage, response: Server
 const createPaths = (projectRoot: string): EditorPaths => ({
   projectRoot,
   appearanceSourceDirectory: path.resolve(projectRoot, 'levels', 'appearance'),
+  levelLibraryDirectory: path.resolve(projectRoot, 'levels', 'library'),
   levelsBuild: path.resolve(projectRoot, 'tools', 'sokoban-levels', 'build.mjs'),
   locationsSource: path.resolve(projectRoot, 'levels', 'locations.json'),
   locationsOutputDirectory: path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'generated'),
-  mapsSourceDirectory: path.resolve(projectRoot, 'levels', 'maps'),
 })
 
 // Пытается выполнить операцию `tryServeTile` и сообщает результат.
@@ -282,9 +294,9 @@ const createSokobanLevelEditorPlugin = (projectRoot: string): Plugin => {
     configureServer(server) {
       server.watcher.add([
         paths.appearanceSourceDirectory,
+        paths.levelLibraryDirectory,
         paths.locationsSource,
         paths.locationsOutputDirectory,
-        paths.mapsSourceDirectory,
       ])
       server.middlewares.use(async (request: IncomingMessage, response: ServerResponse, next: () => void) => {
         if (tryServeTile(request, response, projectRoot)) return
