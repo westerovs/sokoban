@@ -433,15 +433,10 @@ export default class AdminPanel {
     setTimeout(() => location.reload(), 500)
   }
 
-  // Разблокирует путь к выбранному уровню и делает его текущим.
+  // Имитирует прохождение пути до выбранного уровня и делает его текущим.
   #applyLevelSelection = (levelIndex: number) => {
     const entry = getLevelEntryByIndex(levelIndex)
-    const unlockedIds = getLocations()
-      .slice(0, entry.locationIndex + 1)
-      .map(({id}) => id)
-    this.#storage.playerData.unlockedLocationIds = [...new Set([...this.#storage.playerData.unlockedLocationIds, ...unlockedIds])]
-    this.#storage.playerData.lastPlayedLevelId = entry.level.id
-    new LevelProgress(this.#storage).selectLevel(entry.level.id, {ignoreLock: true, save: false})
+    new LevelProgress(this.#storage).simulateProgressToLevel(entry.level.id, {save: false})
   }
 
   // Полностью сбрасывает профиль игрока.

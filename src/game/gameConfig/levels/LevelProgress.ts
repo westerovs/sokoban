@@ -14,6 +14,10 @@ type SelectLevelOptions = {
   save?: boolean
 }
 
+type SimulateProgressOptions = {
+  save?: boolean
+}
+
 export default class LevelProgress {
   #pageSize = 4 // Количество карточек локаций на одной вкладке выбора
   #progressVersion = 1 // Версия формата прогресса по идентификаторам уровней
@@ -153,6 +157,23 @@ export default class LevelProgress {
     return true
   }
 
+  // Имитирует последовательное прохождение всех уровней до выбранного.
+  simulateProgressToLevel = (levelId: string, {save = true}: SimulateProgressOptions = {}) => {
+    const entry = getLevelEntryById(levelId)
+    if (!entry) return false
+
+    getLevelEntries()
+      .slice(0, entry.globalIndex)
+      .forEach(({level}) => this.#addCompletedLevel(level.id))
+    getLocations()
+      .slice(0, entry.locationIndex + 1)
+      .forEach(({id}) => this.#markLocationVisited(id))
+    this.#storage.playerData.lastPlayedLevelId = entry.level.id
+    this.#setSelectedEntry(entry)
+    if (save) this.#storage.save()
+    return true
+  }
+
   markLevelPlayed = (levelId: string) => {
     const entry = getLevelEntryById(levelId)
     if (!entry || !this.isLocationUnlocked(entry.location.id)) return false
@@ -269,6 +290,12 @@ export default class LevelProgress {
     if (!this.#storage.playerData.celebratedLocationIds.includes(locationId)) {
       this.#storage.playerData.celebratedLocationIds.push(locationId)
     }
+  }
+
+  // Помечает локацию уже открытой и показанной игроку.
+  #markLocationVisited = (locationId: string) => {
+    this.#addUnlockedLocation(locationId)
+    this.#addCelebratedLocation(locationId)
   }
 
   #findNewlyUnlockedLocation = (unlockedIdsBefore: Set<string>) => {
