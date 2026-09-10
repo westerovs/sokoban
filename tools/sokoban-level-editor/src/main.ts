@@ -44,6 +44,7 @@ const elements = {
   generatorPanel: getElement<HTMLElement>('#generator-panel'),
   generatorTab: getElement<HTMLButtonElement>('#generator-tab'),
   launchButton: getElement<HTMLButtonElement>('#launch-button'),
+  levelDimensions: getElement<HTMLOutputElement>('#level-dimensions'),
   levelSelect: getElement<HTMLSelectElement>('#level-select'),
   locationSelect: getElement<HTMLSelectElement>('#location-select'),
   manualToolsPanel: getElement<HTMLElement>('#manual-tools-panel'),
@@ -94,6 +95,14 @@ const isFillBrush = (brush: EditorBrush | null): brush is EditorBrush => {
 const updateFillButton = () => {
   elements.fillButton.disabled = !session || elements.manualToolsPanel.hidden || !isFillBrush(selectedBrush)
   elements.fillLocationButton.disabled = elements.fillButton.disabled
+}
+
+// Обновляет размер текущего уровня в клетках для ручного режима.
+const updateLevelDimensions = () => {
+  const map = getExportState()?.map
+  const isVisible = Boolean(map && !elements.manualToolsPanel.hidden)
+  elements.levelDimensions.hidden = !isVisible
+  elements.levelDimensions.textContent = map ? `${map[0].length} × ${map.length}` : ''
 }
 
 // Показывает область перезаписи перед сохранением всей локации.
@@ -147,6 +156,7 @@ const bindLocationFill = () => {
 const renderSession = () => {
   if (!session || !selectedLevel) {
     updateFillButton()
+    updateLevelDimensions()
     return board.setState(null, {})
   }
   const validation = validateLevelMap(session.state.map)
@@ -158,6 +168,7 @@ const renderSession = () => {
   elements.redoButton.disabled = !session.canRedo
   elements.saveButton.dataset.dirty = String(session.isDirty)
   updateFillButton()
+  updateLevelDimensions()
   generatorPanel?.setCurrentLevel(getExportState())
 }
 
@@ -263,6 +274,7 @@ const selectSidebarPanel = (mode: string) => {
   elements.manualToolsTab.ariaSelected = String(!isGenerator)
   elements.generatorTab.ariaSelected = String(isGenerator)
   updateFillButton()
+  updateLevelDimensions()
 }
 
 // Проверяет текущую карту и показывает ошибки перед внешним действием.

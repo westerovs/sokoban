@@ -596,6 +596,26 @@ select:focus-visible {
   touch-action: none;
 }
 
+.editor-level-dimensions {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  left: 18px;
+  min-width: 112px;
+  padding: 10px 15px;
+  color: #eaf4e7;
+  background: rgb(20 31 24 / 88%);
+  border: 1px solid #405448;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+  line-height: 1;
+  text-align: center;
+  pointer-events: none;
+}
+
 .editor-status {
   position: absolute;
   z-index: 10;
