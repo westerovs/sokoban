@@ -27,6 +27,9 @@ import type CompleteLevelView from './CompleteLevelView.js'
 
 type CompletionResult = {
   unlockedLocation?: LocationDefinition | null
+  actualPushes?: number | null
+  personalBestPushes?: number | null
+  minimumPushes?: number | null
 }
 
 export default class CompleteLevel {
@@ -59,6 +62,11 @@ export default class CompleteLevel {
       this.#soundManager = Locator.soundManager
 
       this.#initViewElements()
+      this.#view.setSokobanResult({
+        actualPushes: completionResult.actualPushes ?? null,
+        personalBestPushes: completionResult.personalBestPushes ?? null,
+        minimumPushes: completionResult.minimumPushes ?? null,
+      })
       this.#setEvents(true)
 
       this.#sendCompleteLvlMetrika()

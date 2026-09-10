@@ -37,8 +37,10 @@ const SOKOBAN_HUD_SETTINGS = Object.freeze({
   buttonBorderWidthRatio: 0.035, // Толщина обводки кнопки относительно её размера
   buttonIconSizeRatio: 0.52, // Размер иконки кнопки относительно высоты HUD
   stepsIconSizeRatio: 0.5, // Размер иконки шагов относительно высоты HUD
+  pushesIconSizeRatio: 0.46, // Размер иконки толчков относительно высоты HUD
   horizontalPadding: 20, // Отступ крайних кнопок от левого и правого края HUD
   controlsGap: 20, // Расстояние между кнопкой отмены и блоком шагов
+  counterGap: 18, // Расстояние между счётчиками шагов и толчков
   stepsGapRatio: 0.5, // Расстояние от иконки шагов до счётчика относительно высоты HUD
   stepsFontSizeRatio: 0.35, // Размер счётчика шагов относительно высоты HUD
   levelFontSizeRatio: 0.32, // Размер названия уровня относительно высоты HUD

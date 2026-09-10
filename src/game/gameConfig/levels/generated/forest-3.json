@@ -75,7 +75,7 @@
       "levelName": "level80",
       "difficulty": "medium",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 903, "pushes": 357, "bestPushes": 355, "timeSeconds": 1},
-      "pushRecord": 355,
+      "minimumPushes": 355,
       "map": [
         "___________########",
         "___________#  ....#",

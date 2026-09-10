@@ -37,6 +37,7 @@ type LevelState = {
   boxes: Map<string, string>
   playerPosition: SokobanPosition
   isCompleted: boolean
+  pushes: number
 }
 
 export default class SokobanLevel {
@@ -49,6 +50,7 @@ export default class SokobanLevel {
   #nextBoxId = 0
   #playerPosition: SokobanPosition | null = null
   #isCompleted = false
+  #pushes = 0
   #initialState!: LevelState
   #history: LevelState[] = []
 
@@ -97,6 +99,11 @@ export default class SokobanLevel {
     return this.#history.length
   }
 
+  // Возвращает текущее число толчков с учётом отменённых ходов.
+  get pushes() {
+    return this.#pushes
+  }
+
   // Проверяет, является ли клетка стеной.
   isWall(position: SokobanPosition) {
     return this.#walls.has(this.#getPositionKey(position))
@@ -124,6 +131,7 @@ export default class SokobanLevel {
     if (!boxMove.canMove) return {moved: false, completed: false}
 
     this.#history.push(previousState)
+    if (boxMove.pushedBox) this.#pushes++
     this.#playerPosition = nextPosition
     this.#isCompleted = this.#checkCompleted()
     return {
@@ -298,6 +306,7 @@ export default class SokobanLevel {
       boxes: new Map(this.#boxes),
       playerPosition: {...this.#playerPosition!},
       isCompleted: this.#isCompleted,
+      pushes: this.#pushes,
     }
   }
 
@@ -306,6 +315,7 @@ export default class SokobanLevel {
     this.#boxes = new Map(state.boxes)
     this.#playerPosition = {...state.playerPosition}
     this.#isCompleted = state.isCompleted
+    this.#pushes = state.pushes
   }
 
   // Добавляет координату в коллекцию в строковом формате.

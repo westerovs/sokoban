@@ -61,6 +61,22 @@ export default class Storage {
     return this.#playerData.levelIndex
   }
 
+  // Возвращает лучший результат игрока по толчкам для уровня.
+  getSokobanPushRecord(levelId: string) {
+    const record = this.#playerData.sokobanPushRecords.find((entry) => entry?.levelId === levelId)
+    return record && Number.isInteger(record.pushes) && record.pushes >= 0 ? record.pushes : null
+  }
+
+  // Сохраняет новый личный минимум толчков и возвращает актуальный рекорд.
+  updateSokobanPushRecord(levelId: string, pushes: number) {
+    const currentRecord = this.getSokobanPushRecord(levelId)
+    if (!Number.isInteger(pushes) || pushes < 0 || (currentRecord !== null && currentRecord <= pushes)) return currentRecord
+
+    this.#playerData.sokobanPushRecords = this.#playerData.sokobanPushRecords.filter((entry) => entry?.levelId !== levelId)
+    this.#playerData.sokobanPushRecords.push({levelId, pushes})
+    return pushes
+  }
+
   // Переводит профиль в режим без постоянных записей до перезагрузки страницы.
   enableReadOnlyMode = () => {
     this.#isReadOnly = true

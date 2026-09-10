@@ -11,7 +11,7 @@
       "levelName": "level21",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 473, "pushes": 136, "bestPushes": 120, "timeSeconds": 0},
-      "pushRecord": 120,
+      "minimumPushes": 120,
       "map": [
         "####################",
         "#    @##      #   ##",
@@ -32,7 +32,7 @@
       "levelName": "level22",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 378, "pushes": 124, "bestPushes": 118, "timeSeconds": 1},
-      "pushRecord": 118,
+      "minimumPushes": 118,
       "map": [
         "_#########____",
         "_#       #____",
@@ -71,7 +71,7 @@
       "levelName": "level24",
       "difficulty": "medium",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 521, "pushes": 208, "bestPushes": 200, "timeSeconds": 1},
-      "pushRecord": 200,
+      "minimumPushes": 200,
       "map": [
         "__#########__",
         "__#-.-#-.-#__",

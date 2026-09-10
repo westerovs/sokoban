@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "sokoban-001",
+      "mapHash": "2af8edabfab7d878f4af3e73a0e83fa43bd1df32f54ce6fa9a45ff27328dee09",
+      "minimumPushes": 5,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 24
+    },
+    {
+      "id": "sokoban-002",
+      "mapHash": "ae223fe35fcac56df4425f29bcb9820b807cc921d2b138d7ae800d6be0352bb2",
+      "minimumPushes": 20,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 2055
+    },
+    {
+      "id": "sokoban-003",
+      "mapHash": "4c88501c092c24a18382296f636c38f289d87d1704efeaba9b8adbe677b9ca9a",
+      "minimumPushes": 31,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 707
+    },
+    {
+      "id": "sokoban-004",
+      "mapHash": "c60b67ebe7b6ce9eb20315e132fe226201344f4e641da9b7c206f0b68cba3fb8",
+      "minimumPushes": 13,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 194
+    },
+    {
+      "id": "sokoban-005",
+      "mapHash": "136b2ed4a67ba0841baf5857daa3fa8d40563fa4dd55a3be407ac590fbc55b84",
+      "minimumPushes": 27,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 9087
+    },
+    {
+      "id": "sokoban-006",
+      "mapHash": "50067b85594169d5f480e9e0966381cc66f6f658b62373941a76c68eb57388d6",
+      "minimumPushes": 11,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 102
+    },
+    {
+      "id": "sokoban-008",
+      "mapHash": "d9e1fa748aeb25c312d29d15fa5748f6ff47f59d9410856c9d5522ae69cf2866",
+      "minimumPushes": 24,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 9353
+    },
+    {
+      "id": "sokoban-009",
+      "mapHash": "cf8cb08c27602869a5fe50b9be5bacc72d4b11da87fc99b746816568d0e22c6d",
+      "minimumPushes": 16,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 4699
+    },
+    {
+      "id": "sokoban-012",
+      "mapHash": "8383ebc8097e923de7cd4a3947439140672f6475d7d57274438d48c78ecc68fb",
+      "minimumPushes": 97,
+      "solver": "internal-push-bfs",
+      "solverVersion": "1",
+      "exploredStates": 1531710
+    },
+    {
+      "id": "sokoban-018",
+      "mapHash": "0c86abd88eaa9bbe0122e9f897579c1bba38e3e99610943cce9cf967226d3d2d",
+      "minimumPushes": 120,
+      "solver": "Takaken",
+      "solverVersion": "7.3.1"
+    },
+    {
+      "id": "sokoban-019",
+      "mapHash": "f47d1005fe7157b53387a4e32a194b3205ce110449bf27cfc3f791132e32ca53",
+      "minimumPushes": 118,
+      "solver": "Takaken",
+      "solverVersion": "7.3.1"
+    },
+    {
+      "id": "sokoban-052",
+      "mapHash": "c5ef1dbe6cb38d70fe170a542c406174d10642090ec9b6cf5c7fffb2d9eb23e4",
+      "minimumPushes": 200,
+      "solver": "Takaken",
+      "solverVersion": "7.3.1"
+    },
+    {
+      "id": "sokoban-070",
+      "mapHash": "68bee68047f4f6bc3588d05632158e74cf6504cd4921f252d5212e4188207551",
+      "minimumPushes": 355,
+      "solver": "Takaken",
+      "solverVersion": "7.3.1"
+    }
+  ]
+}

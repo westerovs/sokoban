@@ -13,12 +13,15 @@ export default class SokobanHud extends Container {
   updateAdaptive = true
   _customPosition = {x: 0, y: 0}
   #levelNumber: number
-  #pushRecord?: number
+  #minimumPushes?: number
   #onUndo: () => void
   #onRestart: () => void
   #stepsText!: Text
   #stepsIcon!: Sprite
   #stepsView!: Container
+  #pushesText!: Text
+  #pushesIcon!: Sprite
+  #pushesView!: Container
   #levelText!: Text
   #recordText!: Text
   #panel!: Graphics
@@ -30,28 +33,29 @@ export default class SokobanHud extends Container {
   // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({
     levelNumber,
-    pushRecord,
+    minimumPushes,
     onUndo,
     onRestart,
   }: {
     levelNumber: number
-    pushRecord?: number
+    minimumPushes?: number
     onUndo: () => void
     onRestart: () => void
   }) {
     super({label: 'sokoban-hud'})
 
     this.#levelNumber = levelNumber
-    this.#pushRecord = pushRecord
+    this.#minimumPushes = minimumPushes
     this.#onUndo = onUndo
     this.#onRestart = onRestart
     this.#init()
   }
 
-  // Обновляет отображаемое количество шагов.
-  setSteps(steps: number) {
+  // Обновляет отображаемое количество шагов и толчков.
+  setCounts({steps, pushes}: {steps: number; pushes: number}) {
     this.#steps = steps
     this.#stepsText.text = String(steps)
+    this.#pushesText.text = String(pushes)
     this.#updateButtons()
   }
 
@@ -106,13 +110,14 @@ export default class SokobanHud extends Container {
   #init() {
     this.#panel = new Graphics({label: 'sokoban-hud-panel'})
     this.#stepsView = this.#createStepsView()
+    this.#pushesView = this.#createPushesView()
     this.#levelText = this.#createLevelText()
     this.#recordText = this.#createRecordText()
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
-    this.addChild(this.#panel, this.#stepsView, this.#backButton, this.#levelText, this.#recordText, this.#restartButton)
-    this.setSteps(0)
+    this.addChild(this.#panel, this.#stepsView, this.#pushesView, this.#backButton, this.#levelText, this.#recordText, this.#restartButton)
+    this.setCounts({steps: 0, pushes: 0})
   }
 
   // Создаёт блок иконки и счётчика шагов.
@@ -131,6 +136,21 @@ export default class SokobanHud extends Container {
     return stepsView
   }
 
+  // Создаёт блок иконки ящика и счётчика толчков.
+  #createPushesView() {
+    const pushesView = new Container({label: 'sokoban-pushes-view'})
+    this.#pushesIcon = GameUtils.createSprite('box-default', {label: 'sokoban-pushes-icon'})
+    this.#pushesText = new Text({
+      label: 'sokoban-pushes-text',
+      text: '0',
+      style: this.#createTextStyle(1),
+    })
+    this.#pushesText.anchor.set(0.5)
+    pushesView.addChild(this.#pushesIcon, this.#pushesText)
+
+    return pushesView
+  }
+
   // Создаёт подпись номера уровня.
   #createLevelText() {
     const levelText = new Text({
@@ -147,9 +167,9 @@ export default class SokobanHud extends Container {
   #createRecordText() {
     const recordText = new Text({
       label: 'sokoban-record-text',
-      text: this.#pushRecord ? i18next.t('sokoban.record', {record: this.#pushRecord}) : '',
+      text: Number.isInteger(this.#minimumPushes) ? i18next.t('sokoban.minimumPushes', {pushes: this.#minimumPushes}) : '',
       style: this.#createTextStyle(1),
-      visible: Number.isInteger(this.#pushRecord),
+      visible: Number.isInteger(this.#minimumPushes),
     })
 
     recordText.anchor.set(0.5)
@@ -174,8 +194,11 @@ export default class SokobanHud extends Container {
 
     this.#stepsText.x = height * settings.stepsGapRatio
     this.#stepsText.style.fontSize = height * settings.stepsFontSizeRatio
+    this.#pushesText.x = height * settings.stepsGapRatio
+    this.#pushesText.style.fontSize = height * settings.stepsFontSizeRatio
     this.#layoutCenterTexts(height)
-    this.#setStepsIconSize(height * settings.stepsIconSizeRatio)
+    this.#setCounterIconSize(this.#stepsIcon, height * settings.stepsIconSizeRatio)
+    this.#setCounterIconSize(this.#pushesIcon, height * settings.pushesIconSizeRatio)
     this.#backButton.setLayoutSize(buttonSize, height * settings.buttonIconSizeRatio)
     this.#restartButton.setLayoutSize(buttonSize, height * settings.buttonIconSizeRatio)
     this.#positionContent(width)
@@ -197,6 +220,7 @@ export default class SokobanHud extends Container {
     this.#alignLeft(this.#backButton, width)
     this.#alignRight(this.#restartButton, width)
     this.#positionStepsAfterBack()
+    this.#positionPushesAfterSteps()
     this.#levelText.x = 0
     this.#recordText.x = 0
   }
@@ -224,12 +248,21 @@ export default class SokobanHud extends Container {
     this.#stepsView.x = backRight + SOKOBAN_HUD_SETTINGS.controlsGap - stepsBounds.x
   }
 
-  // Масштабирует иконку счётчика шагов.
-  #setStepsIconSize(iconSize: number) {
-    this.#stepsIcon.scale.set(1)
-    const iconScale = iconSize / Math.max(this.#stepsIcon.width, this.#stepsIcon.height)
+  // Размещает счётчик толчков справа от счётчика шагов.
+  #positionPushesAfterSteps() {
+    const stepsBounds = this.#stepsView.getLocalBounds()
+    const pushesBounds = this.#pushesView.getLocalBounds()
+    const stepsRight = this.#stepsView.x + stepsBounds.x + stepsBounds.width
 
-    this.#stepsIcon.scale.set(iconScale)
+    this.#pushesView.x = stepsRight + SOKOBAN_HUD_SETTINGS.counterGap - pushesBounds.x
+  }
+
+  // Масштабирует иконку игрового счётчика.
+  #setCounterIconSize(icon: Sprite, iconSize: number) {
+    icon.scale.set(1)
+    const iconScale = iconSize / Math.max(icon.width, icon.height)
+
+    icon.scale.set(iconScale)
   }
 
   // Размещает HUD относительно доски и доступной высоты.

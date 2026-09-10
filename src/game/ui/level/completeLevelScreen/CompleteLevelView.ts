@@ -8,6 +8,8 @@ import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {primaryFontStyle} from '@/game/styles.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
+import type {CompleteLevelStats} from './CompleteLevelStatsView.js'
+import CompleteLevelStatsView from './CompleteLevelStatsView.js'
 import CompleteLocationUnlockCelebration from './CompleteLocationUnlockCelebration.js'
 
 // Создаёт экран завершения уровня и кнопки дальнейшей навигации.
@@ -30,6 +32,7 @@ const STYLES = {
 
 export default class CompleteLevelView extends Container {
   #locationUnlockCelebration!: CompleteLocationUnlockCelebration
+  #statsView!: CompleteLevelStatsView
   #refs: Record<string, any>
 
   // Сохраняет ссылки уровня и создаёт элементы экрана завершения.
@@ -46,12 +49,19 @@ export default class CompleteLevelView extends Container {
     this.#locationUnlockCelebration.show(location)
   }
 
+  // Показывает результаты завершённого уровня.
+  setSokobanResult(stats: CompleteLevelStats) {
+    this.#statsView.setData(stats)
+  }
+
   // Регистрирует представление и создаёт его содержимое.
   #init = () => {
     this.#refs.completeLevelView = this
     this.#createButtonsContainer()
+    this.#statsView = new CompleteLevelStatsView()
+    this.#statsView.position.set(WORLD.HALF_W, 555)
     this.#locationUnlockCelebration = new CompleteLocationUnlockCelebration()
-    this.addChild(this.#locationUnlockCelebration)
+    this.addChild(this.#statsView, this.#locationUnlockCelebration)
   }
 
   // Создаёт контейнер основных кнопок.

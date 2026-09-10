@@ -58,12 +58,20 @@ export default class LevelConfig {
   }
 
   // Записывает прохождение текущего уровня.
-  updateSavedLevel() {
+  updateSavedLevel(actualPushes?: number) {
+    const personalBestPushes = Number.isInteger(actualPushes)
+      ? this.#storage.updateSokobanPushRecord(this.#config!.id, actualPushes!)
+      : null
     const progress = new LevelProgress(this.#storage)
     const result = progress.completeLevel(this.#config!.id)
 
     if (result.isGameCompleted && result.isFirstCompletion) this.#completeGame()
-    return result
+    return {
+      ...result,
+      actualPushes: Number.isInteger(actualPushes) ? actualPushes! : null,
+      personalBestPushes,
+      minimumPushes: this.#config!.minimumPushes ?? null,
+    }
   }
 
   // Преобразует запись каталога в формат загрузчика уровня.

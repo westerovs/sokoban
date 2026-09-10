@@ -19,7 +19,7 @@ type SokobanGameOptions = {
   map: string[]
   appearance?: LevelAppearance
   levelNumber: number
-  pushRecord?: number
+  minimumPushes?: number
   onComplete?: () => void
   onMove?: () => void
   canMove?: () => boolean
@@ -29,7 +29,7 @@ export default class SokobanGame extends Container {
   #map: string[]
   #appearance: LevelAppearance
   #levelNumber: number
-  #pushRecord?: number
+  #minimumPushes?: number
   #onComplete?: () => void
   #onMove?: () => void
   #canMove?: () => boolean
@@ -44,13 +44,13 @@ export default class SokobanGame extends Container {
   #heldDirection: SokobanDirectionName | null = null
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({map, appearance = {}, levelNumber, pushRecord, onComplete, onMove, canMove}: SokobanGameOptions) {
+  constructor({map, appearance = {}, levelNumber, minimumPushes, onComplete, onMove, canMove}: SokobanGameOptions) {
     super({label: 'sokoban-game'})
 
     this.#map = map
     this.#appearance = appearance
     this.#levelNumber = levelNumber
-    this.#pushRecord = pushRecord
+    this.#minimumPushes = minimumPushes
     this.#onComplete = onComplete
     this.#onMove = onMove
     this.#canMove = canMove
@@ -68,6 +68,11 @@ export default class SokobanGame extends Container {
     this.#input.setEnabled(isEnabled)
     this.#hud.setEnabled(isEnabled)
     this.#dpad.setEnabled(isEnabled)
+  }
+
+  // Возвращает число толчков в текущем прохождении.
+  get pushes() {
+    return this.#level.pushes
   }
 
   // Добавляет HUD и крестовину в интерфейсный слой игры.
@@ -123,7 +128,7 @@ export default class SokobanGame extends Container {
     if (!result.moved) return false
 
     this.#isAnimatingMove = true
-    this.#hud.setSteps(this.#level.steps)
+    this.#updateHudCounters()
     this.#onMove?.()
     const isContinuous = Boolean(heldDirection)
     this.#board.animateMove(result, {isContinuous}).then(() => this.#finishMove(result))
@@ -136,7 +141,7 @@ export default class SokobanGame extends Container {
     this.#board = new SokobanBoard(this.#level, this.#appearance)
     this.#hud = new SokobanHud({
       levelNumber: this.#levelNumber,
-      pushRecord: this.#pushRecord,
+      minimumPushes: this.#minimumPushes,
       onUndo: () => this.undo(),
       onRestart: () => this.restart(),
     })
@@ -190,7 +195,12 @@ export default class SokobanGame extends Container {
   #updateViews() {
     this.#hud.stopUndoButtonPulse()
     this.#board.update()
-    this.#hud.setSteps(this.#level.steps)
+    this.#updateHudCounters()
+  }
+
+  // Синхронизирует счётчики шагов и толчков с моделью.
+  #updateHudCounters() {
+    this.#hud.setCounts({steps: this.#level.steps, pushes: this.#level.pushes})
   }
 
   // Пересчитывает расположение HUD и экранной крестовины.

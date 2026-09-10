@@ -135,7 +135,7 @@ export default class Level {
       map: this.config.map,
       appearance: this.config.appearance,
       levelNumber: this.config.locationLevelNumber,
-      pushRecord: this.config.pushRecord,
+      minimumPushes: this.config.minimumPushes,
       canMove: this.#canMove,
       onMove: this.#notifyMove,
       onComplete: this.#requestWin,
@@ -201,7 +201,7 @@ export default class Level {
     CrazyGames.showCrazyGamesBanner()
     // await new LevelResultsReward().init()
     ;(this.game.view as LevelView).createCompleteLevelView()
-    const completionResult = this.levelConfig.updateSavedLevel()
+    const completionResult = this.levelConfig.updateSavedLevel(this.sokobanGame!.pushes)
     this.#completeLevel.init(completionResult)
   }
 

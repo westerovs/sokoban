@@ -21,6 +21,7 @@ const STORAGE_KEYS = {
   lastPlayedLevelId: 'lastPlayedLevelId',
   selectedLocationId: 'selectedLocationId',
   completedLevelIds: 'completedLevelIds',
+  sokobanPushRecords: 'sokobanPushRecords', // Лучшие результаты игрока по толчкам
   unlockedLocationIds: 'unlockedLocationIds',
   celebratedLocationIds: 'celebratedLocationIds',
   locationPageIndex: 'locationPageIndex',
@@ -55,6 +56,11 @@ const STORAGE_KEYS = {
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]
 
+type SokobanPushRecord = {
+  levelId: string
+  pushes: number
+}
+
 type PlayerData = {
   version: string
   userLevel: number
@@ -70,6 +76,7 @@ type PlayerData = {
   lastPlayedLevelId: string | null
   selectedLocationId: string | null
   completedLevelIds: string[]
+  sokobanPushRecords: SokobanPushRecord[]
   unlockedLocationIds: string[]
   celebratedLocationIds: string[]
   locationPageIndex: number
@@ -119,6 +126,7 @@ const DEFAULT_DATA: Record<StorageKey, DefaultDataEntry> = {
   [STORAGE_KEYS.lastPlayedLevelId]: {type: 'string', value: null},
   [STORAGE_KEYS.selectedLocationId]: {type: 'string', value: null},
   [STORAGE_KEYS.completedLevelIds]: {type: 'array', value: []},
+  [STORAGE_KEYS.sokobanPushRecords]: {type: 'array', value: []},
   [STORAGE_KEYS.unlockedLocationIds]: {type: 'array', value: []},
   [STORAGE_KEYS.celebratedLocationIds]: {type: 'array', value: []},
   [STORAGE_KEYS.locationPageIndex]: {type: 'number', value: 0},
@@ -156,10 +164,23 @@ const DEFAULT_DATA_VALUES = Object.fromEntries(Object.entries(DEFAULT_DATA).map(
 const SERIALIZED_ARRAY_KEYS = Object.freeze([
   STORAGE_KEYS.celebratedLocationIds,
   STORAGE_KEYS.completedLevelIds,
+  STORAGE_KEYS.sokobanPushRecords,
   STORAGE_KEYS.skins,
   STORAGE_KEYS.unlockedLocationIds,
 ])
 
-export {DEFAULT_DATA, DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS}
+export {
+  // Схема, значения и ключи сериализуемого профиля
+  DEFAULT_DATA,
+  DEFAULT_DATA_VALUES,
+  SERIALIZED_ARRAY_KEYS,
+  STORAGE_KEYS,
+}
 
-export type {DataType, PlayerData, StorageKey}
+export type {
+  // Типы данных профиля игрока
+  DataType,
+  PlayerData,
+  SokobanPushRecord,
+  StorageKey,
+}

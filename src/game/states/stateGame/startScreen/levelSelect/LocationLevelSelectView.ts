@@ -30,7 +30,8 @@ export default class LocationLevelSelectView extends Container {
   #onLevelSelect: GameMenuCallbacks['onLevelSelect']
   #playButton!: ButtonContainer
   #preview!: LevelPreview
-  #record!: Text
+  #minimumPushesText!: Text
+  #personalBestText!: Text
   #selectedEntry: LevelEntry | null = null
   #title!: Text
 
@@ -48,7 +49,7 @@ export default class LocationLevelSelectView extends Container {
     this.#title.text = i18next.t(location.titleKey)
     this.#preview.setLevel(selectedEntry.level)
     this.#setDifficulty(selectedEntry.level)
-    this.#setRecord(selectedEntry.level)
+    this.#setPushRecords(selectedEntry.level)
     this.#replaceLevelButtons(levels, selectedEntry.level.id)
     this.updateAdaptive()
   }
@@ -58,7 +59,7 @@ export default class LocationLevelSelectView extends Container {
     this.#selectedEntry = selectedEntry
     this.#preview.setLevel(selectedEntry.level)
     this.#setDifficulty(selectedEntry.level)
-    this.#setRecord(selectedEntry.level)
+    this.#setPushRecords(selectedEntry.level)
     this.#levelButtons.forEach((button, index) => {
       button.setState({...levels[index], isSelected: levels[index].id === selectedEntry.level.id})
     })
@@ -112,14 +113,21 @@ export default class LocationLevelSelectView extends Container {
     })
     this.#difficultyText.anchor.set(0.5)
     this.#difficultyText.y = -125
-    this.#record = new Text({
-      label: 'level-preview-record',
+    this.#minimumPushesText = new Text({
+      label: 'level-preview-minimum-pushes',
       text: '',
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 25},
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 23},
     })
-    this.#record.anchor.set(0.5)
-    this.#record.y = -88
-    this.#levelsContainer.addChild(panel, this.#difficultyText, this.#record)
+    this.#minimumPushesText.anchor.set(0.5)
+    this.#minimumPushesText.position.set(-150, -88)
+    this.#personalBestText = new Text({
+      label: 'level-preview-personal-best',
+      text: '',
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 23},
+    })
+    this.#personalBestText.anchor.set(0.5)
+    this.#personalBestText.position.set(150, -88)
+    this.#levelsContainer.addChild(panel, this.#difficultyText, this.#minimumPushesText, this.#personalBestText)
   }
 
   // Создаёт данные или представление для операции `createBackButton`.
@@ -185,9 +193,12 @@ export default class LocationLevelSelectView extends Container {
     this.#playButton.position.set(rowLeft + this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width / 2, ACTION_BUTTONS_Y)
   }
 
-  // Обновляет состояние через операцию `setRecord`.
-  #setRecord = (level: LevelDefinition) => {
-    this.#record.text = level.pushRecord ? i18next.t('sokoban.record', {record: level.pushRecord}) : ''
+  // Показывает эталон и лучший результат игрока для выбранного уровня.
+  #setPushRecords(level: LevelDefinition) {
+    const personalBest = Locator.storage.getSokobanPushRecord(level.id)
+    const minimumPushes = Number.isInteger(level.minimumPushes) ? level.minimumPushes : '—'
+    this.#minimumPushesText.text = i18next.t('sokoban.minimumPushes', {pushes: minimumPushes})
+    this.#personalBestText.text = i18next.t('sokoban.personalBestPushes', {pushes: personalBest ?? '—'})
   }
 
   // Показывает локализованную сложность выбранного уровня.

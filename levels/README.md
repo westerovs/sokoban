@@ -20,6 +20,7 @@
 ```bash
 npm run levels
 npm run levels:check
+npm run levels:solve-pushes
 ```
 
-`npm start` и `npm run build` также обновляют игровые JSON автоматически.
+`npm start` и `npm run build` обновляют игровые JSON автоматически, но не запускают длительный поиск эталонных решений. `npm run levels:solve-pushes` запускается отдельно только после добавления или изменения карт.

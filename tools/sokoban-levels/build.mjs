@@ -1,4 +1,3 @@
-import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -7,6 +6,7 @@ import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {LEVEL_DIFFICULTIES} from '../../src/game/gameConfig/levels/levelDifficulty.ts'
 import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
+import {createMapHash} from './mapHash.mjs'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
@@ -21,6 +21,7 @@ const levelLibraryDirectory = path.resolve(levelsDirectory, 'library')
 const locationsSourcePath = path.resolve(levelsDirectory, 'locations.json')
 const appearanceSourceDirectory = path.resolve(levelsDirectory, 'appearance')
 const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
+const pushRecordsPath = path.resolve(levelsDirectory, 'metadata', 'push-records.json')
 const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels')
 const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
@@ -45,17 +46,6 @@ const readText = (filePath) => fs.readFileSync(filePath, 'utf8').replace(/\r\n/g
 
 // Возвращает данные, за которые отвечает операция `readJson`.
 const readJson = (filePath) => JSON.parse(readText(filePath))
-
-// Выполняет отдельную операцию `normalizeMapForHash`.
-const normalizeMapForHash = (map) => {
-  const rows = map.map((row) => row.trimEnd()).filter((row) => row.trim())
-  const indent = Math.min(...rows.map((row) => row.search(/\S/)))
-
-  return rows.map((row) => row.slice(indent).trimEnd()).join('\n')
-}
-
-// Создаёт данные или представление для операции `createMapHash`.
-const createMapHash = (map) => crypto.createHash('sha256').update(normalizeMapForHash(map)).digest('hex')
 
 // Возвращает данные, за которые отвечает операция `getStandardMetrics`.
 const getStandardMetrics = (map) => {
@@ -246,6 +236,25 @@ const loadLevels = () => {
   return levels
 }
 
+// Загружает доказанные минимумы толчков и отбрасывает результаты изменённых карт.
+const loadMinimumPushes = (levels) => {
+  if (!fs.existsSync(pushRecordsPath)) return new Map()
+
+  const source = readJson(pushRecordsPath)
+  if (source.version !== 1 || !Array.isArray(source.records)) throw new Error('Файл push-records.json имеет неподдерживаемый формат')
+  const levelsById = new Map(levels.map((level) => [level.id, level]))
+  return new Map(source.records.flatMap((record) => createMinimumPushesEntry(record, levelsById.get(record.id))))
+}
+
+// Проверяет одну запись эталона и создаёт элемент индекса.
+const createMinimumPushesEntry = (record, level) => {
+  if (!level || record.mapHash !== createMapHash(level.map)) return []
+  if (!Number.isInteger(record.minimumPushes) || record.minimumPushes < 0) {
+    throw new Error(`${record.id}: эталон толчков должен быть неотрицательным целым числом`)
+  }
+  return [[record.id, record.minimumPushes]]
+}
+
 // Возвращает данные, за которые отвечает операция `getLocationLevels`.
 const getLocationLevels = (location, levelsById, assignedIds) => {
   if (!Array.isArray(location.levelIds) || location.levelIds.length === 0) throw new Error(`${location.id}: в локации нет уровней`)
@@ -375,32 +384,23 @@ const createSolverMetadata = (level) => {
   }
 }
 
-// Возвращает данные, за которые отвечает операция `getProvenPushRecord`.
-const getProvenPushRecord = (level) => {
-  if (!level.stats || level.stats.lowerBound === null) return null
-  if (level.stats.lowerBound !== level.stats.bestPushes) return null
-
-  return level.stats.bestPushes
-}
-
 // Создаёт данные или представление для операции `createRuntimeLevel`.
-const createRuntimeLevel = (level, index, appearance) => {
+const createRuntimeLevel = (level, index, appearance, minimumPushes) => {
   const solver = createSolverMetadata(level)
-  const pushRecord = getProvenPushRecord(level)
 
   return {
     id: level.id,
     levelName: `level${index}`,
     difficulty: level.difficulty,
     ...(solver && {solver}),
-    ...(pushRecord && {pushRecord}),
+    ...(Number.isInteger(minimumPushes) && {minimumPushes}),
     ...(appearance && {appearance}),
     map: toRuntimeMap(level.map),
   }
 }
 
 // Создаёт данные или представление для операции `createRuntimeLocation`.
-const createRuntimeLocation = (location, levelIndexes, appearances) => {
+const createRuntimeLocation = (location, levelIndexes, appearances, minimumPushesById) => {
   return {
     id: location.id,
     titleKey: location.titleKey,
@@ -408,15 +408,17 @@ const createRuntimeLocation = (location, levelIndexes, appearances) => {
     background: location.background,
     ambience: location.ambience,
     music: location.music,
-    levels: location.levels.map((level) => createRuntimeLevel(level, levelIndexes.get(level.id), appearances.get(level.id))),
+    levels: location.levels.map((level) =>
+      createRuntimeLevel(level, levelIndexes.get(level.id), appearances.get(level.id), minimumPushesById.get(level.id)),
+    ),
   }
 }
 
 // Создаёт данные или представление для операции `createRuntimeCatalog`.
-const createRuntimeCatalog = (locations, appearances) => {
+const createRuntimeCatalog = (locations, appearances, minimumPushesById) => {
   const orderedLevels = locations.flatMap((location) => location.levels)
   const levelIndexes = new Map(orderedLevels.map((level, index) => [level.id, index]))
-  return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes, appearances))}
+  return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes, appearances, minimumPushesById))}
 }
 
 // Проверяет условие, описанное операцией `validateUniqueIds`.
@@ -474,8 +476,9 @@ const buildLevels = async () => {
   validateUniqueIds(levels)
   const locations = loadLocations(levels, sourceLocations)
   const appearances = loadAppearances(levels, locations)
+  const minimumPushesById = loadMinimumPushes(levels)
 
-  const gameCatalog = createRuntimeCatalog(locations, appearances)
+  const gameCatalog = createRuntimeCatalog(locations, appearances, minimumPushesById)
   const prettierConfig = await prettier.resolveConfig(path.resolve(projectRoot, 'package.json'))
   await writeLocationFiles(gameCatalog.locations, prettierConfig)
   removeStaleLocationFiles(gameCatalog.locations)
