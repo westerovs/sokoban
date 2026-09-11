@@ -53,7 +53,7 @@ select:focus-visible {
   z-index: 2;
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: 120px 120px minmax(70px, 1fr) auto;
+  grid-template-columns: 120px 160px minmax(70px, 1fr) auto;
   gap: 14px;
   align-items: center;
   padding: 12px 22px;
@@ -105,6 +105,11 @@ select:focus-visible {
   background: #223028;
   border: 1px solid #405649;
   border-radius: 10px;
+}
+
+.editor-field--level,
+.editor-field--level select {
+  width: 160px;
 }
 
 .editor-actions {
@@ -271,15 +276,15 @@ select:focus-visible {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 5px;
-  margin-bottom: 20px;
-  padding: 4px;
-  background: #111b15;
-  border: 1px solid #2c4033;
-  border-radius: 11px;
+  padding: 0;
 }
 
 .editor-palette__title + .editor-mode-tabs {
-  margin-top: 10px;
+  margin-top: 0;
+}
+
+.editor-structures-section {
+  margin-bottom: 16px;
 }
 
 .editor-mode-button:nth-child(-n + 2) {
@@ -465,6 +470,69 @@ select:focus-visible {
 .editor-palette__section {
   display: grid;
   gap: 10px;
+  padding: 12px;
+  background: #111b15;
+  border: 1px solid #2c4033;
+  border-radius: 11px;
+}
+
+.editor-help-button {
+  position: absolute;
+  z-index: 2;
+  bottom: 16px;
+  left: 16px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid #587247;
+  border-radius: 50%;
+  background: #1d3023;
+  color: #bedf70;
+  box-shadow: 0 4px 14px #0006;
+  cursor: pointer;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.editor-help-button:hover {
+  background: #30452b;
+  border-color: #bedf70;
+}
+
+.editor-confirm-dialog.editor-shortcuts-dialog {
+  width: min(660px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  border-color: #587247;
+}
+
+.editor-shortcuts {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 1.4fr);
+  gap: 12px 20px;
+  font-size: 14px;
+}
+
+.editor-shortcuts dt {
+  color: #bedf70;
+  font-weight: 700;
+}
+
+.editor-shortcuts dd {
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .editor-shortcuts {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .editor-shortcuts dd {
+    margin-bottom: 10px;
+  }
 }
 
 .editor-palette__title {
@@ -700,7 +768,7 @@ select:focus-visible {
   }
 
   .editor-header {
-    grid-template-columns: 120px 120px minmax(70px, 1fr) auto;
+    grid-template-columns: 120px 156px minmax(70px, 1fr) auto;
   }
 
   .editor-palette__tiles {
@@ -714,7 +782,7 @@ select:focus-visible {
   }
 
   .editor-header {
-    grid-template-columns: 120px 120px minmax(70px, 1fr);
+    grid-template-columns: 120px 156px minmax(70px, 1fr);
     gap: 10px 14px;
     padding: 10px;
   }

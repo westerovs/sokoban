@@ -70,6 +70,8 @@ const elements = {
   resetButton: getElement<HTMLButtonElement>('#reset-button'),
   saveButton: getElement<HTMLButtonElement>('#save-button'),
   saveAsButton: getElement<HTMLButtonElement>('#save-as-button'),
+  shortcutsButton: getElement<HTMLButtonElement>('#shortcuts-button'),
+  shortcutsDialog: getElement<HTMLDialogElement>('#shortcuts-dialog'),
   status: getElement<HTMLElement>('#status'),
   undoButton: getElement<HTMLButtonElement>('#undo-button'),
   utilityPalette: getElement<HTMLElement>('#utility-palette'),
@@ -77,6 +79,7 @@ const elements = {
 }
 
 const isDebug = window.localStorage.getItem(`${GAME_NAME}-isDebug`) === 'true' // Показывает служебные сведения об уровне
+const LEVEL_WHEEL_INTERVAL = 180 // Минимальная пауза между переключениями колёсиком в миллисекундах
 
 let board: EditorBoard
 let editorData: EditorData
@@ -85,6 +88,7 @@ let libraryPanel: LevelLibraryPanel
 let navigation: LevelNavigation
 let isSaving = false
 let isGenerating = false
+let lastLevelWheelTime = -Infinity
 let palette: EditorPalette
 let selectedBrush: EditorBrush | null = null
 let selectedLevel: EditorLevel | null = null
@@ -474,7 +478,19 @@ const resetAllChanges = () => {
 // Масштабирует поле колёсиком относительно положения курсора.
 const handleBoardWheel = (event: WheelEvent) => {
   event.preventDefault()
+  if (event.ctrlKey) return
   board.zoomAt(event.deltaY, {x: event.offsetX, y: event.offsetY})
+}
+
+// Переключает уровни колёсиком с Ctrl, подавляя масштаб браузера и повторные события.
+const handleLevelWheel = (event: WheelEvent) => {
+  if (!event.ctrlKey) return
+  event.preventDefault()
+  event.stopPropagation()
+  if (document.querySelector('dialog[open]') || isSaving || isGenerating || !event.deltaY) return
+  if (performance.now() - lastLevelWheelTime < LEVEL_WHEEL_INTERVAL) return
+  navigation.selectRelative(event.deltaY)
+  lastLevelWheelTime = performance.now()
 }
 
 // Создаёт PixiJS-доску и отключает системное меню правой кнопки мыши.
@@ -519,7 +535,12 @@ const handleControlShortcut = (event: KeyboardEvent) => {
 
 // Переключает палитры цифрами и передаёт служебные сочетания.
 const handleKeyboard = (event: KeyboardEvent) => {
-  if (elements.fillLocationDialog.open || libraryPanel.isOpen || isSaving) {
+  if (event.key === 'F1') {
+    event.preventDefault()
+    if (!document.querySelector('dialog[open]') && !isSaving) elements.shortcutsDialog.showModal()
+    return
+  }
+  if (elements.fillLocationDialog.open || libraryPanel.isOpen || elements.shortcutsDialog.open || isSaving) {
     if ((event.ctrlKey || event.metaKey) && event.code === 'KeyS') event.preventDefault()
     return
   }
@@ -541,6 +562,8 @@ const bindSidebarTabs = () => {
 // Подключает кнопки интерфейса и защиту несохранённой сессии.
 const bindActions = () => {
   bindLocationFill()
+  elements.shortcutsButton.addEventListener('click', () => elements.shortcutsDialog.showModal())
+  window.addEventListener('wheel', handleLevelWheel, {passive: false, capture: true})
   elements.fillButton.addEventListener('click', fillSelectedRole)
   elements.saveButton.addEventListener('click', save)
   elements.saveAsButton.addEventListener('click', () => {

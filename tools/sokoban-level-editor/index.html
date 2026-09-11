@@ -8,6 +8,37 @@
     <link rel="stylesheet" href="./src/editor.css" />
   </head>
   <body>
+    <dialog id="shortcuts-dialog" class="editor-confirm-dialog editor-shortcuts-dialog" aria-labelledby="shortcuts-title">
+      <h2 id="shortcuts-title">Горячие клавиши редактора</h2>
+      <dl class="editor-shortcuts">
+        <dt>Ctrl + колесо вверх / вниз</dt>
+        <dd>Предыдущий / следующий уровень текущей локации</dd>
+        <dt>Ctrl + S</dt>
+        <dd>Сохранить текущий уровень</dd>
+        <dt>Ctrl + Z</dt>
+        <dd>Отменить действие</dd>
+        <dt>Ctrl + Shift + Z / Ctrl + Y</dt>
+        <dd>Повторить действие</dd>
+        <dt>1 / 2 / 3 / 4 / 5</dt>
+        <dd>Стены / декор / ящики / пол / цели</dd>
+        <dt>Колесо мыши над полем</dt>
+        <dd>Приблизить / отдалить карту относительно курсора</dd>
+        <dt>Левая кнопка мыши / протягивание</dt>
+        <dd>Рисовать выбранной кистью</dd>
+        <dt>Правая кнопка мыши / протягивание</dt>
+        <dd>Очищать клетки</dd>
+        <dt>F1</dt>
+        <dd>Открыть справку</dd>
+        <dt>Esc</dt>
+        <dd>Закрыть всплывающее окно, если не идёт сохранение</dd>
+      </dl>
+      <p>
+        На macOS для сохранения, отмены и повтора можно использовать ⌘ вместо Ctrl. Цифровые команды не действуют при вводе в поля формы.
+      </p>
+      <form method="dialog" class="editor-confirm-dialog__actions">
+        <button class="editor-button editor-button--primary" autofocus>Понятно</button>
+      </form>
+    </dialog>
     <dialog id="save-as-dialog" class="editor-confirm-dialog" aria-labelledby="save-as-title">
       <form id="save-as-form">
         <h2 id="save-as-title">Сохранить как</h2>
@@ -129,8 +160,10 @@
         </div>
         <div id="manual-tools-panel" role="tabpanel">
           <div id="utility-palette" class="editor-utility-palette"></div>
-          <h2 class="editor-palette__title">Структуры</h2>
-          <div id="mode-tabs" class="editor-mode-tabs"></div>
+          <section class="editor-palette__section editor-structures-section">
+            <h2 class="editor-palette__title">Структуры</h2>
+            <div id="mode-tabs" class="editor-mode-tabs"></div>
+          </section>
           <div id="palette" class="editor-palette"></div>
         </div>
         <section id="generator-panel" class="editor-generator" role="tabpanel" hidden>
@@ -145,6 +178,16 @@
       </aside>
 
       <main class="editor-workspace">
+        <button
+          id="shortcuts-button"
+          class="editor-help-button"
+          type="button"
+          title="Горячие клавиши (F1)"
+          aria-label="Горячие клавиши редактора"
+          aria-haspopup="dialog"
+        >
+          ?
+        </button>
         <div id="canvas-host" class="editor-canvas-host"></div>
         <div class="editor-level-metadata">
           <output

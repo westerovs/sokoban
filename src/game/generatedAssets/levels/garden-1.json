@@ -216,6 +216,7 @@
           "9:3": "wall-bush",
           "0:4": "wall-bush",
           "4:4": "wall-bush",
+          "8:4": "wall-bush",
           "9:4": "wall-bush",
           "0:5": "wall-bush",
           "4:5": "wall-bush",
@@ -228,8 +229,7 @@
           "5:6": "wall-bush",
           "6:6": "wall-bush",
           "7:6": "wall-bush",
-          "8:6": "wall-bush",
-          "8:4": "wall-bush"
+          "8:6": "wall-bush"
         },
         "box": {"2:2": "box-pumpkin", "4:3": "box-pumpkin", "7:3": "box-pumpkin", "6:4": "box-pumpkin"},
         "ground": {"8:4": "ground-default"}
@@ -287,6 +287,43 @@
       "levelName": "level6",
       "difficulty": "easy",
       "authorId": "custom",
+      "appearance": {
+        "wall": {
+          "3:0": "wall-bush",
+          "4:0": "wall-bush",
+          "5:0": "wall-bush",
+          "6:0": "wall-bush",
+          "7:0": "wall-bush",
+          "8:0": "wall-bush",
+          "1:1": "wall-bush",
+          "2:1": "wall-bush",
+          "3:1": "wall-bush",
+          "8:1": "wall-bush",
+          "0:2": "wall-bush",
+          "1:2": "wall-bush",
+          "5:2": "wall-bush",
+          "6:2": "wall-bush",
+          "8:2": "wall-bush",
+          "9:2": "wall-bush",
+          "0:3": "wall-bush",
+          "9:3": "wall-bush",
+          "0:4": "wall-bush",
+          "8:4": "wall-bush",
+          "9:4": "wall-bush",
+          "0:5": "wall-bush",
+          "1:5": "wall-bush",
+          "2:5": "wall-bush",
+          "3:5": "wall-bush",
+          "4:5": "wall-bush",
+          "5:5": "wall-bush",
+          "8:5": "wall-bush",
+          "5:6": "wall-bush",
+          "6:6": "wall-bush",
+          "7:6": "wall-bush",
+          "8:6": "wall-bush"
+        },
+        "box": {"4:2": "box-pumpkin", "3:3": "box-pumpkin", "5:3": "box-pumpkin", "4:4": "box-pumpkin", "6:4": "box-pumpkin"}
+      },
       "map": ["___######_", "_###    #_", "##. $## ##", "#..$ $  @#", "#.. $ $ ##", "######  #_", "_____####_"]
     },
     {
@@ -331,7 +368,8 @@
           "6:6": "wall-bush",
           "7:6": "wall-bush",
           "8:6": "wall-bush"
-        }
+        },
+        "box": {"5:2": "box-pumpkin", "2:3": "box-pumpkin", "6:3": "box-pumpkin", "6:4": "box-pumpkin"}
       },
       "map": ["____######", "_####   .#", "##@  $   #", "# $ ##$ .#", "#  ## $ ##", "#  .   .##", "#########_"]
     }

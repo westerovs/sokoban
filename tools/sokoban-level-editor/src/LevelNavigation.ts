@@ -62,6 +62,17 @@ export default class LevelNavigation {
     this.#levelSelect.replaceChildren()
   }
 
+  // Выбирает соседний уровень текущей локации с обычной защитой несохранённых изменений.
+  selectRelative(direction: number) {
+    const levels = this.#getSelectedLocation()?.levels
+    if (!levels || !this.#selectedLevel || !direction) return
+    const index = levels.findIndex((level) => level.id === this.#selectedLevel?.id)
+    const nextLevel = levels[index + Math.sign(direction)]
+    if (index < 0 || !nextLevel) return
+    this.#levelSelect.value = nextLevel.id
+    this.#tryCommitSelection(nextLevel)
+  }
+
   // Инициализирует внутреннее состояние и зависимости.
   #init() {
     this.#locationSelect.replaceChildren(...this.#locations.map(this.#createLocationOption))
@@ -139,7 +150,8 @@ export default class LevelNavigation {
   #createLevelOption = (level: EditorLevel) => {
     const option = document.createElement('option')
     option.value = level.id
-    option.textContent = level.id
+    const index = this.#locations.flatMap((location) => location.levels).findIndex(({id}) => id === level.id)
+    option.textContent = `${index + 1}. ${level.id}`
     return option
   }
 }
