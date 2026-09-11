@@ -12,7 +12,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 473, "pushes": 136, "timeSeconds": 0},
       "map": [
         "####################",
         "#    @##      #   ##",
@@ -34,7 +33,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 378, "pushes": 124, "timeSeconds": 1},
       "map": [
         "_#########____",
         "_#       #____",
@@ -56,7 +54,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 508, "pushes": 131, "timeSeconds": 1},
       "map": [
         "############__",
         "#..  #     ###",
@@ -76,7 +73,6 @@
       "difficulty": "medium",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 521, "pushes": 208, "timeSeconds": 1},
       "map": [
         "__#########__",
         "__#-.-#-.-#__",
@@ -102,7 +98,6 @@
       "difficulty": "medium",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 807, "pushes": 243, "timeSeconds": 1},
       "map": [
         "####################",
         "##...   ## #    #  #",
@@ -124,7 +119,6 @@
       "difficulty": "hard",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1360, "pushes": 360, "timeSeconds": 8},
       "map": [
         "____############_",
         "____#          ##",
@@ -150,7 +144,6 @@
       "difficulty": "veryHard",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1901, "pushes": 384, "timeSeconds": 9},
       "map": [
         "####################",
         "#    ##   #    #   #",

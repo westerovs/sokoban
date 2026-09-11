@@ -4,15 +4,6 @@ import type {LevelDifficulty} from './levelDifficulty.js'
 
 type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, string>>>
 
-type LevelSolver = {
-  verified: boolean
-  name: string
-  version: string
-  moves: number
-  pushes: number
-  timeSeconds: number
-}
-
 type LevelDefinition = {
   id: string
   levelName: string
@@ -21,7 +12,6 @@ type LevelDefinition = {
   authorName: string
   isRemote?: boolean
   appearance?: LevelAppearance
-  solver?: LevelSolver
   map: string[]
 }
 

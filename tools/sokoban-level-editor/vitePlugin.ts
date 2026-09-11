@@ -75,7 +75,6 @@ const createEditorLocations = (catalog: any) => {
       map: level.map,
       authorId: level.authorId,
       authorName: level.authorName,
-      isVerified: Boolean(level.solver?.verified),
     })),
   }))
 }
@@ -141,10 +140,8 @@ const updateLevelMap = (content: string, levelId: string, runtimeMap: string[], 
   const level = levels.find((entry) => entry.metadata.id === levelId)
   if (!level) throw new Error(`Level ${levelId} is missing in ${sourceLabel}`)
 
-  const isMapChanged = JSON.stringify(toRuntimeMap(level.map)) !== JSON.stringify(runtimeMap)
   level.map = toStandardMap(runtimeMap)
   delete level.metadata.custom
-  if (isMapChanged) level.metadata.unverified = 'true'
   return serializeXsb(levels)
 }
 

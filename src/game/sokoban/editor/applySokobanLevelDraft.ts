@@ -49,7 +49,6 @@ const applySokobanLevelDraft = (levelId: string, searchParams: URLSearchParams) 
 
   entry.level.map = [...draft.map]
   entry.level.appearance = structuredClone(draft.appearance)
-  delete entry.level.solver
   showDraftBanner()
   return true
 }

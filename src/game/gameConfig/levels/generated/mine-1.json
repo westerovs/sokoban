@@ -12,7 +12,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 410, "pushes": 143, "timeSeconds": 1},
       "map": [
         "________#####____",
         "________#   #####",
@@ -35,7 +34,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 608, "pushes": 148, "timeSeconds": 0},
       "map": [
         "________#######____",
         "____#####  #  ####_",
@@ -56,7 +54,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 560, "pushes": 140, "timeSeconds": 1},
       "map": [
         "################_",
         "#       #@ #   #_",
@@ -76,7 +73,6 @@
       "difficulty": "medium",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 752, "pushes": 256, "timeSeconds": 1},
       "map": [
         "___#########_______",
         "__##   ##  #####___",
@@ -99,7 +95,6 @@
       "difficulty": "medium",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 820, "pushes": 264, "timeSeconds": 1},
       "map": [
         "####################",
         "#   #  #@# ##  #####",
@@ -121,7 +116,6 @@
       "difficulty": "hard",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1337, "pushes": 409, "timeSeconds": 1},
       "map": [
         "####################",
         "#     #  #...#@    #",
@@ -143,7 +137,6 @@
       "difficulty": "veryHard",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1100, "pushes": 436, "timeSeconds": 48},
       "map": [
         "#############____",
         "#........####____",

@@ -28,7 +28,6 @@ type EditorLevel = {
   authorId: string
   authorName: string
   number?: number
-  isVerified?: boolean
 }
 
 type EditorState = {

@@ -6,7 +6,6 @@ import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {LEVEL_DIFFICULTIES} from '../../src/game/gameConfig/levels/levelDifficulty.ts'
 import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
-import {createMapHash} from './mapHash.mjs'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
@@ -20,7 +19,6 @@ const levelsDirectory = path.resolve(projectRoot, 'levels')
 const levelLibraryDirectory = path.resolve(levelsDirectory, 'library')
 const locationsSourcePath = path.resolve(levelsDirectory, 'locations.json')
 const appearanceSourceDirectory = path.resolve(levelsDirectory, 'appearance')
-const solverStatsPath = path.resolve(levelsDirectory, 'metadata', 'solver-stats.json')
 const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels')
 const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
@@ -33,12 +31,6 @@ const difficultyDirectories = Object.freeze({
   'very-hard': 'veryHard', // Каталог очень тяжёлых карт
 })
 const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
-const lurdDirections = Object.freeze({
-  u: Object.freeze({x: 0, y: -1}),
-  d: Object.freeze({x: 0, y: 1}),
-  l: Object.freeze({x: -1, y: 0}),
-  r: Object.freeze({x: 1, y: 0}),
-})
 
 // Возвращает данные, за которые отвечает операция `readText`.
 const readText = (filePath) => fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n')
@@ -72,110 +64,15 @@ const validateStandardMap = (level) => {
   return metrics
 }
 
-// Возвращает данные, за которые отвечает операция `getStatsById`.
-const getStatsById = () => {
-  const stats = readJson(solverStatsPath)
-  return {
-    solver: stats.solver,
-    levels: new Map(stats.levels.map((level) => [level.id, level])),
-  }
-}
-
 // Создаёт данные или представление для операции `createLevel`.
-const createLevel = (parsedLevel, difficulty, author, statsData) => {
-  const id = parsedLevel.metadata.id
-  const isUnverified = parsedLevel.metadata.unverified === 'true'
-  const stats = isUnverified ? null : statsData.levels.get(id) || null
-
+const createLevel = (parsedLevel, difficulty, author) => {
   return {
-    id,
+    id: parsedLevel.metadata.id,
     map: parsedLevel.map,
     difficulty,
     authorId: author.authorId,
     authorName: author.authorName,
-    isUnverified,
-    stats,
-    solver: stats ? {name: statsData.solver.name, version: stats.solverVersion} : null,
   }
-}
-
-// Проверяет условие, описанное операцией `validateStats`.
-const validateStats = (level, metrics) => {
-  if (!level.stats) return
-  if (createMapHash(level.map) !== level.stats.mapHash) throw new Error(`${level.id}: карта не совпадает с проверенной решателем`)
-
-  const keys = ['width', 'height', 'boxCount']
-  keys.forEach((key) => {
-    if (metrics[key] !== level.stats[key]) throw new Error(`${level.id}: метрика ${key} не совпадает с таблицей решателя`)
-  })
-  validateLurdSolution(level)
-}
-
-// Возвращает данные, за которые отвечает операция `getPositionKey`.
-const getPositionKey = (position) => `${position.x}:${position.y}`
-
-// Разбирает входные данные через операцию `parseSolutionState`.
-const parseSolutionState = (standardMap) => {
-  const map = toRuntimeMap(standardMap)
-  const boxes = new Set()
-  const targets = new Set()
-  let player = null
-
-  map.forEach((row, y) => {
-    Array.from(row).forEach((symbol, x) => addSolutionSymbol(symbol, {x, y}, boxes, targets, (value) => (player = value)))
-  })
-  return {map, boxes, targets, player}
-}
-
-// Добавляет данные или представление через операцию `addSolutionSymbol`.
-const addSolutionSymbol = (symbol, position, boxes, targets, setPlayer) => {
-  const key = getPositionKey(position)
-  if ('$-'.includes(symbol)) boxes.add(key)
-  if ('.-*'.includes(symbol)) targets.add(key)
-  if ('@*'.includes(symbol)) setPlayer(position)
-}
-
-// Проверяет условие, описанное операцией `isBlockedSolutionCell`.
-const isBlockedSolutionCell = (state, position) => {
-  const symbol = state.map[position.y]?.[position.x]
-  return !symbol || symbol === '_' || symbol === '#'
-}
-
-// Обновляет состояние через операцию `applyLurdMove`.
-const applyLurdMove = (state, move, levelId) => {
-  const direction = lurdDirections[move.toLowerCase()]
-  if (!direction) throw new Error(`${levelId}: недопустимый символ решения ${move}`)
-
-  const next = {x: state.player.x + direction.x, y: state.player.y + direction.y}
-  const nextKey = getPositionKey(next)
-  const isPush = state.boxes.has(nextKey)
-  if (isPush !== (move === move.toUpperCase())) throw new Error(`${levelId}: регистр LURD не совпадает с действием`)
-  moveSolutionBox(state, next, direction, levelId)
-  if (isBlockedSolutionCell(state, next)) throw new Error(`${levelId}: решение проходит сквозь стену`)
-  state.player = next
-}
-
-// Выполняет отдельную операцию `moveSolutionBox`.
-const moveSolutionBox = (state, box, direction, levelId) => {
-  const boxKey = getPositionKey(box)
-  if (!state.boxes.has(boxKey)) return
-
-  const destination = {x: box.x + direction.x, y: box.y + direction.y}
-  const destinationKey = getPositionKey(destination)
-  if (isBlockedSolutionCell(state, destination) || state.boxes.has(destinationKey))
-    throw new Error(`${levelId}: решение толкает ящик в препятствие`)
-  state.boxes.delete(boxKey)
-  state.boxes.add(destinationKey)
-}
-
-// Проверяет условие, описанное операцией `validateLurdSolution`.
-const validateLurdSolution = (level) => {
-  if (!level.stats.solution) return
-
-  const state = parseSolutionState(level.map)
-  Array.from(level.stats.solution).forEach((move) => applyLurdMove(state, move, level.id))
-  const isSolved = Array.from(state.boxes).every((box) => state.targets.has(box))
-  if (!isSolved) throw new Error(`${level.id}: сохранённое решение не завершает карту`)
 }
 
 // Возвращает данные, за которые отвечает операция `loadLocationDefinitions`.
@@ -216,7 +113,7 @@ const getDifficultyFiles = (author, directoryName) => {
 }
 
 // Читает единственную карту из отдельного файла библиотеки.
-const loadLibraryLevel = (filePath, difficulty, author, statsData) => {
+const loadLibraryLevel = (filePath, difficulty, author) => {
   const sourceLabel = path.relative(projectRoot, filePath)
   const parsedLevels = parseXsb(readText(filePath), sourceLabel)
   if (parsedLevels.length !== 1) throw new Error(`${sourceLabel}: файл должен содержать ровно один уровень`)
@@ -225,40 +122,31 @@ const loadLibraryLevel = (filePath, difficulty, author, statsData) => {
   const id = parsedLevel.metadata.id
   if (!id) throw new Error(`${sourceLabel}: не указан id уровня`)
   if (path.basename(filePath, '.xsb') !== id) throw new Error(`${sourceLabel}: имя файла должно совпадать с id ${id}`)
-  return createLevel(parsedLevel, difficulty, author, statsData)
+  return createLevel(parsedLevel, difficulty, author)
 }
 
 // Загружает уровни одного автора и получает сложность из имени папки.
-const loadAuthorLevels = (author, statsData) => {
+const loadAuthorLevels = (author) => {
   return Object.entries(difficultyDirectories).flatMap(([directoryName, difficulty]) => {
     if (!LEVEL_DIFFICULTIES.includes(difficulty)) throw new Error(`Неизвестная сложность ${difficulty}`)
-    return getDifficultyFiles(author, directoryName).map((filePath) => loadLibraryLevel(filePath, difficulty, author, statsData))
+    return getDifficultyFiles(author, directoryName).map((filePath) => loadLibraryLevel(filePath, difficulty, author))
   })
 }
 
 // Загружает библиотеку уровней из всех найденных групп авторов.
-const loadLibraryLevels = (statsData) => {
+const loadLibraryLevels = () => {
   const authors = loadAuthors()
   const authorIds = new Set(authors.map(({authorId}) => authorId))
   if (authorIds.size !== authors.length) throw new Error('Идентификаторы авторов в levels/library должны быть уникальны')
-  return authors.flatMap((author) => loadAuthorLevels(author, statsData))
-}
-
-// Проверяет условие, описанное операцией `validateStatsLinks`.
-const validateStatsLinks = (levels, statsData) => {
-  const levelIds = new Set(levels.map((level) => level.id))
-  const unknownStatsIds = Array.from(statsData.levels.keys()).filter((levelId) => !levelIds.has(levelId))
-  if (unknownStatsIds.length > 0) throw new Error(`Статистика ссылается на неизвестный уровень ${unknownStatsIds[0]}`)
+  return authors.flatMap((author) => loadAuthorLevels(author))
 }
 
 // Возвращает данные, за которые отвечает операция `loadLevels`.
 const loadLevels = () => {
-  const statsData = getStatsById()
-  const levels = loadLibraryLevels(statsData)
+  const levels = loadLibraryLevels()
 
   if (levels.length === 0) throw new Error('Папка levels/library не содержит карт')
-  levels.forEach((level) => validateStats(level, validateStandardMap(level)))
-  validateStatsLinks(levels, statsData)
+  levels.forEach(validateStandardMap)
 
   return levels
 }
@@ -377,31 +265,14 @@ const loadAppearances = (levels, locations) => {
   return result
 }
 
-// Создаёт данные или представление для операции `createSolverMetadata`.
-const createSolverMetadata = (level) => {
-  if (!level.stats) return undefined
-
-  return {
-    verified: true,
-    name: level.solver.name,
-    version: level.solver.version,
-    moves: level.stats.moves,
-    pushes: level.stats.pushes,
-    timeSeconds: level.stats.timeSeconds,
-  }
-}
-
 // Создаёт данные или представление для операции `createRuntimeLevel`.
 const createRuntimeLevel = (level, index, appearance) => {
-  const solver = createSolverMetadata(level)
-
   return {
     id: level.id,
     levelName: `level${index}`,
     difficulty: level.difficulty,
     authorId: level.authorId,
     authorName: level.authorName,
-    ...(solver && {solver}),
     ...(appearance && {appearance}),
     map: toRuntimeMap(level.map),
   }

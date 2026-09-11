@@ -12,7 +12,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 518, "pushes": 168, "timeSeconds": 0},
       "map": [
         "####################",
         "# #     #          #",
@@ -34,7 +33,6 @@
       "difficulty": "easy",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 497, "pushes": 187, "timeSeconds": 0},
       "map": [
         "#######_________",
         "#     ##########",
@@ -56,7 +54,6 @@
       "difficulty": "medium",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 879, "pushes": 264, "timeSeconds": 1},
       "map": [
         "__####____________",
         "__#  #########____",
@@ -82,7 +79,6 @@
       "difficulty": "medium",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 990, "pushes": 268, "timeSeconds": 1},
       "map": [
         "####################",
         "# # # #   #@##   # #",
@@ -104,7 +100,6 @@
       "difficulty": "hard",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1393, "pushes": 402, "timeSeconds": 5},
       "map": [
         "####_______________",
         "#  ##############__",
@@ -130,7 +125,6 @@
       "difficulty": "veryHard",
       "authorId": "xsokoban",
       "authorName": "XSokoban",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1519, "pushes": 481, "timeSeconds": 10},
       "map": [
         "_______###########_",
         "_______#   #     #_",

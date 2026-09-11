@@ -309,7 +309,6 @@ const applySavedData = (data: EditorData) => {
   const currentLevel = selectedLevel as EditorLevel
   const savedLevel = findLevel(data, currentLevel.id) as EditorLevel
   currentLevel.map = [...savedLevel.map]
-  currentLevel.isVerified = savedLevel.isVerified
   currentLevel.authorId = savedLevel.authorId
   currentLevel.authorName = savedLevel.authorName
   editorData = data
@@ -359,7 +358,6 @@ const getSolvabilityMessage = (result: any) => {
 // Запускает серверный решатель для изменённой структуры уровня.
 const checkSolvability = async () => {
   if (!session || !selectedLevel || !getValidation().isValid) return
-  if (!session.isMapDirty && selectedLevel.isVerified) return showStatus('Эта карта уже подтверждена решателем')
   elements.validateButton.disabled = true
   showStatus('Проверяем решаемость…')
   try {
