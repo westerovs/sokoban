@@ -113,8 +113,7 @@ const updateLevelDimensions = () => {
 const updateLevelAuthor = () => {
   const isVisible = Boolean(isDebug && selectedLevel && !elements.manualToolsPanel.hidden)
   elements.levelAuthor.hidden = !isVisible
-  elements.levelAuthor.textContent = selectedLevel ? `Автор: ${selectedLevel.authorName}` : ''
-  elements.levelAuthor.title = selectedLevel?.authorId ?? ''
+  elements.levelAuthor.textContent = selectedLevel ? `Автор: ${selectedLevel.authorId}` : ''
 }
 
 // Показывает область перезаписи перед сохранением всей локации.
@@ -310,7 +309,6 @@ const applySavedData = (data: EditorData) => {
   const savedLevel = findLevel(data, currentLevel.id) as EditorLevel
   currentLevel.map = [...savedLevel.map]
   currentLevel.authorId = savedLevel.authorId
-  currentLevel.authorName = savedLevel.authorName
   editorData = data
   const appearance = getLevelAppearance(editorData.appearance, currentLevel.id)
   session = new EditorSession(currentLevel, appearance)

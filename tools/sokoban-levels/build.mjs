@@ -71,7 +71,6 @@ const createLevel = (parsedLevel, difficulty, author) => {
     map: parsedLevel.map,
     difficulty,
     authorId: author.authorId,
-    authorName: author.authorName,
   }
 }
 
@@ -87,7 +86,7 @@ const loadAuthor = (directoryPath) => {
   const metadataPath = path.resolve(directoryPath, 'author.json')
   if (!fs.existsSync(metadataPath)) throw new Error(`${path.relative(projectRoot, directoryPath)}: отсутствует author.json`)
   const author = readJson(metadataPath)
-  if (!author.authorId || !author.authorName) throw new Error(`${path.relative(projectRoot, metadataPath)}: автор заполнен не полностью`)
+  if (!author.authorId) throw new Error(`${path.relative(projectRoot, metadataPath)}: не указан authorId`)
   return {...author, directoryPath}
 }
 
@@ -272,7 +271,6 @@ const createRuntimeLevel = (level, index, appearance) => {
     levelName: `level${index}`,
     difficulty: level.difficulty,
     authorId: level.authorId,
-    authorName: level.authorName,
     ...(appearance && {appearance}),
     map: toRuntimeMap(level.map),
   }

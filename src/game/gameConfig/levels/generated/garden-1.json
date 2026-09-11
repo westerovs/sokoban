@@ -10,8 +10,7 @@
       "id": "sokoban-001",
       "levelName": "level0",
       "difficulty": "easy",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "appearance": {
         "wall": {
           "3:0": "wall-bush",
@@ -55,8 +54,7 @@
       "id": "sokoban-004",
       "levelName": "level1",
       "difficulty": "easy",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "appearance": {
         "ground": {"4:6": "ground-default"},
         "box": {"2:2": "box-pumpkin", "2:3": "box-pumpkin", "3:4": "box-pumpkin", "2:5": "box-pumpkin"},
@@ -96,8 +94,7 @@
       "id": "sokoban-003",
       "levelName": "level2",
       "difficulty": "easy",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "appearance": {
         "wall": {
           "0:0": "wall-bush",
@@ -148,8 +145,7 @@
       "id": "sokoban-002",
       "levelName": "level3",
       "difficulty": "easy",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "appearance": {
         "wall": {
           "0:0": "wall-bush",
@@ -195,8 +191,7 @@
       "id": "sokoban-005",
       "levelName": "level4",
       "difficulty": "easy",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "appearance": {
         "wall": {
           "1:0": "wall-bush",
@@ -244,8 +239,7 @@
       "id": "sokoban-006",
       "levelName": "level5",
       "difficulty": "easy",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "appearance": {
         "wall": {
           "1:0": "wall-bush",
@@ -291,8 +285,7 @@
       "id": "sokoban-009",
       "levelName": "level6",
       "difficulty": "easy",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "map": ["___######_", "_###    #_", "##. $## ##", "#..$ $  @#", "#.. $ $ ##", "######  #_", "_____####_"]
     }
   ]

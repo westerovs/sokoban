@@ -216,7 +216,7 @@ export default class LocationLevelSelectView extends Container {
   // Показывает автора выбранного уровня только в отладочном режиме.
   #setAuthor(level: LevelDefinition) {
     if (!this.#authorText) return
-    this.#authorText.text = i18next.t('sokoban.author', {author: level.authorName})
+    this.#authorText.text = i18next.t('sokoban.author', {author: level.authorId})
   }
 
   // Выполняет отдельную операцию `openLevelEditor`.

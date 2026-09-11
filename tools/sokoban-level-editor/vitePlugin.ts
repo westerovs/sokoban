@@ -74,7 +74,6 @@ const createEditorLocations = (catalog: any) => {
       number: index + 1,
       map: level.map,
       authorId: level.authorId,
-      authorName: level.authorName,
     })),
   }))
 }

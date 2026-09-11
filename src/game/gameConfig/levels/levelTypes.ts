@@ -9,7 +9,6 @@ type LevelDefinition = {
   levelName: string
   difficulty: LevelDifficulty
   authorId: string
-  authorName: string
   isRemote?: boolean
   appearance?: LevelAppearance
   map: string[]

@@ -10,8 +10,7 @@
       "id": "sokoban-021",
       "levelName": "level28",
       "difficulty": "easy",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "________#####____",
         "________#   #####",
@@ -32,8 +31,7 @@
       "id": "sokoban-022",
       "levelName": "level29",
       "difficulty": "easy",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "________#######____",
         "____#####  #  ####_",
@@ -52,8 +50,7 @@
       "id": "sokoban-023",
       "levelName": "level30",
       "difficulty": "easy",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "################_",
         "#       #@ #   #_",
@@ -71,8 +68,7 @@
       "id": "sokoban-054",
       "levelName": "level31",
       "difficulty": "medium",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "___#########_______",
         "__##   ##  #####___",
@@ -93,8 +89,7 @@
       "id": "sokoban-055",
       "levelName": "level32",
       "difficulty": "medium",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "####################",
         "#   #  #@# ##  #####",
@@ -114,8 +109,7 @@
       "id": "sokoban-081",
       "levelName": "level33",
       "difficulty": "hard",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "####################",
         "#     #  #...#@    #",
@@ -135,8 +129,7 @@
       "id": "sokoban-092",
       "levelName": "level34",
       "difficulty": "veryHard",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "#############____",
         "#........####____",

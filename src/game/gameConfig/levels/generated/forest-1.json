@@ -10,8 +10,7 @@
       "id": "sokoban-012",
       "levelName": "level7",
       "difficulty": "easy",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "____#####__________",
         "____#   #__________",
@@ -30,8 +29,7 @@
       "id": "sokoban-013",
       "levelName": "level8",
       "difficulty": "easy",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "######__###_",
         "#..  #_##@##",
@@ -50,8 +48,7 @@
       "id": "sokoban-014",
       "levelName": "level9",
       "difficulty": "easy",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "______####_",
         "####### @#_",
@@ -70,16 +67,14 @@
       "id": "sokoban-008",
       "levelName": "level10",
       "difficulty": "medium",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "map": ["___#######", "__##  # @#", "__#   #  #", "__#$ $ $ #", "__# $##  #", "### $ # ##", "#.....  #_", "#########_"]
     },
     {
       "id": "sokoban-049",
       "levelName": "level11",
       "difficulty": "medium",
-      "authorId": "xsokoban",
-      "authorName": "XSokoban",
+      "authorId": "XSokoban",
       "map": [
         "____#####_______",
         "_####   ##_#####",
@@ -101,8 +96,7 @@
       "id": "sokoban-007",
       "levelName": "level12",
       "difficulty": "medium",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "map": [
         "___#######___",
         "####     #___",
@@ -121,8 +115,7 @@
       "id": "sokoban-010",
       "levelName": "level13",
       "difficulty": "medium",
-      "authorId": "livevil",
-      "authorName": "LIVEVIL",
+      "authorId": "GrimJoy",
       "map": [
         "______####____",
         "______#  #____",

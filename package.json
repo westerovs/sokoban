@@ -4,7 +4,7 @@
   "version": "5.1.1",
   "main": "index.js",
   "keywords": [],
-  "author": "",
+  "author": "GrimJoy",
   "license": "ISC",
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
