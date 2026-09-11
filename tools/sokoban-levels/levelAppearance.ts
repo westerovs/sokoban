@@ -4,9 +4,11 @@ import {toRuntimeMap} from './xsbFormat.mjs'
 
 const appearanceRoles = Object.freeze(['wall', 'decor', 'ground', 'box', 'target']) // Поддерживаемые слои оформления
 const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/ // Формат координат клетки без ведущих нулей
+const missingDecorTexture = 'd_empty' // Текстура для отсутствующего декора
 
 type AppearanceLevel = {id: string; map: string[]}
 type TileCatalog = {groups: Record<string, string[]>}
+type MissingDecorReplacement = {positionKey: string; texture: string}
 
 // Проверяет соответствие слоя типу клетки карты.
 const isAppearanceRoleCell = (role: string, symbol?: string) => {
@@ -55,6 +57,23 @@ const validateLevelAppearance = (level: AppearanceLevel, appearance: unknown, ti
   validateDecorOffsets(level, appearance as Record<string, unknown>)
 }
 
+// Заменяет отсутствующие текстуры декора, не изменяя исходное оформление.
+const replaceMissingDecorTextures = (appearance: unknown, tileCatalog: TileCatalog) => {
+  if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) return {appearance, replacements: []}
+  const decor = (appearance as Record<string, unknown>).decor
+  if (!decor || typeof decor !== 'object' || Array.isArray(decor)) return {appearance, replacements: []}
+
+  const availableTextures = tileCatalog.groups.decor ?? []
+  const replacements: MissingDecorReplacement[] = Object.entries(decor).flatMap(([positionKey, texture]) => {
+    return typeof texture === 'string' && !availableTextures.includes(texture) ? [{positionKey, texture}] : []
+  })
+  if (replacements.length === 0) return {appearance, replacements}
+
+  const resolvedDecor: Record<string, unknown> = {...decor}
+  replacements.forEach(({positionKey}) => (resolvedDecor[positionKey] = missingDecorTexture))
+  return {appearance: {...appearance, decor: resolvedDecor}, replacements}
+}
+
 // Проверяет индивидуальные смещения существующего декора в логических пикселях.
 const validateDecorOffsets = (level: AppearanceLevel, appearance: Record<string, unknown>) => {
   const offsets = appearance.decorOffsets
@@ -77,5 +96,6 @@ const validateDecorOffsets = (level: AppearanceLevel, appearance: Record<string,
 }
 
 export {
+  replaceMissingDecorTextures,
   validateLevelAppearance,
 }

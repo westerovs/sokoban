@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import {test} from 'node:test'
-import {validateLevelAppearance} from '../../sokoban-levels/levelAppearance.js'
+import {replaceMissingDecorTextures, validateLevelAppearance} from '../../sokoban-levels/levelAppearance.js'
 import EditorSession from './EditorSession.js'
 import {applyEditorBrush} from './levelEditing.js'
 
@@ -42,4 +42,22 @@ test('Валидация отклоняет смещение без декора
   for (const x of [NaN, Infinity, '12', null]) {
     assert.throws(() => validateLevelAppearance(LEVEL, {...APPEARANCE, decorOffsets: {'0:0': {x, y: 0}}}, CATALOG))
   }
+})
+
+test('Отсутствующий декор заменяется на пустую текстуру без изменения исходных данных', () => {
+  const appearance = {decor: {'0:0': 'decor-missing'}}
+  const catalog = {groups: {decor: ['d_empty']}}
+  const resolved = replaceMissingDecorTextures(appearance, catalog)
+
+  assert.deepEqual(resolved.appearance, {decor: {'0:0': 'd_empty'}})
+  assert.deepEqual(resolved.replacements, [{positionKey: '0:0', texture: 'decor-missing'}])
+  assert.deepEqual(appearance, {decor: {'0:0': 'decor-missing'}})
+})
+
+test('Отсутствующая текстура другого слоя остаётся ошибкой валидации', () => {
+  const appearance = {wall: {'0:0': 'wall-missing'}}
+  const catalog = {groups: {wall: ['wall-default'], decor: ['d_empty']}}
+  const resolved = replaceMissingDecorTextures(appearance, catalog)
+
+  assert.throws(() => validateLevelAppearance(LEVEL, resolved.appearance, catalog))
 })

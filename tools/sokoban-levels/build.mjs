@@ -6,7 +6,7 @@ import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {LEVEL_DIFFICULTIES} from '../../src/game/gameConfig/levels/levelDifficulty.ts'
 import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
-import {validateLevelAppearance} from './levelAppearance.ts'
+import {replaceMissingDecorTextures, validateLevelAppearance} from './levelAppearance.ts'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
@@ -24,6 +24,8 @@ const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig
 const gameLocationsDirectory = path.resolve(projectRoot, 'src', 'game', 'generatedAssets', 'levels') // Каталог генерируемых JSON локаций
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
+const consoleRed = '\u001B[31m' // Красный цвет текста в терминале
+const consoleReset = '\u001B[0m' // Сброс цвета текста в терминале
 const difficultyDirectories = Object.freeze({
   easy: 'easy', // Каталог лёгких карт
   medium: 'medium', // Каталог средних карт
@@ -193,7 +195,7 @@ const readLocationAppearance = (location) => {
 }
 
 // Добавляет данные или представление через операцию `addLocationAppearances`.
-const addLocationAppearances = (result, location, levelsById, tileCatalog) => {
+const addLocationAppearances = (result, replacementsByLevelId, location, levelsById, tileCatalog) => {
   const assignedLevelIds = new Set(location.levels.map((level) => level.id))
   Object.entries(readLocationAppearance(location)).forEach(([levelId, appearance]) => {
     if (!assignedLevelIds.has(levelId)) return
@@ -201,22 +203,73 @@ const addLocationAppearances = (result, location, levelsById, tileCatalog) => {
     const level = levelsById.get(levelId)
     if (!level) throw new Error(`${levelId}: оформление ссылается на неизвестный уровень`)
 
-    validateLevelAppearance(level, appearance, tileCatalog)
-    result.set(levelId, appearance)
+    const resolved = replaceMissingDecorTextures(appearance, tileCatalog)
+    validateLevelAppearance(level, resolved.appearance, tileCatalog)
+    result.set(levelId, resolved.appearance)
+    replacementsByLevelId.set(
+      levelId,
+      resolved.replacements.map((replacement) => ({...replacement, locationId: location.id, levelId})),
+    )
   })
+}
+
+// Создаёт индекс локаций по идентификаторам назначенных уровней.
+const createLocationIdByLevelId = (locations) => {
+  return new Map(locations.flatMap((location) => location.levels.map((level) => [level.id, location.id])))
+}
+
+// Склоняет краткое описание количества отсутствующих текстур.
+const getMissingTextureSummary = (count) => {
+  const remainder = count % 100
+  if (remainder >= 11 && remainder <= 14) return `${count} текстур отсутствуют`
+  if (count % 10 === 1) return `${count} текстура отсутствует`
+  if (count % 10 >= 2 && count % 10 <= 4) return `${count} текстуры отсутствуют`
+  return `${count} текстур отсутствуют`
+}
+
+// Группирует строки отчёта по локациям и уровням.
+const createMissingDecorWarningLines = (replacementsByLevelId) => {
+  const levelsByLocation = new Map()
+  replacementsByLevelId.forEach((replacements) => {
+    if (replacements.length === 0) return
+    const {locationId, levelId} = replacements[0]
+    if (!levelsByLocation.has(locationId)) levelsByLocation.set(locationId, [])
+    levelsByLocation.get(locationId).push({levelId, count: replacements.length})
+  })
+
+  return [...levelsByLocation].flatMap(([locationId, levels]) => {
+    return [`- location: ${locationId}`, ...levels.map(({levelId, count}) => `- level: ${levelId}: ${getMissingTextureSummary(count)}`)]
+  })
+}
+
+// Выводит единый отчёт о подстановках отсутствующего декора.
+const warnAboutMissingDecor = (replacementsByLevelId) => {
+  const lines = createMissingDecorWarningLines(replacementsByLevelId)
+  if (lines.length === 0) return
+  const title = `${consoleRed}[SokobanLevels]: отсутствующие текстуры декора заменены на d_empty:${consoleReset}`
+  console.warn([title, ...lines, ''].join('\n'))
 }
 
 // Возвращает данные, за которые отвечает операция `loadAppearances`.
 const loadAppearances = (levels, locations) => {
   const result = new Map()
+  const replacementsByLevelId = new Map()
   const levelsById = new Map(levels.map((level) => [level.id, level]))
+  const locationIdByLevelId = createLocationIdByLevelId(locations)
   const tileCatalog = getSokobanTileCatalog(projectRoot)
   levels.forEach((level) => {
     if (!level.libraryAppearance) return
-    validateLevelAppearance(level, level.libraryAppearance, tileCatalog)
-    result.set(level.id, level.libraryAppearance)
+    const resolved = replaceMissingDecorTextures(level.libraryAppearance, tileCatalog)
+    validateLevelAppearance(level, resolved.appearance, tileCatalog)
+    result.set(level.id, resolved.appearance)
+    const locationId = locationIdByLevelId.get(level.id) ?? 'без локации'
+    replacementsByLevelId.set(
+      level.id,
+      resolved.replacements.map((replacement) => ({...replacement, locationId, levelId: level.id})),
+    )
   })
-  locations.forEach((location) => addLocationAppearances(result, location, levelsById, tileCatalog))
+  locations.forEach((location) => addLocationAppearances(result, replacementsByLevelId, location, levelsById, tileCatalog))
+  warnAboutMissingDecor(replacementsByLevelId)
 
   return result
 }
