@@ -74,6 +74,14 @@ const replaceMissingDecorTextures = (appearance: unknown, tileCatalog: TileCatal
   return {appearance: {...appearance, decor: resolvedDecor}, replacements}
 }
 
+// Считает пустые текстуры декора в итоговом оформлении уровня.
+const countEmptyDecorTextures = (appearance: unknown) => {
+  if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) return 0
+  const decor = (appearance as Record<string, unknown>).decor
+  if (!decor || typeof decor !== 'object' || Array.isArray(decor)) return 0
+  return Object.values(decor).filter((texture) => texture === missingDecorTexture).length
+}
+
 // Проверяет индивидуальные смещения существующего декора в логических пикселях.
 const validateDecorOffsets = (level: AppearanceLevel, appearance: Record<string, unknown>) => {
   const offsets = appearance.decorOffsets
@@ -96,6 +104,7 @@ const validateDecorOffsets = (level: AppearanceLevel, appearance: Record<string,
 }
 
 export {
+  countEmptyDecorTextures,
   replaceMissingDecorTextures,
   validateLevelAppearance,
 }

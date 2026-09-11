@@ -6,7 +6,7 @@ import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {LEVEL_DIFFICULTIES} from '../../src/game/gameConfig/levels/levelDifficulty.ts'
 import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
-import {replaceMissingDecorTextures, validateLevelAppearance} from './levelAppearance.ts'
+import {countEmptyDecorTextures, replaceMissingDecorTextures, validateLevelAppearance} from './levelAppearance.ts'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
@@ -24,6 +24,7 @@ const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig
 const gameLocationsDirectory = path.resolve(projectRoot, 'src', 'game', 'generatedAssets', 'levels') // Каталог генерируемых JSON локаций
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
+const forbidEmptyDecor = process.argv.includes('--forbid-empty-decor') // Запрет пустого декора для production-сборки
 const consoleRed = '\u001B[31m' // Красный цвет текста в терминале
 const consoleReset = '\u001B[0m' // Сброс цвета текста в терминале
 const difficultyDirectories = Object.freeze({
@@ -195,7 +196,7 @@ const readLocationAppearance = (location) => {
 }
 
 // Добавляет данные или представление через операцию `addLocationAppearances`.
-const addLocationAppearances = (result, replacementsByLevelId, location, levelsById, tileCatalog) => {
+const addLocationAppearances = (result, location, levelsById, tileCatalog) => {
   const assignedLevelIds = new Set(location.levels.map((level) => level.id))
   Object.entries(readLocationAppearance(location)).forEach(([levelId, appearance]) => {
     if (!assignedLevelIds.has(levelId)) return
@@ -206,16 +207,7 @@ const addLocationAppearances = (result, replacementsByLevelId, location, levelsB
     const resolved = replaceMissingDecorTextures(appearance, tileCatalog)
     validateLevelAppearance(level, resolved.appearance, tileCatalog)
     result.set(levelId, resolved.appearance)
-    replacementsByLevelId.set(
-      levelId,
-      resolved.replacements.map((replacement) => ({...replacement, locationId: location.id, levelId})),
-    )
   })
-}
-
-// Создаёт индекс локаций по идентификаторам назначенных уровней.
-const createLocationIdByLevelId = (locations) => {
-  return new Map(locations.flatMap((location) => location.levels.map((level) => [level.id, location.id])))
 }
 
 // Склоняет краткое описание количества отсутствующих текстур.
@@ -227,49 +219,50 @@ const getMissingTextureSummary = (count) => {
   return `${count} текстур отсутствуют`
 }
 
-// Группирует строки отчёта по локациям и уровням.
-const createMissingDecorWarningLines = (replacementsByLevelId) => {
-  const levelsByLocation = new Map()
-  replacementsByLevelId.forEach((replacements) => {
-    if (replacements.length === 0) return
-    const {locationId, levelId} = replacements[0]
-    if (!levelsByLocation.has(locationId)) levelsByLocation.set(locationId, [])
-    levelsByLocation.get(locationId).push({levelId, count: replacements.length})
+// Находит уровни с пустым декором в итоговом игровом каталоге.
+const findEmptyDecorLocations = (gameCatalog) => {
+  return gameCatalog.locations.flatMap((location) => {
+    const levels = location.levels.flatMap((level) => {
+      const count = countEmptyDecorTextures(level.appearance)
+      return count > 0 ? [{levelId: level.id, count}] : []
+    })
+    return levels.length > 0 ? [{locationId: location.id, levels}] : []
   })
+}
 
-  return [...levelsByLocation].flatMap(([locationId, levels]) => {
+// Формирует строки отчёта по локациям и уровням.
+const createEmptyDecorWarningLines = (locations) => {
+  return locations.flatMap(({locationId, levels}) => {
     return [`- location: ${locationId}`, ...levels.map(({levelId, count}) => `- level: ${levelId}: ${getMissingTextureSummary(count)}`)]
   })
 }
 
-// Выводит единый отчёт о подстановках отсутствующего декора.
-const warnAboutMissingDecor = (replacementsByLevelId) => {
-  const lines = createMissingDecorWarningLines(replacementsByLevelId)
+// Выводит единый отчёт обо всём пустом декоре.
+const warnAboutEmptyDecor = (locations) => {
+  const lines = createEmptyDecorWarningLines(locations)
   if (lines.length === 0) return
-  const title = `${consoleRed}[SokobanLevels]: отсутствующие текстуры декора заменены на d_empty:${consoleReset}`
+  const title = `${consoleRed}[SokobanLevels]: обнаружены пустые текстуры декора d_empty:${consoleReset}`
   console.warn([title, ...lines, ''].join('\n'))
+}
+
+// Запрещает выпуск production-сборки с пустым декором.
+const validateProductionDecor = (locations) => {
+  if (!forbidEmptyDecor || locations.length === 0) return
+  throw new Error('[SokobanLevels]: production build contains d_empty decor textures')
 }
 
 // Возвращает данные, за которые отвечает операция `loadAppearances`.
 const loadAppearances = (levels, locations) => {
   const result = new Map()
-  const replacementsByLevelId = new Map()
   const levelsById = new Map(levels.map((level) => [level.id, level]))
-  const locationIdByLevelId = createLocationIdByLevelId(locations)
   const tileCatalog = getSokobanTileCatalog(projectRoot)
   levels.forEach((level) => {
     if (!level.libraryAppearance) return
     const resolved = replaceMissingDecorTextures(level.libraryAppearance, tileCatalog)
     validateLevelAppearance(level, resolved.appearance, tileCatalog)
     result.set(level.id, resolved.appearance)
-    const locationId = locationIdByLevelId.get(level.id) ?? 'без локации'
-    replacementsByLevelId.set(
-      level.id,
-      resolved.replacements.map((replacement) => ({...replacement, locationId, levelId: level.id})),
-    )
   })
-  locations.forEach((location) => addLocationAppearances(result, replacementsByLevelId, location, levelsById, tileCatalog))
-  warnAboutMissingDecor(replacementsByLevelId)
+  locations.forEach((location) => addLocationAppearances(result, location, levelsById, tileCatalog))
 
   return result
 }
@@ -363,6 +356,9 @@ const buildLevels = async () => {
   const appearances = loadAppearances(levels, locations)
 
   const gameCatalog = createRuntimeCatalog(locations, appearances)
+  const emptyDecorLocations = findEmptyDecorLocations(gameCatalog)
+  warnAboutEmptyDecor(emptyDecorLocations)
+  validateProductionDecor(emptyDecorLocations)
   const prettierConfig = await prettier.resolveConfig(path.resolve(projectRoot, 'package.json'))
   await writeLocationFiles(gameCatalog.locations, prettierConfig)
   removeStaleLocationFiles(gameCatalog.locations)

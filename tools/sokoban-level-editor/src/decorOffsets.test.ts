@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import {test} from 'node:test'
-import {replaceMissingDecorTextures, validateLevelAppearance} from '../../sokoban-levels/levelAppearance.js'
+import {countEmptyDecorTextures, replaceMissingDecorTextures, validateLevelAppearance} from '../../sokoban-levels/levelAppearance.js'
 import EditorSession from './EditorSession.js'
 import {applyEditorBrush} from './levelEditing.js'
 
@@ -60,4 +60,11 @@ test('Отсутствующая текстура другого слоя ост
   const resolved = replaceMissingDecorTextures(appearance, catalog)
 
   assert.throws(() => validateLevelAppearance(LEVEL, resolved.appearance, catalog))
+})
+
+test('Финальный аудит считает сохранённые и подставленные пустые текстуры декора', () => {
+  const appearance = {decor: {'0:0': 'd_empty', '1:0': 'decor-test', '2:0': 'd_empty'}}
+
+  assert.equal(countEmptyDecorTextures(appearance), 2)
+  assert.equal(countEmptyDecorTextures({wall: {'0:0': 'd_empty'}}), 0)
 })
