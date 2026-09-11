@@ -29,13 +29,6 @@ const createDifficultyOptions = () => {
     .join('')
 }
 
-// Создаёт варианты выбора внешней формы из общей конфигурации генератора.
-const createShapeOptions = () => {
-  return Object.entries(SHAPE_CONFIG)
-    .map(([value, config]) => `<option value="${value}">${config.label}</option>`)
-    .join('')
-}
-
 // Создаёт разметку настроек новой структуры.
 const createStructureControlsMarkup = () => `
   <div class="editor-generator__fields">
@@ -51,10 +44,6 @@ const createStructureControlsMarkup = () => `
   <label class="editor-generator__field">
     <span>Сложность</span>
     <select data-field="difficulty">${createDifficultyOptions()}</select>
-  </label>
-  <label class="editor-generator__field">
-    <span>Форма</span>
-    <select data-field="shape">${createShapeOptions()}</select>
   </label>
   <p class="editor-generator__hint">Размер задаёт максимальную область: контур может занимать только часть её клеток.</p>
   <button class="editor-generator__primary" data-action="new-structure" type="button">Создать новую структуру</button>
@@ -93,7 +82,6 @@ export default class LevelGeneratorPanel {
   #maximumBoxCount = 1
   #onGenerate: (options: Record<string, any>) => Promise<any>
   #removeButton!: HTMLButtonElement
-  #shapeSelect!: HTMLSelectElement
   #stats: any = null
   #statsElement!: HTMLElement
   #widthInput!: HTMLInputElement
@@ -131,7 +119,6 @@ export default class LevelGeneratorPanel {
     this.#element.innerHTML = createStructureControlsMarkup() + createObjectControlsMarkup()
     this.#cacheElements()
     this.#difficultySelect.value = DEFAULT_DIFFICULTY
-    this.#shapeSelect.value = DEFAULT_SHAPE
     this.#bindActions()
     this.#render()
   }
@@ -141,7 +128,6 @@ export default class LevelGeneratorPanel {
     this.#widthInput = this.#getElement('[data-field="width"]')
     this.#heightInput = this.#getElement('[data-field="height"]')
     this.#difficultySelect = this.#getElement('[data-field="difficulty"]')
-    this.#shapeSelect = this.#getElement('[data-field="shape"]')
     this.#boxCountOutput = this.#getElement('[data-field="box-count"]')
     this.#statsElement = this.#getElement('[data-field="stats"]')
     this.#removeButton = this.#getElement('[data-action="remove-box"]')
@@ -164,7 +150,7 @@ export default class LevelGeneratorPanel {
       width: Number(this.#widthInput.value),
       height: Number(this.#heightInput.value),
       difficulty: this.#difficultySelect.value,
-      shape: this.#shapeSelect.value,
+      shape: DEFAULT_SHAPE,
       boxCount: null,
       preserveTopology: false,
     })
