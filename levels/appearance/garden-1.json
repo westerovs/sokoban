@@ -372,7 +372,7 @@
       },
       "box": {"2:2": "box-pumpkin", "6:2": "box-pumpkin", "4:3": "box-pumpkin"},
       "ground": {"4:0": "ground-default", "4:3": "ground-default"},
-      "decor": {"4:0": "decor-garden14", "7:0": "decor-garden5-2", "1:0": "decor-garden5", "2:5": "decor-garden11"},
+      "decor": {"4:0": "decor-garden-gate", "7:0": "decor-garden5-2", "1:0": "decor-garden5", "2:5": "decor-garden11"},
       "decorOffsets": {"4:0": {"x": 0, "y": -60}}
     }
   }
