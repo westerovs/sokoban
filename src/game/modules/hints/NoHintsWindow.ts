@@ -116,7 +116,7 @@ export default class NoHintsWindow extends BaseModal {
         fontSize: 100,
         fill: 0xffffff,
         dropShadow: {color: 0x000000},
-        stroke: {color: 0x000000, width: 1},
+        stroke: {color: 0x000000, width: 1, join: 'round'},
       },
     })
     textRewardCounter.anchor.set(0.5)

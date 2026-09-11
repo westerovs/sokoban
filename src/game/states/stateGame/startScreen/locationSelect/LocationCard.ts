@@ -92,7 +92,7 @@ export default class LocationCard extends Container {
     const view = new Text({
       label: `${this.label}-${label}`,
       text,
-      style: {...primaryFontStyle, align: 'center', fill: 0xffefb0, fontSize, stroke: {color: 0x102217, width: 5}},
+      style: {...primaryFontStyle, align: 'center', fill: 0xffefb0, fontSize, stroke: {color: 0x102217, width: 5, join: 'round'}},
     })
     view.anchor.set(0.5)
     view.position.set(0, y)

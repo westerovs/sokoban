@@ -178,7 +178,7 @@ export default class CompleteLevelView extends Container {
         fontSize: 22,
         lineHeight: 21,
         fill: 0xffffff,
-        stroke: {color: '#000000', width: 2},
+        stroke: {color: '#000000', width: 2, join: 'round'},
         align: 'right',
       },
     })

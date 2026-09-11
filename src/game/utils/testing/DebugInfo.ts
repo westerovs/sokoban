@@ -37,7 +37,7 @@ const TEXT_STYLE = {
   fontSize: 22,
   lineHeight: 27,
   fill: 0x29e51f,
-  stroke: {color: 0x000000, width: 2},
+  stroke: {color: 0x000000, width: 2, join: 'round'},
   tagStyles: {
     section: {
       fontSize: 18,

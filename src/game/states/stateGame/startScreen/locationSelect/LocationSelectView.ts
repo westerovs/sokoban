@@ -91,7 +91,7 @@ export default class LocationSelectView extends Container {
     const title = new Text({
       label: 'location-select-title',
       text: i18next.t('locationSelect.title'),
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 58, stroke: {color: 0x19251d, width: 7}},
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 58, stroke: {color: 0x19251d, width: 7, join: 'round'}},
     })
     title.anchor.set(0.5)
     title.y = -390

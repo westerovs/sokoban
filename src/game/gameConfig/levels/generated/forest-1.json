@@ -67,7 +67,7 @@
       "id": "custom-008",
       "levelName": "level10",
       "difficulty": "medium",
-      "authorId": "GrimJoy",
+      "authorId": "custom",
       "map": ["___#######", "__##  # @#", "__#   #  #", "__#$ $ $ #", "__# $##  #", "### $ # ##", "#.....  #_", "#########_"]
     },
     {
@@ -96,7 +96,7 @@
       "id": "custom-007",
       "levelName": "level12",
       "difficulty": "medium",
-      "authorId": "GrimJoy",
+      "authorId": "custom",
       "map": [
         "___#######___",
         "####     #___",
@@ -115,7 +115,7 @@
       "id": "custom-010",
       "levelName": "level13",
       "difficulty": "medium",
-      "authorId": "GrimJoy",
+      "authorId": "custom",
       "map": [
         "______####____",
         "______#  #____",

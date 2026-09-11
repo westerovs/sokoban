@@ -95,7 +95,7 @@ export default class LocationLevelSelectView extends Container {
     this.#title = new Text({
       label: 'location-level-title',
       text: '',
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 64, stroke: {color: 0x19251d, width: 7}},
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 64, stroke: {color: 0x19251d, width: 7, join: 'round'}},
     })
     this.#title.anchor.set(0.5)
     this.addChild(this.#title)
@@ -132,10 +132,10 @@ export default class LocationLevelSelectView extends Container {
     this.#authorText = new Text({
       label: 'level-preview-author',
       text: '',
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 16, stroke: {color: 0x19251d, width: 3}},
+      style: {...primaryFontStyle, fill: 0xffe6a1, stroke: {color: 0x19251d, width: 3, join: 'round'}},
     })
     this.#authorText.anchor.set(0.5)
-    this.#authorText.position.set(0, -185)
+    this.#authorText.position.set(0, -190)
     this.#levelsContainer.addChild(this.#authorText)
   }
 
