@@ -4,5 +4,13 @@
   "trailingComma": "all",
   "printWidth": 140,
   "semi": false,
-  "bracketSpacing": false
+  "bracketSpacing": false,
+  "overrides": [
+    {
+      "files": "levels/locations.json",
+      "options": {
+        "parser": "json-stringify"
+      }
+    }
+  ]
 }

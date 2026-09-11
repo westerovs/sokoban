@@ -269,7 +269,7 @@ const createPaths = (projectRoot: string): EditorPaths => ({
   levelLibraryDirectory: path.resolve(projectRoot, 'levels', 'library'),
   levelsBuild: path.resolve(projectRoot, 'tools', 'sokoban-levels', 'build.mjs'),
   locationsSource: path.resolve(projectRoot, 'levels', 'locations.json'),
-  locationsOutputDirectory: path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'generated'),
+  locationsOutputDirectory: path.resolve(projectRoot, 'src', 'game', 'generatedAssets', 'levels'),
 })
 
 // Пытается выполнить операцию `tryServeTile` и сообщает результат.

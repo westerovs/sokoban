@@ -288,6 +288,52 @@
       "difficulty": "easy",
       "authorId": "custom",
       "map": ["___######_", "_###    #_", "##. $## ##", "#..$ $  @#", "#.. $ $ ##", "######  #_", "_____####_"]
+    },
+    {
+      "id": "custom-012",
+      "levelName": "level7",
+      "difficulty": "easy",
+      "authorId": "custom",
+      "appearance": {
+        "wall": {
+          "4:0": "wall-bush",
+          "5:0": "wall-bush",
+          "6:0": "wall-bush",
+          "7:0": "wall-bush",
+          "8:0": "wall-bush",
+          "9:0": "wall-bush",
+          "1:1": "wall-bush",
+          "2:1": "wall-bush",
+          "3:1": "wall-bush",
+          "4:1": "wall-bush",
+          "9:1": "wall-bush",
+          "0:2": "wall-bush",
+          "1:2": "wall-bush",
+          "9:2": "wall-bush",
+          "0:3": "wall-bush",
+          "4:3": "wall-bush",
+          "5:3": "wall-bush",
+          "9:3": "wall-bush",
+          "0:4": "wall-bush",
+          "3:4": "wall-bush",
+          "4:4": "wall-bush",
+          "8:4": "wall-bush",
+          "9:4": "wall-bush",
+          "0:5": "wall-bush",
+          "8:5": "wall-bush",
+          "9:5": "wall-bush",
+          "0:6": "wall-bush",
+          "1:6": "wall-bush",
+          "2:6": "wall-bush",
+          "3:6": "wall-bush",
+          "4:6": "wall-bush",
+          "5:6": "wall-bush",
+          "6:6": "wall-bush",
+          "7:6": "wall-bush",
+          "8:6": "wall-bush"
+        }
+      },
+      "map": ["____######", "_####   .#", "##@  $   #", "# $ ##$ .#", "#  ## $ ##", "#  .   .##", "#########_"]
     }
   ]
 }

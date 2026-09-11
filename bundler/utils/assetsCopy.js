@@ -10,7 +10,7 @@
  *
  * Если платформа описана в remoteAssetsPlatforms, копирование работает по правилам:
  * - общие ассеты копируются в assets без папки levels
- * - levels наполняется динамически по JSON-файлам локаций из src/game/gameConfig/levels/generated
+ * - levels наполняется динамически по JSON-файлам локаций из src/game/generatedAssets/levels
  * - фон локации копируется в assets/levels, если в ней есть локальные уровни
  * - фон локации копируется в remote-assets/assets/levels, если в ней есть удалённые уровни
  * - при смешанной локации общий фон присутствует в обеих папках
@@ -26,7 +26,7 @@ const projectRoot = path.resolve(__dirname, '..', '..')
 const assetsSourceDir = path.resolve(projectRoot, 'public', 'assets')
 const distDir = path.resolve(projectRoot, 'dist')
 
-const levelsConfigDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig', 'levels', 'generated')
+const levelsConfigDirectory = path.resolve(projectRoot, 'src', 'game', 'generatedAssets', 'levels')
 const levelsSourceDir = path.resolve(assetsSourceDir, 'levels')
 const remoteAssetsDirName = 'remote-assets'
 

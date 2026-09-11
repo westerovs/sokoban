@@ -122,7 +122,7 @@ npm run levels:check
 
 Не редактируйте вручную:
 
-- `src/game/gameConfig/levels/generated/<location-id>.json`;
+- `src/game/generatedAssets/levels/<location-id>.json`;
 - `public/assets`;
 - `.assetpack`.
 

@@ -7,7 +7,16 @@
       "background": "garden",
       "ambience": "amb_garden",
       "music": "m_garden",
-      "levelIds": ["custom-001", "custom-004", "custom-003", "custom-002", "custom-005", "custom-006", "custom-009"]
+      "levelIds": [
+        "custom-001",
+        "custom-004",
+        "custom-003",
+        "custom-002",
+        "custom-005",
+        "custom-006",
+        "custom-009",
+        "custom-012"
+      ]
     },
     {
       "id": "forest-1",
@@ -16,7 +25,15 @@
       "background": "forest",
       "ambience": "amb_forest",
       "music": "m_forest",
-      "levelIds": ["xSokoban-001", "xSokoban-006", "xSokoban-038", "custom-008", "xSokoban-087", "custom-007", "custom-010"]
+      "levelIds": [
+        "xSokoban-001",
+        "xSokoban-006",
+        "xSokoban-038",
+        "custom-008",
+        "xSokoban-087",
+        "custom-007",
+        "custom-010"
+      ]
     },
     {
       "id": "garden-2",
@@ -25,7 +42,15 @@
       "background": "garden2",
       "ambience": "amb_garden",
       "music": "m_garden",
-      "levelIds": ["xSokoban-007", "xSokoban-003", "xSokoban-078", "xSokoban-057", "xSokoban-062", "xSokoban-067", "custom-011"]
+      "levelIds": [
+        "xSokoban-007",
+        "xSokoban-003",
+        "xSokoban-078",
+        "xSokoban-057",
+        "xSokoban-062",
+        "xSokoban-067",
+        "custom-011"
+      ]
     },
     {
       "id": "antarctica-1",
@@ -34,7 +59,15 @@
       "background": "antarctica",
       "ambience": "amb_antarctica",
       "music": "m_antarctica",
-      "levelIds": ["xSokoban-055", "xSokoban-051", "xSokoban-002", "xSokoban-048", "xSokoban-058", "xSokoban-040", "xSokoban-053"]
+      "levelIds": [
+        "xSokoban-055",
+        "xSokoban-051",
+        "xSokoban-002",
+        "xSokoban-048",
+        "xSokoban-058",
+        "xSokoban-040",
+        "xSokoban-053"
+      ]
     },
     {
       "id": "mine-1",
@@ -43,7 +76,15 @@
       "background": "mine",
       "ambience": "amb_forest",
       "music": "m_forest",
-      "levelIds": ["xSokoban-005", "xSokoban-043", "xSokoban-086", "xSokoban-013", "xSokoban-059", "xSokoban-066", "xSokoban-088"]
+      "levelIds": [
+        "xSokoban-005",
+        "xSokoban-043",
+        "xSokoban-086",
+        "xSokoban-013",
+        "xSokoban-059",
+        "xSokoban-066",
+        "xSokoban-088"
+      ]
     },
     {
       "id": "factory-1",
@@ -52,7 +93,14 @@
       "background": "factory",
       "ambience": "amb_garden",
       "music": "m_garden",
-      "levelIds": ["xSokoban-082", "xSokoban-077", "xSokoban-008", "xSokoban-011", "xSokoban-085", "xSokoban-089"]
+      "levelIds": [
+        "xSokoban-082",
+        "xSokoban-077",
+        "xSokoban-008",
+        "xSokoban-011",
+        "xSokoban-085",
+        "xSokoban-089"
+      ]
     },
     {
       "id": "antarctica-2",
@@ -61,7 +109,14 @@
       "background": "antarctica",
       "ambience": "amb_antarctica",
       "music": "m_antarctica",
-      "levelIds": ["xSokoban-060", "xSokoban-084", "xSokoban-031", "xSokoban-076", "xSokoban-025", "xSokoban-030"]
+      "levelIds": [
+        "xSokoban-060",
+        "xSokoban-084",
+        "xSokoban-031",
+        "xSokoban-076",
+        "xSokoban-025",
+        "xSokoban-030"
+      ]
     },
     {
       "id": "forest-2",
@@ -70,7 +125,14 @@
       "background": "forest",
       "ambience": "amb_forest",
       "music": "m_forest",
-      "levelIds": ["xSokoban-021", "xSokoban-081", "xSokoban-046", "xSokoban-041", "xSokoban-073", "xSokoban-090"]
+      "levelIds": [
+        "xSokoban-021",
+        "xSokoban-081",
+        "xSokoban-046",
+        "xSokoban-041",
+        "xSokoban-073",
+        "xSokoban-090"
+      ]
     },
     {
       "id": "garden-3",
@@ -79,7 +141,14 @@
       "background": "garden2",
       "ambience": "amb_garden",
       "music": "m_garden",
-      "levelIds": ["xSokoban-079", "xSokoban-015", "xSokoban-019", "xSokoban-014", "xSokoban-063", "xSokoban-036"]
+      "levelIds": [
+        "xSokoban-079",
+        "xSokoban-015",
+        "xSokoban-019",
+        "xSokoban-014",
+        "xSokoban-063",
+        "xSokoban-036"
+      ]
     },
     {
       "id": "mine-2",
@@ -88,7 +157,14 @@
       "background": "mine",
       "ambience": "amb_forest",
       "music": "m_forest",
-      "levelIds": ["xSokoban-017", "xSokoban-026", "xSokoban-042", "xSokoban-072", "xSokoban-022", "xSokoban-020"]
+      "levelIds": [
+        "xSokoban-017",
+        "xSokoban-026",
+        "xSokoban-042",
+        "xSokoban-072",
+        "xSokoban-022",
+        "xSokoban-020"
+      ]
     },
     {
       "id": "factory-2",
@@ -97,7 +173,14 @@
       "background": "factory",
       "ambience": "amb_garden",
       "music": "m_garden",
-      "levelIds": ["xSokoban-044", "xSokoban-049", "xSokoban-045", "xSokoban-061", "xSokoban-069", "xSokoban-010"]
+      "levelIds": [
+        "xSokoban-044",
+        "xSokoban-049",
+        "xSokoban-045",
+        "xSokoban-061",
+        "xSokoban-069",
+        "xSokoban-010"
+      ]
     },
     {
       "id": "antarctica-3",
@@ -106,7 +189,14 @@
       "background": "antarctica",
       "ambience": "amb_antarctica",
       "music": "m_antarctica",
-      "levelIds": ["xSokoban-083", "xSokoban-034", "xSokoban-028", "xSokoban-037", "xSokoban-075", "xSokoban-024"]
+      "levelIds": [
+        "xSokoban-083",
+        "xSokoban-034",
+        "xSokoban-028",
+        "xSokoban-037",
+        "xSokoban-075",
+        "xSokoban-024"
+      ]
     },
     {
       "id": "forest-3",
@@ -115,7 +205,14 @@
       "background": "forest",
       "ambience": "amb_forest",
       "music": "m_forest",
-      "levelIds": ["xSokoban-032", "xSokoban-047", "xSokoban-009", "xSokoban-004", "xSokoban-071", "xSokoban-023"]
+      "levelIds": [
+        "xSokoban-032",
+        "xSokoban-047",
+        "xSokoban-009",
+        "xSokoban-004",
+        "xSokoban-071",
+        "xSokoban-023"
+      ]
     },
     {
       "id": "garden-4",
@@ -124,7 +221,14 @@
       "background": "garden2",
       "ambience": "amb_garden",
       "music": "m_garden",
-      "levelIds": ["xSokoban-065", "xSokoban-080", "xSokoban-056", "xSokoban-070", "xSokoban-016", "xSokoban-039"]
+      "levelIds": [
+        "xSokoban-065",
+        "xSokoban-080",
+        "xSokoban-056",
+        "xSokoban-070",
+        "xSokoban-016",
+        "xSokoban-039"
+      ]
     },
     {
       "id": "mine-3",
@@ -133,7 +237,14 @@
       "background": "mine",
       "ambience": "amb_forest",
       "music": "m_forest",
-      "levelIds": ["xSokoban-033", "xSokoban-074", "xSokoban-012", "xSokoban-068", "xSokoban-064", "xSokoban-050"]
+      "levelIds": [
+        "xSokoban-033",
+        "xSokoban-074",
+        "xSokoban-012",
+        "xSokoban-068",
+        "xSokoban-064",
+        "xSokoban-050"
+      ]
     },
     {
       "id": "factory-3",
@@ -142,7 +253,14 @@
       "background": "factory",
       "ambience": "amb_garden",
       "music": "m_garden",
-      "levelIds": ["xSokoban-054", "xSokoban-018", "xSokoban-035", "xSokoban-029", "xSokoban-027", "xSokoban-052"]
+      "levelIds": [
+        "xSokoban-054",
+        "xSokoban-018",
+        "xSokoban-035",
+        "xSokoban-029",
+        "xSokoban-027",
+        "xSokoban-052"
+      ]
     }
   ]
 }

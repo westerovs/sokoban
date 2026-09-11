@@ -8,7 +8,7 @@
   "levels": [
     {
       "id": "xSokoban-021",
-      "levelName": "level47",
+      "levelName": "level48",
       "difficulty": "easy",
       "authorId": "XSokoban",
       "map": [
@@ -31,7 +31,7 @@
     },
     {
       "id": "xSokoban-081",
-      "levelName": "level48",
+      "levelName": "level49",
       "difficulty": "easy",
       "authorId": "XSokoban",
       "map": [
@@ -52,7 +52,7 @@
     },
     {
       "id": "xSokoban-046",
-      "levelName": "level49",
+      "levelName": "level50",
       "difficulty": "medium",
       "authorId": "XSokoban",
       "map": [
@@ -76,7 +76,7 @@
     },
     {
       "id": "xSokoban-041",
-      "levelName": "level50",
+      "levelName": "level51",
       "difficulty": "medium",
       "authorId": "XSokoban",
       "map": [
@@ -99,7 +99,7 @@
     },
     {
       "id": "xSokoban-073",
-      "levelName": "level51",
+      "levelName": "level52",
       "difficulty": "hard",
       "authorId": "XSokoban",
       "map": [
@@ -119,7 +119,7 @@
     },
     {
       "id": "xSokoban-090",
-      "levelName": "level52",
+      "levelName": "level53",
       "difficulty": "veryHard",
       "authorId": "XSokoban",
       "map": [
