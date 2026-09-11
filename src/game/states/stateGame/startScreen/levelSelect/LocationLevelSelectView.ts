@@ -30,7 +30,7 @@ export default class LocationLevelSelectView extends Container {
   #onLevelSelect: GameMenuCallbacks['onLevelSelect']
   #playButton!: ButtonContainer
   #preview!: LevelPreview
-  #minimumPushesText!: Text
+  #benchmarkPushesText!: Text
   #personalBestText!: Text
   #selectedEntry: LevelEntry | null = null
   #title!: Text
@@ -113,13 +113,13 @@ export default class LocationLevelSelectView extends Container {
     })
     this.#difficultyText.anchor.set(0.5)
     this.#difficultyText.y = -125
-    this.#minimumPushesText = new Text({
-      label: 'level-preview-minimum-pushes',
+    this.#benchmarkPushesText = new Text({
+      label: 'level-preview-benchmark-pushes',
       text: '',
       style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 23},
     })
-    this.#minimumPushesText.anchor.set(0.5)
-    this.#minimumPushesText.position.set(-150, -88)
+    this.#benchmarkPushesText.anchor.set(0.5)
+    this.#benchmarkPushesText.position.set(-150, -88)
     this.#personalBestText = new Text({
       label: 'level-preview-personal-best',
       text: '',
@@ -127,7 +127,7 @@ export default class LocationLevelSelectView extends Container {
     })
     this.#personalBestText.anchor.set(0.5)
     this.#personalBestText.position.set(150, -88)
-    this.#levelsContainer.addChild(panel, this.#difficultyText, this.#minimumPushesText, this.#personalBestText)
+    this.#levelsContainer.addChild(panel, this.#difficultyText, this.#benchmarkPushesText, this.#personalBestText)
   }
 
   // Создаёт данные или представление для операции `createBackButton`.
@@ -196,8 +196,8 @@ export default class LocationLevelSelectView extends Container {
   // Показывает эталон и лучший результат игрока для выбранного уровня.
   #setPushRecords(level: LevelDefinition) {
     const personalBest = Locator.storage.getSokobanPushRecord(level.id)
-    const minimumPushes = Number.isInteger(level.minimumPushes) ? level.minimumPushes : '—'
-    this.#minimumPushesText.text = i18next.t('sokoban.minimumPushes', {pushes: minimumPushes})
+    const benchmarkPushes = Number.isInteger(level.benchmarkPushes) ? level.benchmarkPushes : '—'
+    this.#benchmarkPushesText.text = i18next.t('sokoban.benchmarkPushes', {pushes: benchmarkPushes})
     this.#personalBestText.text = i18next.t('sokoban.personalBestPushes', {pushes: personalBest ?? '—'})
   }
 

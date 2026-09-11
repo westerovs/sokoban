@@ -135,7 +135,7 @@ export default class Level {
       map: this.config.map,
       appearance: this.config.appearance,
       levelNumber: this.config.locationLevelNumber,
-      minimumPushes: this.config.minimumPushes,
+      benchmarkPushes: this.config.benchmarkPushes,
       canMove: this.#canMove,
       onMove: this.#notifyMove,
       onComplete: this.#requestWin,

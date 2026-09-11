@@ -11,7 +11,7 @@
       "levelName": "level21",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 473, "pushes": 136, "bestPushes": 120, "timeSeconds": 0},
-      "minimumPushes": 120,
+      "benchmarkPushes": 120,
       "map": [
         "####################",
         "#    @##      #   ##",
@@ -32,7 +32,7 @@
       "levelName": "level22",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 378, "pushes": 124, "bestPushes": 118, "timeSeconds": 1},
-      "minimumPushes": 118,
+      "benchmarkPushes": 118,
       "map": [
         "_#########____",
         "_#       #____",
@@ -53,6 +53,7 @@
       "levelName": "level23",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 508, "pushes": 131, "bestPushes": 131, "timeSeconds": 1},
+      "benchmarkPushes": 131,
       "map": [
         "############__",
         "#..  #     ###",
@@ -71,7 +72,7 @@
       "levelName": "level24",
       "difficulty": "medium",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 521, "pushes": 208, "bestPushes": 200, "timeSeconds": 1},
-      "minimumPushes": 200,
+      "benchmarkPushes": 200,
       "map": [
         "__#########__",
         "__#-.-#-.-#__",
@@ -96,6 +97,7 @@
       "levelName": "level25",
       "difficulty": "medium",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 807, "pushes": 243, "bestPushes": 199, "timeSeconds": 1},
+      "benchmarkPushes": 199,
       "map": [
         "####################",
         "##...   ## #    #  #",
@@ -124,6 +126,7 @@
         "bestPushes": 324,
         "timeSeconds": 8
       },
+      "benchmarkPushes": 324,
       "map": [
         "____############_",
         "____#          ##",
@@ -156,6 +159,7 @@
         "bestPushes": 368,
         "timeSeconds": 9
       },
+      "benchmarkPushes": 368,
       "map": [
         "####################",
         "#    ##   #    #   #",

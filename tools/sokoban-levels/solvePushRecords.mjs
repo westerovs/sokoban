@@ -6,7 +6,7 @@ import {solveSokoban} from '../sokoban-level-editor/solver.ts'
 import {createMapHash} from './mapHash.mjs'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
-// Вычисляет и кеширует только доказанные минимумы толчков для неизменившихся карт.
+// Собирает опубликованные эталоны и вычисляет точные результаты для собственных карт.
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(scriptDirectory, '..', '..')
@@ -69,8 +69,18 @@ const loadLevel = (filePath) => {
 // Создаёт индекс уже сохранённых эталонов.
 const createRecordIndex = () => {
   const source = readJson(pushRecordsPath, {version: 1, records: []})
-  if (source.version !== 1 || !Array.isArray(source.records)) throw new Error('Unsupported push records format')
-  return new Map(source.records.map((record) => [record.id, record]))
+  if (![1, 2].includes(source.version) || !Array.isArray(source.records)) throw new Error('Unsupported push records format')
+  return new Map(source.records.map((record) => [record.id, normalizeRecord(record)]))
+}
+
+// Приводит старую запись точного минимума к формату игрового эталона.
+const normalizeRecord = (record) => {
+  const {minimumPushes, ...currentRecord} = record
+  return {
+    ...currentRecord,
+    benchmarkPushes: record.benchmarkPushes ?? minimumPushes,
+    isProvenOptimal: record.isProvenOptimal ?? Number.isInteger(minimumPushes),
+  }
 }
 
 // Удаляет эталоны отсутствующих или изменившихся карт.
@@ -89,24 +99,27 @@ const createLocationIndex = () => {
   return new Map(source.locations.flatMap((location) => location.levelIds.map((levelId) => [levelId, location.id])))
 }
 
-// Добавляет опубликованные результаты с доказанным нижним пределом.
-const importProvenPublishedRecords = (records, levels) => {
+// Добавляет лучшие опубликованные результаты для совпавших карт XSokoban.
+const importPublishedBenchmarks = (records, levels) => {
   const levelsById = new Map(levels.map((level) => [level.id, level]))
   const stats = readJson(solverStatsPath, {levels: []})
-  stats.levels.forEach((entry) => importPublishedRecord(records, levelsById.get(entry.id), entry))
+  stats.levels.forEach((entry) => importPublishedBenchmark(records, levelsById.get(entry.id), entry))
 }
 
-// Импортирует один доказанный результат внешнего решателя.
-const importPublishedRecord = (records, level, stats) => {
-  const hasProvenMinimum = Number.isInteger(stats.lowerBound) && stats.lowerBound >= 0 && stats.lowerBound === stats.bestPushes
-  if (!level || stats.mapHash !== level.mapHash || !hasProvenMinimum) return
-  if (records.get(level.id)?.mapHash === level.mapHash) return
+// Импортирует лучший известный результат одной карты с признаком оптимальности.
+const importPublishedBenchmark = (records, level, stats) => {
+  if (!level || stats.mapHash !== level.mapHash || !Number.isInteger(stats.bestPushes) || stats.bestPushes < 0) return
+  const currentRecord = records.get(level.id)
+  if (currentRecord?.mapHash === level.mapHash && currentRecord.isProvenOptimal) return
 
   records.set(level.id, {
     id: level.id,
     mapHash: level.mapHash,
-    minimumPushes: stats.bestPushes,
-    solver: 'Takaken',
+    benchmarkPushes: stats.bestPushes,
+    isProvenOptimal: stats.lowerBound === stats.bestPushes,
+    source: stats.verification,
+    sourceLevel: stats.sourceLevel,
+    solverLevel: stats.solverLevel,
     solverVersion: stats.solverVersion,
   })
 }
@@ -114,7 +127,7 @@ const importPublishedRecord = (records, level, stats) => {
 // Записывает эталоны в стабильном порядке идентификаторов.
 const writeRecords = (records) => {
   const sortedRecords = Array.from(records.values()).sort((first, second) => first.id.localeCompare(second.id))
-  fs.writeFileSync(pushRecordsPath, JSON.stringify({version: 1, records: sortedRecords}, null, 2) + '\n')
+  fs.writeFileSync(pushRecordsPath, JSON.stringify({version: 2, records: sortedRecords}, null, 2) + '\n')
 }
 
 // Проверяет, нужно ли вычислять эталон выбранной карты.
@@ -142,7 +155,8 @@ const solveLevel = (level, records, limits) => {
   records.set(level.id, {
     id: level.id,
     mapHash: level.mapHash,
-    minimumPushes: result.pushes,
+    benchmarkPushes: result.pushes,
+    isProvenOptimal: true,
     solver: 'internal-push-bfs',
     solverVersion: '1',
     exploredStates: result.explored,
@@ -178,15 +192,15 @@ const getMissingRecordsByLocation = (records) => {
     .filter(({levelIds}) => levelIds.length > 0)
 }
 
-// Печатает итоговый список уровней без доказанного минимума.
+// Печатает итоговый список уровней без игрового эталона.
 const printMissingRecordsByLocation = (records) => {
   const missingLocations = getMissingRecordsByLocation(records)
   if (missingLocations.length === 0) {
-    console.log('[PushRecords]: all location levels have exact benchmarks')
+    console.log('[PushRecords]: all location levels have benchmarks')
     return
   }
 
-  console.log('[PushRecords]: levels without exact benchmarks by location:')
+  console.log('[PushRecords]: levels without benchmarks by location:')
   missingLocations.forEach(({locationId, levelIds}) => {
     console.log(`  ${locationId} (${levelIds.length}): ${levelIds.join(', ')}`)
   })
@@ -210,7 +224,7 @@ const run = () => {
 
   validateSelectedIds(selectedIds, levels)
   removeStaleRecords(records, levels)
-  importProvenPublishedRecords(records, levels)
+  importPublishedBenchmarks(records, levels)
   writeRecords(records)
   const unresolvedCount = solveMissingRecords(levels, records, selectedIds, limits, process.argv.includes('--force'), locationsByLevelId)
   console.log(`[PushRecords]: cached ${records.size}/${levels.length}, unresolved in this run ${unresolvedCount}`)

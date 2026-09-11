@@ -7,7 +7,7 @@ import {primaryFontStyle} from '@/game/styles.js'
 type CompleteLevelStats = {
   actualPushes: number | null
   personalBestPushes: number | null
-  minimumPushes: number | null
+  benchmarkPushes: number | null
 }
 
 const PANEL_WIDTH = 520 // Ширина панели результатов
@@ -17,7 +17,7 @@ const ROW_GAP = 52 // Расстояние между строками резу�
 export default class CompleteLevelStatsView extends Container {
   #actualPushesText!: Text
   #personalBestText!: Text
-  #minimumPushesText!: Text
+  #benchmarkPushesText!: Text
 
   // Создаёт панель результатов прохождения.
   constructor() {
@@ -27,10 +27,10 @@ export default class CompleteLevelStatsView extends Container {
   }
 
   // Обновляет фактический результат, личный рекорд и эталон.
-  setData({actualPushes, personalBestPushes, minimumPushes}: CompleteLevelStats) {
+  setData({actualPushes, personalBestPushes, benchmarkPushes}: CompleteLevelStats) {
     this.#actualPushesText.text = i18next.t('sokoban.pushes', {pushes: this.#formatValue(actualPushes)})
     this.#personalBestText.text = i18next.t('sokoban.personalBestPushes', {pushes: this.#formatValue(personalBestPushes)})
-    this.#minimumPushesText.text = i18next.t('sokoban.minimumPushes', {pushes: this.#formatValue(minimumPushes)})
+    this.#benchmarkPushesText.text = i18next.t('sokoban.benchmarkPushes', {pushes: this.#formatValue(benchmarkPushes)})
   }
 
   // Создаёт фон и три строки результатов.
@@ -43,8 +43,8 @@ export default class CompleteLevelStatsView extends Container {
 
     this.#actualPushesText = this.#createRow('complete-level-actual-pushes', -ROW_GAP)
     this.#personalBestText = this.#createRow('complete-level-personal-best', 0)
-    this.#minimumPushesText = this.#createRow('complete-level-minimum-pushes', ROW_GAP)
-    this.addChild(background, this.#actualPushesText, this.#personalBestText, this.#minimumPushesText)
+    this.#benchmarkPushesText = this.#createRow('complete-level-benchmark-pushes', ROW_GAP)
+    this.addChild(background, this.#actualPushesText, this.#personalBestText, this.#benchmarkPushesText)
   }
 
   // Создаёт одну текстовую строку результатов.

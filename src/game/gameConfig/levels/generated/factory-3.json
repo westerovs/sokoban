@@ -11,6 +11,7 @@
       "levelName": "level95",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 748, "pushes": 231, "bestPushes": 187, "timeSeconds": 1},
+      "benchmarkPushes": 187,
       "map": [
         "####################",
         "#   #    #   #   #@#",
@@ -39,6 +40,7 @@
         "bestPushes": 124,
         "timeSeconds": 5
       },
+      "benchmarkPushes": 124,
       "map": [
         "_____###########___",
         "_____#  .  #   #___",
@@ -68,6 +70,7 @@
         "bestPushes": 378,
         "timeSeconds": 1
       },
+      "benchmarkPushes": 378,
       "map": [
         "############_######",
         "#   #    # ###....#",
@@ -100,6 +103,7 @@
         "bestPushes": 164,
         "timeSeconds": 81
       },
+      "benchmarkPushes": 164,
       "map": [
         "#####______________",
         "#   ##_____________",
@@ -129,6 +133,7 @@
         "bestPushes": 363,
         "timeSeconds": 2
       },
+      "benchmarkPushes": 363,
       "map": [
         "_#################_",
         "_#...   #    #   ##",
@@ -158,6 +163,7 @@
         "bestPushes": 421,
         "timeSeconds": 72
       },
+      "benchmarkPushes": 421,
       "map": [
         "___________########",
         "___________#......#",

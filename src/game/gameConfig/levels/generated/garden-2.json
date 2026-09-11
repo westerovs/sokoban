@@ -11,6 +11,7 @@
       "levelName": "level14",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 357, "pushes": 114, "bestPushes": 88, "timeSeconds": 1},
+      "benchmarkPushes": 88,
       "map": [
         "_______#####_",
         "_#######   ##",
@@ -31,6 +32,7 @@
       "levelName": "level15",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 421, "pushes": 138, "bestPushes": 134, "timeSeconds": 0},
+      "benchmarkPushes": 134,
       "map": [
         "________########_",
         "________#     @#_",
@@ -49,6 +51,7 @@
       "levelName": "level16",
       "difficulty": "easy",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 388, "pushes": 142, "bestPushes": 136, "timeSeconds": 1},
+      "benchmarkPushes": 136,
       "map": [
         "_______###########_",
         "_______#         #_",
@@ -69,6 +72,7 @@
       "levelName": "level17",
       "difficulty": "medium",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 693, "pushes": 253, "bestPushes": 225, "timeSeconds": 1},
+      "benchmarkPushes": 225,
       "map": [
         "####################",
         "#@     ###   #  #  #",
@@ -89,6 +93,7 @@
       "levelName": "level18",
       "difficulty": "medium",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 673, "pushes": 257, "bestPushes": 245, "timeSeconds": 1},
+      "benchmarkPushes": 245,
       "map": [
         "####################",
         "#    #  # #  #  #  #",
@@ -117,6 +122,7 @@
         "bestPushes": 401,
         "timeSeconds": 1
       },
+      "benchmarkPushes": 401,
       "map": [
         "####################",
         "#####@###.##...##  #",

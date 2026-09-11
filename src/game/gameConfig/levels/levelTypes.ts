@@ -18,7 +18,7 @@ type LevelDefinition = {
   id: string
   levelName: string
   difficulty: LevelDifficulty
-  minimumPushes?: number
+  benchmarkPushes?: number
   isRemote?: boolean
   appearance?: LevelAppearance
   solver?: LevelSolver

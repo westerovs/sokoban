@@ -13,7 +13,7 @@ export default class SokobanHud extends Container {
   updateAdaptive = true
   _customPosition = {x: 0, y: 0}
   #levelNumber: number
-  #minimumPushes?: number
+  #benchmarkPushes?: number
   #onUndo: () => void
   #onRestart: () => void
   #stepsText!: Text
@@ -33,19 +33,19 @@ export default class SokobanHud extends Container {
   // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({
     levelNumber,
-    minimumPushes,
+    benchmarkPushes,
     onUndo,
     onRestart,
   }: {
     levelNumber: number
-    minimumPushes?: number
+    benchmarkPushes?: number
     onUndo: () => void
     onRestart: () => void
   }) {
     super({label: 'sokoban-hud'})
 
     this.#levelNumber = levelNumber
-    this.#minimumPushes = minimumPushes
+    this.#benchmarkPushes = benchmarkPushes
     this.#onUndo = onUndo
     this.#onRestart = onRestart
     this.#init()
@@ -167,9 +167,9 @@ export default class SokobanHud extends Container {
   #createRecordText() {
     const recordText = new Text({
       label: 'sokoban-record-text',
-      text: Number.isInteger(this.#minimumPushes) ? i18next.t('sokoban.minimumPushes', {pushes: this.#minimumPushes}) : '',
+      text: Number.isInteger(this.#benchmarkPushes) ? i18next.t('sokoban.benchmarkPushes', {pushes: this.#benchmarkPushes}) : '',
       style: this.#createTextStyle(1),
-      visible: Number.isInteger(this.#minimumPushes),
+      visible: Number.isInteger(this.#benchmarkPushes),
     })
 
     recordText.anchor.set(0.5)

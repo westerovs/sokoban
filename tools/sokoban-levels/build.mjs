@@ -236,23 +236,26 @@ const loadLevels = () => {
   return levels
 }
 
-// Загружает доказанные минимумы толчков и отбрасывает результаты изменённых карт.
-const loadMinimumPushes = (levels) => {
+// Загружает игровые эталоны толчков и отбрасывает результаты изменённых карт.
+const loadPushBenchmarks = (levels) => {
   if (!fs.existsSync(pushRecordsPath)) return new Map()
 
   const source = readJson(pushRecordsPath)
-  if (source.version !== 1 || !Array.isArray(source.records)) throw new Error('Файл push-records.json имеет неподдерживаемый формат')
+  if (![1, 2].includes(source.version) || !Array.isArray(source.records)) {
+    throw new Error('Файл push-records.json имеет неподдерживаемый формат')
+  }
   const levelsById = new Map(levels.map((level) => [level.id, level]))
-  return new Map(source.records.flatMap((record) => createMinimumPushesEntry(record, levelsById.get(record.id))))
+  return new Map(source.records.flatMap((record) => createPushBenchmarkEntry(record, levelsById.get(record.id))))
 }
 
 // Проверяет одну запись эталона и создаёт элемент индекса.
-const createMinimumPushesEntry = (record, level) => {
+const createPushBenchmarkEntry = (record, level) => {
   if (!level || record.mapHash !== createMapHash(level.map)) return []
-  if (!Number.isInteger(record.minimumPushes) || record.minimumPushes < 0) {
+  const benchmarkPushes = record.benchmarkPushes ?? record.minimumPushes
+  if (!Number.isInteger(benchmarkPushes) || benchmarkPushes < 0) {
     throw new Error(`${record.id}: эталон толчков должен быть неотрицательным целым числом`)
   }
-  return [[record.id, record.minimumPushes]]
+  return [[record.id, benchmarkPushes]]
 }
 
 // Возвращает данные, за которые отвечает операция `getLocationLevels`.
@@ -385,7 +388,7 @@ const createSolverMetadata = (level) => {
 }
 
 // Создаёт данные или представление для операции `createRuntimeLevel`.
-const createRuntimeLevel = (level, index, appearance, minimumPushes) => {
+const createRuntimeLevel = (level, index, appearance, benchmarkPushes) => {
   const solver = createSolverMetadata(level)
 
   return {
@@ -393,14 +396,14 @@ const createRuntimeLevel = (level, index, appearance, minimumPushes) => {
     levelName: `level${index}`,
     difficulty: level.difficulty,
     ...(solver && {solver}),
-    ...(Number.isInteger(minimumPushes) && {minimumPushes}),
+    ...(Number.isInteger(benchmarkPushes) && {benchmarkPushes}),
     ...(appearance && {appearance}),
     map: toRuntimeMap(level.map),
   }
 }
 
 // Создаёт данные или представление для операции `createRuntimeLocation`.
-const createRuntimeLocation = (location, levelIndexes, appearances, minimumPushesById) => {
+const createRuntimeLocation = (location, levelIndexes, appearances, pushBenchmarksById) => {
   return {
     id: location.id,
     titleKey: location.titleKey,
@@ -409,16 +412,16 @@ const createRuntimeLocation = (location, levelIndexes, appearances, minimumPushe
     ambience: location.ambience,
     music: location.music,
     levels: location.levels.map((level) =>
-      createRuntimeLevel(level, levelIndexes.get(level.id), appearances.get(level.id), minimumPushesById.get(level.id)),
+      createRuntimeLevel(level, levelIndexes.get(level.id), appearances.get(level.id), pushBenchmarksById.get(level.id)),
     ),
   }
 }
 
 // Создаёт данные или представление для операции `createRuntimeCatalog`.
-const createRuntimeCatalog = (locations, appearances, minimumPushesById) => {
+const createRuntimeCatalog = (locations, appearances, pushBenchmarksById) => {
   const orderedLevels = locations.flatMap((location) => location.levels)
   const levelIndexes = new Map(orderedLevels.map((level, index) => [level.id, index]))
-  return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes, appearances, minimumPushesById))}
+  return {locations: locations.map((location) => createRuntimeLocation(location, levelIndexes, appearances, pushBenchmarksById))}
 }
 
 // Проверяет условие, описанное операцией `validateUniqueIds`.
@@ -476,9 +479,9 @@ const buildLevels = async () => {
   validateUniqueIds(levels)
   const locations = loadLocations(levels, sourceLocations)
   const appearances = loadAppearances(levels, locations)
-  const minimumPushesById = loadMinimumPushes(levels)
+  const pushBenchmarksById = loadPushBenchmarks(levels)
 
-  const gameCatalog = createRuntimeCatalog(locations, appearances, minimumPushesById)
+  const gameCatalog = createRuntimeCatalog(locations, appearances, pushBenchmarksById)
   const prettierConfig = await prettier.resolveConfig(path.resolve(projectRoot, 'package.json'))
   await writeLocationFiles(gameCatalog.locations, prettierConfig)
   removeStaleLocationFiles(gameCatalog.locations)

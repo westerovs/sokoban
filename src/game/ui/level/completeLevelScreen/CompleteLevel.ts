@@ -29,7 +29,7 @@ type CompletionResult = {
   unlockedLocation?: LocationDefinition | null
   actualPushes?: number | null
   personalBestPushes?: number | null
-  minimumPushes?: number | null
+  benchmarkPushes?: number | null
 }
 
 export default class CompleteLevel {
@@ -65,7 +65,7 @@ export default class CompleteLevel {
       this.#view.setSokobanResult({
         actualPushes: completionResult.actualPushes ?? null,
         personalBestPushes: completionResult.personalBestPushes ?? null,
-        minimumPushes: completionResult.minimumPushes ?? null,
+        benchmarkPushes: completionResult.benchmarkPushes ?? null,
       })
       this.#setEvents(true)
 
