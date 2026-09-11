@@ -12,6 +12,7 @@ import type {Bounds, EditorBrush, EditorLevel, LevelAppearance, Position} from '
 const TILE_SIZE = 100 // Логический размер клетки редактора
 const BOARD_PADDING = 44 // Минимальный отступ карты от краёв рабочей области
 const INITIAL_VERTICAL_PADDING = 1 // Число видимых клеток над и под содержимым при открытии
+const ROTATED_VERTICAL_PADDING = 1 // Число экранных клеток сверху и снизу после поворота
 const MIN_ZOOM = 1 // Минимальный масштаб относительно полного поля
 const MAX_ZOOM = 4 // Максимальное увеличение рабочего поля
 const ZOOM_SENSITIVITY = 0.0014 // Скорость изменения масштаба колёсиком мыши
@@ -49,7 +50,7 @@ export default class EditorBoard extends Container {
     this.#isRotated = !this.#isRotated
     this.rotation = this.#isRotated ? Math.PI / 2 : 0
     this.#render()
-    this.#centerBoard()
+    this.#focusInitialContent()
     return this.#isRotated
   }
 
@@ -157,13 +158,14 @@ export default class EditorBoard extends Container {
     this.position.set(this.#viewportWidth / 2, this.#viewportHeight / 2)
   }
 
-  // Вписывает непустую часть уровня с вертикальным запасом в одну клетку.
+  // Вписывает непустую часть уровня с запасом в одну экранную клетку.
   #focusInitialContent() {
     const bounds = this.#getInitialViewBounds()
     if (!bounds) return this.#centerBoard()
 
     const fitScale = this.#getFitScale()
-    const contentWidth = (bounds.maxX - bounds.minX + 1) * TILE_SIZE
+    const rotatedPadding = this.#isRotated ? ROTATED_VERTICAL_PADDING * 2 : 0
+    const contentWidth = (bounds.maxX - bounds.minX + 1 + rotatedPadding) * TILE_SIZE
     const contentHeight = (bounds.maxY - bounds.minY + 1) * TILE_SIZE
     const displayedSize = this.#getDisplayedSize(contentWidth, contentHeight)
     const contentScale = Math.min(
