@@ -16,7 +16,9 @@ type Bounds = {
   maxY: number
 }
 
-type LevelAppearance = Record<string, Record<string, string> | undefined>
+type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, string>>> & {
+  decorOffsets?: Record<string, Position>
+}
 
 type AppearanceCatalog = {
   levels: Record<string, LevelAppearance>

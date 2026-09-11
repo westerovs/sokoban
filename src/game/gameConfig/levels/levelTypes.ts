@@ -2,7 +2,9 @@ import type {LevelDifficulty} from './levelDifficulty.js'
 
 // Описывает структуру локаций, уровней и подготовленной конфигурации Sokoban.
 
-type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, string>>>
+type LevelAppearance = Partial<Record<'box' | 'decor' | 'ground' | 'target' | 'wall', Record<string, string>>> & {
+  decorOffsets?: Record<string, {x: number; y: number}>
+}
 
 type LevelDefinition = {
   id: string

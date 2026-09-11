@@ -13,14 +13,14 @@ const getLevelAppearance = (appearance: AppearanceCatalog, levelId: string) => {
 }
 
 // Удаляет опустевший визуальный слой из оформления уровня.
-const removeEmptyRole = (appearance: LevelAppearance, role: string) => {
+const removeEmptyRole = (appearance: LevelAppearance, role: keyof LevelAppearance) => {
   if (appearance[role] && Object.keys(appearance[role]).length === 0) delete appearance[role]
 }
 
 // Назначает выбранную текстуру клетке или убирает избыточное значение по умолчанию.
 const setTileAppearance = (appearance: LevelAppearance, brush: EditorBrush, positionKey: string, defaults: Record<string, string>) => {
   const nextAppearance = cloneAppearance(appearance)
-  const role = brush.role as string
+  const role = brush.role as Exclude<keyof LevelAppearance, 'decorOffsets'>
   const texture = brush.texture as string
   const roleAppearance = (nextAppearance[role] ??= {})
 
@@ -33,7 +33,9 @@ const setTileAppearance = (appearance: LevelAppearance, brush: EditorBrush, posi
 // Удаляет визуальные переопределения указанных слоёв в одной клетке.
 const removeTileAppearances = (appearance: LevelAppearance, positionKey: string, roles: readonly string[]) => {
   const nextAppearance = cloneAppearance(appearance)
-  roles.forEach((role) => {
+  const removedRoles = roles.includes('decor') ? [...roles, 'decorOffsets'] : roles
+  removedRoles.forEach((value) => {
+    const role = value as keyof LevelAppearance
     delete nextAppearance[role]?.[positionKey]
     removeEmptyRole(nextAppearance, role)
   })

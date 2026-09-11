@@ -14,6 +14,8 @@ const INITIAL_VERTICAL_PADDING = 1 // Число видимых клеток н�
 const MIN_ZOOM = 1 // Минимальный масштаб относительно полного поля
 const MAX_ZOOM = 4 // Максимальное увеличение рабочего поля
 const ZOOM_SENSITIVITY = 0.0014 // Скорость изменения масштаба колёсиком мыши
+const SELECTION_DASH = 8 // Длина штриха рамки выбранного декора в пикселях
+const SELECTION_GAP = 5 // Промежуток между штрихами рамки в пикселях
 
 export default class EditorBoard extends Container {
   #appearance: LevelAppearance = {}
@@ -29,6 +31,15 @@ export default class EditorBoard extends Container {
   #viewportHeight = 0
   #viewportWidth = 0
   #zoom = MIN_ZOOM
+  #selectedDecor: Position | null = null
+  #decorSprites = new Map<Sprite, Position>()
+
+  // Подсвечивает исходную клетку выбранного декора.
+  selectDecor(position: Position | null) {
+    if (position?.x === this.#selectedDecor?.x && position?.y === this.#selectedDecor?.y) return
+    this.#selectedDecor = position
+    this.#render()
+  }
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor(
@@ -60,7 +71,10 @@ export default class EditorBoard extends Container {
 
   // Обновляет состояние через операцию `setBrush`.
   setBrush(brush: EditorBrush) {
+    this.#stopPainting()
     this.#brush = brush
+    this.cursor = 'crosshair'
+    this.#render()
   }
 
   // Рассчитывает и применяет расположение представления.
@@ -171,6 +185,7 @@ export default class EditorBoard extends Container {
 
   // Выполняет отдельную операцию `render`.
   #render() {
+    this.#decorSprites.clear()
     this.removeChildren().forEach((child) => child.destroy({children: true}))
     if (!this.#level) return
 
@@ -182,6 +197,7 @@ export default class EditorBoard extends Container {
     })
     scene.addChild(this.#createGrid())
     scene.addChild(this.#createIssueOverlay())
+    scene.addChild(this.#createDecorOverlay(scene))
     this.addChild(scene)
     this.hitArea = new Rectangle(0, 0, level.map[0].length * TILE_SIZE, level.map.length * TILE_SIZE)
   }
@@ -230,8 +246,12 @@ export default class EditorBoard extends Container {
     const anchorY = role === 'wall' || role === 'box' ? 0.5 : 1
     sprite.anchor.set(0.5, anchorY)
     sprite.position.set((position.x + 0.5) * TILE_SIZE, (position.y + anchorY) * TILE_SIZE)
+    const offset = role === 'decor' ? this.#appearance.decorOffsets?.[`${position.x}:${position.y}`] : undefined
+    sprite.x += offset?.x ?? 0
+    sprite.y += offset?.y ?? 0
     sprite.zIndex = this.#getRoleDepth(role, position.y)
     applyTileVisualScale(sprite, TILE_SIZE)
+    if (role === 'decor') this.#decorSprites.set(sprite, position)
     return sprite
   }
 
@@ -265,9 +285,53 @@ export default class EditorBoard extends Container {
     return overlay
   }
 
+  // Обводит весь декор в режиме выбора либо один выбранный объект с прозрачностью 50%.
+  #createDecorOverlay(scene: Container) {
+    const overlay = new Graphics({label: 'editor-decor-selection', zIndex: 1002})
+    if (this.#brush?.mode !== 'select-decor') return overlay
+    const selected = this.#selectedDecor
+    const selectedLabel = selected ? `editor-decor-${selected.x}-${selected.y}` : null
+    for (const child of scene.children) {
+      if (!(child instanceof Sprite) || !child.label.startsWith('editor-decor-')) continue
+      if (selectedLabel && child.label !== selectedLabel) continue
+      if (selected) {
+        this.#drawSelectedDecorFrame(overlay, child)
+        continue
+      }
+      overlay
+        .rect(child.x - child.width * child.anchor.x, child.y - child.height * child.anchor.y, child.width, child.height)
+        .stroke({color: 0xbedf70, width: 3})
+    }
+    return overlay
+  }
+
+  // Обводит выбранный объект красной пунктирной рамкой с прозрачностью 50%.
+  #drawSelectedDecorFrame(overlay: Graphics, sprite: Sprite) {
+    const x = sprite.x - sprite.width * sprite.anchor.x
+    const y = sprite.y - sprite.height * sprite.anchor.y
+    this.#drawDashedLine(overlay, {x, y}, {x: x + sprite.width, y})
+    this.#drawDashedLine(overlay, {x, y: y + sprite.height}, {x: x + sprite.width, y: y + sprite.height})
+    this.#drawDashedLine(overlay, {x, y}, {x, y: y + sprite.height})
+    this.#drawDashedLine(overlay, {x: x + sprite.width, y}, {x: x + sprite.width, y: y + sprite.height})
+    overlay.stroke({color: 0xff0000, width: 3, alpha: 0.5})
+  }
+
+  // Добавляет отдельные штрихи вдоль стороны рамки.
+  #drawDashedLine(overlay: Graphics, start: Position, end: Position) {
+    const length = Math.hypot(end.x - start.x, end.y - start.y)
+    if (!length) return
+    const dx = (end.x - start.x) / length
+    const dy = (end.y - start.y) / length
+    for (let offset = 0; offset < length; offset += SELECTION_DASH + SELECTION_GAP) {
+      const finish = Math.min(offset + SELECTION_DASH, length)
+      overlay.moveTo(start.x + dx * offset, start.y + dy * offset)
+      overlay.lineTo(start.x + dx * finish, start.y + dy * finish)
+    }
+  }
+
   // Возвращает данные, за которые отвечает операция `getTextureName`.
   #getTextureName(role: string, position: Position) {
-    return this.#appearance[role]?.[`${position.x}:${position.y}`] ?? this.#defaults[role]
+    return this.#appearance[role as Exclude<keyof LevelAppearance, 'decorOffsets'>]?.[`${position.x}:${position.y}`] ?? this.#defaults[role]
   }
 
   // Возвращает текстуру декоративной стены только для явно оформленной клетки.
@@ -278,9 +342,25 @@ export default class EditorBoard extends Container {
   // Выполняет отдельную операцию `startPainting`.
   #startPainting = (event: any) => {
     if (![0, 2].includes(event.button) || !this.#brush) return
+    if (this.#brush.mode === 'select-decor') {
+      const position = this.#getDecorPosition(event) ?? this.#getCellPosition(event)
+      if (position) this.#onPaint({brush: this.#brush, position, positionKey: `${position.x}:${position.y}`})
+      return
+    }
     this.#paintingBrush = event.button === 2 ? {mode: 'void', label: 'Пустота'} : this.#brush
     this.#lastPaintedPosition = null
     this.#paintAt(event)
+  }
+
+  // Находит верхний декор по видимым границам с учётом его индивидуального смещения.
+  #getDecorPosition(event: any) {
+    const point = this.toLocal(event.global)
+    const sprites = [...this.#decorSprites.entries()].sort(([first], [second]) => second.zIndex - first.zIndex)
+    return sprites.find(([sprite]) => {
+      const left = sprite.x - sprite.width * sprite.anchor.x
+      const top = sprite.y - sprite.height * sprite.anchor.y
+      return point.x >= left && point.x <= left + sprite.width && point.y >= top && point.y <= top + sprite.height
+    })?.[1]
   }
 
   // Выполняет отдельную операцию `continuePainting`.

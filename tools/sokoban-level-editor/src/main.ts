@@ -4,6 +4,7 @@ import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {SOKOBAN_TILE_CATALOG} from '@/game/generatedAssets/sokobanTileCatalog.js'
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
 import {getLevelAppearance} from './appearanceState.js'
+import DecorOffsetPanel from './DecorOffsetPanel.js'
 import {
   checkLevelSolvability,
   fillEditorLocation,
@@ -85,6 +86,7 @@ let board: EditorBoard
 let editorData: EditorData
 let generatorPanel: LevelGeneratorPanel | null = null
 let libraryPanel: LevelLibraryPanel
+let decorOffsetPanel: DecorOffsetPanel
 let navigation: LevelNavigation
 let isSaving = false
 let isGenerating = false
@@ -187,6 +189,7 @@ const bindLocationFill = () => {
 
 // Отрисовывает карту, проверку и доступность команд истории.
 const renderSession = () => {
+  decorOffsetPanel?.sync(session?.state ?? null)
   updateSaveButtons()
   if (!session || !selectedLevel) {
     updateFillButton()
@@ -210,6 +213,7 @@ const renderSession = () => {
 
 // Открывает выбранный уровень на полном рабочем поле редактора.
 const updateSelectedLevel = (level: EditorLevel | null, libraryAppearance?: LevelAppearance) => {
+  decorOffsetPanel?.select(null)
   selectedLevel = level
   libraryPanel.selectPath(level?.libraryPath)
   const location = editorData.locations.find(({levels}) => levels.some(({id}) => id === level?.id))
@@ -238,15 +242,27 @@ const canChangeLevel = () => {
 // Применяет выбранную кисть к клетке карты.
 const handlePaint = ({brush, position}: {brush: EditorBrush; position: Position}) => {
   if (!session) return
+  if (brush.mode === 'select-decor') return decorOffsetPanel.select(position)
   const result = applyEditorBrush(session.state, brush, position, SOKOBAN_TILE_CATALOG.defaults)
   if (session.apply(result.state)) renderSession()
 }
 
 // Передаёт выбранную кисть доске и обновляет подпись интерфейса.
 const selectBrush = (brush: EditorBrush) => {
+  if (brush.mode === 'select-decor') palette.clearBrushSelection()
+  decorOffsetPanel?.select(null)
+  const decorButton = getElement('#select-decor-button')
+  decorButton.setAttribute('aria-pressed', String(brush.mode === 'select-decor'))
+  decorButton.textContent = brush.mode === 'select-decor' ? 'Выберите цель' : 'Настройка декора'
   board.setBrush(brush)
   selectedBrush = brush
   updateFillButton()
+}
+
+// Переключает настройку декора и возвращает предыдущую кисть при повторном нажатии.
+const toggleDecorSelection = () => {
+  if (selectedBrush?.mode === 'select-decor') palette.restoreBrushSelection()
+  else selectBrush({mode: 'select-decor', label: 'Настройка декора'})
 }
 
 // Заливает все подходящие клетки текстурой выбранной кисти.
@@ -261,7 +277,9 @@ const fillSelectedRole = () => {
 // Оставляет оформление стен, декора и пола при перестановке игровых объектов.
 const getStructuralAppearance = (appearance: LevelAppearance): LevelAppearance => {
   return Object.fromEntries(
-    ['wall', 'decor', 'ground'].filter((role) => appearance[role]).map((role) => [role, structuredClone(appearance[role])]),
+    (['wall', 'decor', 'ground', 'decorOffsets'] as const)
+      .filter((role) => appearance[role])
+      .map((role) => [role, structuredClone(appearance[role])]),
   )
 }
 
@@ -313,6 +331,7 @@ const generateLevel = async (options: Record<string, any>) => {
 // Переключает ручные инструменты и вкладку автогенерации.
 const selectSidebarPanel = (mode: string) => {
   const isGenerator = mode === 'generator'
+  if (isGenerator) decorOffsetPanel?.select(null)
   elements.manualToolsPanel.hidden = isGenerator
   elements.generatorPanel.hidden = !isGenerator
   elements.manualToolsTab.ariaSelected = String(!isGenerator)
@@ -556,6 +575,7 @@ const handleKeyboard = (event: KeyboardEvent) => {
     return
   }
   if (isEditableTarget(event.target)) return
+  if (!isGenerating && decorOffsetPanel.handleKey(event)) return event.preventDefault()
   if (handleControlShortcut(event)) return event.preventDefault()
   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
   if (['1', '2', '3', '4', '5'].includes(event.key)) {
@@ -572,6 +592,7 @@ const bindSidebarTabs = () => {
 
 // Подключает кнопки интерфейса и защиту несохранённой сессии.
 const bindActions = () => {
+  getElement('#select-decor-button').addEventListener('click', toggleDecorSelection)
   bindLocationFill()
   elements.shortcutsButton.addEventListener('click', () => elements.shortcutsDialog.showModal())
   window.addEventListener('wheel', handleLevelWheel, {passive: false, capture: true})
@@ -602,6 +623,13 @@ const getActiveEditorLocations = (data: EditorData) => {
 
 // Создаёт панели редактора и навигацию по игровым уровням и библиотеке.
 const createEditorPanels = (libraryData: LibraryData) => {
+  decorOffsetPanel = new DecorOffsetPanel(
+    getElement('#decor-offset-panel'),
+    (state) => {
+      if (!isSaving && !isGenerating && session?.apply(state)) renderSession()
+    },
+    (position) => board.selectDecor(position),
+  )
   palette = new EditorPalette(
     elements.utilityPalette,
     elements.modeTabs,

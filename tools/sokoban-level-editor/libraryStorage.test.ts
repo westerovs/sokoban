@@ -9,7 +9,7 @@ import {readLibraryData, saveLibraryLevel} from './libraryStorage.js'
 // Проверяет сохранение самостоятельных уровней, защиту исходников и восстановление после ошибок.
 
 const MAP = ['#####', '#@$.#', '#####'] // Минимальная корректная карта для проверки записи
-const GROUPS = {wall: ['wall-test'], ground: ['ground-test']} // Каталог тестовых текстур
+const GROUPS = {wall: ['wall-test'], ground: ['ground-test'], decor: ['decor-test']} // Каталог тестовых текстур
 
 // Создаёт изолированную библиотеку с двумя коллекциями в системной временной папке.
 const createFixture = (context: {after: (callback: () => void) => void}) => {
@@ -38,6 +38,13 @@ test('Новый файл открывается без generated и сохра�
   assert.deepEqual(data.levels[0], {id: 'custom-001', map: MAP, authorId: 'custom', libraryPath, appearance})
   assert.deepEqual(data.usedIds, ['custom-001'])
   assert.equal(data.directories.length, 2)
+})
+
+test('Смещения одинакового декора сохраняются отдельно в XSB', (context) => {
+  const root = createFixture(context)
+  const appearance = {decor: {'0:0': 'decor-test', '1:0': 'decor-test'}, decorOffsets: {'0:0': {x: -15, y: 8}, '1:0': {x: 20, y: -10}}}
+  saveLibraryLevel(root, readLibraryData(root, new Set()), createRequest({appearance}), true, GROUPS)
+  assert.deepEqual(readLibraryData(root, new Set()).levels[0].appearance, appearance)
 })
 
 test('Повторная запись обновляет файл и удаляет старый хвост оформления', (context) => {

@@ -27,7 +27,7 @@ const BOARD_Z_INDEX = {
 type TileTextureType = Exclude<keyof typeof SOKOBAN_TEXTURES, 'player'>
 type TileVisualType = TileTextureType | 'decor'
 type MovementOptions = {isContinuous?: boolean}
-type TileView = {position: SokobanPosition; sprite: Sprite}
+type TileView = {position: SokobanPosition; sprite: Sprite; offset?: SokobanPosition}
 
 export default class SokobanBoard extends Container {
   #level: SokobanLevel
@@ -243,8 +243,11 @@ export default class SokobanBoard extends Container {
     })
 
     tile.position.set((position.x + 0.5) * this.#tileSize, (position.y + anchorY) * this.#tileSize)
+    const offset = type === 'decor' ? this.#appearance.decorOffsets?.[`${position.x}:${position.y}`] : undefined
+    tile.x += offset?.x ?? 0
+    tile.y += offset?.y ?? 0
     applyTileVisualScale(tile, this.#tileSize)
-    this.#tileViews.push({position, sprite: tile})
+    this.#tileViews.push({position, sprite: tile, offset})
     return tile
   }
 
@@ -336,10 +339,12 @@ export default class SokobanBoard extends Container {
 
   // Сохраняет исходную ориентацию всех тайлов доски.
   #updateTileOrientations() {
-    this.#tileViews.forEach(({position, sprite}) => {
+    this.#tileViews.forEach(({position, sprite, offset}) => {
       const {x, y} = this.#getAnchoredVisualPosition(position, sprite.anchor.y)
       sprite.rotation = -this.rotation
-      sprite.position.set(x, y)
+      const cos = Math.cos(this.rotation)
+      const sin = Math.sin(this.rotation)
+      sprite.position.set(x + (offset?.x ?? 0) * cos + (offset?.y ?? 0) * sin, y - (offset?.x ?? 0) * sin + (offset?.y ?? 0) * cos)
     })
   }
 

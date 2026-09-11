@@ -27,6 +27,8 @@
         <dd>Рисовать выбранной кистью</dd>
         <dt>Правая кнопка мыши / протягивание</dt>
         <dd>Очищать клетки</dd>
+        <dt>Стрелки / Shift + стрелки</dt>
+        <dd>Сдвинуть выбранный декор на 1 / 10 пикселей</dd>
         <dt>F1</dt>
         <dd>Открыть справку</dd>
         <dt>Esc</dt>
@@ -163,6 +165,34 @@
           <section class="editor-palette__section editor-structures-section">
             <h2 class="editor-palette__title">Структуры</h2>
             <div id="mode-tabs" class="editor-mode-tabs"></div>
+          </section>
+          <section id="decor-offset-panel" class="editor-palette__section editor-decor-offset">
+            <h2 class="editor-palette__title">Смещение декора</h2>
+            <button id="select-decor-button" type="button" class="editor-generator__secondary" aria-pressed="false">
+              Настройка декора
+            </button>
+            <output hidden></output>
+            <fieldset disabled>
+              <input
+                name="decor-x"
+                type="number"
+                step="1"
+                value="0"
+                aria-label="Смещение X в пикселях"
+                title="Смещение X в пикселях"
+                required
+              />
+              <input
+                name="decor-y"
+                type="number"
+                step="1"
+                value="0"
+                aria-label="Смещение Y в пикселях"
+                title="Смещение Y в пикселях"
+                required
+              />
+              <button type="button" data-reset class="editor-generator__secondary">Сбросить смещение</button>
+            </fieldset>
           </section>
           <div id="palette" class="editor-palette"></div>
         </div>

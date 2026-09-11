@@ -26,6 +26,7 @@ export default class EditorPalette {
   #onSelect: (brush: EditorBrush) => void
   #paletteElement: HTMLElement
   #selectedButtons = new Map<string, HTMLButtonElement>()
+  #activeBrushButton: HTMLButtonElement | null = null
   #utilityElement: HTMLElement
   #locationId: string | null = null
 
@@ -48,6 +49,19 @@ export default class EditorPalette {
   // Выбирает стену по умолчанию после открытия редактора.
   selectDefault() {
     this.#selectMode('wall')
+  }
+
+  // Возвращает последний инструмент рисования после выхода из настройки декора.
+  restoreBrushSelection() {
+    if (this.#activeBrushButton) this.#activeBrushButton.click()
+    else this.selectDefault()
+  }
+
+  // Снимает выделение кистей при переходе к настройке размещённого декора.
+  clearBrushSelection() {
+    for (const element of [this.#utilityElement, this.#paletteElement]) {
+      element.querySelectorAll<HTMLButtonElement>('button').forEach((button) => (button.ariaPressed = 'false'))
+    }
   }
 
   // Переключает палитру по цифровой горячей клавише.
@@ -248,8 +262,8 @@ export default class EditorPalette {
 
   // Делает кнопку единственной активной кистью и сообщает о выборе.
   #selectBrush(button: HTMLButtonElement, brush: EditorBrush) {
-    this.#utilityElement.querySelectorAll<HTMLButtonElement>('button').forEach((item) => (item.ariaPressed = 'false'))
-    this.#paletteElement.querySelectorAll<HTMLButtonElement>('button').forEach((item) => (item.ariaPressed = 'false'))
+    this.#activeBrushButton = button
+    this.clearBrushSelection()
     button.ariaPressed = 'true'
     if (brush.role) this.#selectedButtons.set(brush.role, button)
     this.#updateTextureName(button, brush)

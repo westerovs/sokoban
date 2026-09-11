@@ -36,7 +36,7 @@ const shiftPositionKey = (positionKey: string, offset: Offset) => {
 }
 
 // Переносит координаты всех текстур одного визуального слоя.
-const shiftRoleAppearance = (roleAppearance: Record<string, string>, offset: Offset) => {
+const shiftRoleAppearance = (roleAppearance: Record<string, unknown>, offset: Offset) => {
   return Object.fromEntries(Object.entries(roleAppearance).map(([key, texture]) => [shiftPositionKey(key, offset), texture]))
 }
 
@@ -84,7 +84,7 @@ const isInsideBounds = (positionKey: string, bounds: Bounds | null) => {
 }
 
 // Обрезает и переносит один визуальный слой в координаты экспортируемой карты.
-const cropRoleAppearance = (roleAppearance: Record<string, string>, bounds: Bounds) => {
+const cropRoleAppearance = (roleAppearance: Record<string, unknown>, bounds: Bounds) => {
   const offset = {x: -bounds.minX, y: -bounds.minY}
   const entries = Object.entries(roleAppearance).filter(([key]) => isInsideBounds(key, bounds))
   return Object.fromEntries(entries.map(([key, texture]) => [shiftPositionKey(key, offset), texture]))

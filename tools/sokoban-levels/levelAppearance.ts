@@ -46,11 +46,33 @@ const validateLevelAppearance = (level: AppearanceLevel, appearance: unknown, ti
   if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
     throw new Error(`${level.id}: оформление уровня должно быть объектом`)
   }
-  const unknownRoles = Object.keys(appearance).filter((role) => !appearanceRoles.includes(role))
+  const unknownRoles = Object.keys(appearance).filter((role) => role !== 'decorOffsets' && !appearanceRoles.includes(role))
   if (unknownRoles.length > 0) throw new Error(`${level.id}: неизвестный слой оформления ${unknownRoles[0]}`)
   appearanceRoles.forEach((role) => {
     const overrides = (appearance as Record<string, unknown>)[role]
     if (overrides !== undefined) validateAppearanceRole(level, role, overrides, tileCatalog)
+  })
+  validateDecorOffsets(level, appearance as Record<string, unknown>)
+}
+
+// Проверяет индивидуальные смещения существующего декора в логических пикселях.
+const validateDecorOffsets = (level: AppearanceLevel, appearance: Record<string, unknown>) => {
+  const offsets = appearance.decorOffsets
+  if (offsets === undefined) return
+  if (!offsets || typeof offsets !== 'object' || Array.isArray(offsets)) throw new Error(`${level.id}: неверные смещения декора`)
+  Object.entries(offsets).forEach(([key, offset]) => {
+    validateAppearancePosition(level, 'decor', key)
+    if (!(appearance.decor as Record<string, string> | undefined)?.[key]) throw new Error(`${level.id}: нет декора в клетке ${key}`)
+    if (
+      !offset ||
+      typeof offset !== 'object' ||
+      Array.isArray(offset) ||
+      Object.keys(offset).some((axis) => axis !== 'x' && axis !== 'y') ||
+      !Number.isFinite(offset.x) ||
+      !Number.isFinite(offset.y)
+    ) {
+      throw new Error(`${level.id}: смещение ${key} должно содержать числовые X и Y`)
+    }
   })
 }
 
