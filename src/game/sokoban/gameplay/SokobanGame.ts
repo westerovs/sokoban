@@ -128,7 +128,7 @@ export default class SokobanGame extends Container {
     this.#updateHudCounters()
     this.#onMove?.()
     const isContinuous = Boolean(heldDirection)
-    this.#board.animateMove(result, {isContinuous}).then(() => this.#finishMove(result))
+    this.#board.animateMove(result, levelDirection, {isContinuous}).then(() => this.#finishMove(result))
     return true
   }
 

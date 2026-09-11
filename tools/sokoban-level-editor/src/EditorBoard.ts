@@ -1,7 +1,8 @@
 import {Container, Graphics, Rectangle, Sprite, type Texture} from 'pixi.js'
-import {SOKOBAN_TEXTURES} from '@/game/sokoban/config/config.js'
+import {SOKOBAN_PLAYER_TEXTURES} from '@/game/sokoban/config/config.js'
 import {applyTileVisualScale} from '@/game/sokoban/rendering/applyTileVisualScale.js'
 import {getBoardTileVisualTransform} from '@/game/sokoban/rendering/getBoardTileVisualTransform.js'
+import SokobanPlayerView from '@/game/sokoban/rendering/SokobanPlayerView.js'
 import {getContentBounds} from './editorGrid.js'
 import type {Bounds, EditorBrush, EditorLevel, LevelAppearance, Position} from './editorTypes.js'
 
@@ -253,7 +254,22 @@ export default class EditorBoard extends Container {
     scene.addChild(this.#createRoleSprite('ground', position, this.#getTextureName('ground', position)))
     if ('.-*'.includes(symbol)) scene.addChild(this.#createRoleSprite('target', position, this.#getTextureName('target', position)))
     if ('$-'.includes(symbol)) scene.addChild(this.#createRoleSprite('box', position, this.#getTextureName('box', position)))
-    if ('@*'.includes(symbol)) scene.addChild(this.#createRoleSprite('player', position, SOKOBAN_TEXTURES.player))
+    if ('@*'.includes(symbol)) scene.addChild(this.#createPlayer(position))
+  }
+
+  // Создаёт игрока с общим для игры и редактора выбором ракурса.
+  #createPlayer(position: Position) {
+    const textures = {
+      front: this.#textures[SOKOBAN_PLAYER_TEXTURES.front],
+      back: this.#textures[SOKOBAN_PLAYER_TEXTURES.back],
+      side: this.#textures[SOKOBAN_PLAYER_TEXTURES.side],
+    }
+    const player = new SokobanPlayerView(TILE_SIZE, textures)
+    const transform = getBoardTileVisualTransform({position, anchorY: 1, tileSize: TILE_SIZE, rotation: this.rotation})
+    player.position.copyFrom(transform.position)
+    player.zIndex = this.#getRoleDepth('player', position.y)
+    player.setBoardRotation(this.rotation)
+    return player
   }
 
   // Создаёт данные или представление для операции `createVoidCell`.

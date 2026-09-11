@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import {test} from 'node:test'
 import {getBoardTileVisualTransform} from '@/game/sokoban/rendering/getBoardTileVisualTransform.js'
+import {getPlayerVisual, getScreenDirection} from '@/game/sokoban/rendering/SokobanPlayerView.js'
 
 // Проверяет совпадение компенсации поворота редактора и игровой доски.
 
@@ -39,4 +40,18 @@ test('Центрированный ящик остаётся в центре к�
   })
 
   assert.deepEqual(transform.position, {x: 450, y: 350})
+})
+
+test('Игрок после поворота доски смотрит в прежнем направлении уровня', () => {
+  const screenDirection = getScreenDirection('down', true)
+
+  assert.equal(screenDirection, 'left')
+  assert.deepEqual(getPlayerVisual(screenDirection), {texture: 'side', mirrored: true})
+})
+
+test('Ракурсы игрока соответствуют всем направлениям без поворота', () => {
+  assert.deepEqual(getPlayerVisual('up'), {texture: 'back', mirrored: false})
+  assert.deepEqual(getPlayerVisual('down'), {texture: 'front', mirrored: false})
+  assert.deepEqual(getPlayerVisual('right'), {texture: 'side', mirrored: false})
+  assert.deepEqual(getPlayerVisual('left'), {texture: 'side', mirrored: true})
 })

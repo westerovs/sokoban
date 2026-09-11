@@ -32,13 +32,18 @@ const SOKOBAN_TEXTURES = Object.freeze({
   wall: 'wall-default', // Текстура стены по умолчанию
   target: 'target-default', // Текстура цели
   box: 'box-default', // Текстура ящика по умолчанию
-  player: 'tile-player', // Текстура игрока
+} as const)
+
+const SOKOBAN_PLAYER_TEXTURES = Object.freeze({
+  front: 'tile-player-front', // Текстура игрока лицом к экрану
+  back: 'tile-player-back', // Текстура игрока спиной к экрану
+  side: 'tile-player-side', // Текстура игрока в профиль вправо
 } as const)
 
 type SokobanDirectionName = keyof typeof SOKOBAN_DIRECTIONS
 type SokobanDirection = (typeof SOKOBAN_DIRECTIONS)[SokobanDirectionName]
 type SokobanSymbol = (typeof SOKOBAN_SYMBOLS)[keyof typeof SOKOBAN_SYMBOLS]
 
-export {ROTATED_DIRECTIONS, SOKOBAN_DIRECTIONS, SOKOBAN_SYMBOLS, SOKOBAN_TEXTURES}
+export {ROTATED_DIRECTIONS, SOKOBAN_DIRECTIONS, SOKOBAN_PLAYER_TEXTURES, SOKOBAN_SYMBOLS, SOKOBAN_TEXTURES}
 
 export type {SokobanDirection, SokobanDirectionName, SokobanSymbol}

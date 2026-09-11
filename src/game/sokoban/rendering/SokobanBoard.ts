@@ -13,6 +13,7 @@ import SokobanLevel from '../gameplay/SokobanLevel.js'
 import {applyTileVisualScale} from './applyTileVisualScale.js'
 import {getBoardTileVisualTransform} from './getBoardTileVisualTransform.js'
 import SokobanBoxView from './SokobanBoxView.js'
+import SokobanPlayerView from './SokobanPlayerView.js'
 
 /**
  * Отображает карту, игрока, ящики и анимации игровой доски Sokoban.
@@ -25,7 +26,7 @@ const BOARD_Z_INDEX = {
   playerRowOffset: 1, // Смещение игрока поверх стены текущего ряда
 }
 
-type TileTextureType = Exclude<keyof typeof SOKOBAN_TEXTURES, 'player'>
+type TileTextureType = keyof typeof SOKOBAN_TEXTURES
 type TileVisualType = TileTextureType | 'decor'
 type MovementOptions = {isContinuous?: boolean}
 type TileView = {position: SokobanPosition; sprite: Sprite; offset?: SokobanPosition}
@@ -39,7 +40,7 @@ export default class SokobanBoard extends Container {
   #boxesContainer!: Container
   #boxViews = new Map<string, SokobanBoxView>()
   #tileViews: TileView[] = []
-  #player!: Sprite
+  #player!: SokobanPlayerView
   #movementTimeline: gsap.core.Timeline | null = null
   #deadlockedBoxView: SokobanBoxView | null = null
   #isRotated = false
@@ -75,8 +76,9 @@ export default class SokobanBoard extends Container {
   }
 
   // Анимирует перемещение игрока и при необходимости ящика.
-  animateMove(moveResult: SokobanMoveResult, {isContinuous = false}: MovementOptions = {}) {
+  animateMove(moveResult: SokobanMoveResult, direction: SokobanDirectionName, {isContinuous = false}: MovementOptions = {}) {
     return new Promise<void>((resolve) => {
+      this.#player.setDirection(direction)
       this.#updatePlayerDepth()
       this.#movementTimeline = this.#createMovementTimeline(moveResult, isContinuous, resolve)
     })
@@ -92,7 +94,7 @@ export default class SokobanBoard extends Container {
     this.rotation = shouldRotate ? Math.PI / 2 : 0
     this.#updateTileOrientations()
     this.#updateBoxOrientations()
-    this.#updatePlayerRotation()
+    this.#player.setBoardRotation(this.rotation)
     this.#updatePlayer()
     this.scale.set(boardScale)
     this.position.set(WORLD.HALF_W, this.#getBoardCenterY())
@@ -149,11 +151,6 @@ export default class SokobanBoard extends Container {
     const isTallBoardOnLandscape = this.#level.height > this.#level.width && WORLD.isLandscape
     const isWideBoardOnPortrait = this.#level.width > this.#level.height && WORLD.isPortrait
     return isTallBoardOnLandscape || isWideBoardOnPortrait
-  }
-
-  // Компенсирует поворот доски, чтобы игрок всегда оставался вертикальным.
-  #updatePlayerRotation() {
-    this.#player.rotation = -this.rotation
   }
 
   // Возвращает отображаемые размеры с учётом поворота доски.
@@ -277,13 +274,7 @@ export default class SokobanBoard extends Container {
 
   // Создаёт и размещает спрайт игрока.
   #createPlayer() {
-    const player = GameUtils.createSprite(SOKOBAN_TEXTURES.player, {
-      label: 'sokoban-player',
-      anchorY: 1,
-    })
-
-    applyTileVisualScale(player, this.#tileSize)
-    return player
+    return new SokobanPlayerView(this.#tileSize)
   }
 
   // Создаёт таймлайн одного игрового перемещения.
@@ -321,7 +312,7 @@ export default class SokobanBoard extends Container {
   #getPlayerPixelPosition() {
     return getBoardTileVisualTransform({
       position: this.#level.playerPosition,
-      anchorY: this.#player.anchor.y,
+      anchorY: 1,
       tileSize: this.#tileSize,
       rotation: this.rotation,
     }).position
