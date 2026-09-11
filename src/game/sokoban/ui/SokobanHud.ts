@@ -6,14 +6,13 @@ import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
 import SokobanHudButton from './SokobanHudButton.js'
 
 /**
- * Отображает панель шагов, рекорда и действий уровня Sokoban.
+ * Отображает панель шагов, толчков и действий уровня Sokoban.
  */
 
 export default class SokobanHud extends Container {
   updateAdaptive = true
   _customPosition = {x: 0, y: 0}
   #levelNumber: number
-  #benchmarkPushes?: number
   #onUndo: () => void
   #onRestart: () => void
   #stepsText!: Text
@@ -23,7 +22,6 @@ export default class SokobanHud extends Container {
   #pushesIcon!: Sprite
   #pushesView!: Container
   #levelText!: Text
-  #recordText!: Text
   #panel!: Graphics
   #backButton!: SokobanHudButton
   #restartButton!: SokobanHudButton
@@ -31,21 +29,10 @@ export default class SokobanHud extends Container {
   #steps = 0
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({
-    levelNumber,
-    benchmarkPushes,
-    onUndo,
-    onRestart,
-  }: {
-    levelNumber: number
-    benchmarkPushes?: number
-    onUndo: () => void
-    onRestart: () => void
-  }) {
+  constructor({levelNumber, onUndo, onRestart}: {levelNumber: number; onUndo: () => void; onRestart: () => void}) {
     super({label: 'sokoban-hud'})
 
     this.#levelNumber = levelNumber
-    this.#benchmarkPushes = benchmarkPushes
     this.#onUndo = onUndo
     this.#onRestart = onRestart
     this.#init()
@@ -112,11 +99,10 @@ export default class SokobanHud extends Container {
     this.#stepsView = this.#createStepsView()
     this.#pushesView = this.#createPushesView()
     this.#levelText = this.#createLevelText()
-    this.#recordText = this.#createRecordText()
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
-    this.addChild(this.#panel, this.#stepsView, this.#pushesView, this.#backButton, this.#levelText, this.#recordText, this.#restartButton)
+    this.addChild(this.#panel, this.#stepsView, this.#pushesView, this.#backButton, this.#levelText, this.#restartButton)
     this.setCounts({steps: 0, pushes: 0})
   }
 
@@ -163,19 +149,6 @@ export default class SokobanHud extends Container {
     return levelText
   }
 
-  // Создаёт подпись рекорда по толчкам.
-  #createRecordText() {
-    const recordText = new Text({
-      label: 'sokoban-record-text',
-      text: Number.isInteger(this.#benchmarkPushes) ? i18next.t('sokoban.benchmarkPushes', {pushes: this.#benchmarkPushes}) : '',
-      style: this.#createTextStyle(1),
-      visible: Number.isInteger(this.#benchmarkPushes),
-    })
-
-    recordText.anchor.set(0.5)
-    return recordText
-  }
-
   // Перерисовывает фон и рамку панели HUD.
   #drawPanel(width: number, height: number) {
     const settings = SOKOBAN_HUD_SETTINGS
@@ -196,7 +169,7 @@ export default class SokobanHud extends Container {
     this.#stepsText.style.fontSize = height * settings.stepsFontSizeRatio
     this.#pushesText.x = height * settings.stepsGapRatio
     this.#pushesText.style.fontSize = height * settings.stepsFontSizeRatio
-    this.#layoutCenterTexts(height)
+    this.#layoutLevelText(height)
     this.#setCounterIconSize(this.#stepsIcon, height * settings.stepsIconSizeRatio)
     this.#setCounterIconSize(this.#pushesIcon, height * settings.pushesIconSizeRatio)
     this.#backButton.setLayoutSize(buttonSize, height * settings.buttonIconSizeRatio)
@@ -204,15 +177,10 @@ export default class SokobanHud extends Container {
     this.#positionContent(width)
   }
 
-  // Размещает подписи уровня и рекорда по центру HUD.
-  #layoutCenterTexts(height: number) {
-    const settings = SOKOBAN_HUD_SETTINGS
-    const hasRecord = this.#recordText.visible
-
-    this.#levelText.style.fontSize = height * settings.levelFontSizeRatio
-    this.#levelText.y = hasRecord ? -height * settings.levelWithRecordOffsetRatio : 0
-    this.#recordText.style.fontSize = height * settings.recordFontSizeRatio
-    this.#recordText.y = height * settings.recordOffsetRatio
+  // Размещает номер уровня по центру HUD.
+  #layoutLevelText(height: number) {
+    this.#levelText.style.fontSize = height * SOKOBAN_HUD_SETTINGS.levelFontSizeRatio
+    this.#levelText.y = 0
   }
 
   // Выравнивает крайние элементы и блок шагов внутри HUD.
@@ -222,7 +190,6 @@ export default class SokobanHud extends Container {
     this.#positionStepsAfterBack()
     this.#positionPushesAfterSteps()
     this.#levelText.x = 0
-    this.#recordText.x = 0
   }
 
   // Выравнивает элемент по левому краю панели.

@@ -44,9 +44,6 @@ const SOKOBAN_HUD_SETTINGS = Object.freeze({
   stepsGapRatio: 0.5, // Расстояние от иконки шагов до счётчика относительно высоты HUD
   stepsFontSizeRatio: 0.35, // Размер счётчика шагов относительно высоты HUD
   levelFontSizeRatio: 0.32, // Размер названия уровня относительно высоты HUD
-  recordFontSizeRatio: 0.23, // Размер текста рекорда относительно высоты HUD
-  levelWithRecordOffsetRatio: 0.16, // Смещение номера уровня вверх при показе рекорда
-  recordOffsetRatio: 0.18, // Смещение текста рекорда вниз от центра HUD
   textColor: 0x172b38, // Цвет текста HUD
   disabledAlpha: 0.55, // Прозрачность недоступной кнопки
 })

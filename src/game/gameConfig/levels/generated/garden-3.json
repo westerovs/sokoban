@@ -10,8 +10,7 @@
       "id": "sokoban-030",
       "levelName": "level53",
       "difficulty": "easy",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 513, "pushes": 186, "bestPushes": 174, "timeSeconds": 1},
-      "benchmarkPushes": 174,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 513, "pushes": 186, "timeSeconds": 1},
       "map": [
         "#############______",
         "#           #______",
@@ -31,8 +30,7 @@
       "id": "sokoban-031",
       "levelName": "level54",
       "difficulty": "easy",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 526, "pushes": 158, "bestPushes": 122, "timeSeconds": 3},
-      "benchmarkPushes": 122,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 526, "pushes": 158, "timeSeconds": 3},
       "map": [
         "___########______",
         "___#   #  #______",
@@ -56,8 +54,7 @@
       "id": "sokoban-062",
       "levelName": "level55",
       "difficulty": "medium",
-      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 862, "pushes": 318, "bestPushes": 302, "timeSeconds": 1},
-      "benchmarkPushes": 302,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 862, "pushes": 318, "timeSeconds": 1},
       "map": [
         "__######___________",
         "__#   @####________",
@@ -81,16 +78,7 @@
       "id": "sokoban-063",
       "levelName": "level56",
       "difficulty": "medium",
-      "solver": {
-        "verified": true,
-        "name": "Takaken",
-        "version": "7.3.1",
-        "moves": 1126,
-        "pushes": 249,
-        "bestPushes": 239,
-        "timeSeconds": 4
-      },
-      "benchmarkPushes": 239,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1126, "pushes": 249, "timeSeconds": 4},
       "map": [
         "_______#######____",
         "_#######     #____",
@@ -114,16 +102,7 @@
       "id": "sokoban-085",
       "levelName": "level57",
       "difficulty": "hard",
-      "solver": {
-        "verified": true,
-        "name": "Takaken",
-        "version": "7.3.1",
-        "moves": 1488,
-        "pushes": 461,
-        "bestPushes": 431,
-        "timeSeconds": 0
-      },
-      "benchmarkPushes": 431,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1488, "pushes": 461, "timeSeconds": 0},
       "map": [
         "####################",
         "#....#       #  #  #",
@@ -143,16 +122,7 @@
       "id": "sokoban-096",
       "levelName": "level58",
       "difficulty": "veryHard",
-      "solver": {
-        "verified": true,
-        "name": "Takaken",
-        "version": "7.3.1",
-        "moves": 1611,
-        "pushes": 521,
-        "bestPushes": 521,
-        "timeSeconds": 7
-      },
-      "benchmarkPushes": 521,
+      "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1611, "pushes": 521, "timeSeconds": 7},
       "map": [
         "____________#####__",
         "#####__######   #__",

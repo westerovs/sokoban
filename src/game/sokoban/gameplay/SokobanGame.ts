@@ -19,7 +19,6 @@ type SokobanGameOptions = {
   map: string[]
   appearance?: LevelAppearance
   levelNumber: number
-  benchmarkPushes?: number
   onComplete?: () => void
   onMove?: () => void
   canMove?: () => boolean
@@ -29,7 +28,6 @@ export default class SokobanGame extends Container {
   #map: string[]
   #appearance: LevelAppearance
   #levelNumber: number
-  #benchmarkPushes?: number
   #onComplete?: () => void
   #onMove?: () => void
   #canMove?: () => boolean
@@ -44,13 +42,12 @@ export default class SokobanGame extends Container {
   #heldDirection: SokobanDirectionName | null = null
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({map, appearance = {}, levelNumber, benchmarkPushes, onComplete, onMove, canMove}: SokobanGameOptions) {
+  constructor({map, appearance = {}, levelNumber, onComplete, onMove, canMove}: SokobanGameOptions) {
     super({label: 'sokoban-game'})
 
     this.#map = map
     this.#appearance = appearance
     this.#levelNumber = levelNumber
-    this.#benchmarkPushes = benchmarkPushes
     this.#onComplete = onComplete
     this.#onMove = onMove
     this.#canMove = canMove
@@ -141,7 +138,6 @@ export default class SokobanGame extends Container {
     this.#board = new SokobanBoard(this.#level, this.#appearance)
     this.#hud = new SokobanHud({
       levelNumber: this.#levelNumber,
-      benchmarkPushes: this.#benchmarkPushes,
       onUndo: () => this.undo(),
       onRestart: () => this.restart(),
     })

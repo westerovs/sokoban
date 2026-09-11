@@ -7,17 +7,15 @@ import {primaryFontStyle} from '@/game/styles.js'
 type CompleteLevelStats = {
   actualPushes: number | null
   personalBestPushes: number | null
-  benchmarkPushes: number | null
 }
 
 const PANEL_WIDTH = 520 // Ширина панели результатов
-const PANEL_HEIGHT = 190 // Высота панели результатов
+const PANEL_HEIGHT = 140 // Высота панели результатов
 const ROW_GAP = 52 // Расстояние между строками результатов
 
 export default class CompleteLevelStatsView extends Container {
   #actualPushesText!: Text
   #personalBestText!: Text
-  #benchmarkPushesText!: Text
 
   // Создаёт панель результатов прохождения.
   constructor() {
@@ -26,14 +24,13 @@ export default class CompleteLevelStatsView extends Container {
     this.#init()
   }
 
-  // Обновляет фактический результат, личный рекорд и эталон.
-  setData({actualPushes, personalBestPushes, benchmarkPushes}: CompleteLevelStats) {
+  // Обновляет фактический результат и личный рекорд.
+  setData({actualPushes, personalBestPushes}: CompleteLevelStats) {
     this.#actualPushesText.text = i18next.t('sokoban.pushes', {pushes: this.#formatValue(actualPushes)})
     this.#personalBestText.text = i18next.t('sokoban.personalBestPushes', {pushes: this.#formatValue(personalBestPushes)})
-    this.#benchmarkPushesText.text = i18next.t('sokoban.benchmarkPushes', {pushes: this.#formatValue(benchmarkPushes)})
   }
 
-  // Создаёт фон и три строки результатов.
+  // Создаёт фон и две строки результатов.
   #init() {
     const background = new Graphics({label: 'complete-level-stats-background'})
     background
@@ -41,10 +38,9 @@ export default class CompleteLevelStatsView extends Container {
       .fill({color: 0x132319, alpha: 0.92})
       .stroke({color: 0xa98c48, width: 5})
 
-    this.#actualPushesText = this.#createRow('complete-level-actual-pushes', -ROW_GAP)
-    this.#personalBestText = this.#createRow('complete-level-personal-best', 0)
-    this.#benchmarkPushesText = this.#createRow('complete-level-benchmark-pushes', ROW_GAP)
-    this.addChild(background, this.#actualPushesText, this.#personalBestText, this.#benchmarkPushesText)
+    this.#actualPushesText = this.#createRow('complete-level-actual-pushes', -ROW_GAP / 2)
+    this.#personalBestText = this.#createRow('complete-level-personal-best', ROW_GAP / 2)
+    this.addChild(background, this.#actualPushesText, this.#personalBestText)
   }
 
   // Создаёт одну текстовую строку результатов.
@@ -61,7 +57,7 @@ export default class CompleteLevelStatsView extends Container {
 
   // Преобразует неизвестное значение в отображаемый прочерк.
   #formatValue(value: number | null) {
-    return Number.isInteger(value) ? String(value) : '—'
+    return Number.isInteger(value) ? String(value) : '-'
   }
 }
 

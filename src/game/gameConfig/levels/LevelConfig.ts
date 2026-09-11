@@ -70,7 +70,6 @@ export default class LevelConfig {
       ...result,
       actualPushes: Number.isInteger(actualPushes) ? actualPushes! : null,
       personalBestPushes,
-      benchmarkPushes: this.#config!.benchmarkPushes ?? null,
     }
   }
 

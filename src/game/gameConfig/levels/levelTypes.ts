@@ -10,7 +10,6 @@ type LevelSolver = {
   version: string
   moves: number
   pushes: number
-  bestPushes: number
   timeSeconds: number
 }
 
@@ -18,7 +17,6 @@ type LevelDefinition = {
   id: string
   levelName: string
   difficulty: LevelDifficulty
-  benchmarkPushes?: number
   isRemote?: boolean
   appearance?: LevelAppearance
   solver?: LevelSolver
