@@ -69,6 +69,7 @@ const elements = {
   palette: getElement<HTMLElement>('#palette'),
   redoButton: getElement<HTMLButtonElement>('#redo-button'),
   resetButton: getElement<HTMLButtonElement>('#reset-button'),
+  rotateBoardButton: getElement<HTMLButtonElement>('#rotate-board-button'),
   saveButton: getElement<HTMLButtonElement>('#save-button'),
   saveAsButton: getElement<HTMLButtonElement>('#save-as-button'),
   shortcutsButton: getElement<HTMLButtonElement>('#shortcuts-button'),
@@ -123,6 +124,11 @@ const isFillBrush = (brush: EditorBrush | null): brush is EditorBrush => {
 const updateFillButton = () => {
   elements.fillButton.disabled = !session || elements.manualToolsPanel.hidden || !isFillBrush(selectedBrush)
   elements.fillLocationButton.disabled = elements.fillButton.disabled || Boolean(selectedLevel?.libraryPath)
+}
+
+// Синхронизирует доступность кнопки визуального поворота с открытым уровнем.
+const updateRotateBoardButton = () => {
+  elements.rotateBoardButton.disabled = !session
 }
 
 // Обновляет размер текущего уровня в клетках для ручного режима.
@@ -191,6 +197,7 @@ const bindLocationFill = () => {
 const renderSession = () => {
   decorOffsetPanel?.sync(session?.state ?? null)
   updateSaveButtons()
+  updateRotateBoardButton()
   if (!session || !selectedLevel) {
     updateFillButton()
     updateLevelDimensions()
@@ -498,6 +505,11 @@ const redo = () => {
   if (session?.redo()) renderSession()
 }
 
+// Переключает поворот представления и отражает состояние на кнопке.
+const rotateBoard = () => {
+  elements.rotateBoardButton.ariaPressed = String(board.toggleRotation())
+}
+
 // Отменяет все действия, выполненные после открытия или сохранения уровня.
 const resetAllChanges = () => {
   if (!session?.reset()) return
@@ -606,6 +618,7 @@ const bindActions = () => {
   elements.resetButton.addEventListener('click', resetAllChanges)
   elements.undoButton.addEventListener('click', undo)
   elements.redoButton.addEventListener('click', redo)
+  elements.rotateBoardButton.addEventListener('click', rotateBoard)
   window.addEventListener('keydown', handleKeyboard)
   window.addEventListener('beforeunload', (event) => {
     if (!session?.isDirty) return

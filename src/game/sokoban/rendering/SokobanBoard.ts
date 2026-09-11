@@ -11,6 +11,7 @@ import {SOKOBAN_SETTINGS} from '../config/settings.js'
 import type {PushedBox, SokobanMoveResult, SokobanPosition} from '../gameplay/SokobanLevel.js'
 import SokobanLevel from '../gameplay/SokobanLevel.js'
 import {applyTileVisualScale} from './applyTileVisualScale.js'
+import {getBoardTileVisualTransform} from './getBoardTileVisualTransform.js'
 import SokobanBoxView from './SokobanBoxView.js'
 
 /**
@@ -318,17 +319,12 @@ export default class SokobanBoard extends Container {
 
   // Возвращает экранную позицию игрока.
   #getPlayerPixelPosition() {
-    return this.#getAnchoredVisualPosition(this.#level.playerPosition, this.#player.anchor.y)
-  }
-
-  // Возвращает позицию визуала с сохранением экранной стороны его якоря.
-  #getAnchoredVisualPosition(position: SokobanPosition, anchorY: number) {
-    const xOffset = this.#isRotated ? anchorY : 0.5
-    const yOffset = this.#isRotated ? 0.5 : anchorY
-    return {
-      x: (position.x + xOffset) * this.#tileSize,
-      y: (position.y + yOffset) * this.#tileSize,
-    }
+    return getBoardTileVisualTransform({
+      position: this.#level.playerPosition,
+      anchorY: this.#player.anchor.y,
+      tileSize: this.#tileSize,
+      rotation: this.rotation,
+    }).position
   }
 
   // Возвращает экранную позицию ящика.
@@ -342,11 +338,15 @@ export default class SokobanBoard extends Container {
   // Сохраняет исходную ориентацию всех тайлов доски.
   #updateTileOrientations() {
     this.#tileViews.forEach(({position, sprite, offset}) => {
-      const {x, y} = this.#getAnchoredVisualPosition(position, sprite.anchor.y)
-      sprite.rotation = -this.rotation
-      const cos = Math.cos(this.rotation)
-      const sin = Math.sin(this.rotation)
-      sprite.position.set(x + (offset?.x ?? 0) * cos + (offset?.y ?? 0) * sin, y - (offset?.x ?? 0) * sin + (offset?.y ?? 0) * cos)
+      const transform = getBoardTileVisualTransform({
+        position,
+        anchorY: sprite.anchor.y,
+        tileSize: this.#tileSize,
+        rotation: this.rotation,
+        offset,
+      })
+      sprite.position.copyFrom(transform.position)
+      sprite.rotation = transform.rotation
     })
   }
 

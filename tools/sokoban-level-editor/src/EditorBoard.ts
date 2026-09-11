@@ -1,6 +1,7 @@
 import {Container, Graphics, Rectangle, Sprite, type Texture} from 'pixi.js'
 import {SOKOBAN_TEXTURES} from '@/game/sokoban/config/config.js'
 import {applyTileVisualScale} from '@/game/sokoban/rendering/applyTileVisualScale.js'
+import {getBoardTileVisualTransform} from '@/game/sokoban/rendering/getBoardTileVisualTransform.js'
 import {getContentBounds} from './editorGrid.js'
 import type {Bounds, EditorBrush, EditorLevel, LevelAppearance, Position} from './editorTypes.js'
 
@@ -22,6 +23,7 @@ export default class EditorBoard extends Container {
   #brush: EditorBrush | null = null
   #defaults: Record<string, string>
   #invalidPositions: Position[] = []
+  #isRotated = false
   #paintingBrush: EditorBrush | null = null
   #lastPaintedPosition: string | null = null
   #level: EditorLevel | null = null
@@ -39,6 +41,16 @@ export default class EditorBoard extends Container {
     if (position?.x === this.#selectedDecor?.x && position?.y === this.#selectedDecor?.y) return
     this.#selectedDecor = position
     this.#render()
+  }
+
+  // Переключает визуальный поворот доски на 90 градусов без изменения данных уровня.
+  toggleRotation() {
+    this.#stopPainting()
+    this.#isRotated = !this.#isRotated
+    this.rotation = this.#isRotated ? Math.PI / 2 : 0
+    this.#render()
+    this.#centerBoard()
+    return this.#isRotated
   }
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
@@ -116,14 +128,20 @@ export default class EditorBoard extends Container {
     this.on('pointercancel', this.#stopPainting)
   }
 
+  // Возвращает размеры прямоугольника после применения текущего поворота.
+  #getDisplayedSize(width: number, height: number) {
+    return this.#isRotated ? {width: height, height: width} : {width, height}
+  }
+
   // Возвращает масштаб, при котором всё поле помещается в рабочую область.
   #getFitScale() {
     const level = this.#level
     if (!level) return 1
     const boardWidth = level.map[0].length * TILE_SIZE
     const boardHeight = level.map.length * TILE_SIZE
-    const widthScale = (this.#viewportWidth - BOARD_PADDING * 2) / boardWidth
-    const heightScale = (this.#viewportHeight - BOARD_PADDING * 2) / boardHeight
+    const displayedSize = this.#getDisplayedSize(boardWidth, boardHeight)
+    const widthScale = (this.#viewportWidth - BOARD_PADDING * 2) / displayedSize.width
+    const heightScale = (this.#viewportHeight - BOARD_PADDING * 2) / displayedSize.height
     return Math.max(Math.min(widthScale, heightScale, 1.35), 0.1)
   }
 
@@ -135,7 +153,8 @@ export default class EditorBoard extends Container {
     const boardHeight = level.map.length * TILE_SIZE
     const scale = this.#getFitScale() * this.#zoom
     this.scale.set(scale)
-    this.position.set((this.#viewportWidth - boardWidth * scale) / 2, (this.#viewportHeight - boardHeight * scale) / 2)
+    this.pivot.set(boardWidth / 2, boardHeight / 2)
+    this.position.set(this.#viewportWidth / 2, this.#viewportHeight / 2)
   }
 
   // Вписывает непустую часть уровня с вертикальным запасом в одну клетку.
@@ -146,7 +165,11 @@ export default class EditorBoard extends Container {
     const fitScale = this.#getFitScale()
     const contentWidth = (bounds.maxX - bounds.minX + 1) * TILE_SIZE
     const contentHeight = (bounds.maxY - bounds.minY + 1) * TILE_SIZE
-    const contentScale = Math.min((this.#viewportWidth - BOARD_PADDING * 2) / contentWidth, this.#viewportHeight / contentHeight)
+    const displayedSize = this.#getDisplayedSize(contentWidth, contentHeight)
+    const contentScale = Math.min(
+      (this.#viewportWidth - BOARD_PADDING * 2) / displayedSize.width,
+      this.#viewportHeight / displayedSize.height,
+    )
     this.#zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, contentScale / fitScale))
     this.#applyViewBounds(bounds, fitScale * this.#zoom)
   }
@@ -170,17 +193,18 @@ export default class EditorBoard extends Container {
     const centerX = ((bounds.minX + bounds.maxX + 1) * TILE_SIZE) / 2
     const centerY = ((bounds.minY + bounds.maxY + 1) * TILE_SIZE) / 2
     this.scale.set(scale)
-    this.position.set(this.#viewportWidth / 2 - centerX * scale, this.#viewportHeight / 2 - centerY * scale)
+    this.pivot.set(centerX, centerY)
+    this.position.set(this.#viewportWidth / 2, this.#viewportHeight / 2)
   }
 
   // Сохраняет выбранную точку поля под курсором во время увеличения.
   #applyZoomAtPoint(nextZoom: number, point: Position) {
-    const localX = (point.x - this.x) / this.scale.x
-    const localY = (point.y - this.y) / this.scale.y
+    const localPoint = this.toLocal(point)
     const scale = this.#getFitScale() * nextZoom
     this.#zoom = nextZoom
     this.scale.set(scale)
-    this.position.set(point.x - localX * scale, point.y - localY * scale)
+    const transformedPoint = this.toGlobal(localPoint)
+    this.position.set(this.x + point.x - transformedPoint.x, this.y + point.y - transformedPoint.y)
   }
 
   // Выполняет отдельную операцию `render`.
@@ -245,10 +269,10 @@ export default class EditorBoard extends Container {
     const sprite = new Sprite({label: `editor-${role}-${position.x}-${position.y}`, texture})
     const anchorY = role === 'wall' || role === 'box' ? 0.5 : 1
     sprite.anchor.set(0.5, anchorY)
-    sprite.position.set((position.x + 0.5) * TILE_SIZE, (position.y + anchorY) * TILE_SIZE)
     const offset = role === 'decor' ? this.#appearance.decorOffsets?.[`${position.x}:${position.y}`] : undefined
-    sprite.x += offset?.x ?? 0
-    sprite.y += offset?.y ?? 0
+    const transform = getBoardTileVisualTransform({position, anchorY, tileSize: TILE_SIZE, rotation: this.rotation, offset})
+    sprite.position.copyFrom(transform.position)
+    sprite.rotation = transform.rotation
     sprite.zIndex = this.#getRoleDepth(role, position.y)
     applyTileVisualScale(sprite, TILE_SIZE)
     if (role === 'decor') this.#decorSprites.set(sprite, position)
@@ -298,22 +322,39 @@ export default class EditorBoard extends Container {
         this.#drawSelectedDecorFrame(overlay, child)
         continue
       }
-      overlay
-        .rect(child.x - child.width * child.anchor.x, child.y - child.height * child.anchor.y, child.width, child.height)
-        .stroke({color: 0xbedf70, width: 3})
+      this.#drawDecorFrame(overlay, child)
     }
     return overlay
   }
 
+  // Обводит повернутые границы доступного для выбора декора.
+  #drawDecorFrame(overlay: Graphics, sprite: Sprite) {
+    const corners = this.#getSpriteCorners(sprite)
+    overlay.moveTo(corners[0].x, corners[0].y)
+    corners.slice(1).forEach(({x, y}) => overlay.lineTo(x, y))
+    overlay.closePath().stroke({color: 0xbedf70, width: 3, join: 'round'})
+  }
+
   // Обводит выбранный объект красной пунктирной рамкой с прозрачностью 50%.
   #drawSelectedDecorFrame(overlay: Graphics, sprite: Sprite) {
-    const x = sprite.x - sprite.width * sprite.anchor.x
-    const y = sprite.y - sprite.height * sprite.anchor.y
-    this.#drawDashedLine(overlay, {x, y}, {x: x + sprite.width, y})
-    this.#drawDashedLine(overlay, {x, y: y + sprite.height}, {x: x + sprite.width, y: y + sprite.height})
-    this.#drawDashedLine(overlay, {x, y}, {x, y: y + sprite.height})
-    this.#drawDashedLine(overlay, {x: x + sprite.width, y}, {x: x + sprite.width, y: y + sprite.height})
+    const corners = this.#getSpriteCorners(sprite)
+    corners.forEach((corner, index) => this.#drawDashedLine(overlay, corner, corners[(index + 1) % corners.length]))
     overlay.stroke({color: 0xff0000, width: 3, alpha: 0.5})
+  }
+
+  // Возвращает углы визуала в координатах сцены с учётом его поворота.
+  #getSpriteCorners(sprite: Sprite) {
+    const left = -sprite.width * sprite.anchor.x
+    const top = -sprite.height * sprite.anchor.y
+    const offsets = [
+      {x: left, y: top},
+      {x: left + sprite.width, y: top},
+      {x: left + sprite.width, y: top + sprite.height},
+      {x: left, y: top + sprite.height},
+    ]
+    const cos = Math.cos(sprite.rotation)
+    const sin = Math.sin(sprite.rotation)
+    return offsets.map(({x, y}) => ({x: sprite.x + x * cos - y * sin, y: sprite.y + x * sin + y * cos}))
   }
 
   // Добавляет отдельные штрихи вдоль стороны рамки.
@@ -354,12 +395,11 @@ export default class EditorBoard extends Container {
 
   // Находит верхний декор по видимым границам с учётом его индивидуального смещения.
   #getDecorPosition(event: any) {
-    const point = this.toLocal(event.global)
     const sprites = [...this.#decorSprites.entries()].sort(([first], [second]) => second.zIndex - first.zIndex)
     return sprites.find(([sprite]) => {
-      const left = sprite.x - sprite.width * sprite.anchor.x
-      const top = sprite.y - sprite.height * sprite.anchor.y
-      return point.x >= left && point.x <= left + sprite.width && point.y >= top && point.y <= top + sprite.height
+      const point = sprite.toLocal(event.global)
+      const bounds = sprite.getLocalBounds()
+      return point.x >= bounds.x && point.x <= bounds.x + bounds.width && point.y >= bounds.y && point.y <= bounds.y + bounds.height
     })?.[1]
   }
 
