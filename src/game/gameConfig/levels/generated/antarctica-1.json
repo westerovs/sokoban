@@ -7,7 +7,7 @@
   "music": "m_antarctica",
   "levels": [
     {
-      "id": "sokoban-018",
+      "id": "xSokoban-055",
       "levelName": "level21",
       "difficulty": "easy",
       "authorId": "XSokoban",
@@ -27,7 +27,7 @@
       ]
     },
     {
-      "id": "sokoban-019",
+      "id": "xSokoban-051",
       "levelName": "level22",
       "difficulty": "easy",
       "authorId": "XSokoban",
@@ -47,7 +47,7 @@
       ]
     },
     {
-      "id": "sokoban-020",
+      "id": "xSokoban-002",
       "levelName": "level23",
       "difficulty": "easy",
       "authorId": "XSokoban",
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "id": "sokoban-052",
+      "id": "xSokoban-048",
       "levelName": "level24",
       "difficulty": "medium",
       "authorId": "XSokoban",
@@ -89,7 +89,7 @@
       ]
     },
     {
-      "id": "sokoban-053",
+      "id": "xSokoban-058",
       "levelName": "level25",
       "difficulty": "medium",
       "authorId": "XSokoban",
@@ -109,7 +109,7 @@
       ]
     },
     {
-      "id": "sokoban-080",
+      "id": "xSokoban-040",
       "levelName": "level26",
       "difficulty": "hard",
       "authorId": "XSokoban",
@@ -133,7 +133,7 @@
       ]
     },
     {
-      "id": "sokoban-091",
+      "id": "xSokoban-053",
       "levelName": "level27",
       "difficulty": "veryHard",
       "authorId": "XSokoban",

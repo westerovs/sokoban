@@ -76,7 +76,7 @@
   "background": "harbor",
   "ambience": "amb_harbor",
   "music": "m_harbor",
-  "levelIds": ["sokoban-102", "sokoban-103"]
+  "levelIds": ["custom-012", "custom-013"]
 }
 ```
 

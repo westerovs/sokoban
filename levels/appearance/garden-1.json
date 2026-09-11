@@ -2,7 +2,7 @@
   "_description": "Оформление тайлов уровней локации garden-1.",
   "version": 1,
   "levels": {
-    "sokoban-004": {
+    "custom-004": {
       "ground": {"4:6": "ground-default"},
       "box": {"2:2": "box-pumpkin", "2:3": "box-pumpkin", "3:4": "box-pumpkin", "2:5": "box-pumpkin"},
       "wall": {
@@ -35,7 +35,7 @@
         "5:7": "wall-bush"
       }
     },
-    "sokoban-007": {
+    "custom-007": {
       "wall": {
         "3:0": "wall-bush",
         "4:0": "wall-bush",
@@ -102,7 +102,7 @@
       },
       "box": {"4:4": "box-pumpkin", "6:4": "box-pumpkin", "5:5": "box-pumpkin", "4:6": "box-pumpkin", "6:6": "box-pumpkin"}
     },
-    "sokoban-001": {
+    "custom-001": {
       "wall": {
         "3:0": "wall-bush",
         "4:0": "wall-bush",
@@ -140,7 +140,7 @@
       "decor": {"4:8": "decor-garden14"},
       "ground": {"4:8": "ground-default"}
     },
-    "sokoban-002": {
+    "custom-002": {
       "wall": {
         "0:0": "wall-bush",
         "1:0": "wall-bush",
@@ -179,7 +179,7 @@
       },
       "box": {"2:2": "box-pumpkin", "2:5": "box-pumpkin", "3:5": "box-pumpkin"}
     },
-    "sokoban-003": {
+    "custom-003": {
       "wall": {
         "0:0": "wall-bush",
         "1:0": "wall-bush",
@@ -223,7 +223,7 @@
       },
       "box": {"2:2": "box-pumpkin", "3:2": "box-pumpkin", "2:3": "box-pumpkin"}
     },
-    "sokoban-005": {
+    "custom-005": {
       "wall": {
         "1:0": "wall-bush",
         "2:0": "wall-bush",
@@ -264,7 +264,7 @@
       "box": {"2:2": "box-pumpkin", "4:3": "box-pumpkin", "7:3": "box-pumpkin", "6:4": "box-pumpkin"},
       "ground": {"8:4": "ground-default"}
     },
-    "sokoban-006": {
+    "custom-006": {
       "wall": {
         "1:0": "wall-bush",
         "2:0": "wall-bush",

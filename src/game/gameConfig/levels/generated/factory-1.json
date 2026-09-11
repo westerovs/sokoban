@@ -7,7 +7,7 @@
   "music": "m_garden",
   "levels": [
     {
-      "id": "sokoban-024",
+      "id": "xSokoban-082",
       "levelName": "level35",
       "difficulty": "easy",
       "authorId": "XSokoban",
@@ -28,7 +28,7 @@
       ]
     },
     {
-      "id": "sokoban-025",
+      "id": "xSokoban-077",
       "levelName": "level36",
       "difficulty": "easy",
       "authorId": "XSokoban",
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "id": "sokoban-056",
+      "id": "xSokoban-008",
       "levelName": "level37",
       "difficulty": "medium",
       "authorId": "XSokoban",
@@ -73,7 +73,7 @@
       ]
     },
     {
-      "id": "sokoban-057",
+      "id": "xSokoban-011",
       "levelName": "level38",
       "difficulty": "medium",
       "authorId": "XSokoban",
@@ -96,7 +96,7 @@
       ]
     },
     {
-      "id": "sokoban-082",
+      "id": "xSokoban-085",
       "levelName": "level39",
       "difficulty": "hard",
       "authorId": "XSokoban",
@@ -120,7 +120,7 @@
       ]
     },
     {
-      "id": "sokoban-093",
+      "id": "xSokoban-089",
       "levelName": "level40",
       "difficulty": "veryHard",
       "authorId": "XSokoban",

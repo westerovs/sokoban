@@ -2,7 +2,7 @@
   "_description": "Оформление тайлов уровней локации antarctica-1.",
   "version": 1,
   "levels": {
-    "sokoban-008": {
+    "custom-008": {
       "wall": {
         "3:0": "wall-bush-ice",
         "4:0": "wall-bush-ice",
@@ -76,7 +76,7 @@
         "7:6": "ground-ice"
       }
     },
-    "sokoban-009": {
+    "custom-009": {
       "wall": {
         "3:0": "wall-bush-ice",
         "4:0": "wall-bush-ice",
@@ -140,7 +140,7 @@
         "7:5": "ground-ice"
       }
     },
-    "sokoban-010": {
+    "custom-010": {
       "wall": {
         "6:0": "wall-bush-ice",
         "7:0": "wall-bush-ice",
@@ -297,7 +297,7 @@
         "7:11": "ground-ice"
       }
     },
-    "sokoban-011": {
+    "custom-011": {
       "wall": {
         "3:0": "wall-bush-ice",
         "4:0": "wall-bush-ice",
@@ -489,7 +489,7 @@
         "12:11": "ground-ice"
       }
     },
-    "sokoban-012": {
+    "xSokoban-001": {
       "wall": {
         "4:0": "wall-bush-ice",
         "5:0": "wall-bush-ice",
@@ -622,7 +622,7 @@
         "9:9": "ground-ice"
       }
     },
-    "sokoban-013": {
+    "xSokoban-006": {
       "wall": {
         "0:0": "wall-bush-ice",
         "1:0": "wall-bush-ice",
@@ -756,7 +756,7 @@
         "10:9": "ground-ice"
       }
     },
-    "sokoban-014": {
+    "xSokoban-038": {
       "wall": {
         "6:0": "wall-bush-ice",
         "7:0": "wall-bush-ice",

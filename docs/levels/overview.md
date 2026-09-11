@@ -7,10 +7,10 @@
 Исходные карты разделены по фиксированной сложности:
 
 ```text
-levels/library/custom/easy/sokoban-001.xsb
-levels/library/XSokoban/medium/sokoban-049.xsb
-levels/library/XSokoban/hard/sokoban-079.xsb
-levels/library/XSokoban/very-hard/sokoban-091.xsb
+levels/library/custom/easy/custom-001.xsb
+levels/library/XSokoban/medium/xSokoban-004.xsb
+levels/library/XSokoban/hard/xSokoban-022.xsb
+levels/library/XSokoban/very-hard/xSokoban-010.xsb
 ...
 ```
 
@@ -76,7 +76,7 @@ XSB — текстовый формат обмена уровнями Sokoban. �
 Пример уровня:
 
 ```text
-; id: sokoban-102
+; id: custom-012
 ######
 #    #
 # .$ #
@@ -176,6 +176,8 @@ XSB — текстовый формат обмена уровнями Sokoban. �
 
 `authorId` — стабильный идентификатор автора в camelCase и одновременно подпись для отладочного интерфейса. Список авторов в коде отсутствует: чтобы добавить источник, создайте новую группу и подпапки `easy`, `medium`, `hard`, `very-hard`. Изменённый импортированный уровень остаётся у исходного автора; в `custom` помещаются только карты, полностью созданные с нуля.
 
+Идентификаторы карт нумеруются независимо внутри каждого источника: `custom-001`, `custom-002` и `xSokoban-001`, `xSokoban-002`. Существующие ID не перенумеровываются после добавления или удаления карт; порядок показа задаётся только массивами `levelIds`.
+
 ## Рекомендуемый решатель: JSoko
 
 JSoko — бесплатная программа с графическим интерфейсом для Windows, macOS и Linux. Она открывает XSB-файлы, умеет решать одну карту, диапазон или всю коллекцию.
@@ -221,7 +223,7 @@ Takaken удобен для автоматического запуска из �
 Пример:
 
 ```powershell
-takaken74.exe -in "D:\path\to\levels\library\hard\sokoban-079.xsb" -out "D:\path\to\results.txt" -time 300 -level 1
+takaken74.exe -in "D:\path\to\levels\library\XSokoban\hard\xSokoban-022.xsb" -out "D:\path\to\results.txt" -time 300 -level 1
 ```
 
 Для первого знакомства проще JSoko: там видны карта, прогресс, найденные решения и уровни, завершившиеся по тайм-ауту.
