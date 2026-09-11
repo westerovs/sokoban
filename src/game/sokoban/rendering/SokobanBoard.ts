@@ -141,9 +141,13 @@ export default class SokobanBoard extends Container {
     this.resize()
   }
 
-  // Проверяет, требуется ли визуально повернуть высокую доску.
+  // Проверяет, требуется ли повернуть доску под ориентацию экрана.
   #shouldRotate() {
-    return SOKOBAN_SETTINGS.rotateTallBoardInLandscape && this.#level.height > this.#level.width && WORLD.isLandscape
+    if (!SOKOBAN_SETTINGS.adaptBoardOrientationToViewport) return false
+
+    const isTallBoardOnLandscape = this.#level.height > this.#level.width && WORLD.isLandscape
+    const isWideBoardOnPortrait = this.#level.width > this.#level.height && WORLD.isPortrait
+    return isTallBoardOnLandscape || isWideBoardOnPortrait
   }
 
   // Компенсирует поворот доски, чтобы игрок всегда оставался вертикальным.
@@ -165,16 +169,14 @@ export default class SokobanBoard extends Container {
     const visibleWidth = window.innerWidth / scaleFactor
     const horizontalPadding = this.#getHorizontalPadding(visibleWidth)
     const availableWidth = visibleWidth - horizontalPadding * 2
-    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.boardTopPadding - SOKOBAN_SETTINGS.boardBottomPadding
+    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.boardVerticalPadding * 2
 
     return Math.min(availableWidth / displayedWidth, availableHeight / displayedHeight)
   }
 
-  // Возвращает вертикальный центр доступной области доски.
+  // Возвращает вертикальный центр игрового мира.
   #getBoardCenterY() {
-    const availableHeight = WORLD.HEIGHT - SOKOBAN_SETTINGS.boardTopPadding - SOKOBAN_SETTINGS.boardBottomPadding
-
-    return SOKOBAN_SETTINGS.boardTopPadding + availableHeight / 2
+    return WORLD.HALF_H
   }
 
   // Вычисляет адаптивный горизонтальный отступ доски.

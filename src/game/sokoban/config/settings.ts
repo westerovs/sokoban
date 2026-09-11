@@ -15,9 +15,8 @@ const SOKOBAN_SETTINGS = Object.freeze({
   maxHorizontalPadding: 96, // Максимальный боковой отступ в координатах игрового мира
   horizontalPaddingRatio: 0.06, // Доля видимой ширины для бокового отступа
   maxHorizontalPaddingRatio: 0.1, // Предельная доля ширины для одного бокового отступа
-  boardTopPadding: 48, // Верхний отступ доски в координатах игрового мира
-  boardBottomPadding: 110, // Нижняя область, зарезервированная под компактный HUD
-  rotateTallBoardInLandscape: true, // Сохраняет исходную ориентацию структуры уровня
+  boardVerticalPadding: 48, // Симметричный отступ доски сверху и снизу в координатах игрового мира
+  adaptBoardOrientationToViewport: true, // true — поворачивает вытянутую доску под ориентацию экрана; false — сохраняет ориентацию уровня
 })
 
 const SOKOBAN_HUD_SETTINGS = Object.freeze({
