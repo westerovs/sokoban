@@ -10,6 +10,8 @@
       "id": "sokoban-024",
       "levelName": "level35",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 414, "pushes": 175, "timeSeconds": 0},
       "map": [
         "____######_______",
@@ -31,6 +33,8 @@
       "id": "sokoban-025",
       "levelName": "level36",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3", "moves": 421, "pushes": 174, "timeSeconds": 1},
       "map": [
         "######__#####_",
@@ -52,6 +56,8 @@
       "id": "sokoban-056",
       "levelName": "level37",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 820, "pushes": 268, "timeSeconds": 1},
       "map": [
         "__####__________",
@@ -76,6 +82,8 @@
       "id": "sokoban-057",
       "levelName": "level38",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 897, "pushes": 249, "timeSeconds": 4},
       "map": [
         "__________####_____",
@@ -99,6 +107,8 @@
       "id": "sokoban-082",
       "levelName": "level39",
       "difficulty": "hard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1727, "pushes": 357, "timeSeconds": 5},
       "map": [
         "############________",
@@ -123,6 +133,8 @@
       "id": "sokoban-093",
       "levelName": "level40",
       "difficulty": "veryHard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1461, "pushes": 415, "timeSeconds": 32},
       "map": [
         "_##################_",

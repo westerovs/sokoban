@@ -25,6 +25,8 @@ type AppearanceCatalog = {
 type EditorLevel = {
   id: string
   map: string[]
+  authorId: string
+  authorName: string
   number?: number
   isVerified?: boolean
 }

@@ -10,6 +10,8 @@
       "id": "sokoban-012",
       "levelName": "level7",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 255, "pushes": 97, "timeSeconds": 1},
       "map": [
         "____#####__________",
@@ -29,6 +31,8 @@
       "id": "sokoban-013",
       "levelName": "level8",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 326, "pushes": 110, "timeSeconds": 0},
       "map": [
         "######__###_",
@@ -48,6 +52,8 @@
       "id": "sokoban-014",
       "levelName": "level9",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 326, "pushes": 99, "timeSeconds": 1},
       "map": [
         "______####_",
@@ -67,12 +73,16 @@
       "id": "sokoban-008",
       "levelName": "level10",
       "difficulty": "medium",
+      "authorId": "livevil",
+      "authorName": "LIVEVIL",
       "map": ["___#######", "__##  # @#", "__#   #  #", "__#$ $ $ #", "__# $##  #", "### $ # ##", "#.....  #_", "#########_"]
     },
     {
       "id": "sokoban-049",
       "levelName": "level11",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 848, "pushes": 243, "timeSeconds": 1},
       "map": [
         "____#####_______",
@@ -94,7 +104,9 @@
     {
       "id": "sokoban-007",
       "levelName": "level12",
-      "difficulty": "hard",
+      "difficulty": "medium",
+      "authorId": "livevil",
+      "authorName": "LIVEVIL",
       "map": [
         "___#######___",
         "####     #___",
@@ -112,7 +124,9 @@
     {
       "id": "sokoban-010",
       "levelName": "level13",
-      "difficulty": "veryHard",
+      "difficulty": "medium",
+      "authorId": "livevil",
+      "authorName": "LIVEVIL",
       "map": [
         "______####____",
         "______#  #____",

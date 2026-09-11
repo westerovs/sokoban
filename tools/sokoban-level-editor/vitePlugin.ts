@@ -23,7 +23,6 @@ const SOLVER_API_PATH = '/__sokoban-level-editor/solve' // Путь API пров
 const LOCATION_FILL_API_PATH = '/__sokoban-level-editor/fill-location' // Путь API заливки всей локации
 const TILE_PATH_PATTERN = /^\/__sokoban-level-editor\/tile\/(wall|decor|ground|box|target)\/([^/]+)\.png$/ // Шаблон адреса исходного тайла
 const MAX_BODY_SIZE = 1024 * 1024 // Максимальный размер запроса редактора в байтах
-const LEVEL_DIFFICULTY_DIRECTORIES = ['easy', 'medium', 'hard', 'very-hard'] // Папки библиотеки уровней
 
 type EditorPaths = {
   projectRoot: string
@@ -74,6 +73,8 @@ const createEditorLocations = (catalog: any) => {
       id: level.id,
       number: index + 1,
       map: level.map,
+      authorId: level.authorId,
+      authorName: level.authorName,
       isVerified: Boolean(level.solver?.verified),
     })),
   }))
@@ -120,11 +121,17 @@ const findLocationForLevel = (paths: EditorPaths, levelId: string) => {
   return locations.find((location: any) => location.levelIds.includes(levelId)) ?? null
 }
 
-// Находит отдельный XSB-файл уровня в библиотеке сложности.
+// Ищет файл уровня во вложенных группах авторов и сложности.
 const findLevelSourcePath = (paths: EditorPaths, levelId: string) => {
-  return LEVEL_DIFFICULTY_DIRECTORIES.map((directory) => path.resolve(paths.levelLibraryDirectory, directory, `${levelId}.xsb`)).find(
-    (filePath) => fs.existsSync(filePath),
-  )
+  const pendingDirectories = [paths.levelLibraryDirectory]
+  while (pendingDirectories.length > 0) {
+    const directory = pendingDirectories.pop()!
+    const entries = fs.readdirSync(directory, {withFileTypes: true})
+    const match = entries.find((entry) => entry.isFile() && entry.name === `${levelId}.xsb`)
+    if (match) return path.resolve(directory, match.name)
+    entries.filter((entry) => entry.isDirectory()).forEach((entry) => pendingDirectories.push(path.resolve(directory, entry.name)))
+  }
+  return undefined
 }
 
 // Обновляет геометрию отдельного файла уровня.

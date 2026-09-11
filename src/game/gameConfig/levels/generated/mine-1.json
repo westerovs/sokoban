@@ -10,6 +10,8 @@
       "id": "sokoban-021",
       "levelName": "level28",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 410, "pushes": 143, "timeSeconds": 1},
       "map": [
         "________#####____",
@@ -31,6 +33,8 @@
       "id": "sokoban-022",
       "levelName": "level29",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 608, "pushes": 148, "timeSeconds": 0},
       "map": [
         "________#######____",
@@ -50,6 +54,8 @@
       "id": "sokoban-023",
       "levelName": "level30",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 560, "pushes": 140, "timeSeconds": 1},
       "map": [
         "################_",
@@ -68,6 +74,8 @@
       "id": "sokoban-054",
       "levelName": "level31",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 752, "pushes": 256, "timeSeconds": 1},
       "map": [
         "___#########_______",
@@ -89,6 +97,8 @@
       "id": "sokoban-055",
       "levelName": "level32",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 820, "pushes": 264, "timeSeconds": 1},
       "map": [
         "####################",
@@ -109,6 +119,8 @@
       "id": "sokoban-081",
       "levelName": "level33",
       "difficulty": "hard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1337, "pushes": 409, "timeSeconds": 1},
       "map": [
         "####################",
@@ -129,6 +141,8 @@
       "id": "sokoban-092",
       "levelName": "level34",
       "difficulty": "veryHard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1100, "pushes": 436, "timeSeconds": 48},
       "map": [
         "#############____",

@@ -1,5 +1,6 @@
 import {Application, Assets} from 'pixi.js'
 import {levels} from '@/game/gameConfig/levels/levels.js'
+import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {SOKOBAN_TILE_CATALOG} from '@/game/generatedAssets/sokobanTileCatalog.js'
 import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
 import {getLevelAppearance} from './appearanceState.js'
@@ -44,6 +45,7 @@ const elements = {
   generatorPanel: getElement<HTMLElement>('#generator-panel'),
   generatorTab: getElement<HTMLButtonElement>('#generator-tab'),
   launchButton: getElement<HTMLButtonElement>('#launch-button'),
+  levelAuthor: getElement<HTMLOutputElement>('#level-author'),
   levelDimensions: getElement<HTMLOutputElement>('#level-dimensions'),
   levelSelect: getElement<HTMLSelectElement>('#level-select'),
   locationSelect: getElement<HTMLSelectElement>('#location-select'),
@@ -59,6 +61,8 @@ const elements = {
   utilityPalette: getElement<HTMLElement>('#utility-palette'),
   validateButton: getElement<HTMLButtonElement>('#validate-button'),
 }
+
+const isDebug = window.localStorage.getItem(`${GAME_NAME}-isDebug`) === 'true' // Показывает служебные сведения об уровне
 
 let board: EditorBoard
 let editorData: EditorData
@@ -103,6 +107,14 @@ const updateLevelDimensions = () => {
   const isVisible = Boolean(map && !elements.manualToolsPanel.hidden)
   elements.levelDimensions.hidden = !isVisible
   elements.levelDimensions.textContent = map ? `${map[0].length} × ${map.length}` : ''
+}
+
+// Показывает автора текущего уровня рядом с размером карты только в отладочном режиме.
+const updateLevelAuthor = () => {
+  const isVisible = Boolean(isDebug && selectedLevel && !elements.manualToolsPanel.hidden)
+  elements.levelAuthor.hidden = !isVisible
+  elements.levelAuthor.textContent = selectedLevel ? `Автор: ${selectedLevel.authorName}` : ''
+  elements.levelAuthor.title = selectedLevel?.authorId ?? ''
 }
 
 // Показывает область перезаписи перед сохранением всей локации.
@@ -157,6 +169,7 @@ const renderSession = () => {
   if (!session || !selectedLevel) {
     updateFillButton()
     updateLevelDimensions()
+    updateLevelAuthor()
     return board.setState(null, {})
   }
   const validation = validateLevelMap(session.state.map)
@@ -169,6 +182,7 @@ const renderSession = () => {
   elements.saveButton.dataset.dirty = String(session.isDirty)
   updateFillButton()
   updateLevelDimensions()
+  updateLevelAuthor()
   generatorPanel?.setCurrentLevel(getExportState())
 }
 
@@ -229,7 +243,7 @@ const getStructuralAppearance = (appearance: LevelAppearance): LevelAppearance =
 // Создаёт полное состояние редактора из компактного результата генератора.
 const createGeneratedState = (result: any, preserveTopology: boolean) => {
   const appearance = preserveTopology ? getStructuralAppearance((getExportState() as EditorState).appearance) : {}
-  const level = {id: (selectedLevel as EditorLevel).id, map: result.map}
+  const level = {...(selectedLevel as EditorLevel), map: result.map}
   return expandEditorState(level, appearance, SOKOBAN_SETTINGS.maxBoardColumns, SOKOBAN_SETTINGS.maxBoardRows)
 }
 
@@ -275,6 +289,7 @@ const selectSidebarPanel = (mode: string) => {
   elements.generatorTab.ariaSelected = String(isGenerator)
   updateFillButton()
   updateLevelDimensions()
+  updateLevelAuthor()
 }
 
 // Проверяет текущую карту и показывает ошибки перед внешним действием.
@@ -295,6 +310,8 @@ const applySavedData = (data: EditorData) => {
   const savedLevel = findLevel(data, currentLevel.id) as EditorLevel
   currentLevel.map = [...savedLevel.map]
   currentLevel.isVerified = savedLevel.isVerified
+  currentLevel.authorId = savedLevel.authorId
+  currentLevel.authorName = savedLevel.authorName
   editorData = data
   const appearance = getLevelAppearance(editorData.appearance, currentLevel.id)
   session = new EditorSession(currentLevel, appearance)

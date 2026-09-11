@@ -82,7 +82,7 @@ const getStatsById = () => {
 }
 
 // Создаёт данные или представление для операции `createLevel`.
-const createLevel = (parsedLevel, difficulty, statsData) => {
+const createLevel = (parsedLevel, difficulty, author, statsData) => {
   const id = parsedLevel.metadata.id
   const isUnverified = parsedLevel.metadata.unverified === 'true'
   const stats = isUnverified ? null : statsData.levels.get(id) || null
@@ -91,6 +91,8 @@ const createLevel = (parsedLevel, difficulty, statsData) => {
     id,
     map: parsedLevel.map,
     difficulty,
+    authorId: author.authorId,
+    authorName: author.authorName,
     isUnverified,
     stats,
     solver: stats ? {name: statsData.solver.name, version: stats.solverVersion} : null,
@@ -183,10 +185,28 @@ const loadLocationDefinitions = () => {
   return locations
 }
 
-// Возвращает XSB-файлы одной категории сложности.
-const getDifficultyFiles = (directoryName) => {
-  const directoryPath = path.resolve(levelLibraryDirectory, directoryName)
-  if (!fs.existsSync(directoryPath)) throw new Error(`Папка сложности не найдена: levels/library/${directoryName}`)
+// Читает сведения об авторе одной группы уровней.
+const loadAuthor = (directoryPath) => {
+  const metadataPath = path.resolve(directoryPath, 'author.json')
+  if (!fs.existsSync(metadataPath)) throw new Error(`${path.relative(projectRoot, directoryPath)}: отсутствует author.json`)
+  const author = readJson(metadataPath)
+  if (!author.authorId || !author.authorName) throw new Error(`${path.relative(projectRoot, metadataPath)}: автор заполнен не полностью`)
+  return {...author, directoryPath}
+}
+
+// Находит все группы уровней без списка заранее известных авторов.
+const loadAuthors = () => {
+  return fs
+    .readdirSync(levelLibraryDirectory, {withFileTypes: true})
+    .filter((entry) => entry.isDirectory())
+    .sort((first, second) => first.name.localeCompare(second.name))
+    .map((entry) => loadAuthor(path.resolve(levelLibraryDirectory, entry.name)))
+}
+
+// Возвращает XSB-файлы одной категории сложности указанного автора.
+const getDifficultyFiles = (author, directoryName) => {
+  const directoryPath = path.resolve(author.directoryPath, directoryName)
+  if (!fs.existsSync(directoryPath)) throw new Error(`Папка сложности не найдена: ${path.relative(projectRoot, directoryPath)}`)
 
   return fs
     .readdirSync(directoryPath, {withFileTypes: true})
@@ -196,7 +216,7 @@ const getDifficultyFiles = (directoryName) => {
 }
 
 // Читает единственную карту из отдельного файла библиотеки.
-const loadLibraryLevel = (filePath, difficulty, statsData) => {
+const loadLibraryLevel = (filePath, difficulty, author, statsData) => {
   const sourceLabel = path.relative(projectRoot, filePath)
   const parsedLevels = parseXsb(readText(filePath), sourceLabel)
   if (parsedLevels.length !== 1) throw new Error(`${sourceLabel}: файл должен содержать ровно один уровень`)
@@ -205,15 +225,23 @@ const loadLibraryLevel = (filePath, difficulty, statsData) => {
   const id = parsedLevel.metadata.id
   if (!id) throw new Error(`${sourceLabel}: не указан id уровня`)
   if (path.basename(filePath, '.xsb') !== id) throw new Error(`${sourceLabel}: имя файла должно совпадать с id ${id}`)
-  return createLevel(parsedLevel, difficulty, statsData)
+  return createLevel(parsedLevel, difficulty, author, statsData)
 }
 
-// Загружает библиотеку уровней и получает сложность из имени папки.
-const loadLibraryLevels = (statsData) => {
+// Загружает уровни одного автора и получает сложность из имени папки.
+const loadAuthorLevels = (author, statsData) => {
   return Object.entries(difficultyDirectories).flatMap(([directoryName, difficulty]) => {
     if (!LEVEL_DIFFICULTIES.includes(difficulty)) throw new Error(`Неизвестная сложность ${difficulty}`)
-    return getDifficultyFiles(directoryName).map((filePath) => loadLibraryLevel(filePath, difficulty, statsData))
+    return getDifficultyFiles(author, directoryName).map((filePath) => loadLibraryLevel(filePath, difficulty, author, statsData))
   })
+}
+
+// Загружает библиотеку уровней из всех найденных групп авторов.
+const loadLibraryLevels = (statsData) => {
+  const authors = loadAuthors()
+  const authorIds = new Set(authors.map(({authorId}) => authorId))
+  if (authorIds.size !== authors.length) throw new Error('Идентификаторы авторов в levels/library должны быть уникальны')
+  return authors.flatMap((author) => loadAuthorLevels(author, statsData))
 }
 
 // Проверяет условие, описанное операцией `validateStatsLinks`.
@@ -371,6 +399,8 @@ const createRuntimeLevel = (level, index, appearance) => {
     id: level.id,
     levelName: `level${index}`,
     difficulty: level.difficulty,
+    authorId: level.authorId,
+    authorName: level.authorName,
     ...(solver && {solver}),
     ...(appearance && {appearance}),
     map: toRuntimeMap(level.map),

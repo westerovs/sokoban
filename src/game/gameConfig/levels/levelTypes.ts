@@ -17,6 +17,8 @@ type LevelDefinition = {
   id: string
   levelName: string
   difficulty: LevelDifficulty
+  authorId: string
+  authorName: string
   isRemote?: boolean
   appearance?: LevelAppearance
   solver?: LevelSolver

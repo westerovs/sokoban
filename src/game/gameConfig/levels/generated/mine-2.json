@@ -10,6 +10,8 @@
       "id": "sokoban-032",
       "levelName": "level59",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 512, "pushes": 217, "timeSeconds": 1},
       "map": [
         "___##########___",
@@ -32,6 +34,8 @@
       "id": "sokoban-033",
       "levelName": "level60",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 573, "pushes": 203, "timeSeconds": 0},
       "map": [
         "_#######_______",
@@ -52,6 +56,8 @@
       "id": "sokoban-064",
       "levelName": "level61",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1007, "pushes": 270, "timeSeconds": 1},
       "map": [
         "_____########_____",
@@ -73,6 +79,8 @@
       "id": "sokoban-065",
       "levelName": "level62",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 971, "pushes": 318, "timeSeconds": 1},
       "map": [
         "####################",
@@ -93,6 +101,8 @@
       "id": "sokoban-086",
       "levelName": "level63",
       "difficulty": "hard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1314, "pushes": 408, "timeSeconds": 3},
       "map": [
         "######_____####____",
@@ -117,6 +127,8 @@
       "id": "sokoban-097",
       "levelName": "level64",
       "difficulty": "veryHard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 2103, "pushes": 506, "timeSeconds": 1},
       "map": [
         "____##########_____",

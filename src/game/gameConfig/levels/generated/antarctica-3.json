@@ -10,6 +10,8 @@
       "id": "sokoban-036",
       "levelName": "level71",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 507, "pushes": 202, "timeSeconds": 3},
       "map": [
         "#######_#########",
@@ -31,6 +33,8 @@
       "id": "sokoban-037",
       "levelName": "level72",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 650, "pushes": 188, "timeSeconds": 1},
       "map": [
         "_#########____",
@@ -54,6 +58,8 @@
       "id": "sokoban-068",
       "levelName": "level73",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 929, "pushes": 316, "timeSeconds": 4},
       "map": [
         "_________#####___",
@@ -77,6 +83,8 @@
       "id": "sokoban-069",
       "levelName": "level74",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 879, "pushes": 360, "timeSeconds": 1},
       "map": [
         "###########________",
@@ -100,6 +108,8 @@
       "id": "sokoban-088",
       "levelName": "level75",
       "difficulty": "hard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1871, "pushes": 341, "timeSeconds": 17},
       "map": [
         "####################",
@@ -120,6 +130,8 @@
       "id": "sokoban-099",
       "levelName": "level76",
       "difficulty": "veryHard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1580, "pushes": 564, "timeSeconds": 13},
       "map": [
         "###############____",

@@ -596,11 +596,19 @@ select:focus-visible {
   touch-action: none;
 }
 
-.editor-level-dimensions {
+.editor-level-metadata {
   position: absolute;
   z-index: 2;
   top: 18px;
   left: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.editor-level-dimensions,
+.editor-level-author {
   min-width: 112px;
   padding: 10px 15px;
   color: #eaf4e7;
@@ -613,7 +621,12 @@ select:focus-visible {
   font-weight: 750;
   line-height: 1;
   text-align: center;
-  pointer-events: none;
+}
+
+.editor-level-author {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
 }
 
 .editor-status {

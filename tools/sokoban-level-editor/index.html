@@ -113,7 +113,10 @@
 
       <main class="editor-workspace">
         <div id="canvas-host" class="editor-canvas-host"></div>
-        <output id="level-dimensions" class="editor-level-dimensions" aria-label="Размер уровня в клетках" hidden></output>
+        <div class="editor-level-metadata">
+          <output id="level-dimensions" class="editor-level-dimensions" aria-label="Размер уровня в клетках" hidden></output>
+          <output id="level-author" class="editor-level-author" aria-label="Автор уровня" hidden></output>
+        </div>
         <div id="empty-state" class="editor-empty-state" hidden>В локации нет уровней</div>
         <output id="status" class="editor-status" aria-live="polite"></output>
       </main>

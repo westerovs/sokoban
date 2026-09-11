@@ -24,6 +24,7 @@ const PREVIEW_WIDTH = 500 // Ширина области предпросмот�
 
 export default class LocationLevelSelectView extends Container {
   #backButton!: ButtonContainer
+  #authorText: Text | null = null
   #difficultyText!: Text
   #levelButtons: LevelSelectButton[] = []
   #levelsContainer!: Container
@@ -49,6 +50,7 @@ export default class LocationLevelSelectView extends Container {
     this.#preview.setLevel(selectedEntry.level)
     this.#setDifficulty(selectedEntry.level)
     this.#setPersonalBest(selectedEntry.level)
+    this.#setAuthor(selectedEntry.level)
     this.#replaceLevelButtons(levels, selectedEntry.level.id)
     this.updateAdaptive()
   }
@@ -59,6 +61,7 @@ export default class LocationLevelSelectView extends Container {
     this.#preview.setLevel(selectedEntry.level)
     this.#setDifficulty(selectedEntry.level)
     this.#setPersonalBest(selectedEntry.level)
+    this.#setAuthor(selectedEntry.level)
     this.#levelButtons.forEach((button, index) => {
       button.setState({...levels[index], isSelected: levels[index].id === selectedEntry.level.id})
     })
@@ -120,6 +123,20 @@ export default class LocationLevelSelectView extends Container {
     this.#personalBestText.anchor.set(0.5)
     this.#personalBestText.position.set(150, -108)
     this.#levelsContainer.addChild(panel, this.#difficultyText, this.#personalBestText)
+    this.#createAuthorText()
+  }
+
+  // Создаёт отладочную подпись автора между предпросмотром и панелью уровней.
+  #createAuthorText() {
+    if (!LocalStorage.isDebug) return
+    this.#authorText = new Text({
+      label: 'level-preview-author',
+      text: '',
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 16, stroke: {color: 0x19251d, width: 3}},
+    })
+    this.#authorText.anchor.set(0.5)
+    this.#authorText.position.set(0, -185)
+    this.#levelsContainer.addChild(this.#authorText)
   }
 
   // Создаёт данные или представление для операции `createBackButton`.
@@ -194,6 +211,12 @@ export default class LocationLevelSelectView extends Container {
   // Показывает локализованную сложность выбранного уровня.
   #setDifficulty(level: LevelDefinition) {
     this.#difficultyText.text = i18next.t(`difficultyLevels.${level.difficulty}`)
+  }
+
+  // Показывает автора выбранного уровня только в отладочном режиме.
+  #setAuthor(level: LevelDefinition) {
+    if (!this.#authorText) return
+    this.#authorText.text = i18next.t('sokoban.author', {author: level.authorName})
   }
 
   // Выполняет отдельную операцию `openLevelEditor`.

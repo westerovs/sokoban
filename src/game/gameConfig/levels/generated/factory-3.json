@@ -10,6 +10,8 @@
       "id": "sokoban-047",
       "levelName": "level95",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 748, "pushes": 231, "timeSeconds": 1},
       "map": [
         "####################",
@@ -30,6 +32,8 @@
       "id": "sokoban-048",
       "levelName": "level96",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1112, "pushes": 170, "timeSeconds": 5},
       "map": [
         "_____###########___",
@@ -51,6 +55,8 @@
       "id": "sokoban-076",
       "levelName": "level97",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1128, "pushes": 398, "timeSeconds": 1},
       "map": [
         "############_######",
@@ -75,6 +81,8 @@
       "id": "sokoban-077",
       "levelName": "level98",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1119, "pushes": 308, "timeSeconds": 81},
       "map": [
         "#####______________",
@@ -96,6 +104,8 @@
       "id": "sokoban-078",
       "levelName": "level99",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1322, "pushes": 367, "timeSeconds": 2},
       "map": [
         "_#################_",
@@ -117,6 +127,8 @@
       "id": "sokoban-101",
       "levelName": "level100",
       "difficulty": "veryHard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 2488, "pushes": 625, "timeSeconds": 72},
       "map": [
         "___________########",

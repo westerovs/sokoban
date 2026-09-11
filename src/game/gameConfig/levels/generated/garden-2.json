@@ -10,6 +10,8 @@
       "id": "sokoban-015",
       "levelName": "level14",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 357, "pushes": 114, "timeSeconds": 1},
       "map": [
         "_______#####_",
@@ -30,6 +32,8 @@
       "id": "sokoban-016",
       "levelName": "level15",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 421, "pushes": 138, "timeSeconds": 0},
       "map": [
         "________########_",
@@ -48,6 +52,8 @@
       "id": "sokoban-017",
       "levelName": "level16",
       "difficulty": "easy",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 388, "pushes": 142, "timeSeconds": 1},
       "map": [
         "_______###########_",
@@ -68,6 +74,8 @@
       "id": "sokoban-050",
       "levelName": "level17",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 693, "pushes": 253, "timeSeconds": 1},
       "map": [
         "####################",
@@ -88,6 +96,8 @@
       "id": "sokoban-051",
       "levelName": "level18",
       "difficulty": "medium",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 673, "pushes": 257, "timeSeconds": 1},
       "map": [
         "####################",
@@ -108,6 +118,8 @@
       "id": "sokoban-079",
       "levelName": "level19",
       "difficulty": "hard",
+      "authorId": "xsokoban",
+      "authorName": "XSokoban",
       "solver": {"verified": true, "name": "Takaken", "version": "7.3.1", "moves": 1122, "pushes": 411, "timeSeconds": 1},
       "map": [
         "####################",
@@ -127,7 +139,9 @@
     {
       "id": "sokoban-011",
       "levelName": "level20",
-      "difficulty": "veryHard",
+      "difficulty": "medium",
+      "authorId": "livevil",
+      "authorName": "LIVEVIL",
       "map": [
         "___##########_",
         "####......  #_",
