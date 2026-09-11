@@ -44,6 +44,24 @@ export default class LevelNavigation {
     return this.#getSelectedLocation()?.levels.find(({id}) => id === this.#levelSelect.value) ?? null
   }
 
+  // Обновляет данные навигации после сохранения игрового уровня.
+  setLocations(locations: EditorLocation[]) {
+    this.#locations = locations
+    const location = this.#getSelectedLocation()
+    if (!location) return
+    const levelId = this.#selectedLevel?.id ?? ''
+    this.#replaceLevelOptions(location)
+    this.#levelSelect.value = levelId
+    this.#selectedLevel = this.getSelectedLevel()
+  }
+
+  // Очищает игровые селекторы при открытии самостоятельного файла.
+  clearSelection() {
+    this.#selectedLevel = null
+    this.#locationSelect.value = ''
+    this.#levelSelect.replaceChildren()
+  }
+
   // Инициализирует внутреннее состояние и зависимости.
   #init() {
     this.#locationSelect.replaceChildren(...this.#locations.map(this.#createLocationOption))
@@ -85,7 +103,7 @@ export default class LevelNavigation {
 
   // Пытается выполнить операцию `tryCommitSelection` и сообщает результат.
   #tryCommitSelection(level: EditorLevel | null) {
-    if (this.#selectedLevel && level?.id !== this.#selectedLevel.id && !this.#canSelect()) {
+    if (level?.id !== this.#selectedLevel?.id && !this.#canSelect()) {
       this.#restoreSelection()
       return
     }
@@ -101,7 +119,7 @@ export default class LevelNavigation {
   // Выполняет отдельную операцию `restoreSelection`.
   #restoreSelection() {
     const selectedLevel = this.#selectedLevel
-    if (!selectedLevel) return
+    if (!selectedLevel) return this.clearSelection()
     const location = this.#locations.find(({levels}) => levels.some((level) => level.id === selectedLevel.id))
     if (!location) return
     this.#locationSelect.value = location.id

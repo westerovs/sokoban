@@ -9,16 +9,29 @@ import {
   fillEditorLocation,
   generateEditorLevel,
   loadEditorData,
+  loadEditorLibrary,
   saveEditorLevel,
+  saveEditorLibraryLevel,
   storeLevelDraft,
 } from './editorApi.js'
 import EditorBoard from './EditorBoard.js'
 import {expandEditorState} from './editorGrid.js'
 import EditorPalette from './EditorPalette.js'
 import EditorSession from './EditorSession.js'
-import type {EditorBrush, EditorData, EditorLevel, EditorState, LevelAppearance, Position, ValidationResult} from './editorTypes.js'
+import type {
+  EditorBrush,
+  EditorData,
+  EditorLevel,
+  EditorState,
+  LevelAppearance,
+  LibraryData,
+  LibraryLevel,
+  Position,
+  ValidationResult,
+} from './editorTypes.js'
 import {applyEditorBrush, applyEditorFill, FILLABLE_ROLES} from './levelEditing.js'
 import LevelGeneratorPanel from './LevelGeneratorPanel.js'
+import LevelLibraryPanel from './LevelLibraryPanel.js'
 import LevelNavigation from './LevelNavigation.js'
 import {validateLevelMap} from './levelValidation.js'
 
@@ -56,6 +69,7 @@ const elements = {
   redoButton: getElement<HTMLButtonElement>('#redo-button'),
   resetButton: getElement<HTMLButtonElement>('#reset-button'),
   saveButton: getElement<HTMLButtonElement>('#save-button'),
+  saveAsButton: getElement<HTMLButtonElement>('#save-as-button'),
   status: getElement<HTMLElement>('#status'),
   undoButton: getElement<HTMLButtonElement>('#undo-button'),
   utilityPalette: getElement<HTMLElement>('#utility-palette'),
@@ -67,6 +81,10 @@ const isDebug = window.localStorage.getItem(`${GAME_NAME}-isDebug`) === 'true' /
 let board: EditorBoard
 let editorData: EditorData
 let generatorPanel: LevelGeneratorPanel | null = null
+let libraryPanel: LevelLibraryPanel
+let navigation: LevelNavigation
+let isSaving = false
+let isGenerating = false
 let palette: EditorPalette
 let selectedBrush: EditorBrush | null = null
 let selectedLevel: EditorLevel | null = null
@@ -98,7 +116,7 @@ const isFillBrush = (brush: EditorBrush | null): brush is EditorBrush => {
 // Синхронизирует доступность заливки с текущей сессией и режимом редактора.
 const updateFillButton = () => {
   elements.fillButton.disabled = !session || elements.manualToolsPanel.hidden || !isFillBrush(selectedBrush)
-  elements.fillLocationButton.disabled = elements.fillButton.disabled
+  elements.fillLocationButton.disabled = elements.fillButton.disabled || Boolean(selectedLevel?.libraryPath)
 }
 
 // Обновляет размер текущего уровня в клетках для ручного режима.
@@ -165,6 +183,7 @@ const bindLocationFill = () => {
 
 // Отрисовывает карту, проверку и доступность команд истории.
 const renderSession = () => {
+  updateSaveButtons()
   if (!session || !selectedLevel) {
     updateFillButton()
     updateLevelDimensions()
@@ -186,8 +205,9 @@ const renderSession = () => {
 }
 
 // Открывает выбранный уровень на полном рабочем поле редактора.
-const updateSelectedLevel = (level: EditorLevel | null) => {
+const updateSelectedLevel = (level: EditorLevel | null, libraryAppearance?: LevelAppearance) => {
   selectedLevel = level
+  libraryPanel.selectPath(level?.libraryPath)
   const location = editorData.locations.find(({levels}) => levels.some(({id}) => id === level?.id))
   palette.setLocation(location?.id ?? '')
   elements.emptyState.hidden = Boolean(level)
@@ -196,15 +216,17 @@ const updateSelectedLevel = (level: EditorLevel | null) => {
     renderSession()
     return
   }
-  const appearance = getLevelAppearance(editorData.appearance, level.id)
+  const appearance = libraryAppearance ?? getLevelAppearance(editorData.appearance, level.id)
   session = new EditorSession(level, appearance)
-  history.replaceState(null, '', `?level=${encodeURIComponent(level.id)}`)
+  const query = level.libraryPath ? `library=${encodeURIComponent(level.libraryPath)}` : `level=${encodeURIComponent(level.id)}`
+  history.replaceState(null, '', `?${query}`)
   renderSession()
   generatorPanel?.setCurrentLevel(getExportState(), {syncDimensions: true})
 }
 
 // Разрешает смену уровня либо просит подтвердить потерю изменений.
 const canChangeLevel = () => {
+  if (isSaving || isGenerating) return false
   if (!session?.isDirty) return true
   return window.confirm('Отменить несохранённые изменения и открыть другой уровень?')
 }
@@ -264,7 +286,9 @@ const getGenerationMessage = (stats: any) => {
 
 // Запрашивает генерацию и применяет результат к текущему открытому уровню.
 const generateLevel = async (options: Record<string, any>) => {
-  if (!session) return null
+  if (!session || isSaving || isGenerating) return null
+  isGenerating = true
+  updateSaveButtons()
   const {preserveTopology, ...request} = options
   if (preserveTopology) request.topology = (getExportState() as EditorState).map
   showStatus(preserveTopology ? 'Переставляем объекты, стены останутся прежними…' : 'Создаём структуру и ищем сложную задачу…')
@@ -276,6 +300,9 @@ const generateLevel = async (options: Record<string, any>) => {
   } catch (error) {
     showStatus(getErrorMessage(error), 'error')
     return null
+  } finally {
+    isGenerating = false
+    updateSaveButtons()
   }
 }
 
@@ -286,6 +313,7 @@ const selectSidebarPanel = (mode: string) => {
   elements.generatorPanel.hidden = !isGenerator
   elements.manualToolsTab.ariaSelected = String(!isGenerator)
   elements.generatorTab.ariaSelected = String(isGenerator)
+  elements.saveAsButton.hidden = !isGenerator
   updateFillButton()
   updateLevelDimensions()
   updateLevelAuthor()
@@ -310,26 +338,82 @@ const applySavedData = (data: EditorData) => {
   currentLevel.map = [...savedLevel.map]
   currentLevel.authorId = savedLevel.authorId
   editorData = data
+  navigation.setLocations(getActiveEditorLocations(data))
   const appearance = getLevelAppearance(editorData.appearance, currentLevel.id)
   session = new EditorSession(currentLevel, appearance)
   renderSession()
 }
 
+// Открывает файл библиотеки, проверив несохранённые изменения текущей карты.
+const selectLibraryLevel = (level: LibraryLevel) => {
+  if (!canChangeLevel()) return false
+  navigation.clearSelection()
+  updateSelectedLevel(level, level.appearance)
+  return true
+}
+
+// Обновляет доступность сохранения на время генерации и записи.
+const updateSaveButtons = () => {
+  const disabled = !session || isSaving || isGenerating
+  elements.saveButton.disabled = disabled
+  elements.saveAsButton.disabled = disabled
+}
+
+// Блокирует изменения карты на время сохранения снимка.
+const setSaving = (value: boolean) => {
+  isSaving = value
+  getElement<HTMLElement>('.editor-shell').inert = value
+  updateSaveButtons()
+}
+
+// Записывает самостоятельную карту и делает сохранённый файл текущим.
+const persistLibraryLevel = async (directory: string, name: string, create: boolean) => {
+  const state = getExportState() as EditorState
+  const result = await saveEditorLibraryLevel(directory, name, state.map, state.appearance, create)
+  const level = result.data.levels.find((level: LibraryLevel) => level.libraryPath === result.libraryPath)
+  if (!level) throw new Error('Сохранённый файл отсутствует в ответе библиотеки')
+  libraryPanel.setData(result.data)
+  navigation.clearSelection()
+  updateSelectedLevel(level, level.appearance)
+  showStatus(`Сохранено: ${result.libraryPath}`)
+}
+
+// Сохраняет новый файл из диалога, оставляя ошибку доступной форме.
+const saveAs = async (directory: string, name: string) => {
+  if (isSaving || isGenerating || !session) throw new Error('Дождитесь завершения текущей операции')
+  if (!getValidation().isValid) throw new Error('Исправьте ошибки структуры перед сохранением')
+  setSaving(true)
+  try {
+    await persistLibraryLevel(directory, name, true)
+  } finally {
+    setSaving(false)
+  }
+}
+
+// Выбирает запись в библиотеку либо существующую игровую локацию.
+const saveCurrentLevel = async () => {
+  const level = selectedLevel as EditorLevel
+  if (level.libraryPath) {
+    const directory = level.libraryPath.slice(0, level.libraryPath.lastIndexOf('/'))
+    return persistLibraryLevel(directory, level.id, false)
+  }
+  const state = getExportState() as EditorState
+  applySavedData(await saveEditorLevel(level.id, state.map, state.appearance))
+  showStatus('Уровень сохранён, файл локации и оформление обновлены')
+}
+
 // Сохраняет компактную карту и оформление в исходные файлы локации.
 const save = async () => {
-  if (!session || !getValidation().isValid) return false
-  elements.saveButton.disabled = true
+  if (!session || isSaving || isGenerating || !getValidation().isValid) return false
+  setSaving(true)
   try {
-    const state = getExportState() as EditorState
-    const data = await saveEditorLevel((selectedLevel as EditorLevel).id, state.map, state.appearance)
-    applySavedData(data)
-    showStatus('Уровень сохранён, файл локации и оформление обновлены')
+    await saveCurrentLevel()
     return true
   } catch (error) {
     showStatus(getErrorMessage(error), 'error')
     return false
   } finally {
-    elements.saveButton.disabled = false
+    setSaving(false)
   }
 }
 
@@ -338,9 +422,11 @@ const launchDraft = () => {
   if (!session || !getValidation().isValid) return
   const state = getExportState() as EditorState
   const currentLevel = selectedLevel as EditorLevel
-  const draftToken = storeLevelDraft(currentLevel.id, state.map, state.appearance)
+  const draftLevelId = currentLevel.libraryPath ? getActiveEditorLocations(editorData)[0]?.levels[0]?.id : currentLevel.id
+  if (!draftLevelId) return showStatus('Нет игровой локации для запуска черновика', 'error')
+  const draftToken = storeLevelDraft(draftLevelId, state.map, state.appearance)
   const gameUrl = new URL('/', window.location.origin)
-  gameUrl.searchParams.set('sokobanLevel', currentLevel.id)
+  gameUrl.searchParams.set('sokobanLevel', draftLevelId)
   gameUrl.searchParams.set('sokobanDraft', draftToken)
   window.open(gameUrl, '_blank', 'noopener')
   showStatus('Черновик открыт в новой вкладке')
@@ -433,7 +519,10 @@ const handleControlShortcut = (event: KeyboardEvent) => {
 
 // Переключает палитры цифрами и передаёт служебные сочетания.
 const handleKeyboard = (event: KeyboardEvent) => {
-  if (elements.fillLocationDialog.open) return
+  if (elements.fillLocationDialog.open || libraryPanel.isOpen || isSaving) {
+    if ((event.ctrlKey || event.metaKey) && event.code === 'KeyS') event.preventDefault()
+    return
+  }
   if (isEditableTarget(event.target)) return
   if (handleControlShortcut(event)) return event.preventDefault()
   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
@@ -454,6 +543,9 @@ const bindActions = () => {
   bindLocationFill()
   elements.fillButton.addEventListener('click', fillSelectedRole)
   elements.saveButton.addEventListener('click', save)
+  elements.saveAsButton.addEventListener('click', () => {
+    if (session && !isSaving && !isGenerating && getValidation().isValid) void libraryPanel.openSaveAs()
+  })
   elements.launchButton.addEventListener('click', launchDraft)
   elements.validateButton.addEventListener('click', checkSolvability)
   elements.resetButton.addEventListener('click', resetAllChanges)
@@ -474,28 +566,46 @@ const getActiveEditorLocations = (data: EditorData) => {
   })
 }
 
+// Создаёт панели редактора и навигацию по игровым уровням и библиотеке.
+const createEditorPanels = (libraryData: LibraryData) => {
+  palette = new EditorPalette(
+    elements.utilityPalette,
+    elements.modeTabs,
+    elements.palette,
+    {...SOKOBAN_TILE_CATALOG, decorGroups: editorData.decorGroups},
+    selectBrush,
+  )
+  generatorPanel = new LevelGeneratorPanel(getElement<HTMLElement>('#generator-controls'), generateLevel)
+  libraryPanel = new LevelLibraryPanel(selectLibraryLevel, saveAs, (error) => showStatus(getErrorMessage(error), 'error'))
+  libraryPanel.setData(libraryData)
+  navigation = new LevelNavigation(
+    elements.locationSelect,
+    elements.levelSelect,
+    getActiveEditorLocations(editorData),
+    updateSelectedLevel,
+    canChangeLevel,
+  )
+  palette.selectDefault()
+}
+
+// Восстанавливает открытый файл по адресу редактора.
+const restoreRequestedLevel = (libraryData: LibraryData) => {
+  const params = new URLSearchParams(location.search)
+  const libraryLevel = libraryData.levels.find((level) => level.libraryPath === params.get('library'))
+  if (libraryLevel) {
+    selectLibraryLevel(libraryLevel)
+    selectSidebarPanel('generator')
+  } else navigation.selectLevel(params.get('level'))
+}
+
 // Загружает данные и создаёт компоненты редактора в правильном порядке.
 const init = async () => {
   try {
-    editorData = await loadEditorData()
+    const [data, libraryData] = await Promise.all([loadEditorData(), loadEditorLibrary()])
+    editorData = data
     await createBoard()
-    palette = new EditorPalette(
-      elements.utilityPalette,
-      elements.modeTabs,
-      elements.palette,
-      {...SOKOBAN_TILE_CATALOG, decorGroups: editorData.decorGroups},
-      selectBrush,
-    )
-    generatorPanel = new LevelGeneratorPanel(elements.generatorPanel, generateLevel)
-    const navigation = new LevelNavigation(
-      elements.locationSelect,
-      elements.levelSelect,
-      getActiveEditorLocations(editorData),
-      updateSelectedLevel,
-      canChangeLevel,
-    )
-    palette.selectDefault()
-    navigation.selectLevel(new URLSearchParams(location.search).get('level'))
+    createEditorPanels(libraryData)
+    restoreRequestedLevel(libraryData)
     bindSidebarTabs()
     bindActions()
   } catch (error) {

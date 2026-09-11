@@ -163,6 +163,31 @@ select:focus-visible {
   font-weight: 800;
 }
 
+.editor-button--save-as {
+  padding-inline: 12px;
+  color: #f0fff2;
+  background: #298341;
+  border-color: #54b66b;
+  font-weight: 750;
+}
+
+#save-as-form {
+  display: grid;
+  gap: 14px;
+}
+
+#save-as-dialog {
+  border-color: #54b66b;
+}
+
+.editor-library-path {
+  overflow-wrap: anywhere;
+}
+
+#save-as-error {
+  color: #ffb9ad;
+}
+
 .editor-button--primary[data-dirty='true'] {
   box-shadow: 0 0 0 3px rgb(208 241 127 / 28%);
 }

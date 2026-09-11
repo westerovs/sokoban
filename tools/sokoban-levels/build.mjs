@@ -6,6 +6,7 @@ import prettier from 'prettier'
 import {getSokobanTileCatalog} from '../../bundler/utils/getSokobanTileCatalog.mjs'
 import {LEVEL_DIFFICULTIES} from '../../src/game/gameConfig/levels/levelDifficulty.ts'
 import {SOKOBAN_SETTINGS} from '../../src/game/sokoban/config/settings.ts'
+import {validateLevelAppearance} from './levelAppearance.ts'
 import {parseXsb, toRuntimeMap} from './xsbFormat.mjs'
 
 /**
@@ -23,14 +24,12 @@ const gameLevelsDirectory = path.resolve(projectRoot, 'src', 'game', 'gameConfig
 const gameLocationsDirectory = path.resolve(gameLevelsDirectory, 'generated')
 const obsoleteGameOutputPath = path.resolve(gameLevelsDirectory, 'levels.json')
 const isCheckMode = process.argv.includes('--check')
-const appearanceRoles = Object.freeze(['wall', 'decor', 'ground', 'box', 'target'])
 const difficultyDirectories = Object.freeze({
   easy: 'easy', // Каталог лёгких карт
   medium: 'medium', // Каталог средних карт
   hard: 'hard', // Каталог тяжёлых карт
   'very-hard': 'veryHard', // Каталог очень тяжёлых карт
 })
-const positionKeyPattern = /^(0|[1-9]\d*):(0|[1-9]\d*)$/
 
 // Возвращает данные, за которые отвечает операция `readText`.
 const readText = (filePath) => fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n')
@@ -71,6 +70,7 @@ const createLevel = (parsedLevel, difficulty, author) => {
     map: parsedLevel.map,
     difficulty,
     authorId: author.authorId,
+    libraryAppearance: parsedLevel.metadata.appearance ? JSON.parse(parsedLevel.metadata.appearance) : undefined,
   }
 }
 
@@ -178,56 +178,8 @@ const loadLocations = (levels, sourceLocations) => {
   const levelsById = new Map(levels.map((level) => [level.id, level]))
   const assignedIds = new Set()
   const locations = sourceLocations.map((location, index) => createLocation(location, index, levelsById, assignedIds))
-  if (assignedIds.size !== levels.length) throw new Error('Не все карты из levels/library распределены по локациям')
 
   return locations
-}
-
-// Проверяет условие, описанное операцией `isAppearanceRoleCell`.
-const isAppearanceRoleCell = (role, symbol) => {
-  if (role === 'wall' || role === 'decor') return symbol === '#'
-  if (role === 'ground') return Boolean(symbol) && symbol !== '_'
-  if (role === 'box') return '$-'.includes(symbol)
-  if (role === 'target') return '.-*'.includes(symbol)
-  return false
-}
-
-// Проверяет условие, описанное операцией `validateAppearancePosition`.
-const validateAppearancePosition = (level, role, positionKey) => {
-  if (!positionKeyPattern.test(positionKey)) throw new Error(`${level.id}: недопустимая координата оформления ${positionKey}`)
-
-  const [x, y] = positionKey.split(':').map(Number)
-  const symbol = toRuntimeMap(level.map)[y]?.[x]
-  if (!isAppearanceRoleCell(role, symbol)) {
-    throw new Error(`${level.id}: оформление ${role} нельзя применить к клетке ${positionKey}`)
-  }
-}
-
-// Проверяет условие, описанное операцией `validateAppearanceRole`.
-const validateAppearanceRole = (level, role, overrides, tileCatalog) => {
-  if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides)) {
-    throw new Error(`${level.id}: оформление ${role} должно быть объектом`)
-  }
-
-  Object.entries(overrides).forEach(([positionKey, texture]) => {
-    validateAppearancePosition(level, role, positionKey)
-    if (!tileCatalog.groups[role].includes(texture)) {
-      throw new Error(`${level.id}: текстура ${texture} не входит в каталог ${role}`)
-    }
-  })
-}
-
-// Проверяет условие, описанное операцией `validateLevelAppearance`.
-const validateLevelAppearance = (level, appearance, tileCatalog) => {
-  if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
-    throw new Error(`${level.id}: оформление уровня должно быть объектом`)
-  }
-
-  const unknownRoles = Object.keys(appearance).filter((role) => !appearanceRoles.includes(role))
-  if (unknownRoles.length > 0) throw new Error(`${level.id}: неизвестный слой оформления ${unknownRoles[0]}`)
-  appearanceRoles.forEach((role) => {
-    if (appearance[role] !== undefined) validateAppearanceRole(level, role, appearance[role], tileCatalog)
-  })
 }
 
 // Возвращает данные, за которые отвечает операция `readLocationAppearance`.
@@ -259,6 +211,11 @@ const loadAppearances = (levels, locations) => {
   const result = new Map()
   const levelsById = new Map(levels.map((level) => [level.id, level]))
   const tileCatalog = getSokobanTileCatalog(projectRoot)
+  levels.forEach((level) => {
+    if (!level.libraryAppearance) return
+    validateLevelAppearance(level, level.libraryAppearance, tileCatalog)
+    result.set(level.id, level.libraryAppearance)
+  })
   locations.forEach((location) => addLocationAppearances(result, location, levelsById, tileCatalog))
 
   return result
@@ -357,7 +314,10 @@ const buildLevels = async () => {
   await writeLocationFiles(gameCatalog.locations, prettierConfig)
   removeStaleLocationFiles(gameCatalog.locations)
   removeGeneratedFile(obsoleteGameOutputPath)
-  console.log(`Уровни собраны: ${levels.length} карт в ${locations.length} отдельных файлах локаций.`)
+  const assignedCount = locations.reduce((count, location) => count + location.levels.length, 0)
+  console.log(
+    `Уровни собраны: ${assignedCount} карт в ${locations.length} отдельных файлах локаций. В запасе: ${levels.length - assignedCount}.`,
+  )
 }
 
 await buildLevels()

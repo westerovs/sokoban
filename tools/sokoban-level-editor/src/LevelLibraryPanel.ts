@@ -1,0 +1,171 @@
+import {loadEditorLibrary} from './editorApi.js'
+import type {LibraryData, LibraryLevel} from './editorTypes.js'
+
+// Управляет выбором самостоятельных уровней и диалогом сохранения нового XSB-файла.
+
+// Возвращает обязательный элемент панели библиотеки.
+const getElement = <T extends HTMLElement>(id: string): T => {
+  const element = document.getElementById(id)
+  if (!element) throw new Error(`[LevelLibraryPanel]: element ${id} is missing`)
+  return element as T
+}
+
+export default class LevelLibraryPanel {
+  #data: LibraryData = {directories: [], levels: [], usedIds: []}
+  #selectedPath = ''
+  #isSaving = false
+  #dialog = getElement<HTMLDialogElement>('save-as-dialog')
+  #form = getElement<HTMLFormElement>('save-as-form')
+  #collection = getElement<HTMLSelectElement>('save-as-collection')
+  #directory = getElement<HTMLSelectElement>('save-as-directory')
+  #name = getElement<HTMLInputElement>('save-as-name')
+  #error = getElement<HTMLParagraphElement>('save-as-error')
+  #select = getElement<HTMLSelectElement>('library-level-select')
+  #cancel = getElement<HTMLButtonElement>('save-as-cancel')
+  #submit = getElement<HTMLButtonElement>('save-as-submit')
+  #onSelect: (level: LibraryLevel) => boolean
+  #onSave: (directory: string, name: string) => Promise<void>
+  #onError: (error: unknown) => void
+
+  // Сохраняет обработчики выбора, записи и уведомлений.
+  constructor(
+    onSelect: (level: LibraryLevel) => boolean,
+    onSave: (directory: string, name: string) => Promise<void>,
+    onError: (error: unknown) => void,
+  ) {
+    this.#onSelect = onSelect
+    this.#onSave = onSave
+    this.#onError = onError
+    this.#init()
+  }
+
+  // Сообщает, открыт ли диалог для блокировки сочетаний редактора.
+  get isOpen() {
+    return this.#dialog.open
+  }
+
+  // Обновляет список после загрузки или успешного сохранения.
+  setData(data: LibraryData) {
+    this.#data = data
+    this.#select.replaceChildren(new Option('Выберите файл библиотеки', ''))
+    data.directories.forEach((directory) => {
+      const levels = data.levels.filter((level) => level.libraryPath.startsWith(`${directory.path}/`))
+      if (!levels.length) return
+      const group = document.createElement('optgroup')
+      group.label = directory.path
+      group.append(...levels.map((level) => new Option(`${level.id}.xsb`, level.libraryPath)))
+      this.#select.append(group)
+    })
+    this.selectPath(this.#selectedPath)
+  }
+
+  // Отмечает открытый файл или очищает выбор при переходе к игровому уровню.
+  selectPath(libraryPath = '') {
+    this.#selectedPath = libraryPath
+    this.#select.value = libraryPath
+    const output = getElement<HTMLOutputElement>('library-current-path')
+    output.hidden = !libraryPath
+    output.textContent = libraryPath ? `Библиотека: ${libraryPath}` : ''
+  }
+
+  // Загружает свежие папки и предлагает свободное имя в текущей коллекции.
+  async openSaveAs() {
+    if (this.#dialog.open) return
+    this.#error.textContent = ''
+    this.#dialog.showModal()
+    this.#setSaving(true)
+    try {
+      this.setData(await loadEditorLibrary())
+      this.#populateCollections()
+    } catch (error) {
+      this.#error.textContent = error instanceof Error ? error.message : String(error)
+    } finally {
+      this.#setSaving(false)
+      this.#name.focus()
+      this.#name.select()
+    }
+  }
+
+  // Подключает действия библиотеки и формы сохранения.
+  #init() {
+    this.#collection.addEventListener('change', () => this.#populateDirectories())
+    this.#directory.addEventListener('change', () => this.#updatePath())
+    this.#name.addEventListener('input', () => this.#updatePath())
+    this.#form.addEventListener('submit', (event) => {
+      event.preventDefault()
+      void this.#save()
+    })
+    this.#cancel.addEventListener('click', () => this.#dialog.close())
+    this.#dialog.addEventListener('cancel', (event) => {
+      if (this.#isSaving) event.preventDefault()
+    })
+    this.#select.addEventListener('change', () => this.#selectLevel())
+    getElement('library-refresh').addEventListener('click', () => {
+      loadEditorLibrary()
+        .then((data) => this.setData(data))
+        .catch(this.#onError)
+    })
+  }
+
+  // Заполняет коллекции из существующих разделов на диске.
+  #populateCollections() {
+    const collections = [...new Set(this.#data.directories.map((directory) => directory.collection))]
+    this.#collection.replaceChildren(...collections.map((collection) => new Option(collection, collection)))
+    const preferred = this.#selectedPath.split('/')[0] || 'custom'
+    if (collections.includes(preferred)) this.#collection.value = preferred
+    this.#populateDirectories()
+  }
+
+  // Заполняет разделы выбранной коллекции и предлагает очередной идентификатор автора.
+  #populateDirectories() {
+    const directories = this.#data.directories.filter((directory) => directory.collection === this.#collection.value)
+    this.#directory.replaceChildren(...directories.map((directory) => new Option(directory.section, directory.path)))
+    const selected = this.#selectedPath.slice(0, this.#selectedPath.lastIndexOf('/'))
+    if (directories.some((directory) => directory.path === selected)) this.#directory.value = selected
+    this.#suggestName(directories[0]?.authorId ?? 'level')
+    this.#updatePath()
+  }
+
+  // Предлагает свободное имя, сохраняя регистр существующих идентификаторов автора.
+  #suggestName(authorId: string) {
+    const existingId = this.#data.usedIds.find((id) => id.toLowerCase().startsWith(`${authorId.toLowerCase()}-`))
+    const prefix = existingId?.slice(0, authorId.length) ?? authorId
+    const usedIds = new Set(this.#data.usedIds.map((id) => id.toLowerCase()))
+    let index = 1
+    while (usedIds.has(`${prefix}-${String(index).padStart(3, '0')}`.toLowerCase())) index++
+    this.#name.value = `${prefix}-${String(index).padStart(3, '0')}`
+  }
+
+  // Показывает итоговый путь без интерпретации имени как HTML.
+  #updatePath() {
+    getElement('save-as-path').textContent = `levels/library/${this.#directory.value}/${this.#name.value}.xsb`
+    this.#error.textContent = ''
+  }
+
+  // Передаёт выбранный файл редактору с восстановлением отменённого выбора.
+  #selectLevel() {
+    const level = this.#data.levels.find((level) => level.libraryPath === this.#select.value)
+    if (!level || !this.#onSelect(level)) this.#select.value = this.#selectedPath
+  }
+
+  // Блокирует повторную запись и закрытие формы во время запроса.
+  #setSaving(value: boolean) {
+    this.#isSaving = value
+    for (const element of [this.#collection, this.#directory, this.#name, this.#cancel, this.#submit]) element.disabled = value
+    this.#submit.disabled = value || !this.#data.directories.length
+  }
+
+  // Сохраняет новый файл, оставляя форму и карту при любой ошибке.
+  async #save() {
+    if (this.#isSaving) return
+    this.#setSaving(true)
+    try {
+      await this.#onSave(this.#directory.value, this.#name.value)
+      this.#dialog.close()
+    } catch (error) {
+      this.#error.textContent = error instanceof Error ? error.message : String(error)
+    } finally {
+      this.#setSaving(false)
+    }
+  }
+}

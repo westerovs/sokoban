@@ -7,8 +7,9 @@ import process from 'node:process'
 import prettier from 'prettier'
 import type {Plugin} from 'vite'
 import {getSokobanDecorGroups, getSokobanTileCatalog, getSokobanTileSourcePath} from '../../bundler/utils/getSokobanTileCatalog.mjs'
-import {parseXsb, serializeXsb, toRuntimeMap, toStandardMap} from '../sokoban-levels/xsbFormat.mjs'
+import {parseXsb, serializeXsb, toStandardMap} from '../sokoban-levels/xsbFormat.mjs'
 import {generateSokobanLevel} from './generator/generateSokobanLevel.js'
+import {readLibraryData, saveLibraryLevel} from './libraryStorage.js'
 import {solveSokoban} from './solver.js'
 import type {EditorBrush, EditorLocation, LevelAppearance} from './src/editorTypes.js'
 import {applyEditorFill, FILLABLE_ROLES} from './src/levelEditing.js'
@@ -18,6 +19,7 @@ import {applyEditorFill, FILLABLE_ROLES} from './src/levelEditing.js'
  */
 
 const DATA_API_PATH = '/__sokoban-level-editor/data' // Путь API чтения и сохранения уровней
+const LIBRARY_API_PATH = '/__sokoban-level-editor/library' // Путь API самостоятельных уровней библиотеки
 const GENERATOR_API_PATH = '/__sokoban-level-editor/generate' // Путь API процедурной генерации
 const SOLVER_API_PATH = '/__sokoban-level-editor/solve' // Путь API проверки решаемости
 const LOCATION_FILL_API_PATH = '/__sokoban-level-editor/fill-location' // Путь API заливки всей локации
@@ -141,6 +143,7 @@ const updateLevelMap = (content: string, levelId: string, runtimeMap: string[], 
 
   level.map = toStandardMap(runtimeMap)
   delete level.metadata.custom
+  delete level.metadata.appearance
   return serializeXsb(levels)
 }
 
@@ -247,6 +250,18 @@ const handleGeneratorRequest = async (request: IncomingMessage, response: Server
   sendJson(response, 200, generateSokobanLevel(options))
 }
 
+// Читает библиотеку либо сохраняет самостоятельный уровень без пересборки игры.
+const handleLibraryRequest = async (request: IncomingMessage, response: ServerResponse, paths: EditorPaths) => {
+  if (!['GET', 'POST', 'PUT'].includes(request.method ?? '')) return sendJson(response, 405, {error: 'Method not allowed'})
+  const body = request.method === 'GET' ? null : JSON.parse(await readBody(request))
+  const assignedIds = new Set<string>(readJson(paths.locationsSource).locations.flatMap((location: any) => location.levelIds))
+  const data = readLibraryData(paths.levelLibraryDirectory, assignedIds)
+  if (request.method === 'GET') return sendJson(response, 200, data)
+  const catalog = getSokobanTileCatalog(paths.projectRoot)
+  const libraryPath = saveLibraryLevel(paths.levelLibraryDirectory, data, body, request.method === 'POST', catalog.groups)
+  sendJson(response, 200, {libraryPath, data: readLibraryData(paths.levelLibraryDirectory, assignedIds)})
+}
+
 // Создаёт данные или представление для операции `createPaths`.
 const createPaths = (projectRoot: string): EditorPaths => ({
   projectRoot,
@@ -275,9 +290,11 @@ const tryServeTile = (request: IncomingMessage, response: ServerResponse, projec
 // Обрабатывает событие, за которое отвечает операция `handleEditorApi`.
 const handleEditorApi = async (request: IncomingMessage, response: ServerResponse, next: () => void, paths: EditorPaths) => {
   const requestPath = request.url?.split('?')[0]
-  if (!requestPath || ![DATA_API_PATH, GENERATOR_API_PATH, SOLVER_API_PATH, LOCATION_FILL_API_PATH].includes(requestPath)) return next()
+  if (!requestPath || ![DATA_API_PATH, LIBRARY_API_PATH, GENERATOR_API_PATH, SOLVER_API_PATH, LOCATION_FILL_API_PATH].includes(requestPath))
+    return next()
   try {
     if (requestPath === DATA_API_PATH) await handleDataRequest(request, response, paths)
+    else if (requestPath === LIBRARY_API_PATH) await handleLibraryRequest(request, response, paths)
     else if (requestPath === LOCATION_FILL_API_PATH) await handleLocationFillRequest(request, response, paths)
     else if (requestPath === GENERATOR_API_PATH) await handleGeneratorRequest(request, response)
     else await handleSolverRequest(request, response)

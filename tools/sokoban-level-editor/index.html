@@ -8,6 +8,30 @@
     <link rel="stylesheet" href="./src/editor.css" />
   </head>
   <body>
+    <dialog id="save-as-dialog" class="editor-confirm-dialog" aria-labelledby="save-as-title">
+      <form id="save-as-form">
+        <h2 id="save-as-title">Сохранить как</h2>
+        <label class="editor-generator__field">
+          <span>Коллекция</span>
+          <select id="save-as-collection" required></select>
+        </label>
+        <label class="editor-generator__field">
+          <span>Раздел</span>
+          <select id="save-as-directory" required></select>
+        </label>
+        <label class="editor-generator__field">
+          <span>Имя файла без .xsb</span>
+          <input id="save-as-name" required maxlength="80" pattern="[a-zA-Z0-9][a-zA-Z0-9_\-]*" autocomplete="off" />
+        </label>
+        <p id="save-as-path" class="editor-library-path"></p>
+        <p class="editor-generator__hint">Уровень сохранится в библиотеку. Добавить его в игровую локацию можно отдельно.</p>
+        <p id="save-as-error" role="alert"></p>
+        <div class="editor-confirm-dialog__actions">
+          <button id="save-as-cancel" class="editor-button" type="button">Отмена</button>
+          <button id="save-as-submit" class="editor-button editor-button--save-as" type="submit">Сохранить</button>
+        </div>
+      </form>
+    </dialog>
     <dialog
       id="fill-location-dialog"
       class="editor-confirm-dialog"
@@ -82,6 +106,7 @@
             </svg>
             <span>Черновик</span>
           </button>
+          <button id="save-as-button" class="editor-button editor-button--save-as" type="button" hidden>Сохранить как</button>
           <button
             id="save-button"
             class="editor-button editor-button--primary editor-button--icon"
@@ -108,12 +133,26 @@
           <div id="mode-tabs" class="editor-mode-tabs"></div>
           <div id="palette" class="editor-palette"></div>
         </div>
-        <section id="generator-panel" class="editor-generator" role="tabpanel" hidden></section>
+        <section id="generator-panel" class="editor-generator" role="tabpanel" hidden>
+          <label class="editor-generator__field">
+            <span>Библиотека — уровни вне игры</span>
+            <select id="library-level-select" aria-label="Уровень библиотеки"></select>
+          </label>
+          <button id="library-refresh" class="editor-generator__secondary" type="button">Обновить библиотеку</button>
+          <div class="editor-generator__divider"></div>
+          <div id="generator-controls" class="editor-generator"></div>
+        </section>
       </aside>
 
       <main class="editor-workspace">
         <div id="canvas-host" class="editor-canvas-host"></div>
         <div class="editor-level-metadata">
+          <output
+            id="library-current-path"
+            class="editor-level-author editor-library-path"
+            aria-label="Открытый файл библиотеки"
+            hidden
+          ></output>
           <output id="level-dimensions" class="editor-level-dimensions" aria-label="Размер уровня в клетках" hidden></output>
           <output id="level-author" class="editor-level-author" aria-label="Автор уровня" hidden></output>
         </div>

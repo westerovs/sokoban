@@ -5,6 +5,7 @@ import type {EditorBrush, EditorLevel, LevelAppearance} from './editorTypes.js'
  */
 
 const EDITOR_API_URL = '/__sokoban-level-editor/data' // Путь чтения и сохранения данных редактора
+const LIBRARY_API_URL = '/__sokoban-level-editor/library' // Путь чтения и сохранения самостоятельных уровней
 const GENERATOR_API_URL = '/__sokoban-level-editor/generate' // Путь процедурной генерации уровня
 const SOLVER_API_URL = '/__sokoban-level-editor/solve' // Путь отдельной проверки решаемости
 const LOCATION_FILL_API_URL = '/__sokoban-level-editor/fill-location' // Путь заливки всей локации
@@ -20,6 +21,20 @@ const parseResponse = async (response: Response): Promise<any> => {
 // Возвращает данные, за которые отвечает операция `loadEditorData`.
 const loadEditorData = async () => {
   return await parseResponse(await fetch(EDITOR_API_URL, {cache: 'no-store'}))
+}
+
+// Загружает существующие папки и уровни, ещё не включённые в игру.
+const loadEditorLibrary = async () => parseResponse(await fetch(LIBRARY_API_URL, {cache: 'no-store'}))
+
+// Создаёт новый исходник либо обновляет открытый уровень библиотеки.
+const saveEditorLibraryLevel = async (directory: string, name: string, map: string[], appearance: LevelAppearance, create: boolean) => {
+  return parseResponse(
+    await fetch(LIBRARY_API_URL, {
+      method: create ? 'POST' : 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({directory, name, map, appearance}),
+    }),
+  )
 }
 
 // Выполняет отдельную операцию `saveEditorLevel`.
@@ -79,6 +94,8 @@ export {
   fillEditorLocation,
   generateEditorLevel, // Процедурная генерация карты
   loadEditorData, // Загрузка каталога уровней
+  loadEditorLibrary,
   saveEditorLevel, // Перезапись открытого уровня
+  saveEditorLibraryLevel,
   storeLevelDraft, // Передача черновика в игровую вкладку
 }

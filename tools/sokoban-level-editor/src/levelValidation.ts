@@ -1,4 +1,4 @@
-import {SOKOBAN_SETTINGS} from '@/game/sokoban/config/settings.js'
+import {SOKOBAN_SETTINGS} from '../../../src/game/sokoban/config/settings.js'
 import type {Position, ValidationIssue, ValidationResult} from './editorTypes.js'
 import {getOccupant} from './levelEditing.js'
 
@@ -124,4 +124,6 @@ const validateLevelMap = (map: string[]): ValidationResult => {
   return {isValid: !issues.some((issue) => issue.type === 'error'), issues, invalidPositions}
 }
 
-export {validateLevelMap}
+export {
+  validateLevelMap,
+}

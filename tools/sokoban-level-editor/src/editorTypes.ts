@@ -27,6 +27,25 @@ type EditorLevel = {
   map: string[]
   authorId: string
   number?: number
+  libraryPath?: string
+}
+
+type LibraryLevel = EditorLevel & {
+  libraryPath: string
+  appearance: LevelAppearance
+}
+
+type LibraryDirectory = {
+  path: string
+  collection: string
+  section: string
+  authorId: string
+}
+
+type LibraryData = {
+  directories: LibraryDirectory[]
+  levels: LibraryLevel[]
+  usedIds: string[]
 }
 
 type EditorState = {
@@ -75,6 +94,9 @@ export type {
   EditorLocation,
   EditorState,
   LevelAppearance,
+  LibraryData,
+  LibraryDirectory,
+  LibraryLevel,
   Offset,
   Position,
   ValidationIssue,
