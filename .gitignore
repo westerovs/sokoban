@@ -7,6 +7,4 @@
 .DS_Store
 /temp/
 /dist/
-/src/game/generatedAssets/buildMeta.ts
-/src/game/generatedAssets/soundList.ts
-/src/game/generatedAssets/sokobanTileCatalog.ts
+/src/game/generatedAssets/

@@ -406,9 +406,20 @@ const saveCurrentLevel = async () => {
   showStatus('Уровень сохранён, файл локации и оформление обновлены')
 }
 
+// Предупреждает о перезаписи конкретного уровня перед отправкой изменений.
+const confirmLevelOverwrite = () => {
+  if (!selectedLevel) return false
+  const location = editorData.locations.find(({levels}) => levels.some(({id}) => id === selectedLevel?.id))
+  const target = selectedLevel.libraryPath
+    ? `Файл: levels/library/${selectedLevel.libraryPath}`
+    : `Локация: ${location?.id ?? 'не найдена'}\nУровень: ${selectedLevel.id}`
+  return window.confirm(`Это действие перезапишет текущий уровень.\n\n${target}\n\nПродолжить сохранение?`)
+}
+
 // Сохраняет компактную карту и оформление в исходные файлы локации.
 const save = async () => {
   if (!session || isSaving || isGenerating || !getValidation().isValid) return false
+  if (!confirmLevelOverwrite()) return false
   setSaving(true)
   try {
     await saveCurrentLevel()
@@ -599,7 +610,7 @@ const createEditorPanels = (libraryData: LibraryData) => {
     selectBrush,
   )
   generatorPanel = new LevelGeneratorPanel(getElement<HTMLElement>('#generator-controls'), generateLevel)
-  libraryPanel = new LevelLibraryPanel(selectLibraryLevel, saveAs, (error) => showStatus(getErrorMessage(error), 'error'))
+  libraryPanel = new LevelLibraryPanel(saveAs)
   libraryPanel.setData(libraryData)
   navigation = new LevelNavigation(
     elements.locationSelect,

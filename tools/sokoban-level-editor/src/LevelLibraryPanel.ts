@@ -1,5 +1,5 @@
 import {loadEditorLibrary} from './editorApi.js'
-import type {LibraryData, LibraryLevel} from './editorTypes.js'
+import type {LibraryData} from './editorTypes.js'
 
 // Управляет выбором самостоятельных уровней и диалогом сохранения нового XSB-файла.
 
@@ -20,22 +20,13 @@ export default class LevelLibraryPanel {
   #directory = getElement<HTMLSelectElement>('save-as-directory')
   #name = getElement<HTMLInputElement>('save-as-name')
   #error = getElement<HTMLParagraphElement>('save-as-error')
-  #select = getElement<HTMLSelectElement>('library-level-select')
   #cancel = getElement<HTMLButtonElement>('save-as-cancel')
   #submit = getElement<HTMLButtonElement>('save-as-submit')
-  #onSelect: (level: LibraryLevel) => boolean
   #onSave: (directory: string, name: string) => Promise<void>
-  #onError: (error: unknown) => void
 
   // Сохраняет обработчики выбора, записи и уведомлений.
-  constructor(
-    onSelect: (level: LibraryLevel) => boolean,
-    onSave: (directory: string, name: string) => Promise<void>,
-    onError: (error: unknown) => void,
-  ) {
-    this.#onSelect = onSelect
+  constructor(onSave: (directory: string, name: string) => Promise<void>) {
     this.#onSave = onSave
-    this.#onError = onError
     this.#init()
   }
 
@@ -47,22 +38,11 @@ export default class LevelLibraryPanel {
   // Обновляет список после загрузки или успешного сохранения.
   setData(data: LibraryData) {
     this.#data = data
-    this.#select.replaceChildren(new Option('Выберите файл библиотеки', ''))
-    data.directories.forEach((directory) => {
-      const levels = data.levels.filter((level) => level.libraryPath.startsWith(`${directory.path}/`))
-      if (!levels.length) return
-      const group = document.createElement('optgroup')
-      group.label = directory.path
-      group.append(...levels.map((level) => new Option(`${level.id}.xsb`, level.libraryPath)))
-      this.#select.append(group)
-    })
-    this.selectPath(this.#selectedPath)
   }
 
   // Отмечает открытый файл или очищает выбор при переходе к игровому уровню.
   selectPath(libraryPath = '') {
     this.#selectedPath = libraryPath
-    this.#select.value = libraryPath
     const output = getElement<HTMLOutputElement>('library-current-path')
     output.hidden = !libraryPath
     output.textContent = libraryPath ? `Библиотека: ${libraryPath}` : ''
@@ -99,12 +79,6 @@ export default class LevelLibraryPanel {
     this.#dialog.addEventListener('cancel', (event) => {
       if (this.#isSaving) event.preventDefault()
     })
-    this.#select.addEventListener('change', () => this.#selectLevel())
-    getElement('library-refresh').addEventListener('click', () => {
-      loadEditorLibrary()
-        .then((data) => this.setData(data))
-        .catch(this.#onError)
-    })
   }
 
   // Заполняет коллекции из существующих разделов на диске.
@@ -140,12 +114,6 @@ export default class LevelLibraryPanel {
   #updatePath() {
     getElement('save-as-path').textContent = `levels/library/${this.#directory.value}/${this.#name.value}.xsb`
     this.#error.textContent = ''
-  }
-
-  // Передаёт выбранный файл редактору с восстановлением отменённого выбора.
-  #selectLevel() {
-    const level = this.#data.levels.find((level) => level.libraryPath === this.#select.value)
-    if (!level || !this.#onSelect(level)) this.#select.value = this.#selectedPath
   }
 
   // Блокирует повторную запись и закрытие формы во время запроса.
