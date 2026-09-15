@@ -51,7 +51,7 @@
     "level": "Уровень",
     "sokoban.deadlock": "Ящик заблокирован — отмените ход",
     "sokoban.record": "Рекорд: {{record}}",
-    "sokoban.pushes": "Толчки: {{pushes}}",
+    "sokoban.pushes": "Сдвиги: {{pushes}}",
     "sokoban.personalBestPushes": "Ваш рекорд: {{pushes}}",
     "sokoban.author": "Автор: {{author}}",
     "btnNextText": "Продолжить",

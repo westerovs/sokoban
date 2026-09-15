@@ -1,7 +1,6 @@
 import {gsap} from 'gsap'
-import type Game from '../../../Game.js'
-import {GAME_EVENTS} from '../../../gameConfig/gameEvents.js'
-import Logger, {MODULES} from '../../../utils/Logger.js'
+import type Game from '@/game/Game.ts'
+import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.ts'
 
 // Измеряет время прохождения уровня и публикует секундные обновления.
 
@@ -92,7 +91,7 @@ export default class Stopwatch {
 
   // Останавливает секундомер и удаляет его события.
   clear = (log = false) => {
-    if (log) Logger.log(MODULES.DestroyMessage, '[Stopwatch] module clear')
+    if (log) console.log('[Stopwatch] module clear')
     if (this.timerTween) {
       this.timerTween.kill()
       this.timerTween = null
