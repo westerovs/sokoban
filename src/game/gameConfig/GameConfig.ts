@@ -42,7 +42,7 @@ export default class GameConfig {
 
   // Подключает сгенерированный каталог уровней.
   loadLevelsJson = async () => {
-    this.levels = levels as GameLevels
+    this.levels = levels
   }
 
   // Повторно использует текущую загрузку каталога уровней.

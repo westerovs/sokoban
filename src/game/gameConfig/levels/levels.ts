@@ -16,9 +16,10 @@ import garden4Location from '../../generatedAssets/levels/garden-4.json'
 import mine1Location from '../../generatedAssets/levels/mine-1.json'
 import mine2Location from '../../generatedAssets/levels/mine-2.json'
 import mine3Location from '../../generatedAssets/levels/mine-3.json'
+import type {GameLevels} from './levelTypes.js'
 
 // Список доступных в игре локаций в порядке их прохождения.
-const levels = {
+const levels: GameLevels = {
   locations: [
     // Путешествие 1
     garden1Location,
