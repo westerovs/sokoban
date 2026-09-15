@@ -162,12 +162,16 @@ export default class LevelProgress {
     const entry = getLevelEntryById(levelId)
     if (!entry) return false
 
-    getLevelEntries()
+    const completedLevelIds = getLevelEntries()
       .slice(0, entry.globalIndex)
-      .forEach(({level}) => this.#addCompletedLevel(level.id))
-    getLocations()
+      .map(({level}) => level.id)
+    const visitedLocationIds = getLocations()
       .slice(0, entry.locationIndex + 1)
-      .forEach(({id}) => this.#markLocationVisited(id))
+      .map(({id}) => id)
+
+    this.#storage.playerData.completedLevelIds = completedLevelIds
+    this.#storage.playerData.unlockedLocationIds = [...visitedLocationIds]
+    this.#storage.playerData.celebratedLocationIds = [...visitedLocationIds]
     this.#storage.playerData.lastPlayedLevelId = entry.level.id
     this.#setSelectedEntry(entry)
     if (save) this.#storage.save()
@@ -290,12 +294,6 @@ export default class LevelProgress {
     if (!this.#storage.playerData.celebratedLocationIds.includes(locationId)) {
       this.#storage.playerData.celebratedLocationIds.push(locationId)
     }
-  }
-
-  // Помечает локацию уже открытой и показанной игроку.
-  #markLocationVisited = (locationId: string) => {
-    this.#addUnlockedLocation(locationId)
-    this.#addCelebratedLocation(locationId)
   }
 
   #findNewlyUnlockedLocation = (unlockedIdsBefore: Set<string>) => {
