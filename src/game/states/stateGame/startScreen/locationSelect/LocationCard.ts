@@ -1,9 +1,10 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Graphics, Sprite, Text} from 'pixi.js'
-import {primaryFontStyle} from '../../../../styles.js'
-import GameUtils from '../../../../utils/gameUtils/GameUtils.js'
+import {primaryFontStyle} from '@/game/styles.ts'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../menuTypes.js'
+import LocationProgressView from './LocationProgressView.js'
 
 // Отображает карточку локации, её доступность и прогресс игрока.
 
@@ -22,8 +23,7 @@ export default class LocationCard extends Container {
   #location: LocationSelectionState
   #lockIcon!: Sprite
   #onSelect: (locationId: string) => void
-  #progressText!: Text
-  #status!: Graphics
+  #progress!: LocationProgressView
   #title!: Text
 
   // Сохраняет данные локации и создаёт интерактивную карточку.
@@ -44,10 +44,8 @@ export default class LocationCard extends Container {
   // Обновляет доступность, прогресс и визуальное состояние карточки.
   setState = (state: LocationSelectionState) => {
     this.#drawFrame(state)
-    this.#drawStatus(state)
+    this.#progress.setState(state)
     this.#lockIcon.visible = !state.isUnlocked
-    this.#progressText.visible = state.isUnlocked
-    this.#progressText.text = state.isCompleted ? i18next.t('locationSelect.completed') : `${state.completedCount} / ${state.totalCount}`
     this.#background.tint = state.isUnlocked ? 0xffffff : LOCKED_ART_TINT
     this.eventMode = state.isUnlocked ? 'static' : 'none'
     this.alpha = state.isUnlocked ? 1 : 0.78
@@ -59,10 +57,10 @@ export default class LocationCard extends Container {
     this.#frame = new Graphics({label: `${this.label}-frame`})
     this.addChild(this.#frame)
     this.#createBackground()
-    this.#createTexts()
-    this.#status = new Graphics({label: `${this.label}-status`})
+    this.#createTitle()
+    this.#createProgress()
     this.#lockIcon = GameUtils.createSprite('icon-lock', {label: `${this.label}-lock`, scale: 1.5})
-    this.addChild(this.#status, this.#lockIcon)
+    this.addChild(this.#lockIcon)
     this.on('pointertap', this.#handleSelect)
     this.on('pointerenter', this.#handlePointerEnter)
     this.on('pointerleave', this.#handlePointerLeave)
@@ -79,30 +77,34 @@ export default class LocationCard extends Container {
     this.addChild(this.#background, this.#backgroundMask)
   }
 
-  // Создаёт заголовок и подпись прогресса.
-  #createTexts = () => {
-    this.#title = this.#createText(i18next.t(this.#location.titleKey), -142, 29)
-    this.#progressText = this.#createText('', 143, 24)
-    this.addChild(this.#title, this.#progressText)
+  // Создаёт заголовок карточки.
+  #createTitle = () => {
+    this.#title = GameUtils.createText(i18next.t(this.#location.titleKey), {
+      name: `${this.label}-title`,
+      style: {
+        ...primaryFontStyle,
+        align: 'center',
+        fill: 0xffefb0,
+        fontSize: 28,
+        stroke: {color: 0x102217, width: 5, join: 'round'},
+      },
+    })
+    this.#title.position.set(0, -142)
+    this.addChild(this.#title)
   }
 
-  // Создаёт текстовый элемент карточки.
-  #createText = (text: string, y: number, fontSize: number) => {
-    const label = y < 0 ? 'title' : 'progress'
-    const view = new Text({
-      label: `${this.label}-${label}`,
-      text,
-      style: {...primaryFontStyle, align: 'center', fill: 0xffefb0, fontSize, stroke: {color: 0x102217, width: 5, join: 'round'}},
-    })
-    view.anchor.set(0.5)
-    view.position.set(0, y)
-    return view
+  // Добавляет самостоятельное отображение прогресса локации.
+  #createProgress = () => {
+    this.#progress = new LocationProgressView(`${this.label}-progress`)
+    this.#progress.position.set(0, 140)
+    this.addChild(this.#progress)
   }
 
   // Рисует рамку согласно состоянию локации.
-  #drawFrame = ({isCurrent, isUnlocked}: LocationSelectionState) => {
-    const color = isCurrent ? 0xd9ff5d : isUnlocked ? 0xb99951 : 0x655f4b
+  #drawFrame = ({isCurrent}: LocationSelectionState) => {
+    const color = isCurrent ? 0xd9ff5d : 0x000000
     const width = isCurrent ? 6 : 4
+
     this.#frame
       .clear()
       .roundRect(-CARD_WIDTH / 2, -CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT, 22)
@@ -119,18 +121,6 @@ export default class LocationCard extends Container {
       .clear()
       .roundRect(-CARD_WIDTH / 2 + inset, -CARD_HEIGHT / 2 + inset, CARD_WIDTH - frameWidth, CARD_HEIGHT - frameWidth, 22 - inset)
       .fill(0xffffff)
-  }
-
-  // Рисует отметку завершённой локации.
-  #drawStatus = ({isCompleted, isUnlocked}: LocationSelectionState) => {
-    this.#status.clear()
-    if (isUnlocked && isCompleted) this.#drawCheck()
-  }
-
-  // Рисует значок завершения.
-  #drawCheck = () => {
-    this.#status.circle(101, 151, 24).fill({color: 0x71972c}).stroke({color: 0xe9d084, width: 4})
-    this.#status.moveTo(90, 151).lineTo(99, 160).lineTo(114, 141).stroke({color: 0xffffff, width: 6})
   }
 
   // Передаёт выбор локации контроллеру.
