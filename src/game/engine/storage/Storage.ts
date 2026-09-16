@@ -39,7 +39,6 @@ export default class Storage {
   #isDebug = false
   #isReadOnly = false
 
-  // Сохраняет игровую шину событий и поддерживает единственный экземпляр хранилища.
   constructor(game: Game) {
     if (typeof Storage.instance === 'object') {
       return Storage.instance

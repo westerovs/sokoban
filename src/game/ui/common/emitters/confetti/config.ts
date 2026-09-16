@@ -11,8 +11,8 @@ const CONFETTI_SETTINGS = Object.freeze({
   velocityY: Object.freeze({min: 80, max: 210}),
   spin: Object.freeze({min: 2.2, max: 6.4}),
   sway: Object.freeze({amplitude: 55, frequency: 4}),
-  desktop: Object.freeze({frequency: 0.025, particlesPerWave: 3, maxParticles: 260}),
-  mobile: Object.freeze({frequency: 0.045, particlesPerWave: 2, maxParticles: 110}),
+  desktop: Object.freeze({frequency: 0.025, particlesPerWave: 3, maxParticles: 160}),
+  mobile: Object.freeze({frequency: 0.045, particlesPerWave: 2, maxParticles: 160}),
 })
 
 export {CONFETTI_SETTINGS}

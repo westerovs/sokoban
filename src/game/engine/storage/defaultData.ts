@@ -1,4 +1,4 @@
-import {PACKAGE_VERSION} from '../../generatedAssets/buildMeta.js'
+import {PACKAGE_VERSION} from '@/game/generatedAssets/buildMeta.ts'
 
 // Описывает ключи, значения по умолчанию и сериализуемые поля профиля игрока.
 
@@ -6,6 +6,8 @@ const STORAGE_KEYS = {
   version: 'version',
   userLevel: 'userLevel',
   coins: 'coins',
+  playerId: 'playerId',
+  savedAt: 'savedAt',
 
   // store
   hints: 'hints',
@@ -25,30 +27,29 @@ const STORAGE_KEYS = {
   unlockedLocationIds: 'unlockedLocationIds',
   celebratedLocationIds: 'celebratedLocationIds',
   locationPageIndex: 'locationPageIndex',
-  skinIndex: 'skinIndex',
+
   // options
   option_isPlayMusic: 'option_isPlayMusic',
   option_isPlaySFX: 'option_isPlaySFX',
   option_zoom: 'option_zoom',
   option_sokobanDpad: 'option_sokobanDpad',
+
   // timer reward
   timer_RewardMagnifier: 'timer_RewardMagnifier',
   timer_RewardDarts: 'timer_RewardDarts',
   timer_RewardCompass: 'timer_RewardCompass',
+
   // tutorials
   isTutorial_shadows: 'isTutorial_shadows',
   isTutorial_words: 'isTutorial_words',
   isTutorial_anagrams: 'isTutorial_anagrams',
   isTutorial_generator: 'isTutorial_generator',
   isTutorial_identical: 'isTutorial_identical',
-
   hintDartsIsAvailable: 'hintDartsIsAvailable',
   hintCompassIsAvailable: 'hintCompassIsAvailable',
 
-  playerId: 'playerId',
-  savedAt: 'savedAt',
-
   // skins
+  skinIndex: 'skinIndex',
   currentSkin: 'currentSkin',
   skins: 'skins',
 } as const
