@@ -1,4 +1,5 @@
 import Locator from '@/game/engine/Locator.ts'
+import type {SokobanResult} from '@/game/engine/storage/defaultData.js'
 import type Storage from '@/game/engine/storage/Storage.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import LoadUtils from '@/game/utils/gameUtils/LoadUtils.js'
@@ -58,18 +59,16 @@ export default class LevelConfig {
   }
 
   // Записывает прохождение текущего уровня.
-  updateSavedLevel(actualPushes?: number) {
-    const personalBestPushes = Number.isInteger(actualPushes)
-      ? this.#storage.updateSokobanPushRecord(this.#config!.id, actualPushes!)
-      : null
+  updateSavedLevel(run?: SokobanResult) {
+    const records = run ? this.#storage.updateSokobanRecords(this.#config!.id, run) : null
     const progress = new LevelProgress(this.#storage)
     const result = progress.completeLevel(this.#config!.id)
 
     if (result.isGameCompleted && result.isFirstCompletion) this.#completeGame()
     return {
       ...result,
-      actualPushes: Number.isInteger(actualPushes) ? actualPushes! : null,
-      personalBestPushes,
+      run: run ?? null,
+      records,
     }
   }
 

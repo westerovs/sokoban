@@ -59,7 +59,12 @@ type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]
 type SokobanPushRecord = {
   levelId: string
   pushes: number
+  steps?: number
+  seconds?: number
 }
+
+type SokobanResult = {pushes: number; steps: number; seconds: number}
+type SokobanRecords = Record<keyof SokobanResult, number | null>
 
 type PlayerData = {
   version: string
@@ -184,5 +189,7 @@ export type {
   DataType,
   PlayerData,
   SokobanPushRecord,
+  SokobanRecords,
+  SokobanResult,
   StorageKey,
 }

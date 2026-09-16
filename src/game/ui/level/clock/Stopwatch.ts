@@ -1,4 +1,3 @@
-import {gsap} from 'gsap'
 import Locator from '@/game/engine/Locator.ts'
 import type Game from '@/game/Game.ts'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.ts'
@@ -8,58 +7,41 @@ import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.ts'
 const STOPWATCH_LABELS = {
   level: 'level', // Метка секундомера игрового уровня
 }
+const UPDATE_INTERVAL_MS = 250 // Частота проверки текущей секунды
 
 type StopwatchOptions = {
   game: Game
   label?: string
 }
 
-// todo remove duration
 export default class Stopwatch {
-  game = Locator.game
-  duration: number
+  game: Game
   label: string
-  remainingTime: number
-  timerTween: gsap.core.Tween | null
-  elapsedTime: number
-  #debug = false
+  #elapsedMs = 0
+  #startedAt: number | null = null
+  #interval: ReturnType<typeof setInterval> | null = null
+  #lastSecond = -1
 
   // Сохраняет игру и начальные значения секундомера.
-  constructor({label = 'defaultStopwatch'}: StopwatchOptions) {
-    this.duration = Math.floor(9999)
+  constructor({game, label = 'defaultStopwatch'}: StopwatchOptions) {
+    this.game = game
     this.label = label
-    this.remainingTime = this.duration
-    this.timerTween = null
-    this.elapsedTime = 0
   }
 
   // Запускает отсчёт и ежесекундные события.
-  start = () => {
+  start() {
+    this.clear()
+    this.#elapsedMs = 0
+    this.#lastSecond = -1
+    this.#startedAt = Locator.options.isVisible ? null : Date.now()
     this.#setEvents(true)
-
-    let lastTime = Math.ceil(this.remainingTime)
-
-    this.timerTween = gsap.to(this, {
-      elapsedTime: this.duration, // Время идет вперед
-      duration: this.duration,
-      ease: 'none',
-      onUpdate: () => {
-        const currentTime = Math.floor(this.elapsedTime) // Округляем в меньшую сторону
-
-        if (currentTime !== lastTime) {
-          lastTime = currentTime
-          this.#tick(currentTime)
-        }
-      },
-      onComplete: () => {
-        this.clear()
-      },
-    })
+    this.#interval = setInterval(() => this.#update(), UPDATE_INTERVAL_MS)
+    this.#update()
   }
 
   // Возвращает прошедшее время по часам, минутам и секундам.
   get fullDataTime() {
-    const elapsed = Math.floor(this.elapsedTime)
+    const elapsed = this.seconds
 
     return {
       h: Math.floor(elapsed / 3600),
@@ -70,39 +52,63 @@ export default class Stopwatch {
 
   // Возвращает целое число прошедших секунд.
   get seconds() {
-    return Math.floor(this.elapsedTime)
+    const runningMs = this.#startedAt === null ? 0 : Math.max(0, Date.now() - this.#startedAt)
+    return Math.floor((this.#elapsedMs + runningMs) / 1000)
+  }
+
+  // Приостанавливает отсчёт с сохранением долей секунды.
+  pause() {
+    if (this.#startedAt === null) return
+    this.#elapsedMs += Math.max(0, Date.now() - this.#startedAt)
+    this.#startedAt = null
+    this.#update()
+  }
+
+  // Продолжает только запущенный секундомер после закрытия настроек.
+  resume() {
+    if (this.#interval === null || this.#startedAt !== null) return
+    this.#startedAt = Date.now()
+  }
+
+  // Останавливает секундомер и удаляет его события.
+  clear() {
+    this.pause()
+    if (this.#interval !== null) {
+      clearInterval(this.#interval)
+      this.#interval = null
+      this.game.emit(GAME_EVENTS.Stopwatch.kill, {label: this.label})
+    }
+    this.#setEvents(false)
   }
 
   // Включает или отключает события автоматической остановки.
-  #setEvents = (bool: boolean) => {
+  #setEvents(bool: boolean) {
     const status = bool ? 'on' : 'off'
 
-    this.game[status](GAME_EVENTS.completeLevel, this.clear)
-    this.game[status](GAME_EVENTS.clearLevel, this.clear)
+    this.game[status](GAME_EVENTS.completeLevel, this.clear, this)
+    this.game[status](GAME_EVENTS.clearLevel, this.clear, this)
+    this.game[status](GAME_EVENTS.Options.show, this.pause, this)
+    this.game[status](GAME_EVENTS.Options.hide, this.resume, this)
+  }
+
+  // Публикует обновление только при смене целой секунды.
+  #update() {
+    const seconds = this.seconds
+    if (seconds === this.#lastSecond) return
+    this.#lastSecond = seconds
+    this.#tick(seconds)
   }
 
   // Публикует очередное секундное обновление.
-  #tick = (currentTime: number) => {
+  #tick(currentTime: number) {
     this.game.emit(GAME_EVENTS.Stopwatch.tick, {
       label: this.label,
       currentTime,
       currentTimeWithZero: currentTime > 9 ? currentTime : `0${currentTime}`,
     })
-
-    if (this.#debug) console.log('currentTime', currentTime)
-  }
-
-  // Останавливает секундомер и удаляет его события.
-  clear = (log = false) => {
-    if (log) console.log('[Stopwatch] module clear')
-    if (this.timerTween) {
-      this.timerTween.kill()
-      this.timerTween = null
-      this.game.emit(GAME_EVENTS.Stopwatch.kill, {label: this.label})
-    }
-
-    this.#setEvents(false)
   }
 }
 
-export {STOPWATCH_LABELS}
+export {
+  STOPWATCH_LABELS, // Метки игровых секундомеров
+}

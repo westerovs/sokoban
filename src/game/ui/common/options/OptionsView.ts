@@ -185,9 +185,7 @@ export default class OptionsView extends BaseModal {
     if (isVisible) SdkManager.gameplayStop()
     else SdkManager.gameplayStart()
 
-    if (!isVisible) {
-      this.#game.emit(GAME_EVENTS.Options.hide)
-    }
+    this.#game.emit(isVisible ? GAME_EVENTS.Options.show : GAME_EVENTS.Options.hide)
 
     this.#timeLine = await gsap
       .timeline({ease: 'linear'})

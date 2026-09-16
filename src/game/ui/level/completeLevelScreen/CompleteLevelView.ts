@@ -1,9 +1,11 @@
 import i18next from 'i18next'
-import {Container} from 'pixi.js'
+import {Container, Graphics} from 'pixi.js'
 import ButtonContainer from '@/game/components/buttons/ButtonContainer.js'
 import {applyInteractive} from '@/game/components/buttons/buttons.js'
+import Locator from '@/game/engine/Locator.js'
 import SdkManager from '@/game/engine/SdkManager.js'
 import {GAME_NAMES, WORLD} from '@/game/gameConfig/constants.js'
+import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 import {GAME_NAME} from '@/game/generatedAssets/buildMeta.js'
 import {primaryFontStyle} from '@/game/styles.js'
@@ -33,6 +35,8 @@ const STYLES = {
 export default class CompleteLevelView extends Container {
   #locationUnlockCelebration!: CompleteLocationUnlockCelebration
   #statsView!: CompleteLevelStatsView
+  #content!: Container
+  #backdrop!: Graphics
   #refs: Record<string, any>
 
   // Сохраняет ссылки уровня и создаёт элементы экрана завершения.
@@ -45,8 +49,30 @@ export default class CompleteLevelView extends Container {
   }
 
   // Показывает карточку новой локации, если она была открыта.
-  showLocationUnlock = (location: LocationDefinition | null) => {
-    this.#locationUnlockCelebration.show(location)
+  async showLocationUnlock(location: LocationDefinition | null) {
+    if (!location) return
+    this.#content.visible = false
+    this.visible = true
+    await this.#locationUnlockCelebration.show(location)
+    if (this.destroyed) return
+    this.visible = false
+    this.#content.visible = true
+  }
+
+  // Размещает конфетти над затемнением, но под всеми элементами интерфейса.
+  placeConfettiBehindUi(particles: Container) {
+    this.addChildAt(particles, this.getChildIndex(this.#content))
+  }
+
+  // Запускает анимации улучшенных рекордов на видимом экране.
+  animateRecords() {
+    this.#statsView.animateRecords()
+  }
+
+  // Удаляет подписку на изменение размеров экрана.
+  destroy(options?: Parameters<Container['destroy']>[0]) {
+    Locator.game.off(GAME_EVENTS.gameResize, this.#resize, this)
+    super.destroy(options)
   }
 
   // Показывает результаты завершённого уровня.
@@ -57,17 +83,32 @@ export default class CompleteLevelView extends Container {
   // Регистрирует представление и создаёт его содержимое.
   #init = () => {
     this.#refs.completeLevelView = this
+    this.#backdrop = new Graphics({label: 'complete-level-backdrop', eventMode: 'static'})
+    this.#content = new Container({label: 'complete-level-content'})
+    this.addChild(this.#backdrop, this.#content)
     this.#createButtonsContainer()
     this.#statsView = new CompleteLevelStatsView()
-    this.#statsView.position.set(WORLD.HALF_W, 555)
+    this.#statsView.position.set(0, -150)
     this.#locationUnlockCelebration = new CompleteLocationUnlockCelebration()
-    this.addChild(this.#statsView, this.#locationUnlockCelebration)
+    this.#content.addChild(this.#statsView)
+    this.addChild(this.#locationUnlockCelebration)
+    Locator.game.on(GAME_EVENTS.gameResize, this.#resize, this)
+    this.#resize()
+  }
+
+  // Вписывает весь экран результатов в доступную ширину и высоту.
+  #resize() {
+    const {width, height} = Locator.uiLayer.uiData
+    this.#content.position.set(WORLD.HALF_W, WORLD.HALF_H)
+    this.#content.scale.set(Math.min(1, (width - 40) / 590, (height - 60) / 960))
+    this.#backdrop.clear().rect(0, 0, WORLD.WIDTH, WORLD.HEIGHT).fill({color: 0x07130c, alpha: 0.76})
+    this.#locationUnlockCelebration.resize()
   }
 
   // Создаёт контейнер основных кнопок.
   #createButtonsContainer() {
     const buttonsContainer = new Container({label: 'btnsContainer'})
-    buttonsContainer.position.set(WORLD.HALF_W, 800)
+    buttonsContainer.position.set(0, 190)
 
     buttonsContainer.addChild(this.#createButtonNext())
 
@@ -82,7 +123,7 @@ export default class CompleteLevelView extends Container {
       )
     }
 
-    this.addChild(buttonsContainer)
+    this.#content.addChild(buttonsContainer)
   }
 
   // Создаёт кнопку перехода к следующему уровню.

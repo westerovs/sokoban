@@ -19,7 +19,6 @@ type PerformanceSettings = {
 type ConfettiConfig = {
   readonly enabled: boolean
   readonly revealDuration: number
-  readonly emissionDuration: number
   readonly gravity: number
   readonly spawnHeight: number
   readonly colors: readonly number[]
@@ -60,7 +59,6 @@ export default class Confetti {
   #bounds = new Rectangle(0, 0, 1, 1)
   #fadeTween: ReturnType<typeof gsap.to> | null = null
   #spawnElapsed = 0
-  #emissionRemaining = 0
   #isRunning = false
 
   init = (): void => {
@@ -71,9 +69,15 @@ export default class Confetti {
     this.#setEvents(true)
   }
 
+  // Возвращает слой частиц для размещения между затемнением и интерфейсом.
+  get particleView() {
+    return this.#particleContainer
+  }
+
   destroy = (): void => {
     this.#setEvents(false)
     this.#stop()
+    this.#particleContainer?.destroy()
     this.#container?.destroy({children: true})
     this.#container = null
     this.#fade = null
@@ -101,7 +105,7 @@ export default class Confetti {
     this.#container = new Container({label: 'confetti', visible: false})
     this.#fade = new Graphics({label: 'confetti-fade'})
     this.#particleContainer = this.#createParticleContainer()
-    this.#container.addChild(this.#fade, this.#particleContainer)
+    this.#container.addChild(this.#fade)
   }
 
   #createParticleContainer(): ParticleContainer {
@@ -120,11 +124,11 @@ export default class Confetti {
     if (this.#isRunning) return
 
     this.#game.view.addChild(this.#container!)
+    this.#game.view.addChild(this.#particleContainer!)
     this.#resize()
     this.#container!.visible = true
     this.#particleContainer!.visible = true
     this.#spawnElapsed = 0
-    this.#emissionRemaining = this.#config.emissionDuration
     this.#isRunning = true
     this.#startFade()
     this.#game.app.ticker.add(this.#update)
@@ -193,13 +197,9 @@ export default class Confetti {
 
     this.#updateEmission(delta)
     this.#updateParticles(delta)
-    this.#finishWhenEmpty()
   }
 
   #updateEmission(delta: number) {
-    if (this.#emissionRemaining <= 0) return
-
-    this.#emissionRemaining = Math.max(0, this.#emissionRemaining - delta)
     this.#spawnElapsed += delta
     const {frequency} = this.#config.performance
 
@@ -286,14 +286,6 @@ export default class Confetti {
       item.particle.x = this.#bounds.width
       item.velocityX = -Math.abs(item.velocityX)
     }
-  }
-
-  #finishWhenEmpty() {
-    if (this.#emissionRemaining > 0 || this.#particles.length > 0) return
-
-    this.#game.app.ticker.remove(this.#update)
-    this.#isRunning = false
-    this.#particleContainer!.visible = false
   }
 
   #randomRange({min, max}: Range): number {

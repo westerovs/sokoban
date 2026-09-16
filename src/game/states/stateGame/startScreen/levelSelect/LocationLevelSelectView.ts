@@ -1,5 +1,6 @@
 import i18next from 'i18next'
 import {Container, FederatedPointerEvent, Graphics, Text} from 'pixi.js'
+import {fitTextWidth} from '@/game/utils/fitTextWidth.js'
 import ButtonContainer from '../../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../../engine/Locator.ts'
 import LocalStorage from '../../../../engine/storage/LocalStorage.js'
@@ -8,6 +9,7 @@ import {openSokobanLevelEditor} from '../../../../sokoban/editor/openSokobanLeve
 import {primaryFontStyle} from '../../../../styles.js'
 import type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition} from '../menuTypes.js'
 import LevelPreview from './LevelPreview.js'
+import LevelPreviewStatsView from './LevelPreviewStatsView.js'
 import LevelSelectButton from './LevelSelectButton.js'
 
 /**
@@ -31,7 +33,7 @@ export default class LocationLevelSelectView extends Container {
   #onLevelSelect: GameMenuCallbacks['onLevelSelect']
   #playButton!: ButtonContainer
   #preview!: LevelPreview
-  #personalBestText!: Text
+  #records!: LevelPreviewStatsView
   #selectedEntry: LevelEntry | null = null
   #title!: Text
 
@@ -69,9 +71,9 @@ export default class LocationLevelSelectView extends Container {
 
   // Обновляет состояние через операцию `updateAdaptive`.
   updateAdaptive = () => {
-    const {width} = Locator.uiLayer.uiData
+    const {width, height} = Locator.uiLayer.uiData
     this.position.set(0)
-    this.scale.set(Math.min((width - 28) / 560, 1))
+    this.scale.set(Math.min((width - 28) / 560, (height - 70) / 1030, 1))
     this.#layoutPreview()
     this.#layoutLevels()
     this.#layoutActionButtons()
@@ -98,7 +100,13 @@ export default class LocationLevelSelectView extends Container {
       style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 64, stroke: {color: 0x19251d, width: 7, join: 'round'}},
     })
     this.#title.anchor.set(0.5)
-    this.addChild(this.#title)
+    this.#difficultyText = new Text({
+      label: 'level-preview-difficulty',
+      text: '',
+      style: {...primaryFontStyle, fill: 0xffedbd, fontSize: 27, stroke: {color: 0x19251d, width: 3, join: 'round'}},
+    })
+    this.#difficultyText.anchor.set(0.5)
+    this.addChild(this.#title, this.#difficultyText)
   }
 
   // Создаёт данные или представление для операции `createLevelsPanel`.
@@ -108,21 +116,9 @@ export default class LocationLevelSelectView extends Container {
       .roundRect(-LEVELS_PANEL_WIDTH / 2, -LEVELS_PANEL_HEIGHT / 2, LEVELS_PANEL_WIDTH, LEVELS_PANEL_HEIGHT, 28)
       .fill({color: 0x132319, alpha: 0.92})
     panel.stroke({color: 0xa98c48, width: 5})
-    this.#difficultyText = new Text({
-      label: 'level-preview-difficulty',
-      text: '',
-      style: {...primaryFontStyle, fill: 0xffffff, fontSize: 34},
-    })
-    this.#difficultyText.anchor.set(0.5)
-    this.#difficultyText.position.set(-150, -108)
-    this.#personalBestText = new Text({
-      label: 'level-preview-personal-best',
-      text: '',
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 23},
-    })
-    this.#personalBestText.anchor.set(0.5)
-    this.#personalBestText.position.set(150, -108)
-    this.#levelsContainer.addChild(panel, this.#difficultyText, this.#personalBestText)
+    this.#records = new LevelPreviewStatsView()
+    this.#records.y = -120
+    this.#levelsContainer.addChild(panel, this.#records)
     this.#createAuthorText()
   }
 
@@ -132,7 +128,7 @@ export default class LocationLevelSelectView extends Container {
     this.#authorText = new Text({
       label: 'level-preview-author',
       text: '',
-      style: {...primaryFontStyle, fill: 0xffe6a1, stroke: {color: 0x19251d, width: 3, join: 'round'}},
+      style: {...primaryFontStyle, fontSize: 26, fill: 0xffe6a1, stroke: {color: 0x19251d, width: 3, join: 'round'}},
     })
     this.#authorText.anchor.set(0.5)
     this.#authorText.position.set(0, -190)
@@ -178,14 +174,16 @@ export default class LocationLevelSelectView extends Container {
 
   // Рассчитывает расположение через операцию `layoutPreview`.
   #layoutPreview = () => {
-    this.#title.position.set(0, -420)
+    this.#title.position.set(0, -450)
+    fitTextWidth(this.#title, PREVIEW_WIDTH)
+    this.#difficultyText.position.set(0, -401)
     this.#preview.position.set(0, -165)
     this.#preview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
   }
 
   // Рассчитывает расположение через операцию `layoutLevels`.
   #layoutLevels = () => {
-    this.#levelsContainer.position.set(0, 205)
+    this.#levelsContainer.position.set(0, 235)
     this.#levelsContainer.scale.set(0.8)
     this.#levelButtons.forEach((button, index) => {
       const column = index % 4
@@ -207,19 +205,20 @@ export default class LocationLevelSelectView extends Container {
 
   // Показывает лучший результат игрока для выбранного уровня.
   #setPersonalBest(level: LevelDefinition) {
-    const personalBest = Locator.storage.getSokobanPushRecord(level.id)
-    this.#personalBestText.text = i18next.t('sokoban.personalBestPushes', {pushes: personalBest ?? '-'})
+    this.#records.setData(Locator.storage.getSokobanRecords(level.id))
   }
 
   // Показывает локализованную сложность выбранного уровня.
   #setDifficulty(level: LevelDefinition) {
     this.#difficultyText.text = i18next.t(`difficultyLevels.${level.difficulty}`)
+    fitTextWidth(this.#difficultyText, PREVIEW_WIDTH)
   }
 
   // Показывает автора выбранного уровня только в отладочном режиме.
   #setAuthor(level: LevelDefinition) {
     if (!this.#authorText) return
     this.#authorText.text = i18next.t('sokoban.author', {author: level.authorId})
+    fitTextWidth(this.#authorText, LEVELS_PANEL_WIDTH)
   }
 
   // Выполняет отдельную операцию `openLevelEditor`.

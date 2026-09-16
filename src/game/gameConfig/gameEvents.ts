@@ -40,6 +40,7 @@ const GAME_EVENTS = {
     giveReward: 'paymentManager:giveReward',
   },
   Options: {
+    show: 'options:show', // Остановка игрового секундомера при открытии настроек
     toggleAudioVolume: 'options:toggleAudioVolume',
     checkboxZoom: 'options:checkboxZoom',
     checkboxSokobanDpad: 'options:checkboxSokobanDpad',

@@ -21,6 +21,7 @@ type SokobanGameOptions = {
   levelNumber: number
   onComplete?: () => void
   onMove?: () => void
+  onRestart?: () => void
   canMove?: () => boolean
 }
 
@@ -30,6 +31,7 @@ export default class SokobanGame extends Container {
   #levelNumber: number
   #onComplete?: () => void
   #onMove?: () => void
+  #onRestart?: () => void
   #canMove?: () => boolean
   #level!: SokobanLevel
   #board!: SokobanBoard
@@ -42,7 +44,7 @@ export default class SokobanGame extends Container {
   #heldDirection: SokobanDirectionName | null = null
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
-  constructor({map, appearance = {}, levelNumber, onComplete, onMove, canMove}: SokobanGameOptions) {
+  constructor({map, appearance = {}, levelNumber, onComplete, onMove, onRestart, canMove}: SokobanGameOptions) {
     super({label: 'sokoban-game'})
 
     this.#map = map
@@ -50,6 +52,7 @@ export default class SokobanGame extends Container {
     this.#levelNumber = levelNumber
     this.#onComplete = onComplete
     this.#onMove = onMove
+    this.#onRestart = onRestart
     this.#canMove = canMove
     this.#init()
   }
@@ -70,6 +73,11 @@ export default class SokobanGame extends Container {
   // Возвращает число толчков в текущем прохождении.
   get pushes() {
     return this.#level.pushes
+  }
+
+  // Возвращает количество шагов текущего прохождения.
+  get steps() {
+    return this.#level.steps
   }
 
   // Добавляет HUD и крестовину в интерфейсный слой игры.
@@ -94,9 +102,11 @@ export default class SokobanGame extends Container {
 
   // Возвращает уровень в исходное состояние.
   restart() {
-    if (!this.#canUseControls() || !this.#level.restart()) return false
+    if (!this.#canUseControls()) return false
 
+    this.#level.restart()
     this.#updateViews()
+    this.#onRestart?.()
     return true
   }
 

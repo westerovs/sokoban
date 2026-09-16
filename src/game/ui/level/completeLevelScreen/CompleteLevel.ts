@@ -4,7 +4,9 @@ import {Container, Text} from 'pixi.js'
 import type SoundManager from '@/game/engine/audio/SoundManager.js'
 import Locator from '@/game/engine/Locator.ts'
 import SdkManager from '@/game/engine/SdkManager.js'
+import type {SokobanRecords, SokobanResult} from '@/game/engine/storage/defaultData.js'
 import type Storage from '@/game/engine/storage/Storage.js'
+import LevelBenchmarkSimulator from '@/game/features/LevelBenchmarkSimulator.js'
 import PromoManager from '@/game/features/promotionCards/PromoManager.js'
 import RateUs from '@/game/features/rateUs/RateUs.ts'
 import Store from '@/game/features/store/Store.js'
@@ -15,6 +17,7 @@ import LevelConfig from '@/game/gameConfig/levels/LevelConfig.js'
 import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
 import {rewardsCatalog} from '@/game/gameConfig/rewardsCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
+import {SOKOBAN_SYMBOLS} from '@/game/sokoban/config/config.js'
 import type Level from '@/game/states/stateLevel/Level.js'
 import type StateLevel from '@/game/states/stateLevel/StateLevel.js'
 import ButtonAnimator from '@/game/utils/animations/ButtonAnimator.js'
@@ -27,8 +30,8 @@ import type CompleteLevelView from './CompleteLevelView.js'
 
 type CompletionResult = {
   unlockedLocation?: LocationDefinition | null
-  actualPushes?: number | null
-  personalBestPushes?: number | null
+  run?: SokobanResult | null
+  records?: {previous: SokobanRecords; best: SokobanRecords} | null
 }
 
 export default class CompleteLevel {
@@ -57,16 +60,10 @@ export default class CompleteLevel {
   // Подготавливает данные, события и анимацию экрана завершения.
   init = async (completionResult: CompletionResult = {}) => {
     try {
-      this.#storage = Locator.storage
-      this.#soundManager = Locator.soundManager
+      this.#prepareResults(completionResult)
 
-      this.#initViewElements()
-      this.#view.setSokobanResult({
-        actualPushes: completionResult.actualPushes ?? null,
-        personalBestPushes: completionResult.personalBestPushes ?? null,
-      })
-      this.#setEvents(true)
-
+      await this.#view.showLocationUnlock(completionResult.unlockedLocation ?? null)
+      if (this.#view.destroyed) return
       await this.#showPromoIfAvailable()
       await this.#setPriceTextForBtnAd()
 
@@ -76,11 +73,33 @@ export default class CompleteLevel {
       await RateUs.checkAndShowRateUs(this.#storage, this.levelEntity)
 
       await this.#showAndAnimate()
-      this.#view.showLocationUnlock(completionResult.unlockedLocation ?? null)
+      this.#view.animateRecords()
       SdkManager.gameplayStop()
     } catch (err) {
       console.error('[CompleteLevel]: initialization failed', err)
     }
+  }
+
+  // Подготавливает зависимости и представление результатов перед показом.
+  #prepareResults(result: CompletionResult) {
+    this.#storage = Locator.storage
+    this.#soundManager = Locator.soundManager
+    this.#initViewElements()
+    this.#setResult(result)
+    this.#setEvents(true)
+  }
+
+  // Передаёт представлению реальные результаты и условное сравнение времени.
+  #setResult({run = null, records = null}: CompletionResult) {
+    const {map, difficulty, locationLevelNumber} = this.levelEntity.config
+    const boxCount = [...map.join('')].filter(
+      (cell) => cell === SOKOBAN_SYMBOLS.box || cell === SOKOBAN_SYMBOLS.boxOnTarget,
+    ).length
+    const percent =
+      run && run.pushes > 0 && run.steps > 0
+        ? LevelBenchmarkSimulator.calculate(boxCount, difficulty, run.seconds)
+        : null
+    this.#view.setSokobanResult({levelNumber: locationLevelNumber, run, records, percent})
   }
 
   // Находит созданное представление и его интерактивные элементы.

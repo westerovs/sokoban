@@ -8,7 +8,7 @@ import OfflineBadge from '@/game/utils/gameUtils/OfflineBadge.js'
 import Logger from '@/game/utils/Logger.js'
 import MathTools from '@/game/utils/MathTools.js'
 import type Game from '../../Game.js'
-import type {PlayerData} from './defaultData.js'
+import type {PlayerData, SokobanRecords, SokobanResult} from './defaultData.js'
 import {DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS} from './defaultData.js'
 import GameSettings from './GameSettings.js'
 import LocalStorage from './LocalStorage.js'
@@ -67,23 +67,37 @@ export default class Storage {
     return this.#playerData.levelIndex
   }
 
-  // Возвращает лучший результат игрока по толчкам для уровня.
-  getSokobanPushRecord(levelId: string) {
+  // Возвращает независимые рекорды уровня, заменяя отсутствующие значения на null.
+  getSokobanRecords(levelId: string): SokobanRecords {
     const record = this.#playerData.sokobanPushRecords.find((entry) => entry?.levelId === levelId)
-    return record && Number.isInteger(record.pushes) && record.pushes >= 0 ? record.pushes : null
+    // Проверяет отдельную метрику без подстановки выдуманных результатов.
+    const valid = (value: number | undefined, minimum: number) =>
+      Number.isInteger(value) && value! >= minimum ? value! : null
+    return {pushes: valid(record?.pushes, 1), steps: valid(record?.steps, 1), seconds: valid(record?.seconds, 0)}
   }
 
-  // Сохраняет новый личный минимум толчков и возвращает актуальный рекорд.
-  updateSokobanPushRecord(levelId: string, pushes: number) {
-    const currentRecord = this.getSokobanPushRecord(levelId)
-    if (!Number.isInteger(pushes) || pushes < 0 || (currentRecord !== null && currentRecord <= pushes))
-      return currentRecord
-
-    this.#playerData.sokobanPushRecords = this.#playerData.sokobanPushRecords.filter(
-      (entry) => entry?.levelId !== levelId,
-    )
-    this.#playerData.sokobanPushRecords.push({levelId, pushes})
-    return pushes
+  // Обновляет минимумы прохождений и возвращает прежние и новые значения для анимации.
+  updateSokobanRecords(levelId: string, result: SokobanResult) {
+    const previous = this.getSokobanRecords(levelId)
+    const best = {...previous}
+    if (result.pushes <= 0 || result.steps <= 0) return {previous, best}
+    for (const metric of ['pushes', 'steps', 'seconds'] as const) {
+      const value = result[metric]
+      if (!Number.isInteger(value) || value < 0) continue
+      best[metric] = Math.min(previous[metric] ?? Infinity, value)
+    }
+    if (best.pushes !== null) {
+      this.#playerData.sokobanPushRecords = this.#playerData.sokobanPushRecords.filter(
+        (item) => item.levelId !== levelId,
+      )
+      this.#playerData.sokobanPushRecords.push({
+        levelId,
+        pushes: best.pushes,
+        steps: best.steps ?? undefined,
+        seconds: best.seconds ?? undefined,
+      })
+    }
+    return {previous, best}
   }
 
   // Переводит профиль в режим без постоянных записей до перезагрузки страницы.

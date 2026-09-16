@@ -3,7 +3,6 @@
 const CONFETTI_SETTINGS = Object.freeze({
   enabled: true,
   revealDuration: 0.3,
-  emissionDuration: 3.3,
   gravity: 820,
   spawnHeight: 16,
   colors: Object.freeze([0xf94144, 0xf8961e, 0xf9c74f, 0x90be6d, 0x43aa8b, 0x577590, 0x9b5de5, 0xf15bb5]),

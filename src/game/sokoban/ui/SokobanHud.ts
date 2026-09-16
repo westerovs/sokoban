@@ -1,6 +1,11 @@
 import i18next from 'i18next'
 import type {DestroyOptions, Sprite, TextStyleOptions} from 'pixi.js'
 import {Container, Graphics, Text} from 'pixi.js'
+import Locator from '@/game/engine/Locator.js'
+import LocalStorage from '@/game/engine/storage/LocalStorage.js'
+import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
+import {STOPWATCH_LABELS} from '@/game/ui/level/clock/Stopwatch.js'
+import DateUtils from '@/game/utils/DateUtils.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 import {SOKOBAN_HUD_SETTINGS} from '../config/settings.js'
 import SokobanHudButton from './SokobanHudButton.js'
@@ -22,11 +27,13 @@ export default class SokobanHud extends Container {
   #pushesIcon!: Sprite
   #pushesView!: Container
   #levelText!: Text
+  #timerText!: Text
   #panel!: Graphics
   #backButton!: SokobanHudButton
   #restartButton!: SokobanHudButton
   #isEnabled = false
   #steps = 0
+  #layoutHeight = 0
 
   // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({levelNumber, onUndo, onRestart}: {levelNumber: number; onUndo: () => void; onRestart: () => void}) {
@@ -78,6 +85,7 @@ export default class SokobanHud extends Container {
   }) {
     const settings = SOKOBAN_HUD_SETTINGS
     const height = tileSize * settings.heightInTiles
+    this.#layoutHeight = height
     const borderWidth = height * settings.borderWidthRatio
     const maxAvailableWidth = Math.max(availableWidth - settings.sidePadding * 2 - borderWidth, 1)
     const width = Math.min(boardWidth, maxAvailableWidth)
@@ -89,6 +97,7 @@ export default class SokobanHud extends Container {
 
   // Освобождает обработчики, анимации и ресурсы экземпляра.
   destroy(options?: DestroyOptions) {
+    Locator.game.off(GAME_EVENTS.Stopwatch.tick, this.#updateTimer, this)
     this.stopUndoButtonPulse()
     super.destroy(options)
   }
@@ -99,6 +108,7 @@ export default class SokobanHud extends Container {
     this.#stepsView = this.#createStepsView()
     this.#pushesView = this.#createPushesView()
     this.#levelText = this.#createLevelText()
+    this.#createTimer()
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
@@ -108,6 +118,7 @@ export default class SokobanHud extends Container {
       this.#pushesView,
       this.#backButton,
       this.#levelText,
+      this.#timerText,
       this.#restartButton,
     )
     this.setCounts({steps: 0, pushes: 0})
@@ -187,7 +198,9 @@ export default class SokobanHud extends Container {
   // Размещает номер уровня по центру HUD.
   #layoutLevelText(height: number) {
     this.#levelText.style.fontSize = height * SOKOBAN_HUD_SETTINGS.levelFontSizeRatio
-    this.#levelText.y = 0
+    this.#levelText.y = LocalStorage.isDebug ? -height * 0.16 : 0
+    this.#timerText.style.fontSize = height * 0.22
+    this.#timerText.y = height * 0.22
   }
 
   // Выравнивает крайние элементы и блок шагов внутри HUD.
@@ -268,5 +281,22 @@ export default class SokobanHud extends Container {
   #updateButtons() {
     this.#backButton?.setEnabled(this.#isEnabled && this.#steps > 0)
     this.#restartButton?.setEnabled(this.#isEnabled)
+  }
+
+  // Создаёт скрываемый отладочный секундомер под номером уровня.
+  #createTimer() {
+    this.#timerText = new Text({label: 'sokoban-debug-timer', text: '00:00', style: this.#createTextStyle(16)})
+    this.#timerText.anchor.set(0.5)
+    this.#timerText.visible = LocalStorage.isDebug
+    this.addChild(this.#timerText)
+    Locator.game.on(GAME_EVENTS.Stopwatch.tick, this.#updateTimer, this)
+  }
+
+  // Обновляет отладочное время только для секундомера уровня.
+  #updateTimer({label, currentTime}: {label: string; currentTime: number}) {
+    if (label !== STOPWATCH_LABELS.level) return
+    this.#timerText.visible = LocalStorage.isDebug
+    this.#layoutLevelText(this.#layoutHeight)
+    this.#timerText.text = DateUtils.formatDuration(currentTime)
   }
 }

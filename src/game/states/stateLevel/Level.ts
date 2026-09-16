@@ -11,6 +11,7 @@ import SystemManager from '@/game/levelRuntime/systems/SystemManager.js'
 import ClearLevel from '@/game/modules/ClearLevel.js'
 import SokobanGame from '@/game/sokoban/gameplay/SokobanGame.js'
 import Confetti from '@/game/ui/common/emitters/confetti/Confetti.js'
+import Stopwatch, {STOPWATCH_LABELS} from '@/game/ui/level/clock/Stopwatch.js'
 import CompleteLevel from '@/game/ui/level/completeLevelScreen/CompleteLevel.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
 import type LevelView from './LevelView.js'
@@ -26,7 +27,9 @@ export default class Level {
   #stateIntro!: StateIntro
   #clearLevel!: ClearLevel
   #completeLevel!: CompleteLevel
+  #confetti!: Confetti
   #isLevelCompleted = false
+  #stopwatch!: Stopwatch
   game = Locator.game
   refs = this.game.refs
   stage = this.game.app.stage
@@ -56,6 +59,7 @@ export default class Level {
     await this.#stateIntro.execute()
 
     this.#unlockScene()
+    this.#stopwatch.start()
     SdkManager.gameplayStart()
     SdkManager.gameReady()
     this.#testing()
@@ -100,7 +104,9 @@ export default class Level {
     // this.#hintsController = new HintsController(this)
     this.#clearLevel = new ClearLevel(this)
     this.#completeLevel = new CompleteLevel(this)
-    new Confetti().init()
+    this.#stopwatch = new Stopwatch({game: this.game, label: STOPWATCH_LABELS.level})
+    this.#confetti = new Confetti()
+    this.#confetti.init()
     this.levelConfig = new LevelConfig()
   }
 
@@ -131,6 +137,7 @@ export default class Level {
       canMove: this.#canMove,
       onMove: this.#notifyMove,
       onComplete: this.#requestWin,
+      onRestart: () => this.#stopwatch.start(),
     })
 
     this.refs.sokobanGame = this.sokobanGame
@@ -182,8 +189,14 @@ export default class Level {
 
     CrazyGames.showCrazyGamesBanner()
     // await new LevelResultsReward().init()
-    ;(this.game.view as LevelView).createCompleteLevelView()
-    const completionResult = this.levelConfig.updateSavedLevel(this.sokobanGame!.pushes)
+    const completeLevelView = (this.game.view as LevelView).createCompleteLevelView()
+    const confettiParticles = this.#confetti.particleView
+    if (confettiParticles) completeLevelView.placeConfettiBehindUi(confettiParticles)
+    const completionResult = this.levelConfig.updateSavedLevel({
+      pushes: this.sokobanGame!.pushes,
+      steps: this.sokobanGame!.steps,
+      seconds: this.#stopwatch.seconds,
+    })
     this.#completeLevel.init(completionResult)
   }
 
