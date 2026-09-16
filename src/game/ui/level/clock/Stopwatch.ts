@@ -1,4 +1,5 @@
 import {gsap} from 'gsap'
+import Locator from '@/game/engine/Locator.ts'
 import type Game from '@/game/Game.ts'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.ts'
 
@@ -15,16 +16,16 @@ type StopwatchOptions = {
 
 // todo remove duration
 export default class Stopwatch {
-  game: Game
+  game = Locator.game
   duration: number
   label: string
   remainingTime: number
   timerTween: gsap.core.Tween | null
   elapsedTime: number
+  #debug = false
 
   // Сохраняет игру и начальные значения секундомера.
-  constructor({game, label = 'defaultStopwatch'}: StopwatchOptions) {
-    this.game = game
+  constructor({label = 'defaultStopwatch'}: StopwatchOptions) {
     this.duration = Math.floor(9999)
     this.label = label
     this.remainingTime = this.duration
@@ -87,6 +88,8 @@ export default class Stopwatch {
       currentTime,
       currentTimeWithZero: currentTime > 9 ? currentTime : `0${currentTime}`,
     })
+
+    if (this.#debug) console.log('currentTime', currentTime)
   }
 
   // Останавливает секундомер и удаляет его события.

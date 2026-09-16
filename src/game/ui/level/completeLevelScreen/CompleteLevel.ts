@@ -67,7 +67,6 @@ export default class CompleteLevel {
       })
       this.#setEvents(true)
 
-      this.#sendCompleteLvlMetrika()
       await this.#showPromoIfAvailable()
       await this.#setPriceTextForBtnAd()
 
@@ -289,13 +288,5 @@ export default class CompleteLevel {
       const btnByeAdText = this.btnByeAd.getChildByLabel('btnByeAdText')
       if (btnByeAdText) btnByeAdText.visible = false
     }
-  }
-
-  // ---------- other
-  // Отправляет метрику завершения с временем прохождения.
-  #sendCompleteLvlMetrika = () => {
-    const stopwatch = this.levelEntity.modulesInitializer.getMod('stopwatch')
-    const levelPlayTime = stopwatch?.seconds ?? 0
-    YaMetrika.completeLevel(this.levelEntity.config, this.#storage, levelPlayTime)
   }
 }

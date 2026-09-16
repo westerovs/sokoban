@@ -9,11 +9,8 @@ import type {RuntimeLevelConfig} from '@/game/gameConfig/levels/levelTypes.js'
 import EntityManager from '@/game/levelRuntime/entities/EntityManager.js'
 import SystemManager from '@/game/levelRuntime/systems/SystemManager.js'
 import ClearLevel from '@/game/modules/ClearLevel.js'
-import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
-import ModulesInitializer from '@/game/modules/ModulesInitializer.js'
 import SokobanGame from '@/game/sokoban/gameplay/SokobanGame.js'
 import Confetti from '@/game/ui/common/emitters/confetti/Confetti.js'
-import {STOPWATCH_LABELS} from '@/game/ui/level/clock/Stopwatch.js'
 import CompleteLevel from '@/game/ui/level/completeLevelScreen/CompleteLevel.js'
 import GameUtils, {eventToggle} from '@/game/utils/gameUtils/GameUtils.js'
 import type LevelView from './LevelView.js'
@@ -37,7 +34,6 @@ export default class Level {
   entityManager: EntityManager | null = null
   systemManager: SystemManager | null = null
   config!: RuntimeLevelConfig
-  modulesInitializer!: ModulesInitializer
   levelConfig!: LevelConfig
   sokobanGame: SokobanGame | null = null
 
@@ -56,7 +52,6 @@ export default class Level {
     await this.#initEntityManager()
     this.#initSystemManager()
     this.#createSokobanGame()
-    this.#initModules()
     // this.#hintsController.init()
     await this.#stateIntro.execute()
 
@@ -76,7 +71,6 @@ export default class Level {
     this.sokobanGame?.setInputEnabled(false)
     this.game.emit(GAME_EVENTS.completeLevel, props)
     this.#setEvents(false)
-    this.#sendEarlyExitMetrika()
     this.#destroyLevel()
   }
 
@@ -107,7 +101,6 @@ export default class Level {
     this.#clearLevel = new ClearLevel(this)
     this.#completeLevel = new CompleteLevel(this)
     new Confetti().init()
-    this.modulesInitializer = new ModulesInitializer()
     this.levelConfig = new LevelConfig()
   }
 
@@ -143,16 +136,6 @@ export default class Level {
     this.refs.sokobanGame = this.sokobanGame
     this.game.view.addChild(this.sokobanGame)
     this.sokobanGame.attachHud()
-  }
-
-  // Выполняет отдельную операцию `initModules`.
-  #initModules() {
-    this.modulesInitializer.init({
-      stopwatch: {
-        game: this.game,
-        label: STOPWATCH_LABELS.level,
-      },
-    })
   }
 
   // Обновляет состояние через операцию `setEvents`.
@@ -202,14 +185,6 @@ export default class Level {
     ;(this.game.view as LevelView).createCompleteLevelView()
     const completionResult = this.levelConfig.updateSavedLevel(this.sokobanGame!.pushes)
     this.#completeLevel.init(completionResult)
-  }
-
-  // Выполняет отдельную операцию `sendEarlyExitMetrika`.
-  #sendEarlyExitMetrika() {
-    if (this.#isLevelCompleted) return
-
-    const stopwatch = this.modulesInitializer.getMod('stopwatch')
-    YaMetrika.earlyExit(this.config, this.#storage, stopwatch?.seconds ?? 0)
   }
 
   // Выполняет отдельную операцию `destroyLevel`.
