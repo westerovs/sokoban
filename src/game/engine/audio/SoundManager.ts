@@ -71,7 +71,9 @@ export default class SoundManager {
   }
 
   getAudioDebugStats = () => {
-    const allSounds = [...new Set((Howler as HowlerWithSounds)._howls ?? [])].filter((sound) => sound.state() !== 'unloaded')
+    const allSounds = [...new Set((Howler as HowlerWithSounds)._howls ?? [])].filter(
+      (sound) => sound.state() !== 'unloaded',
+    )
     const musicSounds = [
       ...new Set(
         Object.entries(this.#musicList)
@@ -366,7 +368,10 @@ export default class SoundManager {
     }
   }
 
-  #playSound(sound: Howl, {loop = false, volume = 1.0, stopMusic = false, volumeMultiplier = this.#sfxVolume}: InternalPlayOptions) {
+  #playSound(
+    sound: Howl,
+    {loop = false, volume = 1.0, stopMusic = false, volumeMultiplier = this.#sfxVolume}: InternalPlayOptions,
+  ) {
     if (stopMusic) {
       Object.values(this.#musicList).forEach((music) => music.stop())
     }

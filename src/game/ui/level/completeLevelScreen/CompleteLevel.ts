@@ -152,7 +152,9 @@ export default class CompleteLevel {
         .from(btnNextArrow, {x: '-=150', alpha: 0, duration: 0.3, delay: 0.2, ease: 'elastic.out(0.5, 0.3)'}, '<')
 
       if (btnBadge) {
-        this.#showTimeline.set(btnBadge, {visible: true}).fromTo(btnBadge.scale, {x: 0, y: 1}, {x: 1, y: 1, ease: 'back.out(2.5)'})
+        this.#showTimeline
+          .set(btnBadge, {visible: true})
+          .fromTo(btnBadge.scale, {x: 0, y: 1}, {x: 1, y: 1, ease: 'back.out(2.5)'})
       }
 
       this.#showTimeline.set(btnNext, {eventMode: 'static'})

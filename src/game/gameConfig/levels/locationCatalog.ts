@@ -55,4 +55,12 @@ const getLocationPageIndex = (locationId: string, pageSize = DEFAULT_LOCATION_PA
   return Math.max(Math.floor(getLocationIndexById(locationId) / pageSize), 0)
 }
 
-export {getLevelEntries, getLevelEntryById, getLevelEntryByIndex, getLocationById, getLocationIndexById, getLocationPageIndex, getLocations}
+export {
+  getLevelEntries,
+  getLevelEntryById,
+  getLevelEntryByIndex,
+  getLocationById,
+  getLocationIndexById,
+  getLocationPageIndex,
+  getLocations,
+}

@@ -24,7 +24,9 @@ export default class LocaleManager {
     const gameConfig = Locator.gameConfig
     const locales = gameConfig.locales ?? {}
 
-    const resources = Object.fromEntries(Object.entries(locales).map(([localeKey, translation]) => [localeKey, {translation}]))
+    const resources = Object.fromEntries(
+      Object.entries(locales).map(([localeKey, translation]) => [localeKey, {translation}]),
+    )
 
     const locale = await SdkManager.getLang()
     const validatedLocale = LocaleManager.validate(locale, locales)

@@ -27,7 +27,9 @@ export default class CompleteLevelStatsView extends Container {
   // Обновляет фактический результат и личный рекорд.
   setData({actualPushes, personalBestPushes}: CompleteLevelStats) {
     this.#actualPushesText.text = i18next.t('sokoban.pushes', {pushes: this.#formatValue(actualPushes)})
-    this.#personalBestText.text = i18next.t('sokoban.personalBestPushes', {pushes: this.#formatValue(personalBestPushes)})
+    this.#personalBestText.text = i18next.t('sokoban.personalBestPushes', {
+      pushes: this.#formatValue(personalBestPushes),
+    })
   }
 
   // Создаёт фон и две строки результатов.

@@ -31,7 +31,9 @@ export default class LocationProgressView extends Container {
     this.#background.clear()
     this.#completedCheck.clear()
     this.#completedCheck.visible = state.isCompleted
-    this.#text.text = state.isCompleted ? i18next.t('locationSelect.completed') : `${state.completedCount} / ${state.totalCount}`
+    this.#text.text = state.isCompleted
+      ? i18next.t('locationSelect.completed')
+      : `${state.completedCount} / ${state.totalCount}`
     this.#drawBackground(state.isCompleted)
 
     if (state.isCompleted) {
@@ -78,7 +80,13 @@ export default class LocationProgressView extends Container {
     const filledWidth = Math.max(innerHeight, availableWidth * normalizedProgress)
 
     this.#background
-      .roundRect(-PROGRESS_WIDTH / 2 + PROGRESS_PADDING, -innerHeight / 2, filledWidth, innerHeight, Math.min(filledWidth, innerHeight) / 2)
+      .roundRect(
+        -PROGRESS_WIDTH / 2 + PROGRESS_PADDING,
+        -innerHeight / 2,
+        filledWidth,
+        innerHeight,
+        Math.min(filledWidth, innerHeight) / 2,
+      )
       .fill({color: 0x78c92e})
   }
 

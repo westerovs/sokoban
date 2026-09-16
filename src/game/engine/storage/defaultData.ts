@@ -159,7 +159,9 @@ const DEFAULT_DATA: Record<StorageKey, DefaultDataEntry> = {
   [STORAGE_KEYS.skins]: {type: 'array', value: ['standard']},
 }
 
-const DEFAULT_DATA_VALUES = Object.fromEntries(Object.entries(DEFAULT_DATA).map(([key, val]) => [key, val?.value])) as PlayerData
+const DEFAULT_DATA_VALUES = Object.fromEntries(
+  Object.entries(DEFAULT_DATA).map(([key, val]) => [key, val?.value]),
+) as PlayerData
 
 const SERIALIZED_ARRAY_KEYS = Object.freeze([
   STORAGE_KEYS.celebratedLocationIds,

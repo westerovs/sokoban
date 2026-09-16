@@ -24,7 +24,10 @@ const random = (min = 0, max = min) => min + Math.random() * (max - min)
 const lerp = (start: number, end: number, progress: number) => start + (end - start) * progress
 
 // Добавляет загруженные текстуры к конфигурации эмиттера.
-const upgradeConfig = <Config extends Record<string, any>>(config: Config, textures: Texture[] = []): Config & {textures: Texture[]} => ({
+const upgradeConfig = <Config extends Record<string, any>>(
+  config: Config,
+  textures: Texture[] = [],
+): Config & {textures: Texture[]} => ({
   ...config,
   textures,
 })

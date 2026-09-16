@@ -146,7 +146,10 @@ const createSelectRow = (data: FieldData, options: SelectOption[], onChange: Eve
   row.className = 'admin-panel__row'
 
   const opts = options
-    .map((option) => `<option value="${option.value}" ${option.value === data.value ? 'selected' : ''}>${option.label}</option>`)
+    .map(
+      (option) =>
+        `<option value="${option.value}" ${option.value === data.value ? 'selected' : ''}>${option.label}</option>`,
+    )
     .join('')
 
   row.innerHTML = `

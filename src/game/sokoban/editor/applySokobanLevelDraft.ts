@@ -29,8 +29,10 @@ const isValidDraft = (draft: unknown, levelId: string): draft is SokobanLevelDra
   if (!draft || typeof draft !== 'object' || Array.isArray(draft)) return false
 
   const candidate = draft as Partial<SokobanLevelDraft>
-  const hasMap = Array.isArray(candidate.map) && candidate.map.length > 0 && candidate.map.every((row) => typeof row === 'string')
-  const hasAppearance = candidate.appearance && typeof candidate.appearance === 'object' && !Array.isArray(candidate.appearance)
+  const hasMap =
+    Array.isArray(candidate.map) && candidate.map.length > 0 && candidate.map.every((row) => typeof row === 'string')
+  const hasAppearance =
+    candidate.appearance && typeof candidate.appearance === 'object' && !Array.isArray(candidate.appearance)
   return candidate.levelId === levelId && Boolean(hasMap && hasAppearance)
 }
 

@@ -26,7 +26,11 @@ export default class LocationSelectView extends Container {
   #unlockCelebration!: LocationUnlockCelebration
 
   // Сохраняет обработчики и создаёт содержимое выбора локаций.
-  constructor({onContinue, onLocationSelect, onPageSelect}: Pick<GameMenuCallbacks, 'onContinue' | 'onLocationSelect' | 'onPageSelect'>) {
+  constructor({
+    onContinue,
+    onLocationSelect,
+    onPageSelect,
+  }: Pick<GameMenuCallbacks, 'onContinue' | 'onLocationSelect' | 'onPageSelect'>) {
     super({label: 'location-select-view'})
 
     this.#onLocationSelect = onLocationSelect

@@ -83,7 +83,11 @@ export default class SpeechBubbleView extends Container {
 
   // Создаёт изображение аватара.
   #createAvatar = () => {
-    const avatar = GameUtils.createSprite('speech-bubble-avatar', {label: 'speech-bubble-avatar', anchorX: 0, anchorY: 0})
+    const avatar = GameUtils.createSprite('speech-bubble-avatar', {
+      label: 'speech-bubble-avatar',
+      anchorX: 0,
+      anchorY: 0,
+    })
     this.#avatar = avatar
     this.addChild(avatar)
   }
@@ -109,7 +113,11 @@ export default class SpeechBubbleView extends Container {
     innerBody.height = texture.height
     bubbleRect.addChild(innerBody)
 
-    const corner = GameUtils.createSprite('speech-bubble-rect-corner', {label: 'speech-bubble-corner', anchorX: 0, anchorY: 0})
+    const corner = GameUtils.createSprite('speech-bubble-rect-corner', {
+      label: 'speech-bubble-corner',
+      anchorX: 0,
+      anchorY: 0,
+    })
     corner.position.set(-(corner.width - 5), 20)
     bubbleRect.addChild(corner)
 

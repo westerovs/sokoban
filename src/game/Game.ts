@@ -115,7 +115,12 @@ export default class Game extends EventEmitter {
     this.#initResize()
     this.#createGameLayers()
 
-    this.#states = [new GamePreload(this, this.#adapter), new StateGame(this), new LevelPreload(this), new StateLevel(this)]
+    this.#states = [
+      new GamePreload(this, this.#adapter),
+      new StateGame(this),
+      new LevelPreload(this),
+      new StateLevel(this),
+    ]
 
     this.#start()
   }

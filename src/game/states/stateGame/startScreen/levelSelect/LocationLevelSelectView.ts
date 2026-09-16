@@ -199,7 +199,10 @@ export default class LocationLevelSelectView extends Container {
     const rowWidth = this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width
     const rowLeft = -rowWidth / 2
     this.#backButton.position.set(rowLeft + this.#backButton.width / 2, ACTION_BUTTONS_Y)
-    this.#playButton.position.set(rowLeft + this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width / 2, ACTION_BUTTONS_Y)
+    this.#playButton.position.set(
+      rowLeft + this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width / 2,
+      ACTION_BUTTONS_Y,
+    )
   }
 
   // Показывает лучший результат игрока для выбранного уровня.

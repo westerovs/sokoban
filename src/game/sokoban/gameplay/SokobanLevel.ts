@@ -272,7 +272,9 @@ export default class SokobanLevel {
 
   // Обновляет признак завершения по положению всех ящиков.
   #checkCompleted() {
-    return this.#boxes.size > 0 && Array.from(this.#boxes.values()).every((positionKey) => this.#targets.has(positionKey))
+    return (
+      this.#boxes.size > 0 && Array.from(this.#boxes.values()).every((positionKey) => this.#targets.has(positionKey))
+    )
   }
 
   // Возвращает ящик, попавший после толчка в статический тупик.

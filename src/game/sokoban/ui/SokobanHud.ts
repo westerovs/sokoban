@@ -102,7 +102,14 @@ export default class SokobanHud extends Container {
     this.#backButton = this.#createButton('icon-back', 'sokoban-undo-button', this.#onUndo)
     this.#restartButton = this.#createButton('icon-restart', 'sokoban-restart-button', this.#onRestart)
 
-    this.addChild(this.#panel, this.#stepsView, this.#pushesView, this.#backButton, this.#levelText, this.#restartButton)
+    this.addChild(
+      this.#panel,
+      this.#stepsView,
+      this.#pushesView,
+      this.#backButton,
+      this.#levelText,
+      this.#restartButton,
+    )
     this.setCounts({steps: 0, pushes: 0})
   }
 

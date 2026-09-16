@@ -61,4 +61,12 @@ type RuntimeLevelConfig = LevelDefinition & {
   currentSkinName: 'sokoban'
 }
 
-export type {CatalogEntry, GameLevels, LevelAppearance, LevelDefinition, LevelEntry, LocationDefinition, RuntimeLevelConfig}
+export type {
+  CatalogEntry,
+  GameLevels,
+  LevelAppearance,
+  LevelDefinition,
+  LevelEntry,
+  LocationDefinition,
+  RuntimeLevelConfig,
+}

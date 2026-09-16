@@ -13,7 +13,13 @@ import {DEFAULT_DATA_VALUES, SERIALIZED_ARRAY_KEYS, STORAGE_KEYS} from './defaul
 import GameSettings from './GameSettings.js'
 import LocalStorage from './LocalStorage.js'
 import type {PlayerSave} from './utils/utils.js'
-import {createProfileProxy, getMaxFreshData, getMaxUserLevelData, parseJsonKey, stringifyJsonKey} from './utils/utils.js'
+import {
+  createProfileProxy,
+  getMaxFreshData,
+  getMaxUserLevelData,
+  parseJsonKey,
+  stringifyJsonKey,
+} from './utils/utils.js'
 import Validation from './utils/Validation.js'
 
 /**
@@ -70,9 +76,12 @@ export default class Storage {
   // Сохраняет новый личный минимум толчков и возвращает актуальный рекорд.
   updateSokobanPushRecord(levelId: string, pushes: number) {
     const currentRecord = this.getSokobanPushRecord(levelId)
-    if (!Number.isInteger(pushes) || pushes < 0 || (currentRecord !== null && currentRecord <= pushes)) return currentRecord
+    if (!Number.isInteger(pushes) || pushes < 0 || (currentRecord !== null && currentRecord <= pushes))
+      return currentRecord
 
-    this.#playerData.sokobanPushRecords = this.#playerData.sokobanPushRecords.filter((entry) => entry?.levelId !== levelId)
+    this.#playerData.sokobanPushRecords = this.#playerData.sokobanPushRecords.filter(
+      (entry) => entry?.levelId !== levelId,
+    )
     this.#playerData.sokobanPushRecords.push({levelId, pushes})
     return pushes
   }
@@ -121,7 +130,9 @@ export default class Storage {
     this.#localStorage.save(this.#rawData)
 
     if (!SdkManager.isPlatform(PLATFORM_ID.base)) {
-      SdkManager.adapter.storage.set(this.#rawData, force).catch((err: unknown) => console.error('[Storage]: platform save failed', err))
+      SdkManager.adapter.storage
+        .set(this.#rawData, force)
+        .catch((err: unknown) => console.error('[Storage]: platform save failed', err))
     }
   }
 

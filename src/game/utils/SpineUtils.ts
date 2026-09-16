@@ -100,7 +100,10 @@ export default class SpineUtils {
       positions[i + 1] = point.y
     }
 
-    const indices = attachment instanceof RegionAttachment ? new Uint32Array([0, 1, 2, 0, 2, 3]) : new Uint32Array(attachment.triangles)
+    const indices =
+      attachment instanceof RegionAttachment
+        ? new Uint32Array([0, 1, 2, 0, 2, 3])
+        : new Uint32Array(attachment.triangles)
 
     const geometry = new MeshGeometry({
       positions,
@@ -205,7 +208,9 @@ export default class SpineUtils {
         // на 0 уровне, 1 скине игнорируем ошибки, т.к там 5 слотов выключены
         if (spineName === 'level0' && currentSkinName === 'mode1/skin_mode1_v1') return
 
-        console.error(`[SpineUtils]: sprite is missing in slot ${slot?.data?.name}, spine ${spineName}, skin ${currentSkinName}`)
+        console.error(
+          `[SpineUtils]: sprite is missing in slot ${slot?.data?.name}, spine ${spineName}, skin ${currentSkinName}`,
+        )
         return
       }
       if (attachment.name) return slot
@@ -251,7 +256,8 @@ export default class SpineUtils {
       console.error('[SpineUtils]: skin setup failed', e)
 
       // todo Временное поведение - применить дефолтный скин в случае ошибки.
-      const skin = spine.skeleton.data.findSkin(skinName) ?? spine.skeleton.data.defaultSkin ?? spine.skeleton.data.skins[0]
+      const skin =
+        spine.skeleton.data.findSkin(skinName) ?? spine.skeleton.data.defaultSkin ?? spine.skeleton.data.skins[0]
 
       if (skin) {
         spine.skeleton.setSkin(skin)

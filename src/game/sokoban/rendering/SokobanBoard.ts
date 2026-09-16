@@ -76,7 +76,11 @@ export default class SokobanBoard extends Container {
   }
 
   // Анимирует перемещение игрока и при необходимости ящика.
-  animateMove(moveResult: SokobanMoveResult, direction: SokobanDirectionName, {isContinuous = false}: MovementOptions = {}) {
+  animateMove(
+    moveResult: SokobanMoveResult,
+    direction: SokobanDirectionName,
+    {isContinuous = false}: MovementOptions = {},
+  ) {
     return new Promise<void>((resolve) => {
       this.#player.setDirection(direction)
       this.#updatePlayerDepth()

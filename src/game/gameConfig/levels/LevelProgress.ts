@@ -1,6 +1,12 @@
 import type Storage from '../../engine/storage/Storage.js'
 import type {LevelEntry, LocationDefinition} from './levelTypes.js'
-import {getLevelEntries, getLevelEntryById, getLevelEntryByIndex, getLocationPageIndex, getLocations} from './locationCatalog.js'
+import {
+  getLevelEntries,
+  getLevelEntryById,
+  getLevelEntryByIndex,
+  getLocationPageIndex,
+  getLocations,
+} from './locationCatalog.js'
 
 /**
  * Хранит прогресс по стабильным идентификаторам карт и синхронизирует старый числовой levelIndex.
@@ -208,7 +214,8 @@ export default class LevelProgress {
   #migrateLegacyProgress = () => {
     const entries = getLevelEntries()
     const legacyIndex = Math.min(Math.max(this.#storage.playerData.levelIndex, 0), entries.length)
-    const completedCount = legacyIndex === 0 && this.#storage.playerData.userLevel > LEGACY_NEW_PLAYER_LEVEL ? entries.length : legacyIndex
+    const completedCount =
+      legacyIndex === 0 && this.#storage.playerData.userLevel > LEGACY_NEW_PLAYER_LEVEL ? entries.length : legacyIndex
 
     this.#storage.playerData.completedLevelIds = entries.slice(0, completedCount).map(({level}) => level.id)
     this.#storage.playerData.selectedLevelId = getLevelEntryByIndex(Math.min(legacyIndex, entries.length - 1)).level.id
@@ -220,9 +227,18 @@ export default class LevelProgress {
     const levelIds = new Set(getLevelEntries().map(({level}) => level.id))
     const locationIds = new Set(getLocations().map(({id}) => id))
 
-    this.#storage.playerData.completedLevelIds = this.#uniqueExistingIds(this.#storage.playerData.completedLevelIds, levelIds)
-    this.#storage.playerData.unlockedLocationIds = this.#uniqueExistingIds(this.#storage.playerData.unlockedLocationIds, locationIds)
-    this.#storage.playerData.celebratedLocationIds = this.#uniqueExistingIds(this.#storage.playerData.celebratedLocationIds, locationIds)
+    this.#storage.playerData.completedLevelIds = this.#uniqueExistingIds(
+      this.#storage.playerData.completedLevelIds,
+      levelIds,
+    )
+    this.#storage.playerData.unlockedLocationIds = this.#uniqueExistingIds(
+      this.#storage.playerData.unlockedLocationIds,
+      locationIds,
+    )
+    this.#storage.playerData.celebratedLocationIds = this.#uniqueExistingIds(
+      this.#storage.playerData.celebratedLocationIds,
+      locationIds,
+    )
     const lastPlayedLevelId = this.#storage.playerData.lastPlayedLevelId
     if (!lastPlayedLevelId || !levelIds.has(lastPlayedLevelId)) this.#storage.playerData.lastPlayedLevelId = null
   }

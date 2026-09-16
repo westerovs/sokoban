@@ -63,7 +63,13 @@ export default class ButtonContainer extends Container {
   }
 
   // Добавляет текст по центру кнопки.
-  addCenterText = ({text = '', style = this.#defaultTextStyle, x = 0, y = 0, name = 'innerText'}: CenterTextOptions = {}) => {
+  addCenterText = ({
+    text = '',
+    style = this.#defaultTextStyle,
+    x = 0,
+    y = 0,
+    name = 'innerText',
+  }: CenterTextOptions = {}) => {
     const innerText = new Text({text, style})
     innerText.label = name
     innerText.anchor.set(0.5)

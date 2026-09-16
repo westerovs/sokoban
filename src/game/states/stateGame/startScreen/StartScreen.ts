@@ -65,7 +65,12 @@ export default class StartScreen {
     ;(this.#game.view as GameView).setBackground('startScreen')
     const unlockedLocation = this.#progress.consumeUnlockCelebration()
     const pageIndex = unlockedLocation ? getLocationPageIndex(unlockedLocation.id) : this.#progress.locationPageIndex
-    this.#gameMenu.showLocations(this.#progress.getLocationStates(), pageIndex, this.#progress.getContinueTargetEntry(), unlockedLocation)
+    this.#gameMenu.showLocations(
+      this.#progress.getLocationStates(),
+      pageIndex,
+      this.#progress.getContinueTargetEntry(),
+      unlockedLocation,
+    )
     if (playSound) this.#playClickSound()
   }
 

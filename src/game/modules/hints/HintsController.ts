@@ -275,13 +275,19 @@ export default class HintsController {
 
   // Запускает периодическую анимацию иконок подсказок.
   #idleButtons = () => {
-    const scales = this.#buttons.filter((btn) => btn.label !== 'optionsToggleBtn').map((btn) => btn.getChildByLabel('icon', true)!.scale)
+    const scales = this.#buttons
+      .filter((btn) => btn.label !== 'optionsToggleBtn')
+      .map((btn) => btn.getChildByLabel('icon', true)!.scale)
 
     if (!scales.length) return
 
     this.#idleTimeLine = gsap
       .timeline({repeat: -1, repeatDelay: 5})
-      .fromTo(scales, {x: 1, y: 1}, {x: 1.15, y: 1.15, yoyo: true, repeat: 5, duration: 0.8, stagger: 0.3, ease: 'sine.inOut'})
+      .fromTo(
+        scales,
+        {x: 1, y: 1},
+        {x: 1.15, y: 1.15, yoyo: true, repeat: 5, duration: 0.8, stagger: 0.3, ease: 'sine.inOut'},
+      )
   }
 
   // Удаляет события, анимации и представление контроллера.

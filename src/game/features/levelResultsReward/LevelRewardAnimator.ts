@@ -203,7 +203,10 @@ export default class LevelRewardAnimator {
   }
 
   // Увеличивает или уменьшает отображаемое значение на единицу.
-  #updateTextValue = (textElement: Text, {increase = true, setIconPlus = false}: {increase?: boolean; setIconPlus?: boolean} = {}) => {
+  #updateTextValue = (
+    textElement: Text,
+    {increase = true, setIconPlus = false}: {increase?: boolean; setIconPlus?: boolean} = {},
+  ) => {
     let value = +textElement.text
     value += increase ? 1 : -1
 

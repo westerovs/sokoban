@@ -96,7 +96,10 @@ export default class Store {
     this.#view.animateLoadingStart()
 
     try {
-      await Promise.all([LoadUtils.loadSpriteSheet({spriteSheetName: 'purchases'}), LoadUtils.loadSpriteSheet({spriteSheetName: 'store'})])
+      await Promise.all([
+        LoadUtils.loadSpriteSheet({spriteSheetName: 'purchases'}),
+        LoadUtils.loadSpriteSheet({spriteSheetName: 'store'}),
+      ])
       return true
     } catch (error) {
       console.error('[Store]: failed to load store assets', error)

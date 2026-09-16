@@ -3,7 +3,13 @@ import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../engine/Locator.ts'
 import LocationLevelSelectView from './levelSelect/LocationLevelSelectView.js'
 import LocationSelectView from './locationSelect/LocationSelectView.js'
-import type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition, LocationSelectionState} from './menuTypes.js'
+import type {
+  GameMenuCallbacks,
+  LevelEntry,
+  LevelSelectionState,
+  LocationDefinition,
+  LocationSelectionState,
+} from './menuTypes.js'
 
 // Объединяет экраны выбора локации, уровня и кнопки верхней панели.
 

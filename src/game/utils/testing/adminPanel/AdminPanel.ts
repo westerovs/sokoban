@@ -93,7 +93,12 @@ export default class AdminPanel {
           disabled: !LiveOpsController.isNewYearAvailable,
           tooltip: 'принудительно включает НГ уровни, если они доступны в конкретной игре',
         },
-        {key: 'testLoad', label: 'testLoad:', value: LocalStorage.testLoad, tooltip: 'в консоли быстрый тест загрузки уровней'},
+        {
+          key: 'testLoad',
+          label: 'testLoad:',
+          value: LocalStorage.testLoad,
+          tooltip: 'в консоли быстрый тест загрузки уровней',
+        },
 
         {
           key: STORAGE_KEYS.hintDartsIsAvailable,
@@ -139,7 +144,12 @@ export default class AdminPanel {
           tooltip: '(hard) если включен - обучение было пройдено',
         },
 
-        {key: STORAGE_KEYS.hasAdPass, label: 'AdPass:', value: playerData.hasAdPass, tooltip: 'куплен ли пропуск рекламы'},
+        {
+          key: STORAGE_KEYS.hasAdPass,
+          label: 'AdPass:',
+          value: playerData.hasAdPass,
+          tooltip: 'куплен ли пропуск рекламы',
+        },
         {
           key: STORAGE_KEYS.eventPurchasedNewYear,
           label: "New Year's Levels",
@@ -161,9 +171,30 @@ export default class AdminPanel {
         },
 
         {key: STORAGE_KEYS.hints, label: 'magnifiers', min: 0, max: 999, value: playerData.hints ?? 0, tooltip: 'лупы'},
-        {key: STORAGE_KEYS.hintDarts, label: 'darts', min: 0, max: 999, value: playerData.hintDarts ?? 0, tooltip: 'дартс'},
-        {key: STORAGE_KEYS.hintCompass, label: 'compass', min: 0, max: 999, value: playerData.hintCompass ?? 0, tooltip: 'компас'},
-        {key: STORAGE_KEYS.coins, label: 'coins', min: 0, max: 99999, value: playerData.coins ?? 0, tooltip: 'игровая валюта'},
+        {
+          key: STORAGE_KEYS.hintDarts,
+          label: 'darts',
+          min: 0,
+          max: 999,
+          value: playerData.hintDarts ?? 0,
+          tooltip: 'дартс',
+        },
+        {
+          key: STORAGE_KEYS.hintCompass,
+          label: 'compass',
+          min: 0,
+          max: 999,
+          value: playerData.hintCompass ?? 0,
+          tooltip: 'компас',
+        },
+        {
+          key: STORAGE_KEYS.coins,
+          label: 'coins',
+          min: 0,
+          max: 99999,
+          value: playerData.coins ?? 0,
+          tooltip: 'игровая валюта',
+        },
       ],
     }
   }
@@ -223,7 +254,9 @@ export default class AdminPanel {
 
   // Возвращает поля общей отладки без обучения и магазина.
   #getDebugCheckboxes(): any[] {
-    return this.#config.checkboxes.filter(({key}: {key: string}) => !this.#learningKeys.includes(key) && !this.#storeKeys.includes(key))
+    return this.#config.checkboxes.filter(
+      ({key}: {key: string}) => !this.#learningKeys.includes(key) && !this.#storeKeys.includes(key),
+    )
   }
 
   // Обновляет доступность полей согласно общему режиму отладки.

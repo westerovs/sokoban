@@ -15,7 +15,9 @@ const createPreloadList = () => {
   // Создаёт ресурс стартового фона с учётом активного события.
   const createBackgroundAsset = () => {
     const isNewYear = Locator.liveOps.isActive(LIVE_OPS_ID.NEW_YEAR)
-    const src = isNewYear ? `${basePath}assets/_events/newYear/images/startScreen.webp` : `${basePath}assets/images/startScreen.webp`
+    const src = isNewYear
+      ? `${basePath}assets/_events/newYear/images/startScreen.webp`
+      : `${basePath}assets/images/startScreen.webp`
 
     return {alias: 'startScreen', src}
   }

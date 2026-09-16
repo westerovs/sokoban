@@ -21,7 +21,11 @@ export default class UIFader {
     const targets = [Locator.uiLayer.stateUiLayer, ...additionalItems].filter(Boolean)
     const fade = this.#game?.refs?.fade
 
-    await gsap.timeline().to(fade, {alpha: 0}).fromTo(targets, {alpha: 0}, {alpha: 1, visible: true}, '<').set(fade, {visible: false})
+    await gsap
+      .timeline()
+      .to(fade, {alpha: 0})
+      .fromTo(targets, {alpha: 0}, {alpha: 1, visible: true}, '<')
+      .set(fade, {visible: false})
   }
 
   // Скрывает UI-слой и дополнительные элементы.

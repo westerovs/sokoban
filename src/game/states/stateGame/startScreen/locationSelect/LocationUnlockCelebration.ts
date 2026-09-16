@@ -162,7 +162,9 @@ export default class LocationUnlockCelebration extends Container {
 
     const {x, y} = this.#targetCard.position
     const scale = this.#targetScale.x
-    this.#veil.clear().roundRect((-CARD_WIDTH * scale) / 2, (-CARD_HEIGHT * scale) / 2, CARD_WIDTH * scale, CARD_HEIGHT * scale, 20)
+    this.#veil
+      .clear()
+      .roundRect((-CARD_WIDTH * scale) / 2, (-CARD_HEIGHT * scale) / 2, CARD_WIDTH * scale, CARD_HEIGHT * scale, 20)
     this.#veil.fill({color: 0x07110c, alpha: 0.68})
     this.#veil.position.set(x, y)
     this.#glow.position.set(x, y)
@@ -196,14 +198,28 @@ export default class LocationUnlockCelebration extends Container {
 
   // Анимирует появление сообщения.
   #animateMessageAppearance = () => {
-    this.#timeline!.fromTo(this.#messageContainer, {alpha: 0, y: this.#messageY + 30}, {alpha: 1, y: this.#messageY, duration: 0.55})
-    this.#timeline!.fromTo(this.#messageContainer.scale, {x: 0.6, y: 0.6}, {x: 1, y: 1, duration: 0.65, ease: 'back.out(2.4)'}, '<')
+    this.#timeline!.fromTo(
+      this.#messageContainer,
+      {alpha: 0, y: this.#messageY + 30},
+      {alpha: 1, y: this.#messageY, duration: 0.55},
+    )
+    this.#timeline!.fromTo(
+      this.#messageContainer.scale,
+      {x: 0.6, y: 0.6},
+      {x: 1, y: 1, duration: 0.65, ease: 'back.out(2.4)'},
+      '<',
+    )
   }
 
   // Анимирует появление свечения.
   #animateGlowAppearance = () => {
     this.#timeline!.fromTo(this.#glow, {alpha: 0}, {alpha: 1, duration: 0.35}, 0.15)
-    this.#timeline!.fromTo(this.#glow.scale, {x: 0.2, y: 0.2}, {x: 1, y: 1, duration: 0.7, ease: 'elastic.out(1, 0.45)'}, 0.15)
+    this.#timeline!.fromTo(
+      this.#glow.scale,
+      {x: 0.2, y: 0.2},
+      {x: 1, y: 1, duration: 0.7, ease: 'elastic.out(1, 0.45)'},
+      0.15,
+    )
   }
 
   // Анимирует падение замка на карточку.
@@ -235,7 +251,13 @@ export default class LocationUnlockCelebration extends Container {
       .timeline()
       .to(this.#glow.scale, {x: 1.28, y: 1.28, duration: 0.55, ease: 'sine.out'})
       .to(this.#glow, {alpha: 0, duration: 0.55, ease: 'sine.out'}, '<')
-    this.#messageTween = gsap.to(this.#messageContainer, {y: this.#messageY - 6, duration: 1.1, ease: 'sine.inOut', repeat: -1, yoyo: true})
+    this.#messageTween = gsap.to(this.#messageContainer, {
+      y: this.#messageY - 6,
+      duration: 1.1,
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true,
+    })
   }
 
   // Обновляет положение частиц на каждом кадре.

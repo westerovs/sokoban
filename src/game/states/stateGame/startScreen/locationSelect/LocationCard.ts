@@ -119,7 +119,13 @@ export default class LocationCard extends Container {
 
     this.#backgroundMask
       .clear()
-      .roundRect(-CARD_WIDTH / 2 + inset, -CARD_HEIGHT / 2 + inset, CARD_WIDTH - frameWidth, CARD_HEIGHT - frameWidth, 22 - inset)
+      .roundRect(
+        -CARD_WIDTH / 2 + inset,
+        -CARD_HEIGHT / 2 + inset,
+        CARD_WIDTH - frameWidth,
+        CARD_HEIGHT - frameWidth,
+        22 - inset,
+      )
       .fill(0xffffff)
   }
 

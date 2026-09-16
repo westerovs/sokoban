@@ -28,7 +28,13 @@ export default class MathTools {
   }
 
   // Возвращает случайное смещение по двум координатам.
-  static getRandomPosition = ({minX = 0, maxX = 100, minY = 0, maxY = 100, forceYMinus = false}: RandomPositionOptions) => {
+  static getRandomPosition = ({
+    minX = 0,
+    maxX = 100,
+    minY = 0,
+    maxY = 100,
+    forceYMinus = false,
+  }: RandomPositionOptions) => {
     // Возвращает случайный знак числа.
     const sign = () => (Math.random() < 0.5 ? -1 : 1)
 

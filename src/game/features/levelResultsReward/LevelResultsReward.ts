@@ -71,7 +71,8 @@ export default class LevelResultsReward extends Container {
   get difficultyData() {
     const levelType = LevelConfig.levelType
 
-    if (levelType === LEVEL_TYPES.SHADOWS.name) return {levelType, textBonus: `${i18next.t('difficultyLevels.hard')}`, reward: REWARD.hard}
+    if (levelType === LEVEL_TYPES.SHADOWS.name)
+      return {levelType, textBonus: `${i18next.t('difficultyLevels.hard')}`, reward: REWARD.hard}
     if (levelType === LEVEL_TYPES.WORDS.name)
       return {levelType, textBonus: `${i18next.t('difficultyLevels.veryHard')}`, reward: REWARD.veryHard}
     if (levelType === LEVEL_TYPES.ANAGRAMS.name)
@@ -251,7 +252,11 @@ export default class LevelResultsReward extends Container {
     const coinTotalCoins = this.#createCoin('coinTotalCoins')
     coinTotalCoins.x = -120
 
-    const textSumReward = GameUtils.createText(`+${this.#levelBonusValue}`, {style: this.#rowTextStyle, name: 'textSumReward', anchorX: 1})
+    const textSumReward = GameUtils.createText(`+${this.#levelBonusValue}`, {
+      style: this.#rowTextStyle,
+      name: 'textSumReward',
+      anchorX: 1,
+    })
     textSumReward.x = +92
 
     const coinBonusSum = this.#createCoin('coinBonusSum')

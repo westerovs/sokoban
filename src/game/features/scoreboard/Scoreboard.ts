@@ -139,7 +139,9 @@ export default class Scoreboard {
   // Выделяет строку текущего игрока.
   #markCurrentPlayer = () => {
     const currentPlayerID = SdkManager.player.getId()
-    const row = this.#view.list.children.find((item) => (item as ScoreRow).id === currentPlayerID) as ScoreRow | undefined
+    const row = this.#view.list.children.find((item) => (item as ScoreRow).id === currentPlayerID) as
+      | ScoreRow
+      | undefined
 
     if (row) {
       const userNameText = row.textUserName

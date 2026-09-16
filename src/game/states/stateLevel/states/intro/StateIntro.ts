@@ -27,7 +27,10 @@ export default class StateIntro {
 
     const {globalUiLayer, stateUiLayer} = Locator.uiLayer
 
-    await gsap.timeline().set(stateUiLayer, {visible: true}).fromTo([globalUiLayer, stateUiLayer], {alpha: 0}, {alpha: 1})
+    await gsap
+      .timeline()
+      .set(stateUiLayer, {visible: true})
+      .fromTo([globalUiLayer, stateUiLayer], {alpha: 0}, {alpha: 1})
 
     Locator.options.view.optionsToggleBtn.eventMode = 'static'
   }

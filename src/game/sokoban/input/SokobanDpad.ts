@@ -115,7 +115,13 @@ export default class SokobanDpad extends Container {
   }
 
   // Активирует направление выбранной кнопки крестовины.
-  #handlePress(event: FederatedPointerEvent, button: Container, highlight: Graphics, arrow: Graphics, direction: SokobanDirectionName) {
+  #handlePress(
+    event: FederatedPointerEvent,
+    button: Container,
+    highlight: Graphics,
+    arrow: Graphics,
+    direction: SokobanDirectionName,
+  ) {
     event.stopPropagation()
     if (this.#activePointerId !== null) return
 
