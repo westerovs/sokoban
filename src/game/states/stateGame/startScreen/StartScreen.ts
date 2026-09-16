@@ -7,7 +7,7 @@ import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import LevelProgress from '@/game/gameConfig/levels/LevelProgress.js'
-import {getLocationById, getLocationPageIndex} from '@/game/gameConfig/levels/locationCatalog.js'
+import {getLevelEntryById, getLocationById, getLocationPageIndex} from '@/game/gameConfig/levels/locationCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import type GameView from '../GameView.js'
@@ -100,22 +100,17 @@ export default class StartScreen {
 
   // Выбирает начальный экран согласно запросу игры.
   #showInitialScreen = () => {
-    if (this.#game.consumeSelectedLocationRequest()) {
-      this.#showSelectedLocation()
+    const request = this.#game.consumeSelectedLocationRequest()
+    if (request) {
+      this.#showSelectedLocation(request.locationId, request.levelId)
       return
     }
 
     this.showLocations(false)
   }
 
-  // Открывает ранее выбранную локацию, если она доступна.
-  #showSelectedLocation = () => {
-    const locationId = this.#progress.selectedLocationId
-    if (!locationId) {
-      this.showLocations(false)
-      return
-    }
-
+  // Открывает запрошенный уровень локации, если он доступен.
+  #showSelectedLocation = (locationId: string, levelId: string) => {
     const location = getLocationById(locationId)
     if (!location || !this.#progress.isLocationUnlocked(locationId)) {
       this.showLocations(false)
@@ -125,7 +120,9 @@ export default class StartScreen {
     this.#selectedLocationId = locationId
     Locator.options.setMainScreenNavigation(false)
     ;(this.#game.view as GameView).setBackground(location.background)
-    const selectedEntry = this.#progress.getSelectedEntry(locationId)
+    const requestedEntry = getLevelEntryById(levelId)
+    const selectedEntry =
+      requestedEntry?.location.id === locationId ? requestedEntry : this.#progress.getSelectedEntry(locationId)
     if (!selectedEntry) return
     this.#gameMenu.showLevels(location, this.#progress.getLevelStates(locationId), selectedEntry)
   }

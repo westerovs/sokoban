@@ -188,7 +188,8 @@ export default class Options {
 
     if (this.#game.stateName !== GAME_STATES.levelState) return
 
-    this.#game.requestSelectedLocationOnStart()
+    const levelConfig = this.#game.level?.config
+    if (levelConfig) this.#game.requestSelectedLocationOnStart(levelConfig.locationId, levelConfig.id)
     this.#game.currentState?.checkoutState(GAME_STATES.gameState)
   }
 

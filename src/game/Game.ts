@@ -25,6 +25,11 @@ import UIFader from './ui/UIFader.js'
 
 // Создаёт приложение PixiJS, регистрирует сервисы и запускает игровые состояния.
 
+type SelectedLocationRequest = {
+  locationId: string
+  levelId: string
+}
+
 export default class Game extends EventEmitter {
   refs: Record<string, any> = {}
   level: any = null
@@ -41,7 +46,7 @@ export default class Game extends EventEmitter {
   #currentStateName: string | undefined
   #adapter: SdkAdapter
   #view!: Container // У каждого состояния есть собственный контейнер представления.
-  #shouldOpenSelectedLocation = false
+  #selectedLocationRequest: SelectedLocationRequest | null = null
 
   // Сохраняет платформенный адаптер и регистрирует игровые сервисы.
   constructor(adapter: SdkAdapter) {
@@ -96,16 +101,16 @@ export default class Game extends EventEmitter {
     this.#view = view
   }
 
-  // Запрашивает открытие выбранной локации при входе в меню.
-  requestSelectedLocationOnStart = () => {
-    this.#shouldOpenSelectedLocation = true
+  // Запрашивает открытие указанного уровня локации при входе в меню.
+  requestSelectedLocationOnStart = (locationId: string, levelId: string) => {
+    this.#selectedLocationRequest = {locationId, levelId}
   }
 
-  // Возвращает и сбрасывает запрос открытия выбранной локации.
+  // Возвращает и сбрасывает запрос открытия уровня локации.
   consumeSelectedLocationRequest = () => {
-    const shouldOpen = this.#shouldOpenSelectedLocation
-    this.#shouldOpenSelectedLocation = false
-    return shouldOpen
+    const request = this.#selectedLocationRequest
+    this.#selectedLocationRequest = null
+    return request
   }
 
   // Создаёт приложение, слои и игровые состояния.

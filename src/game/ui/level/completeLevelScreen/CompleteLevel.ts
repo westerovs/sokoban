@@ -243,7 +243,7 @@ export default class CompleteLevel {
     this.#setEvents(false)
     this.#soundManager.play('sfx_btnClick')
     await ButtonAnimator.click(this.btnBackToLevels)
-    this.#game.requestSelectedLocationOnStart()
+    this.#game.requestSelectedLocationOnStart(this.levelEntity.config.locationId, this.levelEntity.config.id)
     this.state.checkoutState(GAME_STATES.gameState)
   }
 
