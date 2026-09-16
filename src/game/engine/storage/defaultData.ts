@@ -26,17 +26,16 @@ const STORAGE_KEYS = {
   celebratedLocationIds: 'celebratedLocationIds',
   locationPageIndex: 'locationPageIndex',
   skinIndex: 'skinIndex',
-  partIndex: 'partIndex',
-
+  // options
   option_isPlayMusic: 'option_isPlayMusic',
   option_isPlaySFX: 'option_isPlaySFX',
   option_zoom: 'option_zoom',
   option_sokobanDpad: 'option_sokobanDpad',
-
+  // timer reward
   timer_RewardMagnifier: 'timer_RewardMagnifier',
   timer_RewardDarts: 'timer_RewardDarts',
   timer_RewardCompass: 'timer_RewardCompass',
-
+  // tutorials
   isTutorial_shadows: 'isTutorial_shadows',
   isTutorial_words: 'isTutorial_words',
   isTutorial_anagrams: 'isTutorial_anagrams',
@@ -86,7 +85,6 @@ type PlayerData = {
   celebratedLocationIds: string[]
   locationPageIndex: number
   skinIndex: number
-  partIndex: number
   option_isPlayMusic: boolean
   option_isPlaySFX: boolean
   option_zoom: boolean | null
@@ -136,7 +134,6 @@ const DEFAULT_DATA: Record<StorageKey, DefaultDataEntry> = {
   [STORAGE_KEYS.celebratedLocationIds]: {type: 'array', value: []},
   [STORAGE_KEYS.locationPageIndex]: {type: 'number', value: 0},
   [STORAGE_KEYS.skinIndex]: {type: 'number', value: 1},
-  [STORAGE_KEYS.partIndex]: {type: 'number', value: 1},
 
   [STORAGE_KEYS.option_isPlayMusic]: {type: 'bool', value: true},
   [STORAGE_KEYS.option_isPlaySFX]: {type: 'bool', value: true},

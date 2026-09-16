@@ -1,4 +1,4 @@
-import type {RuntimeLevelConfig} from '../../../gameConfig/levels/levelTypes.js'
+import type {RuntimeLevelConfig} from '@/game/gameConfig/levels/levelTypes.ts'
 
 // Описывает промежуточные данные предзагрузки одного уровня.
 
@@ -9,10 +9,8 @@ type LevelPreloadList = {
 }
 
 type PreloadTextData = {
-  partIndex: number
   textLevel: string
   textLoading: string
-  textPart: string
   userLevel: number
 }
 

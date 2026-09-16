@@ -62,9 +62,9 @@ export default class LoadLevelResources {
     if (!this.#isNeedUpdateProgress) return
     if (!this.#preloadText) return
 
-    const {textLevel, userLevel, textPart, partIndex, textLoading} = this.#levelEntity.textPreloadData!
+    const {textLevel, userLevel, textLoading} = this.#levelEntity.textPreloadData!
 
     const preloadText = this.#preloadText
-    preloadText.text = `${textLevel} ${userLevel}\n${textPart} ${partIndex}\n${textLoading} ${progress}%`
+    preloadText.text = `${textLevel} ${userLevel}}\n${textLoading} ${progress}%`
   }
 }

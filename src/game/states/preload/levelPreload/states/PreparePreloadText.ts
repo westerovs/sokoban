@@ -34,29 +34,13 @@ export default class PreparePreloadText {
     // уровень
     const textLevel = i18next.t('level')
     const userLevel = this.#storage.userLevel
-    // этап
-    const textPart = i18next.t('textLoadingSkinPart')
-    const partIndex = this.#getPartIndex()
     // загрузка
     const textLoading = i18next.t('textLoading')
 
     this.#textPreloadData = {
       textLevel,
       userLevel,
-      textPart,
-      partIndex,
       textLoading,
     }
-  }
-
-  // Возвращает текущую часть прогресса игрока.
-  #getPartIndex = () => {
-    const {skinIndex, partIndex} = this.#levelEntity.playerData!
-
-    if (partIndex < 5) {
-      this.#levelEntity.playerData!.partIndex = skinIndex
-    }
-
-    return this.#levelEntity.playerData!.partIndex
   }
 }
