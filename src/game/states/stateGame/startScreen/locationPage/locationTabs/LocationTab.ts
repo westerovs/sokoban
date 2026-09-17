@@ -1,9 +1,8 @@
 import {Container, Graphics, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 
-// Отображает вкладку страницы со списком локаций.
-
-const LOCATION_TAB_WIDTH = 250 // Ширина вкладки диапазона глав
+const LOCATION_TAB_WIDTH = 250
+const LOCATION_TAB_HEIGHT = 90
 
 export default class LocationTab extends Container {
   #background!: Graphics
@@ -21,39 +20,53 @@ export default class LocationTab extends Container {
     this.#init(text)
   }
 
-  // Перерисовывает вкладку в активном или обычном состоянии.
   setActive = (isActive: boolean) => {
+    this.#updateBackground(isActive)
+  }
+
+  #init = (text: string) => {
+    this.#createBackground()
+    this.#createTitle(text)
+
+    this.on('pointertap', this.#handleSelect)
+  }
+
+  #createBackground = () => {
+    this.#background = new Graphics({label: `${this.label}-background`})
+    this.addChild(this.#background)
+  }
+
+  #updateBackground = (isActive: boolean) => {
     const fill = isActive ? 0x718f2d : 0x17271d
     const border = isActive ? 0xe6e55d : 0x927642
+
     this.#background
       .clear()
-      .roundRect(-LOCATION_TAB_WIDTH / 2, -28, LOCATION_TAB_WIDTH, 56, 20)
+      .roundRect(0, 0, LOCATION_TAB_WIDTH, LOCATION_TAB_HEIGHT, 20)
       .fill({
         color: fill,
         alpha: 0.96,
       })
-    this.#background.stroke({color: border, width: isActive ? 5 : 3})
+
+    this.#background.pivot.set(LOCATION_TAB_WIDTH / 2, LOCATION_TAB_HEIGHT / 2)
+    this.#background.stroke({color: border, width: 4})
   }
 
-  // Создаёт фон и подпись вкладки.
-  #init = (text: string) => {
-    this.#background = new Graphics({label: `${this.label}-background`})
+  #createTitle = (text: string) => {
     const title = new Text({
       label: `${this.label}-title`,
       text,
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 32},
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 45},
     })
     title.anchor.set(0.5)
-    this.addChild(this.#background, title)
-    this.on('pointertap', this.#handleSelect)
+    this.addChild(title)
   }
 
-  // Передаёт выбранную страницу контроллеру.
   #handleSelect = () => {
     this.#onSelect(this.#pageIndex)
   }
 }
 
 export {
-  LOCATION_TAB_WIDTH, // Ширина вкладки для внешних расчётов раскладки
+  LOCATION_TAB_WIDTH,
 }

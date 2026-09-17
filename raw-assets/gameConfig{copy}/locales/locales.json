@@ -13,7 +13,7 @@
     "textLoading.init": "Подготовка уровня",
     "textLoadingSkinPart": "этап",
     "btnStart": "ИГРАТЬ",
-    "locationSelect.chapter": "Глава {{chapter}}",
+    "locationSelect.chapter": "ГЛАВА {{chapter}}",
     "locationSelect.continue": "Продолжить",
     "locationSelect.continueLocation": "{{location}} · Уровень {{level}}",
     "locationSelect.unlocked": "Доступна новая локация\n{{location}}",
