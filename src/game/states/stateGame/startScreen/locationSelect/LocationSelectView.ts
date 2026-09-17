@@ -81,25 +81,12 @@ export default class LocationSelectView extends Container {
 
   // Создаёт постоянные элементы экрана.
   #init = (onContinue: GameMenuCallbacks['onContinue']) => {
-    this.#createTitle()
     this.#createTabsContainer()
     this.#cardsContainer = new Container({label: 'location-cards'})
     this.addChild(this.#cardsContainer)
     this.#continueButton = this.#createContinueButton(onContinue)
     this.#unlockCelebration = new LocationUnlockCelebration()
     this.addChild(this.#continueButton, this.#unlockCelebration)
-  }
-
-  // Создаёт заголовок экрана.
-  #createTitle = () => {
-    const title = new Text({
-      label: 'location-select-title',
-      text: i18next.t('locationSelect.title'),
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 58, stroke: {color: 0x19251d, width: 7, join: 'round'}},
-    })
-    title.anchor.set(0.5)
-    title.y = -390
-    this.addChild(title)
   }
 
   // Создаёт контейнер вкладок страниц локаций.
