@@ -1,12 +1,12 @@
 import i18next from 'i18next'
 import {Container, FederatedPointerEvent, Graphics, Text} from 'pixi.js'
+import type {LevelDefinition} from '@/game/gameConfig/levels/levelTypes.ts'
+import {openSokobanLevelEditor} from '@/game/sokoban/editor/openSokobanLevelEditor.ts'
+import {primaryFontStyle} from '@/game/styles.ts'
 import {fitTextWidth} from '@/game/utils/fitTextWidth.js'
 import ButtonContainer from '../../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../../engine/Locator.ts'
 import LocalStorage from '../../../../engine/storage/LocalStorage.js'
-import type {LevelDefinition} from '../../../../gameConfig/levels/levelTypes.js'
-import {openSokobanLevelEditor} from '../../../../sokoban/editor/openSokobanLevelEditor.js'
-import {primaryFontStyle} from '../../../../styles.js'
 import type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition} from '../menuTypes.js'
 import LevelPreview from './LevelPreview.js'
 import LevelPreviewStatsView from './LevelPreviewStatsView.js'
@@ -17,7 +17,7 @@ import LevelSelectButton from './LevelSelectButton.js'
  */
 
 const ACTION_BUTTON_GAP = 24 // Расстояние между кнопками действий
-const ACTION_BUTTONS_Y = 445 // Вертикальная позиция кнопок действий
+const ACTION_BUTTONS_Y = 460 // Вертикальная позиция кнопок действий
 const BACK_BUTTON_SCALE = 0.75 // Масштаб кнопки возврата
 const LEVELS_PANEL_HEIGHT = 320 // Высота панели списка уровней
 const LEVELS_PANEL_WIDTH = 600 // Ширина панели списка уровней
@@ -32,12 +32,11 @@ export default class LocationLevelSelectView extends Container {
   #levelsContainer!: Container
   #onLevelSelect: GameMenuCallbacks['onLevelSelect']
   #playButton!: ButtonContainer
-  #preview!: LevelPreview
+  #levelPreview!: LevelPreview
   #records!: LevelPreviewStatsView
   #selectedEntry: LevelEntry | null = null
   #title!: Text
 
-  // Создаёт экземпляр и сохраняет переданные зависимости.
   constructor({onBack, onLevelSelect, onPlay}: Pick<GameMenuCallbacks, 'onBack' | 'onLevelSelect' | 'onPlay'>) {
     super({label: 'location-level-select-view'})
 
@@ -49,7 +48,7 @@ export default class LocationLevelSelectView extends Container {
   setData = (location: LocationDefinition, levels: LevelSelectionState[], selectedEntry: LevelEntry) => {
     this.#selectedEntry = selectedEntry
     this.#title.text = i18next.t(location.titleKey)
-    this.#preview.setLevel(selectedEntry.level)
+    this.#levelPreview.setLevel(selectedEntry.level)
     this.#setDifficulty(selectedEntry.level)
     this.#setPersonalBest(selectedEntry.level)
     this.#setAuthor(selectedEntry.level)
@@ -60,7 +59,7 @@ export default class LocationLevelSelectView extends Container {
   // Обновляет состояние через операцию `updateSelectedLevel`.
   updateSelectedLevel = (levels: LevelSelectionState[], selectedEntry: LevelEntry) => {
     this.#selectedEntry = selectedEntry
-    this.#preview.setLevel(selectedEntry.level)
+    this.#levelPreview.setLevel(selectedEntry.level)
     this.#setDifficulty(selectedEntry.level)
     this.#setPersonalBest(selectedEntry.level)
     this.#setAuthor(selectedEntry.level)
@@ -81,48 +80,69 @@ export default class LocationLevelSelectView extends Container {
 
   // Инициализирует внутреннее состояние и зависимости.
   #init = (onBack: GameMenuCallbacks['onBack'], onPlay: GameMenuCallbacks['onPlay']) => {
-    this.#createHeader()
-    this.#preview = new LevelPreview()
-    this.#preview.eventMode = 'static'
-    this.#preview.on('pointertap', this.#openLevelEditor)
-    this.#levelsContainer = new Container({label: 'level-select-buttons'})
-    this.#createLevelsPanel()
+    this.#createTitle()
+    this.#createLevelPreview()
+    this.#createLevelsContainer()
+
     this.#backButton = this.#createBackButton(onBack)
     this.#playButton = this.#createPlayButton(onPlay)
-    this.addChild(this.#preview, this.#levelsContainer, this.#backButton, this.#playButton)
   }
 
-  // Создаёт данные или представление для операции `createHeader`.
-  #createHeader = () => {
+  #createTitle = () => {
     this.#title = new Text({
       label: 'location-level-title',
       text: '',
       style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 64, stroke: {color: 0x19251d, width: 7, join: 'round'}},
     })
     this.#title.anchor.set(0.5)
+    this.addChild(this.#title)
+  }
+
+  #createLevelPreview = () => {
+    this.#levelPreview = new LevelPreview()
+    this.#levelPreview.eventMode = 'static'
+    this.#levelPreview.on('pointertap', this.#openLevelEditor)
+    this.addChild(this.#levelPreview)
+  }
+
+  // ------------ панель выбора уровней
+  #createLevelsContainer = () => {
+    this.#levelsContainer = new Container({label: 'level-select-buttons'})
+    this.addChild(this.#levelsContainer)
+
+    this.#createPanelGraphics()
+    this.#createRecords()
+    this.#createDifficultyText()
+    this.#createAuthorText()
+  }
+
+  #createPanelGraphics = () => {
+    const graphics = new Graphics({label: 'level-select-graphics'})
+    graphics
+      .roundRect(-LEVELS_PANEL_WIDTH / 2, -LEVELS_PANEL_HEIGHT / 2, LEVELS_PANEL_WIDTH, LEVELS_PANEL_HEIGHT, 28)
+      .fill({color: 0x132319, alpha: 0.92})
+    graphics.stroke({color: 0xa98c48, width: 5})
+
+    this.#levelsContainer.addChild(graphics)
+  }
+
+  #createDifficultyText = () => {
     this.#difficultyText = new Text({
       label: 'level-preview-difficulty',
       text: '',
       style: {...primaryFontStyle, fill: 0xffedbd, fontSize: 27, stroke: {color: 0x19251d, width: 3, join: 'round'}},
     })
     this.#difficultyText.anchor.set(0.5)
-    this.addChild(this.#title, this.#difficultyText)
+    this.#difficultyText.position.set(0, -70)
+    this.#levelsContainer.addChild(this.#difficultyText)
   }
 
-  // Создаёт данные или представление для операции `createLevelsPanel`.
-  #createLevelsPanel = () => {
-    const panel = new Graphics({label: 'level-select-panel'})
-    panel
-      .roundRect(-LEVELS_PANEL_WIDTH / 2, -LEVELS_PANEL_HEIGHT / 2, LEVELS_PANEL_WIDTH, LEVELS_PANEL_HEIGHT, 28)
-      .fill({color: 0x132319, alpha: 0.92})
-    panel.stroke({color: 0xa98c48, width: 5})
+  #createRecords = () => {
     this.#records = new LevelPreviewStatsView()
     this.#records.y = -120
-    this.#levelsContainer.addChild(panel, this.#records)
-    this.#createAuthorText()
+    this.#levelsContainer.addChild(this.#records)
   }
 
-  // Создаёт отладочную подпись автора между предпросмотром и панелью уровней.
   #createAuthorText() {
     if (!LocalStorage.isDebug) return
     this.#authorText = new Text({
@@ -135,7 +155,8 @@ export default class LocationLevelSelectView extends Container {
     this.#levelsContainer.addChild(this.#authorText)
   }
 
-  // Создаёт данные или представление для операции `createBackButton`.
+
+  // ------------ Кнопки Играть и Назад
   #createBackButton = (onBack: GameMenuCallbacks['onBack']) => {
     const button = new ButtonContainer({
       props: {name: 'btnLocationBack'},
@@ -143,10 +164,11 @@ export default class LocationLevelSelectView extends Container {
       initScale: BACK_BUTTON_SCALE,
     })
     button.on('pointertap', onBack)
+    this.addChild(button)
+
     return button
   }
 
-  // Создаёт данные или представление для операции `createPlayButton`.
   #createPlayButton = (onPlay: GameMenuCallbacks['onPlay']) => {
     const button = new ButtonContainer({
       props: {name: 'btnPlaySelectedLevel'},
@@ -158,8 +180,11 @@ export default class LocationLevelSelectView extends Container {
       style: {...primaryFontStyle, fill: 0x303b12, fontSize: 42},
     })
     button.on('pointertap', () => onPlay(this.#selectedEntry!.level.id))
+    this.addChild(button)
+
     return button
   }
+
 
   // Выполняет отдельную операцию `replaceLevelButtons`.
   #replaceLevelButtons = (levels: LevelSelectionState[], selectedLevelId: string) => {
@@ -176,9 +201,8 @@ export default class LocationLevelSelectView extends Container {
   #layoutPreview = () => {
     this.#title.position.set(0, -450)
     fitTextWidth(this.#title, PREVIEW_WIDTH)
-    this.#difficultyText.position.set(0, -401)
-    this.#preview.position.set(0, -165)
-    this.#preview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
+    this.#levelPreview.position.set(0, -165)
+    this.#levelPreview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
   }
 
   // Рассчитывает расположение через операцию `layoutLevels`.
@@ -210,7 +234,7 @@ export default class LocationLevelSelectView extends Container {
 
   // Показывает локализованную сложность выбранного уровня.
   #setDifficulty(level: LevelDefinition) {
-    this.#difficultyText.text = i18next.t(`difficultyLevels.${level.difficulty}`)
+    this.#difficultyText.text = i18next.t(`difficultyLevels.${level.difficulty}`).toUpperCase()
     fitTextWidth(this.#difficultyText, PREVIEW_WIDTH)
   }
 

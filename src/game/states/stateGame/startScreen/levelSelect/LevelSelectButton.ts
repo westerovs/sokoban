@@ -1,5 +1,5 @@
 import {Container, Graphics, Text} from 'pixi.js'
-import {primaryFontStyle} from '../../../../styles.js'
+import {primaryFontStyle} from '@/game/styles.ts'
 import type {LevelSelectionState} from '../menuTypes.js'
 
 // Отображает кнопку выбора одного уровня и его состояние прохождения.
