@@ -11,7 +11,6 @@ import {CATALOG_COLORS} from './locationCatalogTheme.js'
 const CATALOG_WIDTH = 540 // Фиксированная ширина портретной панели
 const CATALOG_HEIGHT = 780 // Фиксированная высота портретной панели
 const POPUP_BORDER_SIZE = 72 // Размер сохраняемых краёв деревянной панели
-const CLOSE_BUTTON_INSET = 44 // Смещение крестика внутрь деревянной рамки
 const ROW_WIDTH = 460 // Ширина деревянной вкладки локации
 const ROW_HEIGHT = 92 // Высота деревянной вкладки локации
 const ROW_GAP = 6 // Расстояние между вкладками локаций
@@ -39,7 +38,6 @@ export default class LocationCatalogView extends BaseModal {
       label: 'location-catalog-view',
       w: CATALOG_WIDTH,
       h: CATALOG_HEIGHT,
-      crossOffset: {x: CLOSE_BUTTON_INSET, y: -CLOSE_BUTTON_INSET},
       forceUpdateAdaptive: true,
       isNeedCloseButton: true,
       isNeedHeader: true,

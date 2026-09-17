@@ -1,3 +1,4 @@
+import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Rectangle, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
@@ -7,6 +8,12 @@ import type {LocationSelectionState} from '../../menuTypes.js'
 import {CATALOG_COLORS} from './locationCatalogTheme.js'
 
 // Отображает одну компактную строку открытой или закрытой локации.
+
+const CONTENT_PADDING = 40 // Общий горизонтальный отступ содержимого дощечки
+const LOCK_GAP = 12 // Расстояние между названием и замком
+const LOCKED_BOARD_TINT = 0x91846d // Затемнение заблокированной дощечки
+const SHAKE_OFFSET = 6 // Амплитуда горизонтального встряхивания
+const SHAKE_DURATION = 0.045 // Длительность одного шага встряхивания
 
 export default class LocationCatalogRow extends Container {
   #background!: Sprite
@@ -21,17 +28,15 @@ export default class LocationCatalogRow extends Container {
     this.#init(onSelect)
   }
 
-  // Вписывает деревянную подложку, название и замок в размер строки.
+  // Вписывает деревянную подложку и содержимое в размер строки.
   resize = (width: number, height: number) => {
-    const textX = 86
     const scale = Math.min(width / this.#background.texture.width, height / this.#background.texture.height)
     this.hitArea = new Rectangle(0, 0, width, height)
     this.#background.scale.set(scale)
     this.#background.position.set(width / 2, height / 2)
-    this.#title.position.set(textX, height / 2)
-    this.#lock?.position.set(48, height / 2)
+    this.#title.position.set(CONTENT_PADDING, height / 2)
+    this.#layoutLock(height)
     this.#layoutProgress(width, height)
-    fitTextWidth(this.#title, this.#getTitleWidth(width, textX))
   }
 
   // Создаёт визуальные части строки и подключает выбор доступной локации.
@@ -40,17 +45,16 @@ export default class LocationCatalogRow extends Container {
     this.#createLock()
     this.#createTitle()
     this.#createProgress()
-    this.eventMode = this.#state.isUnlocked ? 'static' : 'none'
+    this.eventMode = 'static'
     this.cursor = this.#state.isUnlocked ? 'pointer' : 'default'
     this.interactiveChildren = false
-    if (this.#state.isUnlocked) this.on('pointertap', () => onSelect(this.#state.id))
+    this.on('pointertap', () => this.#handlePress(onSelect))
   }
 
   // Создаёт деревянную подложку строки.
   #createBackground = () => {
     this.#background = GameUtils.createSprite('board', {label: `${this.label}-background`})
-    this.#background.tint = this.#state.isCurrent ? 0xe6ffc4 : 0xffffff
-    this.#background.alpha = this.#state.isUnlocked ? 1 : 0.72
+    this.#background.tint = this.#getBackgroundTint()
     this.addChild(this.#background)
   }
 
@@ -94,13 +98,39 @@ export default class LocationCatalogRow extends Container {
     if (!this.#progress) return
 
     fitTextWidth(this.#progress, 160)
-    this.#progress.position.set(width - 26, height / 2)
+    this.#progress.position.set(width - CONTENT_PADDING, height / 2)
   }
 
-  // Возвращает свободную ширину названия перед прогрессом.
-  #getTitleWidth = (width: number, textX: number) => {
-    if (!this.#progress) return width - textX - 24
+  // Ставит замок непосредственно после названия закрытой локации.
+  #layoutLock = (height: number) => {
+    if (!this.#lock) return
 
-    return this.#progress.x - this.#progress.width - textX - 18
+    this.#lock.position.set(this.#title.x + this.#title.width + LOCK_GAP + this.#lock.width / 2, height / 2)
+  }
+
+  // Возвращает оттенок дощечки для текущего состояния локации.
+  #getBackgroundTint = () => {
+    if (!this.#state.isUnlocked) return LOCKED_BOARD_TINT
+    return this.#state.isCurrent ? 0xe6ffc4 : 0xffffff
+  }
+
+  // Открывает доступную локацию или встряхивает заблокированную.
+  #handlePress = (onSelect: (locationId: string) => void) => {
+    if (this.#state.isUnlocked) {
+      onSelect(this.#state.id)
+      return
+    }
+
+    this.#shakeLockedRow()
+  }
+
+  // Запускает короткое горизонтальное встряхивание закрытой дощечки.
+  #shakeLockedRow = () => {
+    gsap.killTweensOf(this)
+    gsap
+      .timeline()
+      .to(this, {x: -SHAKE_OFFSET, duration: SHAKE_DURATION, ease: 'sine.inOut'})
+      .to(this, {x: SHAKE_OFFSET, duration: SHAKE_DURATION * 2, ease: 'sine.inOut'})
+      .to(this, {x: 0, duration: SHAKE_DURATION, ease: 'sine.inOut'})
   }
 }
