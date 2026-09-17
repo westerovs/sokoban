@@ -1,20 +1,18 @@
 import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
+import LocationNav from '@/game/states/stateGame/startScreen/locationPage/locationNav/LocationNav.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectionState} from '../menuTypes.js'
-import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './LocationCard.js'
+import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './locationCard/LocationCard.ts'
 import LocationCatalogView from './locationCatalog/LocationCatalogView.js'
-import LocationTab from './locationTabs/LocationTab.ts'
 import LocationUnlockCelebration from './LocationUnlockCelebration.js'
 
 // Отображает страницы карточек локаций и кнопку продолжения игры.
 
 const PAGE_SIZE = 4 // Количество локаций на одной странице
 const NARROW_LAYOUT_WIDTH = 1200 // Порог переключения на узкую раскладку
-const NAVIGATION_SCALE = 0.82 // Фиксированный масштаб переключателя во всех ориентациях
-const NARROW_CARD_SCALE = 0.82 // Масштаб карточек в портретной раскладке
-const CARD_GAP = 45 // Единый промежуток между карточками по обеим осям
+const CARD_GAP = 25 // Единый промежуток между карточками по обеим осям
 const WIDE_CARD_ROW_Y = -45 // Центр ряда карточек в альбомной раскладке
 const NARROW_CARD_ROW_Y = -178 // Центр первого ряда карточек в портретной раскладке
 const NAVIGATION_CARD_GAP = 24 // Отступ переключателя от верхнего края карточек
@@ -27,7 +25,7 @@ export default class LocationPageView extends Container {
   #continueTitle!: Text
   #catalog: LocationCatalogView | null = null
   #catalogOpen = false
-  #chapterSelector!: LocationTab
+  #chapterSelector!: LocationNav
   #locations: LocationSelectionState[] = []
   #onLocationSelect: GameMenuCallbacks['onLocationSelect']
   #onPageSelect: GameMenuCallbacks['onPageSelect']
@@ -88,7 +86,7 @@ export default class LocationPageView extends Container {
     this.#catalog?.resize()
     this.#continueButton.position.set(0, isNarrow ? 445 : 410)
     this.#unlockCelebration.resize({
-      cardScale: isNarrow ? NARROW_CARD_SCALE : 1,
+      cardScale: 1,
       height: Locator.uiLayer.uiData.height,
       isNarrow,
       scale: this.scale.x,
@@ -109,7 +107,7 @@ export default class LocationPageView extends Container {
   #createTabsContainer = () => {
     this.#pageNavigation = new Container({label: 'location-page-navigation'})
     this.#tabsContainer = new Container({label: 'location-tabs'})
-    this.#chapterSelector = new LocationTab({
+    this.#chapterSelector = new LocationNav({
       onNext: () => this.#selectRelativePage(1),
       onOpenCatalog: this.#openCatalog,
       onPrevious: () => this.#selectRelativePage(-1),
@@ -143,9 +141,12 @@ export default class LocationPageView extends Container {
       eventMode: 'static',
       cursor: 'pointer',
     })
+
     const background = new Graphics({label: 'btnContinueAdventure-background'})
-    background.roundRect(-240, -50, 480, 100, 28).fill({color: 0x9fbd3b})
+    background.roundRect(0, 0, 480, 100, 28).fill({color: 0x9fbd3b})
     background.stroke({color: 0xe7de83, width: 5})
+    background.pivot.set(background.width / 2, background.height / 2)
+
     this.#continueTitle = new Text({
       label: 'btnContinueAdventure-title',
       text: i18next.t('locationSelect.continue'),
@@ -153,6 +154,7 @@ export default class LocationPageView extends Container {
     })
     this.#continueTitle.anchor.set(0.5)
     this.#continueTitle.y = -15
+
     this.#continueSubtitle = new Text({
       label: 'btnContinueAdventure-subtitle',
       text: '',
@@ -160,6 +162,7 @@ export default class LocationPageView extends Container {
     })
     this.#continueSubtitle.anchor.set(0.5)
     this.#continueSubtitle.y = 22
+
     button.addChild(background, this.#continueTitle, this.#continueSubtitle)
     button.on('pointertap', onContinue)
 
@@ -207,13 +210,13 @@ export default class LocationPageView extends Container {
 
   // Выравнивает переключатель относительно верхнего края карточек.
   #layoutPageNavigation = (isNarrow: boolean) => {
-    const cardScale = isNarrow ? NARROW_CARD_SCALE : 1
+    const cardScale = 1
     const rowY = isNarrow ? NARROW_CARD_ROW_Y : WIDE_CARD_ROW_Y
     const cardTop = rowY - (CARD_HEIGHT * cardScale) / 2
-    const navigationHalfHeight = (this.#chapterSelector.height * NAVIGATION_SCALE) / 2
+    const navigationHalfHeight = (this.#chapterSelector.height) / 2
     const navigationY = cardTop - NAVIGATION_CARD_GAP - navigationHalfHeight
     this.#pageNavigation.position.set(0, navigationY)
-    this.#pageNavigation.scale.set(NAVIGATION_SCALE)
+    this.#pageNavigation.scale.set(1)
     this.#updatePageNavigation()
   }
 
@@ -266,16 +269,17 @@ export default class LocationPageView extends Container {
 
   // Располагает карточки для широкой или узкой раскладки.
   #layoutCards = (isNarrow: boolean) => {
-    const scale = isNarrow ? NARROW_CARD_SCALE : 1
+    const scale = 1
     const columnCount = isNarrow ? 2 : PAGE_SIZE
     const columnStep = CARD_WIDTH * scale + CARD_GAP
     const rowStep = CARD_HEIGHT * scale + CARD_GAP
+
     this.#cards.forEach((card, index) => {
       const column = index % columnCount
       const row = Math.floor(index / columnCount)
       const x = (column - (columnCount - 1) / 2) * columnStep
       const y = (isNarrow ? NARROW_CARD_ROW_Y : WIDE_CARD_ROW_Y) + row * rowStep
-      card.scale.set(scale)
+      // card.scale.set(scale)
       card.position.set(x, y)
     })
   }

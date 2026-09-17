@@ -4,7 +4,7 @@ import {Container} from 'pixi.js'
 import Locator from '@/game/engine/Locator.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
 import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
-import LocationCard from '@/game/states/stateGame/startScreen/locationPage/LocationCard.js'
+import LocationCard from '@/game/states/stateGame/startScreen/locationPage/locationCard/LocationCard.ts'
 import LocationUnlockCelebration from '@/game/states/stateGame/startScreen/locationPage/LocationUnlockCelebration.js'
 
 /**

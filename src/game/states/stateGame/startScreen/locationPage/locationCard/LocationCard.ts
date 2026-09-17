@@ -3,8 +3,8 @@ import i18next from 'i18next'
 import {Container, Graphics, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
-import type {LocationSelectionState} from '../menuTypes.js'
-import LocationProgressView from './LocationProgressView.ts'
+import type {LocationSelectionState} from '../../menuTypes.ts'
+import LocationCardProgress from './LocationCardProgress.ts'
 
 // Отображает карточку локации, её доступность и прогресс игрока.
 
@@ -23,7 +23,7 @@ export default class LocationCard extends Container {
   #location: LocationSelectionState
   #lockIcon!: Sprite
   #onSelect: (locationId: string) => void
-  #progress!: LocationProgressView
+  #progress!: LocationCardProgress
   #title!: Text
 
   // Сохраняет данные локации и создаёт интерактивную карточку.
@@ -98,7 +98,7 @@ export default class LocationCard extends Container {
 
   // Добавляет самостоятельное отображение прогресса локации.
   #createProgress = () => {
-    this.#progress = new LocationProgressView(`${this.label}-progress`)
+    this.#progress = new LocationCardProgress(`${this.label}-progress`)
     this.#progress.position.set(0, 140)
     this.addChild(this.#progress)
   }

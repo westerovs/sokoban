@@ -2,16 +2,14 @@ import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
-import type {LocationSelectionState} from '../menuTypes.ts'
-
-// Отображает прогресс прохождения локации и состояние её завершения.
+import type {LocationSelectionState} from '../../menuTypes.ts'
 
 const PROGRESS_WIDTH = 190
 const PROGRESS_HEIGHT = 35
 const PROGRESS_PADDING = 3 // Внутренний отступ полосы прогресса
 const PROGRESS_STROKE_WIDTH = 4 // Толщина обводки плашки
 
-export default class LocationProgressView extends Container {
+export default class LocationCardProgress extends Container {
   #background!: Graphics
   #completedCheck!: Graphics
   #text!: Text
@@ -22,7 +20,6 @@ export default class LocationProgressView extends Container {
     this.#init()
   }
 
-  // Обновляет вид прогресса по состоянию локации.
   setState = (state: LocationSelectionState) => {
     this.visible = state.isUnlocked
     if (!state.isUnlocked) return

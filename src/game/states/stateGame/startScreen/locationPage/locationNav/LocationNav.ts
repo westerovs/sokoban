@@ -12,14 +12,14 @@ type LocationTabCallbacks = {
   onPrevious: () => void
 }
 
-export default class LocationTab extends Container {
+export default class LocationNav extends Container {
   #leftArrow!: Sprite
   #rightArrow!: Sprite
   #select!: Container
   #title!: Text
 
   constructor({onNext, onOpenCatalog, onPrevious}: LocationTabCallbacks) {
-    super({label: 'location-chapter-selector'})
+    super({label: 'location-nav'})
     this.eventMode = 'passive'
 
     this.#init({onNext, onOpenCatalog, onPrevious})

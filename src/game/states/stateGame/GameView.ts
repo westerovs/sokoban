@@ -1,8 +1,6 @@
 import {Container, Sprite} from 'pixi.js'
 import GameUtils from '../../utils/gameUtils/GameUtils.js'
 
-// Отображает общий фон главного игрового состояния.
-
 export default class GameView extends Container {
   #background: Sprite | null = null
   #backgroundName: string | null = null
@@ -26,6 +24,8 @@ export default class GameView extends Container {
     this.#background.height = 1080
     this.#background.zIndex = -1
     this.#backgroundName = textureName
+    this.#background.alpha = 0.5
+
     this.addChildAt(this.#background, 0)
   }
 
