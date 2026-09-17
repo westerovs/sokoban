@@ -1,125 +1,122 @@
 import i18next from 'i18next'
-import {Circle, Container, Graphics, Text} from 'pixi.js'
+import {Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
+import BaseModal from '@/game/ui/common/modal/BaseModal.ts'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.js'
 import LocationCatalogRow from './LocationCatalogRow.js'
-import {CATALOG_COLORS} from './locationCatalogTheme.js'
 
 // Показывает постраничный каталог локаций поверх основного экрана.
 
-const PAGE_SIZE = 4 // Число строк на одной странице каталога
+const PAGE_SIZE = 6 // Число строк на одной странице каталога
 const CATALOG_WIDTH = 540 // Фиксированная ширина портретной панели
 const CATALOG_HEIGHT = 780 // Фиксированная высота портретной панели
+const POPUP_BORDER_SIZE = 72 // Размер сохраняемых краёв деревянной панели
+const CLOSE_BUTTON_INSET = 44 // Смещение крестика внутрь деревянной рамки
+const ROW_WIDTH = 460 // Ширина деревянной вкладки локации
+const ROW_HEIGHT = 92 // Высота деревянной вкладки локации
+const ROW_GAP = 6 // Расстояние между вкладками локаций
+const ROWS_TOP = -292 // Верхняя позиция первой вкладки
 
 type LocationCatalogCallbacks = {
   onClose: () => void
   onLocationSelect: (locationId: string) => void
-  onPageSelect: (pageIndex: number) => void
 }
 
-export default class LocationCatalogView extends Container {
-  #background!: Graphics
-  #back!: Container
+export default class LocationCatalogView extends BaseModal {
   #callbacks: LocationCatalogCallbacks
   #locations: LocationSelectionState[] = []
-  #next!: Container
+  #next!: Sprite
   #pageIndex = 0
   #pageText!: Text
-  #previous!: Container
+  #previous!: Sprite
   #rows: LocationCatalogRow[] = []
-  #title!: Text
 
   constructor(callbacks: LocationCatalogCallbacks) {
-    super({label: 'location-catalog-view', visible: false})
+    super({
+      label: 'location-catalog-view',
+      w: CATALOG_WIDTH,
+      h: CATALOG_HEIGHT,
+      crossOffset: {x: CLOSE_BUTTON_INSET, y: -CLOSE_BUTTON_INSET},
+      forceUpdateAdaptive: true,
+      isNeedCloseButton: true,
+      isNeedHeader: true,
+      isSprite: true,
+      nineSlice: {
+        left: POPUP_BORDER_SIZE,
+        top: POPUP_BORDER_SIZE,
+        right: POPUP_BORDER_SIZE,
+        bottom: POPUP_BORDER_SIZE,
+      },
+      spriteTexture: 'main-pop-up',
+    })
     this.#callbacks = callbacks
     this.#init()
   }
 
   // Обновляет данные каталога и создаёт только строки выбранной страницы.
-  show = (locations: LocationSelectionState[], pageIndex: number) => {
+  setData = (locations: LocationSelectionState[], firstVisibleLocationIndex: number) => {
     this.#locations = locations
-    this.#pageIndex = pageIndex
-    this.visible = true
+    this.#pageIndex = Math.floor(firstVisibleLocationIndex / PAGE_SIZE)
     this.#replaceRows()
   }
 
-  // Скрывает каталог и освобождает временные строки.
-  hide = () => {
-    this.visible = false
+  override hide = async () => {
+    if (this.destroyed) return
+
     this.#clearRows()
+    this.#callbacks.onClose()
+    await super.hide()
   }
 
   // Сохраняет портретную одноколоночную компоновку при любой ориентации.
   resize = () => {
-    if (!this.visible) return
-    this.#drawBackground(CATALOG_WIDTH, CATALOG_HEIGHT)
-    this.#layoutHeader(CATALOG_WIDTH, CATALOG_HEIGHT)
+    this.updateAdaptive()
+    this.#layoutFooter(CATALOG_HEIGHT)
     this.#layoutRows()
   }
 
   // Создаёт постоянные части каталога.
   #init = () => {
-    this.#createBackground()
-    this.#createHeader()
+    this.#setHeaderText()
     this.#createFooter()
   }
 
-  // Создаёт общую светлую панель.
-  #createBackground = () => {
-    this.#background = new Graphics({label: 'location-catalog-background'})
-    this.addChild(this.#background)
-  }
-
-  // Создаёт заголовок и кнопку возврата.
-  #createHeader = () => {
-    this.#title = new Text({
-      label: 'location-catalog-title',
-      text: i18next.t('locationSelect.allLocations'),
-      style: {...primaryFontStyle, fill: CATALOG_COLORS.ink, fontSize: 40},
-    })
-    this.#title.anchor.set(0.5)
-    this.#back = this.#createRoundButton('location-catalog-back', 'left', this.#callbacks.onClose)
-    this.addChild(this.#title, this.#back)
+  // Устанавливает локализованный заголовок штатного фрейма модального окна.
+  #setHeaderText = () => {
+    if (!this.headerText) return
+    this.headerText.text = i18next.t('locationSelect.allLocations')
   }
 
   // Создаёт кнопки листания и номер страницы.
   #createFooter = () => {
-    this.#previous = this.#createRoundButton('location-catalog-previous', 'left', () => this.#selectPage(-1))
-    this.#next = this.#createRoundButton('location-catalog-next', 'right', () => this.#selectPage(1))
+    this.#previous = this.#createPageButton('location-catalog-previous', 'left', () => this.#selectPage(-1))
+    this.#next = this.#createPageButton('location-catalog-next', 'right', () => this.#selectPage(1))
     this.#pageText = new Text({
       label: 'location-catalog-page',
-      style: {...primaryFontStyle, fill: CATALOG_COLORS.muted, fontSize: 27},
+      style: {
+        ...primaryFontStyle,
+        fill: 0xffe6a1,
+        fontSize: 27,
+        stroke: {color: 0x5a2d0b, width: 3, join: 'round'},
+      },
     })
     this.#pageText.anchor.set(0.5)
     this.addChild(this.#previous, this.#next, this.#pageText)
   }
 
-  // Создаёт круглую светлую кнопку с векторной стрелкой.
-  #createRoundButton = (label: string, direction: 'left' | 'right', onPress: () => void) => {
-    const button = new Container({label, eventMode: 'static', cursor: 'pointer', hitArea: new Circle(0, 0, 34)})
-    const background = new Graphics({label: `${label}-background`})
-      .circle(0, 3, 34)
-      .fill({color: 0x9b8b5b, alpha: 0.18})
-      .circle(0, 0, 34)
-      .fill(CATALOG_COLORS.background)
-      .stroke({color: CATALOG_COLORS.border, width: 2})
-    const arrow = new Graphics({label: `${label}-icon`})
-      .moveTo(-4, -7)
-      .lineTo(4, 0)
-      .lineTo(-4, 7)
-      .stroke({color: CATALOG_COLORS.ink, width: 3, join: 'round', cap: 'round'})
-    arrow.rotation = direction === 'left' ? Math.PI : 0
-    button.addChild(background, arrow)
-    button.on('pointertap', onPress)
-    return button
+  // Создаёт кнопку листания из текстуры вкладочной стрелки.
+  #createPageButton = (label: string, direction: 'left' | 'right', onPress: () => void) => {
+    const arrow = GameUtils.createSprite('tab-arrow', {label, interactive: true})
+    arrow.scale.x = direction === 'left' ? 1 : -1
+    arrow.on('pointertap', onPress)
+
+    return arrow
   }
 
-  // Расставляет заголовок и нижнюю навигацию внутри панели.
-  #layoutHeader = (width: number, height: number) => {
-    const top = -height / 2
+  // Расставляет нижнюю навигацию внутри панели.
+  #layoutFooter = (height: number) => {
     const bottom = height / 2
-    this.#back.position.set(-width / 2 + 54, top + 54)
-    this.#title.position.set(22, top + 54)
     this.#previous.position.set(-170, bottom - 48)
     this.#next.position.set(170, bottom - 48)
     this.#pageText.position.set(0, bottom - 48)
@@ -127,38 +124,18 @@ export default class LocationCatalogView extends Container {
 
   // Раскладывает строки текущей страницы с равными отступами.
   #layoutRows = () => {
-    const gap = 14 // Расстояние между строками
-    const rowWidth = CATALOG_WIDTH - 40
-    const rowHeight = 138 // Высота строки портретного каталога
-    const top = -278 // Верхняя позиция первой строки
     this.#rows.forEach((row, index) => {
-      row.position.set(-CATALOG_WIDTH / 2 + 20, top + index * (rowHeight + gap))
-      row.resize(rowWidth, rowHeight)
+      row.position.set(-ROW_WIDTH / 2, ROWS_TOP + index * (ROW_HEIGHT + ROW_GAP))
+      row.resize(ROW_WIDTH, ROW_HEIGHT)
     })
-  }
-
-  // Рисует панель с мягкой тенью и кремовой рамкой.
-  #drawBackground = (width: number, height: number) => {
-    this.#background
-      .clear()
-      .roundRect(-width / 2, -height / 2 + 6, width, height, 32)
-      .fill({color: 0x302817, alpha: 0.2})
-      .roundRect(-width / 2, -height / 2, width, height, 32)
-      .fill(CATALOG_COLORS.background)
-      .stroke({color: CATALOG_COLORS.border, width: 3})
   }
 
   // Пересоздаёт строки только для видимой страницы.
   #replaceRows = () => {
     this.#clearRows()
     const start = this.#pageIndex * PAGE_SIZE
-    this.#locations.slice(start, start + PAGE_SIZE).forEach((location, index) => {
-      const previous = this.#locations[start + index - 1]
-      const row = new LocationCatalogRow(
-        location,
-        previous ? i18next.t(previous.titleKey) : '',
-        this.#callbacks.onLocationSelect,
-      )
+    this.#locations.slice(start, start + PAGE_SIZE).forEach((location) => {
+      const row = new LocationCatalogRow(location, this.#callbacks.onLocationSelect)
       this.#rows.push(row)
       this.addChild(row)
     })
@@ -175,7 +152,13 @@ export default class LocationCatalogView extends Container {
 
   // Запрашивает соседнюю страницу каталога.
   #selectPage = (offset: number) => {
-    this.#callbacks.onPageSelect(this.#pageIndex + offset)
+    const pageCount = Math.max(1, Math.ceil(this.#locations.length / PAGE_SIZE))
+    const pageIndex = this.#pageIndex + offset
+    if (pageIndex < 0 || pageIndex >= pageCount) return
+
+    this.#pageIndex = pageIndex
+    this.#replaceRows()
+    this.#layoutRows()
   }
 
   // Удаляет строки предыдущей страницы.

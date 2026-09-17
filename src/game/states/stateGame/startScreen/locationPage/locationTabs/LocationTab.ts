@@ -1,21 +1,28 @@
-import {Container, Graphics, Text} from 'pixi.js'
+import {Container, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 
-const LOCATION_TAB_WIDTH = 500
-const LOCATION_TAB_HEIGHT = 80
-const SELECT_WIDTH = 300
-const SELECT_HEIGHT = 60
+const ARROW_GAP = 4 // Расстояние между телом вкладки и боковой стрелкой
+
+type PageDirection = 'left' | 'right'
+
+type LocationTabCallbacks = {
+  onNext: () => void
+  onOpenCatalog: () => void
+  onPrevious: () => void
+}
 
 export default class LocationTab extends Container {
-  #background!: Graphics
+  #leftArrow!: Sprite
+  #rightArrow!: Sprite
+  #select!: Container
   #title!: Text
 
-  constructor(onOpenCatalog: () => void) {
+  constructor({onNext, onOpenCatalog, onPrevious}: LocationTabCallbacks) {
     super({label: 'location-chapter-selector'})
     this.eventMode = 'passive'
 
-    this.#init(onOpenCatalog)
+    this.#init({onNext, onOpenCatalog, onPrevious})
   }
 
   // Обновляет номер текущей главы без пересоздания переключателя.
@@ -23,61 +30,64 @@ export default class LocationTab extends Container {
     this.#title.text = text
   }
 
-  #init = (onOpenCatalog: () => void) => {
-    this.#createBorder()
-    this.#createSelect(onOpenCatalog)
-    this.#createTitle()
+  setNavigationState = (canGoPrevious: boolean, canGoNext: boolean) => {
+    this.#setArrowEnabled(this.#leftArrow, canGoPrevious)
+    this.#setArrowEnabled(this.#rightArrow, canGoNext)
   }
 
-  #createBorder = () => {
-    this.#background = new Graphics({label: `${this.label}-background`})
-      .roundRect(-LOCATION_TAB_WIDTH / 2, -LOCATION_TAB_HEIGHT / 2, LOCATION_TAB_WIDTH, LOCATION_TAB_HEIGHT, 48)
-      .fill({color: 0x12291b, alpha: 0.97})
-      .stroke({color: 0xd9ef58, width: 5})
-    this.addChild(this.#background)
+  #init = ({onNext, onOpenCatalog, onPrevious}: LocationTabCallbacks) => {
+    this.#createSelect(onOpenCatalog)
+    this.#createTitle()
+    this.#leftArrow = this.#createArrowTab('left', onPrevious)
+    this.#rightArrow = this.#createArrowTab('right', onNext)
   }
 
   #createTitle = () => {
     this.#title = new Text({
       label: `${this.label}-title`,
       text: '',
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 45},
-      anchor: 0.5
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 30},
+      anchor: 0.5,
     })
+    this.#title.x = -20
     this.addChild(this.#title)
   }
 
   #createSelect = (onOpenCatalog: () => void) => {
-    const select = new Container({
+    this.#select = new Container({
       label: 'btn-select',
       eventMode: 'static',
       cursor: 'pointer',
     })
 
-    this.#createSelectBackground(select)
-    this.#createSelectArrow(select)
-
-    select.position.set(0, 0)
-    select.on('pointertap', onOpenCatalog)
-    this.addChild(select)
+    this.#createSelectBackground()
+    this.#select.on('pointertap', onOpenCatalog)
+    this.addChild(this.#select)
   }
 
-  #createSelectBackground = (select: Container<any>) => {
-    const background = new Graphics()
-      .roundRect(0, 0, SELECT_WIDTH, SELECT_HEIGHT, 16)
-      .fill({color: 0x6d9f27})
-    background.pivot.set(background.width / 2, background.height / 2)
+  #createSelectBackground = () => {
+    const background = GameUtils.createSprite('select', {label: `${this.label}-background`})
 
-    select.addChild(background)
+    this.#select.addChild(background)
   }
 
-  #createSelectArrow = (select: Container<any>) => {
-    const arrow = GameUtils.createSprite('tab-arrow')
-    arrow.angle = 90
-    arrow.position.set((SELECT_WIDTH / 2) - arrow.width, 0)
+  #createArrowTab = (direction: PageDirection, onSelect: () => void) => {
+    const arrow = GameUtils.createSprite('tab-arrow', {
+      interactive: true,
+      label: `${this.label}-${direction}-arrow`,
+    })
+    const offset = this.#select.width / 2 + arrow.width / 2 + ARROW_GAP
+    arrow.x = direction === 'left' ? -offset : offset
+    arrow.scale.x = direction === 'left' ? 1 : -1
+    arrow.on('pointertap', onSelect)
+    this.addChild(arrow)
 
-    select.addChild(arrow)
+    return arrow
+  }
+
+  #setArrowEnabled = (arrow: Sprite, isEnabled: boolean) => {
+    arrow.visible = isEnabled
+    arrow.eventMode = isEnabled ? 'static' : 'none'
+    arrow.cursor = isEnabled ? 'pointer' : 'default'
   }
 }
-
-export {LOCATION_TAB_WIDTH}
