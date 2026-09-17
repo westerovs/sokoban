@@ -1,6 +1,5 @@
 import i18next from 'i18next'
 import {Circle, Container, Graphics, Text} from 'pixi.js'
-import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import type {LocationSelectionState} from '../../menuTypes.js'
 import LocationCatalogRow from './LocationCatalogRow.js'
@@ -9,6 +8,8 @@ import {CATALOG_COLORS} from './locationCatalogTheme.js'
 // Показывает постраничный каталог локаций поверх основного экрана.
 
 const PAGE_SIZE = 4 // Число строк на одной странице каталога
+const CATALOG_WIDTH = 540 // Фиксированная ширина портретной панели
+const CATALOG_HEIGHT = 780 // Фиксированная высота портретной панели
 
 type LocationCatalogCallbacks = {
   onClose: () => void
@@ -48,20 +49,12 @@ export default class LocationCatalogView extends Container {
     this.#clearRows()
   }
 
-  // Перестраивает панель одной колонкой в портрете и двумя в альбоме.
-  resize = (isNarrow: boolean) => {
+  // Сохраняет портретную одноколоночную компоновку при любой ориентации.
+  resize = () => {
     if (!this.visible) return
-    const {width: screenWidth, height: screenHeight} = Locator.uiLayer.uiData
-    const width = isNarrow ? 540 : Math.min(1700, screenWidth - 100)
-    const height = isNarrow ? 780 : Math.min(720, screenHeight - 100)
-    this.#title.style.fontSize = isNarrow ? 40 : 60
-    this.#pageText.style.fontSize = isNarrow ? 27 : 40
-    this.#back.scale.set(isNarrow ? 1 : 1.3)
-    this.#previous.scale.set(isNarrow ? 1 : 1.3)
-    this.#next.scale.set(isNarrow ? 1 : 1.3)
-    this.#drawBackground(width, height)
-    this.#layoutHeader(width, height)
-    this.#layoutRows(width, isNarrow ? 1 : 2)
+    this.#drawBackground(CATALOG_WIDTH, CATALOG_HEIGHT)
+    this.#layoutHeader(CATALOG_WIDTH, CATALOG_HEIGHT)
+    this.#layoutRows()
   }
 
   // Создаёт постоянные части каталога.
@@ -133,15 +126,13 @@ export default class LocationCatalogView extends Container {
   }
 
   // Раскладывает строки текущей страницы с равными отступами.
-  #layoutRows = (width: number, columns: number) => {
+  #layoutRows = () => {
     const gap = 14 // Расстояние между строками
-    const rowWidth = (width - 40 - gap * (columns - 1)) / columns
-    const rowHeight = columns === 1 ? 138 : 230
-    const top = columns === 1 ? -278 : -230
+    const rowWidth = CATALOG_WIDTH - 40
+    const rowHeight = 138 // Высота строки портретного каталога
+    const top = -278 // Верхняя позиция первой строки
     this.#rows.forEach((row, index) => {
-      const column = index % columns
-      const line = Math.floor(index / columns)
-      row.position.set(-width / 2 + 20 + column * (rowWidth + gap), top + line * (rowHeight + gap))
+      row.position.set(-CATALOG_WIDTH / 2 + 20, top + index * (rowHeight + gap))
       row.resize(rowWidth, rowHeight)
     })
   }

@@ -88,7 +88,7 @@ export default class LocationPageView extends Container {
     this.scale.set(isNarrow ? Math.min((width - 28) / 560, 1) : 1)
     this.#layoutCards(isNarrow)
     this.#layoutPageNavigation(isNarrow)
-    this.#catalog.resize(isNarrow)
+    this.#catalog.resize()
     this.#continueButton.position.set(0, isNarrow ? 445 : 410)
     this.#unlockCelebration.resize({
       cardScale: isNarrow ? NARROW_CARD_SCALE : 1,
@@ -248,7 +248,7 @@ export default class LocationPageView extends Container {
   #showCatalog = () => {
     this.#setMainContentVisible(false)
     this.#catalog.show(this.#locations, this.#pageIndex)
-    this.#catalog.resize(Locator.uiLayer.uiData.width < NARROW_LAYOUT_WIDTH)
+    this.#catalog.resize()
   }
 
   // Закрывает каталог и возвращает прежний главный экран.
