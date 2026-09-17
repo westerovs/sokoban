@@ -4,8 +4,8 @@ import {Container} from 'pixi.js'
 import Locator from '@/game/engine/Locator.js'
 import {WORLD} from '@/game/gameConfig/constants.js'
 import type {LocationDefinition} from '@/game/gameConfig/levels/levelTypes.js'
-import LocationCard from '@/game/states/stateGame/startScreen/locationSelect/LocationCard.js'
-import LocationUnlockCelebration from '@/game/states/stateGame/startScreen/locationSelect/LocationUnlockCelebration.js'
+import LocationCard from '@/game/states/stateGame/startScreen/locationPage/LocationCard.js'
+import LocationUnlockCelebration from '@/game/states/stateGame/startScreen/locationPage/LocationUnlockCelebration.js'
 
 /**
  * Показывает на экране завершения уровня карточку новой локации и эффекты её разблокировки.

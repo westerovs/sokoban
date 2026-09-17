@@ -1,12 +1,10 @@
 import {Container, Text} from 'pixi.js'
+import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.js'
-import Locator from '../../../../engine/Locator.ts'
-import GameUtils from '../../../../utils/gameUtils/GameUtils.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
-// Отображает показатель игрока в адаптивной верхней панели.
-
-const TOP_BAR_BASE_WIDTH = 640 // Базовая ширина верхней панели
-const TOP_BAR_MIN_SCALE = 0.72 // Минимальный масштаб показателя
+const TOP_BAR_BASE_WIDTH = 640
+const TOP_BAR_MIN_SCALE = 0.72
 
 type StatBadgeOptions = {
   alignRight?: boolean
@@ -15,13 +13,16 @@ type StatBadgeOptions = {
   label: string
 }
 
+/**
+* Создаёт бейдж который можно прикрепить к левой, или правой части экрана
+* */
+
 export default class StatBadge extends Container {
   #iconTexture: string
   #alignRight: boolean
   #basePosition: {x: number; y: number}
   #text!: Text
 
-  // Сохраняет настройки показателя и создаёт его содержимое.
   constructor({label, iconTexture, alignRight = false, basePosition = {x: 0, y: 0}}: StatBadgeOptions) {
     super({label})
 
@@ -32,12 +33,10 @@ export default class StatBadge extends Container {
     this.#init()
   }
 
-  // Обновляет отображаемое значение.
   setText = (value: string | number) => {
     this.#text.text = value
   }
 
-  // Выравнивает показатель относительно выбранной стороны экрана.
   alignRight = () => {
     if (!this.#alignRight) {
       this.#alignLeft()
@@ -49,13 +48,11 @@ export default class StatBadge extends Container {
     })
   }
 
-  // Создаёт показатель и выполняет первое выравнивание.
   #init = () => {
     this.#create()
     this.alignRight()
   }
 
-  // Создаёт фон, значок и текст показателя.
   #create = () => {
     const cover = GameUtils.createSprite('stat-badge', {label: `${this.label}-cover`})
     const icon = GameUtils.createSprite(this.#iconTexture, {label: `${this.label}-icon`})
@@ -68,7 +65,6 @@ export default class StatBadge extends Container {
     this.addChild(cover, icon, this.#text)
   }
 
-  // Размещает показатель у левого края с адаптивным масштабом.
   #alignLeft = () => {
     const {width} = Locator.uiLayer.uiData
     const scale = Math.min(1, Math.max(TOP_BAR_MIN_SCALE, (width - 40) / TOP_BAR_BASE_WIDTH))

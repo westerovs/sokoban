@@ -14,7 +14,6 @@ export default class LevelSelectButton extends Container {
   #status!: Graphics
   #text!: Text
 
-  // Сохраняет уровень и обработчик выбора, затем создаёт представление.
   constructor(level: LevelSelectionState, onSelect: (levelId: string) => void) {
     super({label: `level-select-${level.id}`})
 

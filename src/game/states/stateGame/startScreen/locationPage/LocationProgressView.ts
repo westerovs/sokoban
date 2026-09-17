@@ -2,12 +2,12 @@ import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
-import type {LocationSelectionState} from '../menuTypes.js'
+import type {LocationSelectionState} from '../menuTypes.ts'
 
 // Отображает прогресс прохождения локации и состояние её завершения.
 
-const PROGRESS_WIDTH = 190 // Ширина плашки прогресса
-const PROGRESS_HEIGHT = 35 // Высота плашки прогресса
+const PROGRESS_WIDTH = 190
+const PROGRESS_HEIGHT = 35
 const PROGRESS_PADDING = 3 // Внутренний отступ полосы прогресса
 const PROGRESS_STROKE_WIDTH = 4 // Толщина обводки плашки
 
@@ -16,7 +16,6 @@ export default class LocationProgressView extends Container {
   #completedCheck!: Graphics
   #text!: Text
 
-  // Создаёт элементы отображения прогресса.
   constructor(label: string) {
     super({label, eventMode: 'none', visible: false})
 
@@ -45,7 +44,6 @@ export default class LocationProgressView extends Container {
     this.#drawProgress(progress)
   }
 
-  // Инициализирует графику и подпись прогресса.
   #init = () => {
     this.#background = new Graphics({label: `${this.label}-background`})
     this.#completedCheck = new Graphics({label: `${this.label}-completed-check`})

@@ -1,16 +1,16 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Graphics, Sprite, Text, Texture, Ticker} from 'pixi.js'
-import Locator from '../../../../engine/Locator.ts'
+import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
-import GameUtils from '../../../../utils/gameUtils/GameUtils.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
-// Показывает анимацию разблокировки карточки новой локации.
+// Если все уровни локации пройдены, то создаёт на пекшоте и на гл.экране анимацию следующей разблокированной локации
 
 const CARD_WIDTH = 250 // Ширина карточки локации
 const CARD_HEIGHT = 350 // Высота карточки локации
 const CONFETTI_COUNT = 64 // Количество частиц конфетти
-const CONFETTI_COLORS = [0xf94144, 0xf8961e, 0xf9c74f, 0x90be6d, 0x43aa8b, 0x577590, 0x9b5de5, 0xf15bb5] // Палитра конфетти
+const CONFETTI_COLORS = [0xf94144, 0xf8961e, 0xf9c74f, 0x90be6d, 0x43aa8b, 0x577590, 0x9b5de5, 0xf15bb5]
 
 type ConfettiItem = {
   drift: number
@@ -51,7 +51,6 @@ export default class LocationUnlockCelebration extends Container {
   #timeline: gsap.core.Timeline | null = null
   #veil!: Graphics
 
-  // Создаёт скрытый контейнер праздничной анимации.
   constructor() {
     super({label: 'location-unlock-celebration', visible: false})
 
@@ -72,6 +71,7 @@ export default class LocationUnlockCelebration extends Container {
     this.resize({cardScale, height, isNarrow, scale, width})
     this.#resetConfetti(true)
     Locator.game.app.ticker.add(this.#update)
+
     this.#animateUnlock()
   }
 

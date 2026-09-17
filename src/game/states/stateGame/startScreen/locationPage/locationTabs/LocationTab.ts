@@ -10,7 +10,6 @@ export default class LocationTab extends Container {
   #onSelect: (pageIndex: number) => void
   #pageIndex: number
 
-  // Сохраняет номер страницы и создаёт интерактивную вкладку.
   constructor(pageIndex: number, text: string, onSelect: (pageIndex: number) => void) {
     super({label: `location-tab-${pageIndex + 1}`})
 
@@ -18,6 +17,7 @@ export default class LocationTab extends Container {
     this.#pageIndex = pageIndex
     this.eventMode = 'static'
     this.cursor = 'pointer'
+
     this.#init(text)
   }
 
@@ -41,7 +41,7 @@ export default class LocationTab extends Container {
     const title = new Text({
       label: `${this.label}-title`,
       text,
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 24},
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 32},
     })
     title.anchor.set(0.5)
     this.addChild(this.#background, title)
@@ -54,4 +54,6 @@ export default class LocationTab extends Container {
   }
 }
 
-export {LOCATION_TAB_WIDTH}
+export {
+  LOCATION_TAB_WIDTH, // Ширина вкладки для внешних расчётов раскладки
+}

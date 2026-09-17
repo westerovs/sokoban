@@ -1,8 +1,8 @@
 import {Container} from 'pixi.js'
 import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
 import Locator from '../../../engine/Locator.ts'
-import LevelSelectView from './levelSelect/LevelSelectView.ts'
-import LocationSelectView from './locationSelect/LocationSelectView.js'
+import LevelSelectPage from '@/game/states/stateGame/startScreen/levelSelectPage/LevelSelectPage.ts'
+import LocationPageView from '@/game/states/stateGame/startScreen/locationPage/LocationPageView.ts'
 import type {
   GameMenuCallbacks,
   LevelEntry,
@@ -17,8 +17,8 @@ const TOP_BAR_BASE_WIDTH = 640 // Базовая ширина верхней п�
 const TOP_BAR_MIN_SCALE = 0.72 // Минимальный масштаб кнопок панели
 
 export default class GameMenuView extends Container {
-  #levelSelectView!: LevelSelectView
-  #locationSelectView!: LocationSelectView
+  #levelSelectView!: LevelSelectPage
+  #locationSelectView!: LocationPageView
   #toolButtons: ButtonContainer[] = []
 
   // Создаёт оба экрана меню и служебные кнопки.
@@ -67,8 +67,8 @@ export default class GameMenuView extends Container {
 
   // Создаёт представления меню и добавляет их на UI-слой.
   #init = (callbacks: GameMenuCallbacks) => {
-    this.#locationSelectView = new LocationSelectView(callbacks)
-    this.#levelSelectView = new LevelSelectView(callbacks)
+    this.#locationSelectView = new LocationPageView(callbacks)
+    this.#levelSelectView = new LevelSelectPage(callbacks)
     this.#levelSelectView.visible = false
     this.addChild(this.#locationSelectView, this.#levelSelectView)
     Locator.uiLayer.stateUiLayer.addChild(this)

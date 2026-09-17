@@ -15,7 +15,6 @@ import type StateGame from '../StateGame.js'
 import GameMenuView from './GameMenuView.js'
 import StateBadgeController from './statBadge/StateBadgeController.js'
 
-// Координирует навигацию стартового экрана, прогресс и запуск выбранного уровня.
 
 export default class StartScreen {
   #backTimeLine = gsap.timeline()
@@ -29,12 +28,10 @@ export default class StartScreen {
   #storage = Locator.storage
   state: StateGame
 
-  // Сохраняет родительское игровое состояние.
   constructor(state: StateGame) {
     this.state = state
   }
 
-  // Загружает конфигурацию и создаёт стартовый экран.
   init = async () => {
     await Locator.gameConfig.loadLevelConfiguration()
     this.#progress = new LevelProgress(this.#storage)
@@ -46,12 +43,10 @@ export default class StartScreen {
     this.#showInitialScreen()
   }
 
-  // Включает или отключает взаимодействие со сценой.
   setInteractive = (isInteractive: boolean) => {
     this.#stage.interactiveChildren = isInteractive
   }
 
-  // Возвращает пользователя к списку локаций.
   showMainScreen = () => {
     if (this.#selectedLocationId === null) return
 
@@ -154,7 +149,6 @@ export default class StartScreen {
     this.#playClickSound()
   }
 
-  // Выбирает уровень внутри текущей локации.
   #selectLevel = (levelId: string) => {
     if (!this.#progress.selectLevel(levelId)) return
     if (!this.#selectedLocationId) return
@@ -201,7 +195,6 @@ export default class StartScreen {
     userCoinsText.text = this.#storage.playerData.coins
   }
 
-  // Открывает магазин поверх главного экрана.
   #openStore = () => {
     if (Locator.options.isVisible) return
     YaMetrika.mainScreenBtnStore()
@@ -209,7 +202,6 @@ export default class StartScreen {
     new Store(new StoreView())
   }
 
-  // Открывает таблицу лидеров поверх главного экрана.
   #openLeaderboard = () => {
     if (Locator.options.isVisible) return
     YaMetrika.btnLeaders()

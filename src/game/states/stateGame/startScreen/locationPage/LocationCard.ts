@@ -4,7 +4,7 @@ import {Container, Graphics, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../menuTypes.js'
-import LocationProgressView from './LocationProgressView.js'
+import LocationProgressView from './LocationProgressView.ts'
 
 // Отображает карточку локации, её доступность и прогресс игрока.
 
@@ -160,4 +160,9 @@ export default class LocationCard extends Container {
     gsap.killTweensOf(this.#background.scale)
     this.#background.scale.set(this.#backgroundScale.x, this.#backgroundScale.y)
   }
+}
+
+export {
+  CARD_HEIGHT, // Высота карточки для внешних расчётов раскладки
+  CARD_WIDTH, // Ширина карточки для внешних расчётов раскладки
 }

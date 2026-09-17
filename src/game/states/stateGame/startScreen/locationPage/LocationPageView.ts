@@ -1,11 +1,11 @@
 import i18next from 'i18next'
 import {Container, Graphics, Text} from 'pixi.js'
-import Locator from '../../../../engine/Locator.ts'
+import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectionState} from '../menuTypes.js'
-import LocationCard from './LocationCard.js'
-import LocationPageArrow from './LocationPageArrow.js'
-import LocationTab, {LOCATION_TAB_WIDTH} from './LocationTab.js'
+import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './LocationCard.js'
+import LocationTab, {LOCATION_TAB_WIDTH} from './locationTabs/LocationTab.ts'
+import LocationTabsArrow, {LOCATION_PAGE_ARROW_RADIUS} from './locationTabs/LocationTabsArrow.ts'
 import LocationUnlockCelebration from './LocationUnlockCelebration.js'
 
 // Отображает страницы карточек локаций и кнопку продолжения игры.
@@ -15,20 +15,25 @@ const NARROW_LAYOUT_WIDTH = 1200 // Порог переключения на у�
 const VISIBLE_TAB_COUNT = 3 // Максимальное количество одновременно видимых вкладок
 const TAB_GAP = 270 // Расстояние между центрами соседних вкладок
 const PAGE_ARROW_GAP = 52 // Отступ стрелки от края ряда вкладок
-const NARROW_NAVIGATION_SCALE = 0.5 // Масштаб переключателя в узкой раскладке
+const NARROW_NAVIGATION_SCALE = 0.56 // Масштаб переключателя в узкой раскладке
+const NARROW_CARD_SCALE = 0.82 // Масштаб карточек в портретной раскладке
+const CARD_GAP = 45 // Единый промежуток между карточками по обеим осям
+const WIDE_CARD_ROW_Y = -45 // Центр ряда карточек в альбомной раскладке
+const NARROW_CARD_ROW_Y = -178 // Центр первого ряда карточек в портретной раскладке
+const NAVIGATION_CARD_GAP = 24 // Отступ переключателя от верхнего края карточек
 
-export default class LocationSelectView extends Container {
+export default class LocationPageView extends Container {
   #cards: LocationCard[] = []
   #cardsContainer!: Container
   #continueButton!: Container
   #continueSubtitle!: Text
   #continueTitle!: Text
-  #leftPageArrow!: LocationPageArrow
+  #leftPageArrow!: LocationTabsArrow
   #onLocationSelect: GameMenuCallbacks['onLocationSelect']
   #onPageSelect: GameMenuCallbacks['onPageSelect']
   #pageNavigation!: Container
   #pageIndex = 0 // Текущая страница локаций
-  #rightPageArrow!: LocationPageArrow
+  #rightPageArrow!: LocationTabsArrow
   #tabs: LocationTab[] = []
   #tabsContainer!: Container
   #unlockCelebration!: LocationUnlockCelebration
@@ -38,7 +43,7 @@ export default class LocationSelectView extends Container {
     onLocationSelect,
     onPageSelect,
   }: Pick<GameMenuCallbacks, 'onContinue' | 'onLocationSelect' | 'onPageSelect'>) {
-    super({label: 'location-select-view'})
+    super({label: 'location-page-view'})
 
     this.#onLocationSelect = onLocationSelect
     this.#onPageSelect = onPageSelect
@@ -75,11 +80,11 @@ export default class LocationSelectView extends Container {
     const isNarrow = width < NARROW_LAYOUT_WIDTH
     this.position.set(0)
     this.scale.set(isNarrow ? Math.min((width - 28) / 560, 1) : 1)
-    this.#layoutTabs(isNarrow)
     this.#layoutCards(isNarrow)
+    this.#layoutPageNavigation(isNarrow)
     this.#continueButton.position.set(0, isNarrow ? 445 : 410)
     this.#unlockCelebration.resize({
-      cardScale: isNarrow ? 0.82 : 1,
+      cardScale: isNarrow ? NARROW_CARD_SCALE : 1,
       height: Locator.uiLayer.uiData.height,
       isNarrow,
       scale: this.scale.x,
@@ -100,16 +105,14 @@ export default class LocationSelectView extends Container {
   #createTabsContainer = () => {
     this.#pageNavigation = new Container({label: 'location-page-navigation'})
     this.#tabsContainer = new Container({label: 'location-tabs'})
-    this.#leftPageArrow = new LocationPageArrow('left', () => this.#selectRelativePage(-1))
-    this.#rightPageArrow = new LocationPageArrow('right', () => this.#selectRelativePage(1))
-    this.#pageNavigation.y = -350
+    this.#leftPageArrow = new LocationTabsArrow('left', () => this.#selectRelativePage(-1))
+    this.#rightPageArrow = new LocationTabsArrow('right', () => this.#selectRelativePage(1))
     this.#pageNavigation.addChild(this.#tabsContainer, this.#leftPageArrow, this.#rightPageArrow)
     this.addChild(this.#pageNavigation)
   }
 
   #createCardsContainer = () => {
     this.#cardsContainer = new Container({label: 'location-cards'})
-    this.#cardsContainer.position.set(0, -50)
     this.addChild(this.#cardsContainer)
   }
 
@@ -120,8 +123,7 @@ export default class LocationSelectView extends Container {
 
     this.#tabs.forEach((tab) => tab.destroy({children: true}))
     this.#tabs = Array.from({length: pageCount}, (_, pageIndex) => {
-      const from = pageIndex * PAGE_SIZE + 1
-      const text = i18next.t('locationSelect.chapters', {from, to: Math.min(from + PAGE_SIZE - 1, locationCount)})
+      const text = i18next.t('locationSelect.chapter', {chapter: pageIndex + 1})
       const tab = new LocationTab(pageIndex, text, this.#onPageSelect)
       this.#tabsContainer.addChild(tab)
       return tab
@@ -196,9 +198,15 @@ export default class LocationSelectView extends Container {
     })
   }
 
-  // Располагает вкладки для широкой или узкой раскладки.
-  #layoutTabs = (isNarrow: boolean) => {
-    this.#pageNavigation.scale.set(isNarrow ? NARROW_NAVIGATION_SCALE : 1)
+  // Выравнивает переключатель относительно верхнего края карточек.
+  #layoutPageNavigation = (isNarrow: boolean) => {
+    const navigationScale = isNarrow ? NARROW_NAVIGATION_SCALE : 1
+    const cardScale = isNarrow ? NARROW_CARD_SCALE : 1
+    const rowY = isNarrow ? NARROW_CARD_ROW_Y : WIDE_CARD_ROW_Y
+    const cardTop = rowY - (CARD_HEIGHT * cardScale) / 2
+    const navigationY = cardTop - NAVIGATION_CARD_GAP - LOCATION_PAGE_ARROW_RADIUS * navigationScale
+    this.#pageNavigation.position.set(0, navigationY)
+    this.#pageNavigation.scale.set(navigationScale)
     this.#updatePageNavigation()
   }
 
@@ -235,12 +243,15 @@ export default class LocationSelectView extends Container {
 
   // Располагает карточки для широкой или узкой раскладки.
   #layoutCards = (isNarrow: boolean) => {
-    const scale = isNarrow ? 0.82 : 1
+    const scale = isNarrow ? NARROW_CARD_SCALE : 1
+    const columnCount = isNarrow ? 2 : PAGE_SIZE
+    const columnStep = CARD_WIDTH * scale + CARD_GAP
+    const rowStep = CARD_HEIGHT * scale + CARD_GAP
     this.#cards.forEach((card, index) => {
-      const column = isNarrow ? index % 2 : index
-      const row = isNarrow ? Math.floor(index / 2) : 0
-      const x = isNarrow ? (column - 0.5) * 250 : (column - 1.5) * 300
-      const y = isNarrow ? -128 + row * 300 : 5
+      const column = index % columnCount
+      const row = Math.floor(index / columnCount)
+      const x = (column - (columnCount - 1) / 2) * columnStep
+      const y = (isNarrow ? NARROW_CARD_ROW_Y : WIDE_CARD_ROW_Y) + row * rowStep
       card.scale.set(scale)
       card.position.set(x, y)
     })
