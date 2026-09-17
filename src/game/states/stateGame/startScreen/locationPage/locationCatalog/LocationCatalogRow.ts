@@ -43,7 +43,7 @@ export default class LocationCatalogRow extends Container {
     this.eventMode = this.#state.isUnlocked ? 'static' : 'none'
     this.cursor = this.#state.isUnlocked ? 'pointer' : 'default'
     this.interactiveChildren = false
-    this.on('pointertap', () => onSelect(this.#state.id))
+    if (this.#state.isUnlocked) this.on('pointertap', () => onSelect(this.#state.id))
   }
 
   // Создаёт деревянную подложку строки.

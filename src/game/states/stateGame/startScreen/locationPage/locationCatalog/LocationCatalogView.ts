@@ -1,14 +1,13 @@
+import {ScrollBox} from '@pixi/ui'
 import i18next from 'i18next'
-import {Sprite, Text} from 'pixi.js'
-import {primaryFontStyle} from '@/game/styles.ts'
+import {Graphics} from 'pixi.js'
 import BaseModal from '@/game/ui/common/modal/BaseModal.ts'
-import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.js'
 import LocationCatalogRow from './LocationCatalogRow.js'
+import {CATALOG_COLORS} from './locationCatalogTheme.js'
 
-// Показывает постраничный каталог локаций поверх основного экрана.
+// Показывает прокручиваемый каталог всех игровых локаций.
 
-const PAGE_SIZE = 6 // Число строк на одной странице каталога
 const CATALOG_WIDTH = 540 // Фиксированная ширина портретной панели
 const CATALOG_HEIGHT = 780 // Фиксированная высота портретной панели
 const POPUP_BORDER_SIZE = 72 // Размер сохраняемых краёв деревянной панели
@@ -16,7 +15,11 @@ const CLOSE_BUTTON_INSET = 44 // Смещение крестика внутрь 
 const ROW_WIDTH = 460 // Ширина деревянной вкладки локации
 const ROW_HEIGHT = 92 // Высота деревянной вкладки локации
 const ROW_GAP = 6 // Расстояние между вкладками локаций
-const ROWS_TOP = -292 // Верхняя позиция первой вкладки
+const LIST_TOP = -292 // Верхняя граница области прокрутки
+const LIST_HEIGHT = 620 // Высота видимой области прокрутки
+const SCROLL_TRACK_X = 240 // Горизонтальная позиция индикатора прокрутки
+const SCROLL_TRACK_WIDTH = 8 // Ширина дорожки индикатора
+const MIN_SCROLL_THUMB_HEIGHT = 42 // Минимальная высота бегунка
 
 type LocationCatalogCallbacks = {
   onClose: () => void
@@ -25,12 +28,11 @@ type LocationCatalogCallbacks = {
 
 export default class LocationCatalogView extends BaseModal {
   #callbacks: LocationCatalogCallbacks
-  #locations: LocationSelectionState[] = []
-  #next!: Sprite
-  #pageIndex = 0
-  #pageText!: Text
-  #previous!: Sprite
   #rows: LocationCatalogRow[] = []
+  #scrollBox!: ScrollBox
+  #scrollThumb!: Graphics
+  #scrollThumbHeight = 0
+  #scrollTrack!: Graphics
 
   constructor(callbacks: LocationCatalogCallbacks) {
     super({
@@ -54,11 +56,11 @@ export default class LocationCatalogView extends BaseModal {
     this.#init()
   }
 
-  // Обновляет данные каталога и создаёт только строки выбранной страницы.
+  // Наполняет список всеми локациями и прокручивает к текущей группе.
   setData = (locations: LocationSelectionState[], firstVisibleLocationIndex: number) => {
-    this.#locations = locations
-    this.#pageIndex = Math.floor(firstVisibleLocationIndex / PAGE_SIZE)
-    this.#replaceRows()
+    this.#replaceRows(locations)
+    this.#scrollBox.scrollToPosition({y: firstVisibleLocationIndex * (ROW_HEIGHT + ROW_GAP)})
+    this.#updateScrollProgress()
   }
 
   override hide = async () => {
@@ -72,14 +74,17 @@ export default class LocationCatalogView extends BaseModal {
   // Сохраняет портретную одноколоночную компоновку при любой ориентации.
   resize = () => {
     this.updateAdaptive()
-    this.#layoutFooter(CATALOG_HEIGHT)
-    this.#layoutRows()
+    this.#layoutScrollBox()
+    this.#updateScrollProgress()
   }
 
-  // Создаёт постоянные части каталога.
+  // Создаёт постоянные части прокручиваемого каталога.
   #init = () => {
     this.#setHeaderText()
-    this.#createFooter()
+    this.#createScrollBox()
+    this.#createScrollProgress()
+    this.#layoutScrollBox()
+    this.onRender = this.#updateScrollProgress
   }
 
   // Устанавливает локализованный заголовок штатного фрейма модального окна.
@@ -88,81 +93,77 @@ export default class LocationCatalogView extends BaseModal {
     this.headerText.text = i18next.t('locationSelect.allLocations')
   }
 
-  // Создаёт кнопки листания и номер страницы.
-  #createFooter = () => {
-    this.#previous = this.#createPageButton('location-catalog-previous', 'left', () => this.#selectPage(-1))
-    this.#next = this.#createPageButton('location-catalog-next', 'right', () => this.#selectPage(1))
-    this.#pageText = new Text({
-      label: 'location-catalog-page',
-      style: {
-        ...primaryFontStyle,
-        fill: 0xffe6a1,
-        fontSize: 27,
-        stroke: {color: 0x5a2d0b, width: 3, join: 'round'},
-      },
+  // Создаёт область прокрутки с управлением пальцем и колесом мыши.
+  #createScrollBox = () => {
+    this.#scrollBox = new ScrollBox({
+      width: ROW_WIDTH,
+      height: LIST_HEIGHT,
+      type: 'vertical',
+      elementsMargin: ROW_GAP,
+      globalScroll: false,
     })
-    this.#pageText.anchor.set(0.5)
-    this.addChild(this.#previous, this.#next, this.#pageText)
+    this.#scrollBox.label = 'location-catalog-scroll-box'
+    this.addChild(this.#scrollBox)
   }
 
-  // Создаёт кнопку листания из текстуры вкладочной стрелки.
-  #createPageButton = (label: string, direction: 'left' | 'right', onPress: () => void) => {
-    const arrow = GameUtils.createSprite('tab-arrow', {label, interactive: true})
-    arrow.scale.x = direction === 'left' ? 1 : -1
-    arrow.on('pointertap', onPress)
-
-    return arrow
+  // Создаёт дорожку и бегунок прогресса прокрутки.
+  #createScrollProgress = () => {
+    this.#scrollTrack = new Graphics({label: 'location-catalog-scroll-track'})
+      .roundRect(0, 0, SCROLL_TRACK_WIDTH, LIST_HEIGHT, SCROLL_TRACK_WIDTH / 2)
+      .fill({color: CATALOG_COLORS.muted, alpha: 0.28})
+    this.#scrollThumb = new Graphics({label: 'location-catalog-scroll-thumb'})
+    this.addChild(this.#scrollTrack, this.#scrollThumb)
   }
 
-  // Расставляет нижнюю навигацию внутри панели.
-  #layoutFooter = (height: number) => {
-    const bottom = height / 2
-    this.#previous.position.set(-170, bottom - 48)
-    this.#next.position.set(170, bottom - 48)
-    this.#pageText.position.set(0, bottom - 48)
+  // Размещает список и индикатор внутри деревянной панели.
+  #layoutScrollBox = () => {
+    this.#scrollBox.position.set(-ROW_WIDTH / 2, LIST_TOP)
+    this.#scrollTrack.position.set(SCROLL_TRACK_X, LIST_TOP)
+    this.#scrollThumb.x = SCROLL_TRACK_X
   }
 
-  // Раскладывает строки текущей страницы с равными отступами.
-  #layoutRows = () => {
-    this.#rows.forEach((row, index) => {
-      row.position.set(-ROW_WIDTH / 2, ROWS_TOP + index * (ROW_HEIGHT + ROW_GAP))
-      row.resize(ROW_WIDTH, ROW_HEIGHT)
-    })
-  }
-
-  // Пересоздаёт строки только для видимой страницы.
-  #replaceRows = () => {
+  // Пересоздаёт строки и отдаёт их компоненту прокрутки.
+  #replaceRows = (locations: LocationSelectionState[]) => {
     this.#clearRows()
-    const start = this.#pageIndex * PAGE_SIZE
-    this.#locations.slice(start, start + PAGE_SIZE).forEach((location) => {
-      const row = new LocationCatalogRow(location, this.#callbacks.onLocationSelect)
-      this.#rows.push(row)
-      this.addChild(row)
-    })
-    this.#updateFooter()
+    this.#rows = locations.map((location) => this.#createRow(location))
+    this.#scrollBox.addItems(this.#rows)
+    this.#scrollBox.resize(true)
+    this.#drawScrollThumb()
   }
 
-  // Обновляет доступность стрелок и номер страницы.
-  #updateFooter = () => {
-    const pageCount = Math.max(1, Math.ceil(this.#locations.length / PAGE_SIZE))
-    this.#previous.visible = this.#pageIndex > 0
-    this.#next.visible = this.#pageIndex < pageCount - 1
-    this.#pageText.text = `${this.#pageIndex + 1} / ${pageCount}`
+  // Создаёт одну строку заранее известного размера.
+  #createRow = (location: LocationSelectionState) => {
+    const row = new LocationCatalogRow(location, this.#callbacks.onLocationSelect)
+    row.resize(ROW_WIDTH, ROW_HEIGHT)
+    return row
   }
 
-  // Запрашивает соседнюю страницу каталога.
-  #selectPage = (offset: number) => {
-    const pageCount = Math.max(1, Math.ceil(this.#locations.length / PAGE_SIZE))
-    const pageIndex = this.#pageIndex + offset
-    if (pageIndex < 0 || pageIndex >= pageCount) return
-
-    this.#pageIndex = pageIndex
-    this.#replaceRows()
-    this.#layoutRows()
+  // Перерисовывает бегунок с учётом доли видимого содержимого.
+  #drawScrollThumb = () => {
+    const contentHeight = this.#scrollBox.scrollHeight
+    const visibleRatio = contentHeight > 0 ? Math.min(1, LIST_HEIGHT / contentHeight) : 1
+    this.#scrollThumbHeight = Math.max(MIN_SCROLL_THUMB_HEIGHT, LIST_HEIGHT * visibleRatio)
+    this.#scrollThumb.clear()
+    this.#scrollThumb
+      .roundRect(0, 0, SCROLL_TRACK_WIDTH, this.#scrollThumbHeight, SCROLL_TRACK_WIDTH / 2)
+      .fill(CATALOG_COLORS.ink)
   }
 
-  // Удаляет строки предыдущей страницы.
+  // Синхронизирует видимость и положение бегунка с прокруткой списка.
+  #updateScrollProgress = () => {
+    const maxScroll = Math.max(0, this.#scrollBox.scrollHeight - LIST_HEIGHT)
+    const scrollPosition = Math.min(maxScroll, Math.max(0, -this.#scrollBox.scrollY))
+    const progress = maxScroll > 0 ? scrollPosition / maxScroll : 0
+    const progressRange = LIST_HEIGHT - this.#scrollThumbHeight
+    const isScrollable = maxScroll > 0
+    this.#scrollTrack.visible = isScrollable
+    this.#scrollThumb.visible = isScrollable
+    this.#scrollThumb.y = LIST_TOP + progressRange * progress
+  }
+
+  // Удаляет прежние строки перед повторным наполнением списка.
   #clearRows = () => {
+    this.#scrollBox.removeItems()
     this.#rows.forEach((row) => row.destroy({children: true}))
     this.#rows = []
   }
