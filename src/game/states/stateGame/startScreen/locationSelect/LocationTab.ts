@@ -1,7 +1,9 @@
 import {Container, Graphics, Text} from 'pixi.js'
-import {primaryFontStyle} from '../../../../styles.js'
+import {primaryFontStyle} from '@/game/styles.ts'
 
 // Отображает вкладку страницы со списком локаций.
+
+const LOCATION_TAB_WIDTH = 250 // Ширина вкладки диапазона глав
 
 export default class LocationTab extends Container {
   #background!: Graphics
@@ -23,7 +25,13 @@ export default class LocationTab extends Container {
   setActive = (isActive: boolean) => {
     const fill = isActive ? 0x718f2d : 0x17271d
     const border = isActive ? 0xe6e55d : 0x927642
-    this.#background.clear().roundRect(-125, -28, 250, 56, 20).fill({color: fill, alpha: 0.96})
+    this.#background
+      .clear()
+      .roundRect(-LOCATION_TAB_WIDTH / 2, -28, LOCATION_TAB_WIDTH, 56, 20)
+      .fill({
+        color: fill,
+        alpha: 0.96,
+      })
     this.#background.stroke({color: border, width: isActive ? 5 : 3})
   }
 
@@ -45,3 +53,5 @@ export default class LocationTab extends Container {
     this.#onSelect(this.#pageIndex)
   }
 }
+
+export {LOCATION_TAB_WIDTH}

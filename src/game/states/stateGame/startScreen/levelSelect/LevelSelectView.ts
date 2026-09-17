@@ -22,7 +22,7 @@ const LEVELS_PANEL_WIDTH = 600 // Ширина панели списка уро�
 const PREVIEW_HEIGHT = 390 // Высота области предпросмотра
 const PREVIEW_WIDTH = 500 // Ширина области предпросмотра
 
-export default class LocationLevelSelectView extends Container {
+export default class LevelSelectView extends Container {
   #backButton!: ButtonContainer
   #authorText: Text | null = null
   #difficultyBadge!: Container
@@ -39,7 +39,7 @@ export default class LocationLevelSelectView extends Container {
   #title!: Text
 
   constructor({onBack, onLevelSelect, onPlay}: Pick<GameMenuCallbacks, 'onBack' | 'onLevelSelect' | 'onPlay'>) {
-    super({label: 'location-level-select-view'})
+    super({label: 'level-select-view'})
 
     this.#onLevelSelect = onLevelSelect
     this.#init(onBack, onPlay)

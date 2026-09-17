@@ -1,5 +1,5 @@
 import {Container, Graphics} from 'pixi.js'
-import type {LevelDefinition} from '../../../../gameConfig/levels/levelTypes.js'
+import type {LevelDefinition} from '@/game/gameConfig/levels/levelTypes.ts'
 
 // Рисует компактный векторный предпросмотр карты выбранного уровня.
 

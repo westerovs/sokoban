@@ -2,7 +2,7 @@ import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Graphics, Sprite, Text, Texture, Ticker} from 'pixi.js'
 import Locator from '../../../../engine/Locator.ts'
-import {primaryFontStyle} from '../../../../styles.js'
+import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '../../../../utils/gameUtils/GameUtils.js'
 
 // Показывает анимацию разблокировки карточки новой локации.
