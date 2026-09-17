@@ -2,8 +2,8 @@ import Locator from '../../../../engine/Locator.ts'
 import StatBadge from './StatBadge.js'
 
 /**
-* Управляет созданием бейджей на главном экране
-* */
+ * Управляет созданием бейджей на главном экране
+ * */
 
 export default class StateBadgeController {
   #game = Locator.game

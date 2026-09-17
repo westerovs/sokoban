@@ -1,8 +1,8 @@
 import {Container} from 'pixi.js'
-import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
-import Locator from '../../../engine/Locator.ts'
 import LevelSelectPage from '@/game/states/stateGame/startScreen/levelSelectPage/LevelSelectPage.ts'
 import LocationPageView from '@/game/states/stateGame/startScreen/locationPage/LocationPageView.ts'
+import ButtonContainer from '../../../components/buttons/ButtonContainer.js'
+import Locator from '../../../engine/Locator.ts'
 import type {
   GameMenuCallbacks,
   LevelEntry,

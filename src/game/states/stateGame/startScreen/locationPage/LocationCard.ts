@@ -59,7 +59,10 @@ export default class LocationCard extends Container {
     this.#createBackground()
     this.#createTitle()
     this.#createProgress()
-    this.#lockIcon = GameUtils.createSprite('icon-lock', {label: `${this.label}-lock`, scale: 1.5})
+    this.#lockIcon = GameUtils.createSprite('icon-lock', {
+      label: `${this.label}-lock`,
+      scale: 1.5,
+    })
     this.addChild(this.#lockIcon)
     this.on('pointertap', this.#handleSelect)
     this.on('pointerenter', this.#handlePointerEnter)
@@ -162,7 +165,4 @@ export default class LocationCard extends Container {
   }
 }
 
-export {
-  CARD_HEIGHT,
-  CARD_WIDTH,
-}
+export {CARD_HEIGHT, CARD_WIDTH}

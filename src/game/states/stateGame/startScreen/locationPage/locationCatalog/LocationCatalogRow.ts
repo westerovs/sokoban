@@ -1,12 +1,12 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
 import {Container, Rectangle, Sprite, Text} from 'pixi.js'
+import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import {fitTextWidth} from '@/game/utils/fitTextWidth.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.js'
 import {CATALOG_COLORS} from './locationCatalogTheme.js'
-import Locator from '@/game/engine/Locator.ts'
 
 // Отображает одну компактную строку открытой или закрытой локации.
 

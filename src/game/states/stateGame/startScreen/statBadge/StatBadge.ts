@@ -14,8 +14,8 @@ type StatBadgeOptions = {
 }
 
 /**
-* Создаёт бейдж который можно прикрепить к левой, или правой части экрана
-* */
+ * Создаёт бейдж который можно прикрепить к левой, или правой части экрана
+ * */
 
 export default class StatBadge extends Container {
   #iconTexture: string

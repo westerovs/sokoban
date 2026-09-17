@@ -15,7 +15,6 @@ import type StateGame from '../StateGame.js'
 import GameMenuView from './GameMenuView.js'
 import StateBadgeController from './statBadge/StateBadgeController.js'
 
-
 export default class StartScreen {
   #backTimeLine = gsap.timeline()
   #game = Locator.game
