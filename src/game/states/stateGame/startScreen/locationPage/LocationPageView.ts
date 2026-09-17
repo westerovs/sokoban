@@ -4,6 +4,7 @@ import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectionState} from '../menuTypes.js'
 import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './LocationCard.js'
+import LocationCatalogView from './locationCatalog/LocationCatalogView.js'
 import LocationTab, {LOCATION_TAB_WIDTH} from './locationTabs/LocationTab.ts'
 import LocationTabsArrow, {LOCATION_PAGE_ARROW_RADIUS} from './locationTabs/LocationTabsArrow.ts'
 import LocationUnlockCelebration from './LocationUnlockCelebration.js'
@@ -12,10 +13,7 @@ import LocationUnlockCelebration from './LocationUnlockCelebration.js'
 
 const PAGE_SIZE = 4 // Количество локаций на одной странице
 const NARROW_LAYOUT_WIDTH = 1200 // Порог переключения на узкую раскладку
-const VISIBLE_TAB_COUNT = 3 // Максимальное количество одновременно видимых вкладок
-const TAB_GAP = 270 // Расстояние между центрами соседних вкладок
-const PAGE_ARROW_GAP = 52 // Отступ стрелки от края ряда вкладок
-const NARROW_NAVIGATION_SCALE = 0.56 // Масштаб переключателя в узкой раскладке
+const NAVIGATION_SCALE = 0.82 // Фиксированный масштаб переключателя во всех ориентациях
 const NARROW_CARD_SCALE = 0.82 // Масштаб карточек в портретной раскладке
 const CARD_GAP = 45 // Единый промежуток между карточками по обеим осям
 const WIDE_CARD_ROW_Y = -45 // Центр ряда карточек в альбомной раскладке
@@ -28,14 +26,18 @@ export default class LocationPageView extends Container {
   #continueButton!: Container
   #continueSubtitle!: Text
   #continueTitle!: Text
+  #catalog!: LocationCatalogView
+  #catalogOpen = false
+  #chapterSelector!: LocationTab
   #leftPageArrow!: LocationTabsArrow
+  #locations: LocationSelectionState[] = []
   #onLocationSelect: GameMenuCallbacks['onLocationSelect']
   #onPageSelect: GameMenuCallbacks['onPageSelect']
   #pageNavigation!: Container
   #pageIndex = 0 // Текущая страница локаций
   #rightPageArrow!: LocationTabsArrow
-  #tabs: LocationTab[] = []
   #tabsContainer!: Container
+  #pageCount = 0
   #unlockCelebration!: LocationUnlockCelebration
 
   constructor({
@@ -58,19 +60,23 @@ export default class LocationPageView extends Container {
     unlockedLocation: LocationDefinition | null,
   ) => {
     this.#unlockCelebration.stop()
+    this.#locations = locations
     this.#pageIndex = pageIndex
     this.#replaceTabs(locations.length)
     this.#replaceCards(locations.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE))
-    this.#tabs.forEach((tab, index) => tab.setActive(index === pageIndex))
+    this.#chapterSelector.setText(i18next.t('locationSelect.chapter', {chapter: pageIndex + 1}))
     this.#updatePageNavigation()
     this.#setContinueEntry(continueEntry)
     this.updateAdaptive()
+    if (this.#catalogOpen) this.#showCatalog()
     this.#showUnlockCelebration(unlockedLocation)
   }
 
   // Скрывает экран и останавливает праздничную анимацию.
   hide = () => {
     this.visible = false
+    this.#catalogOpen = false
+    this.#catalog.hide()
     this.#unlockCelebration.stop()
   }
 
@@ -82,6 +88,7 @@ export default class LocationPageView extends Container {
     this.scale.set(isNarrow ? Math.min((width - 28) / 560, 1) : 1)
     this.#layoutCards(isNarrow)
     this.#layoutPageNavigation(isNarrow)
+    this.#catalog.resize(isNarrow)
     this.#continueButton.position.set(0, isNarrow ? 445 : 410)
     this.#unlockCelebration.resize({
       cardScale: isNarrow ? NARROW_CARD_SCALE : 1,
@@ -97,6 +104,7 @@ export default class LocationPageView extends Container {
     this.#createTabsContainer()
     this.#createCardsContainer()
     this.#createContinueButton(onContinue)
+    this.#createCatalog()
 
     this.#unlockCelebration = new LocationUnlockCelebration()
     this.addChild(this.#continueButton, this.#unlockCelebration)
@@ -105,8 +113,10 @@ export default class LocationPageView extends Container {
   #createTabsContainer = () => {
     this.#pageNavigation = new Container({label: 'location-page-navigation'})
     this.#tabsContainer = new Container({label: 'location-tabs'})
+    this.#chapterSelector = new LocationTab(this.#openCatalog)
     this.#leftPageArrow = new LocationTabsArrow('left', () => this.#selectRelativePage(-1))
     this.#rightPageArrow = new LocationTabsArrow('right', () => this.#selectRelativePage(1))
+    this.#tabsContainer.addChild(this.#chapterSelector)
     this.#pageNavigation.addChild(this.#tabsContainer, this.#leftPageArrow, this.#rightPageArrow)
     this.addChild(this.#pageNavigation)
   }
@@ -116,18 +126,19 @@ export default class LocationPageView extends Container {
     this.addChild(this.#cardsContainer)
   }
 
+  // Создаёт каталог, который открывается поверх карточек по нажатию на главу.
+  #createCatalog = () => {
+    this.#catalog = new LocationCatalogView({
+      onClose: this.#closeCatalog,
+      onLocationSelect: this.#onLocationSelect,
+      onPageSelect: this.#selectCatalogPage,
+    })
+    this.addChild(this.#catalog)
+  }
+
   // Заменяет вкладки согласно количеству доступных страниц.
   #replaceTabs = (locationCount: number) => {
-    const pageCount = Math.ceil(locationCount / PAGE_SIZE)
-    if (this.#tabs.length === pageCount) return
-
-    this.#tabs.forEach((tab) => tab.destroy({children: true}))
-    this.#tabs = Array.from({length: pageCount}, (_, pageIndex) => {
-      const text = i18next.t('locationSelect.chapter', {chapter: pageIndex + 1})
-      const tab = new LocationTab(pageIndex, text, this.#onPageSelect)
-      this.#tabsContainer.addChild(tab)
-      return tab
-    })
+    this.#pageCount = Math.ceil(locationCount / PAGE_SIZE)
   }
 
   #createContinueButton = (onContinue: GameMenuCallbacks['onContinue']) => {
@@ -200,45 +211,66 @@ export default class LocationPageView extends Container {
 
   // Выравнивает переключатель относительно верхнего края карточек.
   #layoutPageNavigation = (isNarrow: boolean) => {
-    const navigationScale = isNarrow ? NARROW_NAVIGATION_SCALE : 1
     const cardScale = isNarrow ? NARROW_CARD_SCALE : 1
     const rowY = isNarrow ? NARROW_CARD_ROW_Y : WIDE_CARD_ROW_Y
     const cardTop = rowY - (CARD_HEIGHT * cardScale) / 2
-    const navigationY = cardTop - NAVIGATION_CARD_GAP - LOCATION_PAGE_ARROW_RADIUS * navigationScale
+    const navigationY = cardTop - NAVIGATION_CARD_GAP - LOCATION_PAGE_ARROW_RADIUS * NAVIGATION_SCALE
     this.#pageNavigation.position.set(0, navigationY)
-    this.#pageNavigation.scale.set(navigationScale)
+    this.#pageNavigation.scale.set(NAVIGATION_SCALE)
     this.#updatePageNavigation()
   }
 
   // Показывает окно вкладок вокруг текущей страницы и обновляет крайние стрелки.
   #updatePageNavigation = () => {
-    const visibleCount = Math.min(VISIBLE_TAB_COUNT, this.#tabs.length)
-    const firstVisibleIndex = this.#getFirstVisibleTabIndex()
-    this.#tabs.forEach((tab, index) => {
-      const visibleIndex = index - firstVisibleIndex
-      tab.visible = visibleIndex >= 0 && visibleIndex < visibleCount
-      tab.position.set((visibleIndex - (visibleCount - 1) / 2) * TAB_GAP, 0)
-    })
-    const arrowX = (LOCATION_TAB_WIDTH + (visibleCount - 1) * TAB_GAP) / 2 + PAGE_ARROW_GAP
+    const arrowX = LOCATION_TAB_WIDTH / 2 - LOCATION_PAGE_ARROW_RADIUS - 8
     this.#leftPageArrow.position.set(-arrowX, 0)
     this.#rightPageArrow.position.set(arrowX, 0)
-    this.#leftPageArrow.visible = this.#pageIndex > 0
-    this.#rightPageArrow.visible = this.#pageIndex < this.#tabs.length - 1
-  }
-
-  // Рассчитывает начало видимого окна вкладок с учётом краёв списка.
-  #getFirstVisibleTabIndex = () => {
-    const preferredIndex = this.#pageIndex - Math.floor(VISIBLE_TAB_COUNT / 2)
-    const maxIndex = Math.max(this.#tabs.length - VISIBLE_TAB_COUNT, 0)
-    return Math.min(Math.max(preferredIndex, 0), maxIndex)
+    this.#leftPageArrow.setEnabled(this.#pageIndex > 0)
+    this.#rightPageArrow.setEnabled(this.#pageIndex < this.#pageCount - 1)
   }
 
   // Запрашивает соседнюю страницу, если она существует.
   #selectRelativePage = (offset: number) => {
     const pageIndex = this.#pageIndex + offset
-    if (pageIndex < 0 || pageIndex >= this.#tabs.length) return
+    if (pageIndex < 0 || pageIndex >= this.#pageCount) return
 
+    this.#catalogOpen = false
     this.#onPageSelect(pageIndex)
+  }
+
+  // Открывает каталог и скрывает элементы основного экрана под ним.
+  #openCatalog = () => {
+    this.#catalogOpen = true
+    this.#showCatalog()
+  }
+
+  // Синхронизирует содержимое открытого каталога с текущей страницей.
+  #showCatalog = () => {
+    this.#setMainContentVisible(false)
+    this.#catalog.show(this.#locations, this.#pageIndex)
+    this.#catalog.resize(Locator.uiLayer.uiData.width < NARROW_LAYOUT_WIDTH)
+  }
+
+  // Закрывает каталог и возвращает прежний главный экран.
+  #closeCatalog = () => {
+    this.#catalogOpen = false
+    this.#catalog.hide()
+    this.#setMainContentVisible(true)
+  }
+
+  // Листает каталог, сохраняя его открытым после обновления прогресса.
+  #selectCatalogPage = (pageIndex: number) => {
+    if (pageIndex < 0 || pageIndex >= this.#pageCount) return
+    this.#catalogOpen = true
+    this.#onPageSelect(pageIndex)
+  }
+
+  // Одновременно переключает карточки, навигацию и кнопку продолжения.
+  #setMainContentVisible = (visible: boolean) => {
+    this.#pageNavigation.visible = visible
+    this.#cardsContainer.visible = visible
+    this.#continueButton.visible = visible
+    if (!visible) this.#unlockCelebration.stop()
   }
 
   // Располагает карточки для широкой или узкой раскладки.

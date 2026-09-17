@@ -163,6 +163,6 @@ export default class LocationCard extends Container {
 }
 
 export {
-  CARD_HEIGHT, // Высота карточки для внешних расчётов раскладки
-  CARD_WIDTH, // Ширина карточки для внешних расчётов раскладки
+  CARD_HEIGHT,
+  CARD_WIDTH,
 }

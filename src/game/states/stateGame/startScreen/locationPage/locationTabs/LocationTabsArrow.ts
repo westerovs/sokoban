@@ -1,10 +1,8 @@
 import {Circle, Container, Graphics} from 'pixi.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 
-// Отображает боковую кнопку перелистывания страниц с главами.
 
-const LOCATION_PAGE_ARROW_RADIUS = 60
-const ARROW_HALF_HEIGHT = 12
-const ARROW_HALF_WIDTH = 7
+const LOCATION_PAGE_ARROW_RADIUS = 30
 
 type PageDirection = 'left' | 'right'
 
@@ -20,6 +18,13 @@ export default class LocationTabsArrow extends Container {
     this.hitArea = new Circle(0, 0, LOCATION_PAGE_ARROW_RADIUS)
 
     this.#init(direction)
+  }
+
+  // Полностью скрывает стрелку, когда соседней страницы нет.
+  setEnabled = (isEnabled: boolean) => {
+    this.visible = isEnabled
+    this.eventMode = isEnabled ? 'static' : 'none'
+    this.cursor = isEnabled ? 'pointer' : 'default'
   }
 
   #init = (direction: PageDirection) => {
@@ -39,17 +44,14 @@ export default class LocationTabsArrow extends Container {
   }
 
   #createArrow = (direction: PageDirection) => {
-    const arrow = new Graphics({label: `${this.label}-icon`})
-      .moveTo(-ARROW_HALF_WIDTH, -ARROW_HALF_HEIGHT)
-      .lineTo(ARROW_HALF_WIDTH, 0)
-      .lineTo(-ARROW_HALF_WIDTH, ARROW_HALF_HEIGHT)
-      .stroke({color: 0xffffff, width: 7, join: 'round', cap: 'round'})
-    arrow.rotation = direction === 'left' ? Math.PI : 0
+    const arrow = GameUtils.createSprite('tab-arrow')
+    arrow.x = direction === 'left' ? -2 : 2
+    arrow.scale.x = direction === 'left' ? -1 : 1
 
     this.addChild(arrow)
   }
 }
 
 export {
-  LOCATION_PAGE_ARROW_RADIUS, // Радиус стрелки для внешних расчётов раскладки
+  LOCATION_PAGE_ARROW_RADIUS,
 }
