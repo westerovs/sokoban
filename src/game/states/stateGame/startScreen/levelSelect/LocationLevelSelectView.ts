@@ -18,8 +18,7 @@ import LevelSelectButton from './LevelSelectButton.js'
 
 const ACTION_BUTTON_GAP = 24 // Расстояние между кнопками действий
 const ACTION_BUTTONS_Y = 460 // Вертикальная позиция кнопок действий
-const BACK_BUTTON_SCALE = 0.75 // Масштаб кнопки возврата
-const LEVELS_PANEL_HEIGHT = 320 // Высота панели списка уровней
+const LEVELS_PANEL_HEIGHT = 355 // Высота панели списка уровней
 const LEVELS_PANEL_WIDTH = 600 // Ширина панели списка уровней
 const PREVIEW_HEIGHT = 390 // Высота области предпросмотра
 const PREVIEW_WIDTH = 500 // Ширина области предпросмотра
@@ -29,6 +28,7 @@ export default class LocationLevelSelectView extends Container {
   #authorText: Text | null = null
   #difficultyText!: Text
   #levelButtons: LevelSelectButton[] = []
+  #levelButtonsRow!: Container
   #levelsContainer!: Container
   #onLevelSelect: GameMenuCallbacks['onLevelSelect']
   #playButton!: ButtonContainer
@@ -52,7 +52,7 @@ export default class LocationLevelSelectView extends Container {
     this.#setDifficulty(selectedEntry.level)
     this.#setPersonalBest(selectedEntry.level)
     this.#setAuthor(selectedEntry.level)
-    this.#replaceLevelButtons(levels, selectedEntry.level.id)
+    this.#createLevelButtons(levels, selectedEntry.level.id)
     this.updateAdaptive()
   }
 
@@ -107,13 +107,16 @@ export default class LocationLevelSelectView extends Container {
 
   // ------------ панель выбора уровней
   #createLevelsContainer = () => {
-    this.#levelsContainer = new Container({label: 'level-select-buttons'})
+    this.#levelsContainer = new Container({label: 'level-select-panel'})
+    this.#levelsContainer.position.set(0, 235)
+    this.#levelsContainer.scale.set(0.8)
     this.addChild(this.#levelsContainer)
 
     this.#createPanelGraphics()
     this.#createRecords()
     this.#createDifficultyText()
     this.#createAuthorText()
+    this.#createLevelButtonsRow()
   }
 
   #createPanelGraphics = () => {
@@ -133,13 +136,13 @@ export default class LocationLevelSelectView extends Container {
       style: {...primaryFontStyle, fill: 0xffedbd, fontSize: 27, stroke: {color: 0x19251d, width: 3, join: 'round'}},
     })
     this.#difficultyText.anchor.set(0.5)
-    this.#difficultyText.position.set(0, -70)
+    this.#difficultyText.position.set(0, -80)
     this.#levelsContainer.addChild(this.#difficultyText)
   }
 
   #createRecords = () => {
     this.#records = new LevelPreviewStatsView()
-    this.#records.y = -120
+    this.#records.y = -140
     this.#levelsContainer.addChild(this.#records)
   }
 
@@ -161,7 +164,7 @@ export default class LocationLevelSelectView extends Container {
     const button = new ButtonContainer({
       props: {name: 'btnLocationBack'},
       spriteKeys: ['btn-ui-1', {key: 'icon-skin-back', scale: 0.8}],
-      initScale: BACK_BUTTON_SCALE,
+      initScale: 0.75,
     })
     button.on('pointertap', onBack)
     this.addChild(button)
@@ -186,13 +189,21 @@ export default class LocationLevelSelectView extends Container {
   }
 
 
-  // Выполняет отдельную операцию `replaceLevelButtons`.
-  #replaceLevelButtons = (levels: LevelSelectionState[], selectedLevelId: string) => {
+  // ------------ Выбор уровней
+  #createLevelButtonsRow = () => {
+    this.#levelButtonsRow = new Container({label: 'level-buttons-row'})
+    this.#levelButtonsRow.position.set(0, 10)
+    this.#levelsContainer.addChild(this.#levelButtonsRow)
+  }
+
+  // Создаёт кнопки выбора уровней внутри их контейнера.
+  #createLevelButtons = (levels: LevelSelectionState[], selectedLevelId: string) => {
     this.#levelButtons.forEach((button) => button.destroy({children: true}))
+
     this.#levelButtons = levels.map((level) => {
       const button = new LevelSelectButton(level, this.#onLevelSelect)
       button.setState({...level, isSelected: level.id === selectedLevelId})
-      this.#levelsContainer.addChild(button)
+      this.#levelButtonsRow.addChild(button)
       return button
     })
   }
@@ -205,14 +216,11 @@ export default class LocationLevelSelectView extends Container {
     this.#levelPreview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
   }
 
-  // Рассчитывает расположение через операцию `layoutLevels`.
   #layoutLevels = () => {
-    this.#levelsContainer.position.set(0, 235)
-    this.#levelsContainer.scale.set(0.8)
     this.#levelButtons.forEach((button, index) => {
       const column = index % 4
       const row = Math.floor(index / 4)
-      button.position.set((column - 1.5) * 135, -35 + row * 105)
+      button.position.set((column - 1.5) * 135, row * 105)
     })
   }
 
