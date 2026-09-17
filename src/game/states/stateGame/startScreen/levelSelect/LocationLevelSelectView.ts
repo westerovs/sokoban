@@ -1,12 +1,12 @@
 import i18next from 'i18next'
 import {Container, FederatedPointerEvent, Graphics, Text} from 'pixi.js'
+import ButtonContainer from '@/game/components/buttons/ButtonContainer.ts'
+import Locator from '@/game/engine/Locator.ts'
+import LocalStorage from '@/game/engine/storage/LocalStorage.ts'
 import type {LevelDefinition} from '@/game/gameConfig/levels/levelTypes.ts'
 import {openSokobanLevelEditor} from '@/game/sokoban/editor/openSokobanLevelEditor.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import {fitTextWidth} from '@/game/utils/fitTextWidth.js'
-import ButtonContainer from '../../../../components/buttons/ButtonContainer.js'
-import Locator from '../../../../engine/Locator.ts'
-import LocalStorage from '../../../../engine/storage/LocalStorage.js'
 import type {GameMenuCallbacks, LevelEntry, LevelSelectionState, LocationDefinition} from '../menuTypes.js'
 import LevelPreview from './LevelPreview.js'
 import LevelPreviewStatsView from './LevelPreviewStatsView.js'
@@ -16,9 +16,8 @@ import LevelSelectButton from './LevelSelectButton.js'
  * Отображает выбор уровня локации и отладочный переход в редактор.
  */
 
-const ACTION_BUTTON_GAP = 24 // Расстояние между кнопками действий
-const ACTION_BUTTONS_Y = 460 // Вертикальная позиция кнопок действий
-const LEVELS_PANEL_HEIGHT = 355 // Высота панели списка уровней
+const DIFFICULTY_BADGE_HORIZONTAL_PADDING = 18 // Горизонтальный внутренний отступ плашки сложности
+const DIFFICULTY_BADGE_MARGIN = 12 // Отступ плашки сложности от правого края предпросмотра
 const LEVELS_PANEL_WIDTH = 600 // Ширина панели списка уровней
 const PREVIEW_HEIGHT = 390 // Высота области предпросмотра
 const PREVIEW_WIDTH = 500 // Ширина области предпросмотра
@@ -26,6 +25,8 @@ const PREVIEW_WIDTH = 500 // Ширина области предпросмот�
 export default class LocationLevelSelectView extends Container {
   #backButton!: ButtonContainer
   #authorText: Text | null = null
+  #difficultyBadge!: Container
+  #difficultyBackground!: Graphics
   #difficultyText!: Text
   #levelButtons: LevelSelectButton[] = []
   #levelButtonsRow!: Container
@@ -48,6 +49,7 @@ export default class LocationLevelSelectView extends Container {
   setData = (location: LocationDefinition, levels: LevelSelectionState[], selectedEntry: LevelEntry) => {
     this.#selectedEntry = selectedEntry
     this.#title.text = i18next.t(location.titleKey)
+    fitTextWidth(this.#title, PREVIEW_WIDTH)
     this.#levelPreview.setLevel(selectedEntry.level)
     this.#setDifficulty(selectedEntry.level)
     this.#setPersonalBest(selectedEntry.level)
@@ -73,9 +75,6 @@ export default class LocationLevelSelectView extends Container {
     const {width, height} = Locator.uiLayer.uiData
     this.position.set(0)
     this.scale.set(Math.min((width - 28) / 560, (height - 70) / 1030, 1))
-    this.#layoutPreview()
-    this.#layoutLevels()
-    this.#layoutActionButtons()
   }
 
   // Инициализирует внутреннее состояние и зависимости.
@@ -83,9 +82,7 @@ export default class LocationLevelSelectView extends Container {
     this.#createTitle()
     this.#createLevelPreview()
     this.#createLevelsContainer()
-
-    this.#backButton = this.#createBackButton(onBack)
-    this.#playButton = this.#createPlayButton(onPlay)
+    this.#createActionButtons(onBack, onPlay)
   }
 
   #createTitle = () => {
@@ -95,54 +92,73 @@ export default class LocationLevelSelectView extends Container {
       style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 64, stroke: {color: 0x19251d, width: 7, join: 'round'}},
     })
     this.#title.anchor.set(0.5)
+    this.#title.position.set(0, -420)
     this.addChild(this.#title)
   }
 
   #createLevelPreview = () => {
     this.#levelPreview = new LevelPreview()
+    this.#levelPreview.position.set(0, -140)
+    this.#levelPreview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
     this.#levelPreview.eventMode = 'static'
     this.#levelPreview.on('pointertap', this.#openLevelEditor)
     this.addChild(this.#levelPreview)
+    this.#createDifficultyBadge()
+  }
+
+  // Создаёт плашку сложности поверх правого верхнего края предпросмотра.
+  #createDifficultyBadge = () => {
+    this.#difficultyBadge = new Container({label: 'level-preview-difficulty-badge'})
+    this.#difficultyBackground = new Graphics({label: 'level-preview-difficulty-background'})
+    this.#difficultyText = new Text({
+      label: 'level-preview-difficulty-text',
+      text: '',
+      style: {...primaryFontStyle, fill: 0xffedbd, fontSize: 20, stroke: {color: 0x19251d, width: 3, join: 'round'}},
+    })
+    this.#difficultyText.anchor.set(0.5)
+    this.#difficultyBadge.addChild(this.#difficultyBackground, this.#difficultyText)
+
+    this.#levelPreview.addChild(this.#difficultyBadge)
+  }
+
+  // Обновляет ширину и позицию плашки по фактическому размеру текста.
+  #updateDifficultyBadge = () => {
+    const badgeHeight = 40 // Высота плашки сложности
+    const badgeWidth = this.#difficultyText.width + DIFFICULTY_BADGE_HORIZONTAL_PADDING * 2
+    this.#difficultyBackground
+      .clear()
+      .roundRect(-badgeWidth / 2, -badgeHeight / 2, badgeWidth, badgeHeight, 16)
+      .fill({color: 0x132319, alpha: 0.96})
+      .stroke({color: 0xa98c48, width: 3})
+    this.#difficultyBadge.position.set(
+      PREVIEW_WIDTH / 2 - badgeWidth / 2 - DIFFICULTY_BADGE_MARGIN,
+      -PREVIEW_HEIGHT / 2,
+    )
   }
 
   // ------------ панель выбора уровней
   #createLevelsContainer = () => {
-    this.#levelsContainer = new Container({label: 'level-select-panel'})
-    this.#levelsContainer.position.set(0, 235)
+    this.#levelsContainer = new Container({label: 'level-select-panel', y: 235})
     this.#levelsContainer.scale.set(0.8)
     this.addChild(this.#levelsContainer)
 
     this.#createPanelGraphics()
     this.#createRecords()
-    this.#createDifficultyText()
     this.#createAuthorText()
     this.#createLevelButtonsRow()
   }
 
   #createPanelGraphics = () => {
     const graphics = new Graphics({label: 'level-select-graphics'})
-    graphics
-      .roundRect(-LEVELS_PANEL_WIDTH / 2, -LEVELS_PANEL_HEIGHT / 2, LEVELS_PANEL_WIDTH, LEVELS_PANEL_HEIGHT, 28)
-      .fill({color: 0x132319, alpha: 0.92})
+    graphics.roundRect(-LEVELS_PANEL_WIDTH / 2, -150, LEVELS_PANEL_WIDTH, 300, 28).fill({color: 0x132319, alpha: 0.92})
     graphics.stroke({color: 0xa98c48, width: 5})
 
     this.#levelsContainer.addChild(graphics)
   }
 
-  #createDifficultyText = () => {
-    this.#difficultyText = new Text({
-      label: 'level-preview-difficulty',
-      text: '',
-      style: {...primaryFontStyle, fill: 0xffedbd, fontSize: 27, stroke: {color: 0x19251d, width: 3, join: 'round'}},
-    })
-    this.#difficultyText.anchor.set(0.5)
-    this.#difficultyText.position.set(0, -80)
-    this.#levelsContainer.addChild(this.#difficultyText)
-  }
-
   #createRecords = () => {
     this.#records = new LevelPreviewStatsView()
-    this.#records.y = -140
+    this.#records.y = -112
     this.#levelsContainer.addChild(this.#records)
   }
 
@@ -154,12 +170,23 @@ export default class LocationLevelSelectView extends Container {
       style: {...primaryFontStyle, fontSize: 26, fill: 0xffe6a1, stroke: {color: 0x19251d, width: 3, join: 'round'}},
     })
     this.#authorText.anchor.set(0.5)
-    this.#authorText.position.set(0, -190)
+    this.#authorText.position.set(0, -170)
     this.#levelsContainer.addChild(this.#authorText)
   }
 
-
   // ------------ Кнопки Играть и Назад
+  // Создаёт и размещает кнопки действий в общей строке.
+  #createActionButtons = (onBack: GameMenuCallbacks['onBack'], onPlay: GameMenuCallbacks['onPlay']) => {
+    const gap = 24 // Расстояние между кнопками действий
+    const y = 455 // Вертикальная позиция кнопок действий
+    this.#backButton = this.#createBackButton(onBack)
+    this.#playButton = this.#createPlayButton(onPlay)
+    const rowWidth = this.#backButton.width + gap + this.#playButton.width
+    const rowLeft = -rowWidth / 2
+    this.#backButton.position.set(rowLeft + this.#backButton.width / 2, y)
+    this.#playButton.position.set(rowLeft + this.#backButton.width + gap + this.#playButton.width / 2, y)
+  }
+
   #createBackButton = (onBack: GameMenuCallbacks['onBack']) => {
     const button = new ButtonContainer({
       props: {name: 'btnLocationBack'},
@@ -188,11 +215,9 @@ export default class LocationLevelSelectView extends Container {
     return button
   }
 
-
   // ------------ Выбор уровней
   #createLevelButtonsRow = () => {
-    this.#levelButtonsRow = new Container({label: 'level-buttons-row'})
-    this.#levelButtonsRow.position.set(0, 10)
+    this.#levelButtonsRow = new Container({label: 'level-buttons-row', y: -24})
     this.#levelsContainer.addChild(this.#levelButtonsRow)
   }
 
@@ -200,39 +225,15 @@ export default class LocationLevelSelectView extends Container {
   #createLevelButtons = (levels: LevelSelectionState[], selectedLevelId: string) => {
     this.#levelButtons.forEach((button) => button.destroy({children: true}))
 
-    this.#levelButtons = levels.map((level) => {
+    this.#levelButtons = levels.map((level, index) => {
       const button = new LevelSelectButton(level, this.#onLevelSelect)
+      const column = index % 4
+      const row = Math.floor(index / 4)
       button.setState({...level, isSelected: level.id === selectedLevelId})
+      button.position.set((column - 1.5) * 135, row * 105)
       this.#levelButtonsRow.addChild(button)
       return button
     })
-  }
-
-  // Рассчитывает расположение через операцию `layoutPreview`.
-  #layoutPreview = () => {
-    this.#title.position.set(0, -450)
-    fitTextWidth(this.#title, PREVIEW_WIDTH)
-    this.#levelPreview.position.set(0, -165)
-    this.#levelPreview.resize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
-  }
-
-  #layoutLevels = () => {
-    this.#levelButtons.forEach((button, index) => {
-      const column = index % 4
-      const row = Math.floor(index / 4)
-      button.position.set((column - 1.5) * 135, row * 105)
-    })
-  }
-
-  // Рассчитывает расположение через операцию `layoutActionButtons`.
-  #layoutActionButtons = () => {
-    const rowWidth = this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width
-    const rowLeft = -rowWidth / 2
-    this.#backButton.position.set(rowLeft + this.#backButton.width / 2, ACTION_BUTTONS_Y)
-    this.#playButton.position.set(
-      rowLeft + this.#backButton.width + ACTION_BUTTON_GAP + this.#playButton.width / 2,
-      ACTION_BUTTONS_Y,
-    )
   }
 
   // Показывает лучший результат игрока для выбранного уровня.
@@ -243,7 +244,11 @@ export default class LocationLevelSelectView extends Container {
   // Показывает локализованную сложность выбранного уровня.
   #setDifficulty(level: LevelDefinition) {
     this.#difficultyText.text = i18next.t(`difficultyLevels.${level.difficulty}`).toUpperCase()
-    fitTextWidth(this.#difficultyText, PREVIEW_WIDTH)
+    fitTextWidth(
+      this.#difficultyText,
+      PREVIEW_WIDTH - DIFFICULTY_BADGE_MARGIN * 2 - DIFFICULTY_BADGE_HORIZONTAL_PADDING * 2,
+    )
+    this.#updateDifficultyBadge()
   }
 
   // Показывает автора выбранного уровня только в отладочном режиме.
