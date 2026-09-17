@@ -61,12 +61,12 @@ export default class LocationCatalogView extends BaseModal {
     this.#updateScrollProgress()
   }
 
-  override hide = async () => {
+  override hide = async (playClickSound = true) => {
     if (this.destroyed) return
 
     this.#clearRows()
     this.#callbacks.onClose()
-    await super.hide()
+    await super.hide(playClickSound)
   }
 
   // Сохраняет портретную одноколоночную компоновку при любой ориентации.

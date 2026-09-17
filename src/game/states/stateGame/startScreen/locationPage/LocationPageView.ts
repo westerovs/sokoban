@@ -73,7 +73,7 @@ export default class LocationPageView extends Container {
   hide = () => {
     this.visible = false
     this.#catalogOpen = false
-    void this.#catalog?.hide()
+    void this.#catalog?.hide(false)
     this.#unlockCelebration.stop()
   }
 
@@ -241,6 +241,7 @@ export default class LocationPageView extends Container {
   #showCatalog = () => {
     const shouldOpen = !this.#catalog
     if (shouldOpen) this.#createCatalog()
+    Locator.soundManager.play('sfx_btnClick')
 
     this.#setMainContentVisible(false)
     this.#catalog!.setData(this.#locations, this.#pageIndex * PAGE_SIZE)

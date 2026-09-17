@@ -6,6 +6,7 @@ import {fitTextWidth} from '@/game/utils/fitTextWidth.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.js'
 import {CATALOG_COLORS} from './locationCatalogTheme.js'
+import Locator from '@/game/engine/Locator.ts'
 
 // Отображает одну компактную строку открытой или закрытой локации.
 
@@ -122,6 +123,7 @@ export default class LocationCatalogRow extends Container {
     }
 
     this.#shakeLockedRow()
+    Locator.soundManager.play('sfx_noAccess')
   }
 
   // Запускает короткое горизонтальное встряхивание закрытой дощечки.

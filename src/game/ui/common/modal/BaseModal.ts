@@ -143,10 +143,10 @@ export default class BaseModal extends Container {
   }
 
   // Скрывает и уничтожает модальное окно.
-  async hide() {
+  async hide(playClickSound = true) {
     if (this.destroyed) return
 
-    Locator.soundManager.play('sfx_btnClick')
+    if (playClickSound) Locator.soundManager.play('sfx_btnClick')
     this.#setEvents(false)
     await gsap.to(this, {alpha: 0, duration: 0.1, visible: false})
 
