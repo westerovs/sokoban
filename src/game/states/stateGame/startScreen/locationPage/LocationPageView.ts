@@ -11,10 +11,11 @@ import LocationUnlockCelebration from './LocationUnlockCelebration.js'
 // Отображает страницы карточек локаций и кнопку продолжения игры.
 
 const PAGE_SIZE = 4 // Количество локаций на одной странице
-const NARROW_LAYOUT_WIDTH = 1200 // Порог переключения на узкую раскладку
 const CARD_GAP = 25 // Единый промежуток между карточками по обеим осям
-const WIDE_CARD_ROW_Y = -45 // Центр ряда карточек в альбомной раскладке
-const NARROW_CARD_ROW_Y = -178 // Центр первого ряда карточек в портретной раскладке
+const CARD_ROW_Y = -178 // Центр первого ряда карточек
+const LAYOUT_WIDTH = 560 // Базовая ширина портретной раскладки
+const LAYOUT_HORIZONTAL_PADDING = 28 // Суммарный горизонтальный отступ раскладки
+const CONTINUE_BUTTON_Y = 445 // Вертикальная позиция кнопки продолжения
 const NAVIGATION_CARD_GAP = 24 // Отступ переключателя от верхнего края карточек
 
 export default class LocationPageView extends Container {
@@ -78,17 +79,16 @@ export default class LocationPageView extends Container {
   // Перестраивает расположение элементов под текущий размер окна.
   updateAdaptive = () => {
     const {width} = Locator.uiLayer.uiData
-    const isNarrow = width < NARROW_LAYOUT_WIDTH
     this.position.set(0)
-    this.scale.set(isNarrow ? Math.min((width - 28) / 560, 1) : 1)
-    this.#layoutCards(isNarrow)
-    this.#layoutPageNavigation(isNarrow)
+    this.scale.set(Math.min((width - LAYOUT_HORIZONTAL_PADDING) / LAYOUT_WIDTH, 1))
+    this.#layoutCards()
+    this.#layoutPageNavigation()
     this.#catalog?.resize()
-    this.#continueButton.position.set(0, isNarrow ? 445 : 410)
+    this.#continueButton.position.set(0, CONTINUE_BUTTON_Y)
     this.#unlockCelebration.resize({
       cardScale: 1,
       height: Locator.uiLayer.uiData.height,
-      isNarrow,
+      isNarrow: true,
       scale: this.scale.x,
       width,
     })
@@ -185,12 +185,11 @@ export default class LocationPageView extends Container {
 
     const card = this.#cards.find(({locationId}) => locationId === location.id)
     const {height, width} = Locator.uiLayer.uiData
-    const isNarrow = width < NARROW_LAYOUT_WIDTH
     this.#unlockCelebration.start({
       card,
       cardScale: card?.scale.x,
       height,
-      isNarrow,
+      isNarrow: true,
       locationName: i18next.t(location.titleKey),
       scale: this.scale.x,
       width,
@@ -209,11 +208,10 @@ export default class LocationPageView extends Container {
   }
 
   // Выравнивает переключатель относительно верхнего края карточек.
-  #layoutPageNavigation = (isNarrow: boolean) => {
+  #layoutPageNavigation = () => {
     const cardScale = 1
-    const rowY = isNarrow ? NARROW_CARD_ROW_Y : WIDE_CARD_ROW_Y
-    const cardTop = rowY - (CARD_HEIGHT * cardScale) / 2
-    const navigationHalfHeight = (this.#chapterSelector.height) / 2
+    const cardTop = CARD_ROW_Y - (CARD_HEIGHT * cardScale) / 2
+    const navigationHalfHeight = this.#chapterSelector.height / 2
     const navigationY = cardTop - NAVIGATION_CARD_GAP - navigationHalfHeight
     this.#pageNavigation.position.set(0, navigationY)
     this.#pageNavigation.scale.set(1)
@@ -267,10 +265,10 @@ export default class LocationPageView extends Container {
     if (!visible) this.#unlockCelebration.stop()
   }
 
-  // Располагает карточки для широкой или узкой раскладки.
-  #layoutCards = (isNarrow: boolean) => {
+  // Располагает карточки в постоянной портретной сетке.
+  #layoutCards = () => {
     const scale = 1
-    const columnCount = isNarrow ? 2 : PAGE_SIZE
+    const columnCount = 2
     const columnStep = CARD_WIDTH * scale + CARD_GAP
     const rowStep = CARD_HEIGHT * scale + CARD_GAP
 
@@ -278,7 +276,7 @@ export default class LocationPageView extends Container {
       const column = index % columnCount
       const row = Math.floor(index / columnCount)
       const x = (column - (columnCount - 1) / 2) * columnStep
-      const y = (isNarrow ? NARROW_CARD_ROW_Y : WIDE_CARD_ROW_Y) + row * rowStep
+      const y = CARD_ROW_Y + row * rowStep
       // card.scale.set(scale)
       card.position.set(x, y)
     })
