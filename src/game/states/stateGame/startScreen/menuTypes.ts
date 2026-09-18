@@ -14,6 +14,7 @@ type LocationSelectionState = LocationDefinition & {
   isCompleted: boolean
   isCurrent: boolean
   isUnlocked: boolean
+  lockedAfterTitleKey: string | null
   totalCount: number
 }
 

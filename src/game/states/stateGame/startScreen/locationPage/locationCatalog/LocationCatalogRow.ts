@@ -3,6 +3,7 @@ import i18next from 'i18next'
 import {Container, Rectangle, Sprite, Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
+import {shakeNoAccess} from '@/game/utils/animations/gsapUtils.ts'
 import {fitTextWidth} from '@/game/utils/fitTextWidth.js'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.js'
@@ -15,8 +16,6 @@ const LOCK_GAP = 12 // Расстояние между названием и з�
 const LOCKED_BOARD_TINT = 0x91846d // Затемнение заблокированной дощечки
 const HOVER_SCALE = 1.02 // Увеличение дощечки при наведении
 const HOVER_DURATION = 0.15 // Длительность анимации наведения
-const SHAKE_OFFSET = 6 // Амплитуда горизонтального встряхивания
-const SHAKE_DURATION = 0.045 // Длительность одного шага встряхивания
 
 export default class LocationCatalogRow extends Container {
   #background!: Sprite
@@ -143,17 +142,7 @@ export default class LocationCatalogRow extends Container {
       return
     }
 
-    this.#shakeLockedRow()
+    shakeNoAccess(this)
     Locator.soundManager.play('sfx_noAccess')
-  }
-
-  // Запускает короткое горизонтальное встряхивание закрытой дощечки.
-  #shakeLockedRow = () => {
-    gsap.killTweensOf(this)
-    gsap
-      .timeline()
-      .to(this, {x: -SHAKE_OFFSET, duration: SHAKE_DURATION, ease: 'sine.inOut'})
-      .to(this, {x: SHAKE_OFFSET, duration: SHAKE_DURATION * 2, ease: 'sine.inOut'})
-      .to(this, {x: 0, duration: SHAKE_DURATION, ease: 'sine.inOut'})
   }
 }

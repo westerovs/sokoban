@@ -54,11 +54,13 @@ export default class LevelProgress {
 
   getLocationStates = () => {
     const continueLocationId = this.getContinueTargetEntry()?.location.id
+    const locations = getLocations()
 
-    return getLocations().map((location) => ({
+    return locations.map((location, index) => ({
       ...location,
       ...this.#getLocationProgress(location),
       isCurrent: location.id === continueLocationId,
+      lockedAfterTitleKey: locations[index - 1]?.titleKey ?? null,
     }))
   }
 

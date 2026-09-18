@@ -103,6 +103,7 @@ export default class CompleteLocationUnlockCelebration extends Container {
       isCompleted: false,
       isCurrent: true,
       isUnlocked: true,
+      lockedAfterTitleKey: null,
       totalCount: location.levels.length,
     }
     const card = new LocationCard(state, () => {})

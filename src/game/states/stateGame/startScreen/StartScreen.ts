@@ -7,7 +7,12 @@ import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import LevelProgress from '@/game/gameConfig/levels/LevelProgress.js'
-import {getLevelEntryById, getLocationById, getLocations} from '@/game/gameConfig/levels/locationCatalog.js'
+import {
+  getLevelEntryById,
+  getLocationById,
+  getLocationPageIndex,
+  getLocations,
+} from '@/game/gameConfig/levels/locationCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import type GameView from '../GameView.js'
@@ -54,14 +59,14 @@ export default class StartScreen {
 
   // Показывает текущую страницу доступных локаций.
   showLocations = (playSound = true) => {
+    this.#showLocationsPage(this.#progress.locationPageIndex, playSound)
+  }
+
+  #showLocationsPage = (pageIndex: number, playSound: boolean) => {
     this.#selectedLocationId = null
     Locator.options.setMainScreenNavigation(true)
     this.#showProgressBackground()
-    this.#gameMenu.showLocations(
-      this.#progress.getLocationStates(),
-      this.#progress.locationPageIndex,
-      this.#progress.getContinueTargetEntry(),
-    )
+    this.#gameMenu.showLocations(this.#progress.getLocationStates(), pageIndex, this.#progress.getContinueTargetEntry())
     if (playSound) this.#playClickSound()
   }
 
@@ -97,14 +102,21 @@ export default class StartScreen {
       return
     }
 
-    this.showLocations(false)
+    this.#showInitialLocations()
+  }
+
+  // При первом показе открывает главу, содержащую актуальную точку продолжения.
+  #showInitialLocations = () => {
+    const continueEntry = this.#progress.getContinueTargetEntry()
+    const pageIndex = continueEntry ? getLocationPageIndex(continueEntry.location.id) : this.#progress.locationPageIndex
+    this.#showLocationsPage(pageIndex, false)
   }
 
   // Открывает запрошенный уровень локации, если он доступен.
   #showSelectedLocation = (locationId: string, levelId: string) => {
     const location = getLocationById(locationId)
     if (!location || !this.#progress.isLocationUnlocked(locationId)) {
-      this.showLocations(false)
+      this.#showInitialLocations()
       return
     }
 

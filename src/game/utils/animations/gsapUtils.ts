@@ -45,6 +45,16 @@ type GameTicker = {
   }
 }
 
+const NO_ACCESS_SHAKE_OFFSET = 6 // Амплитуда горизонтального встряхивания
+const NO_ACCESS_SHAKE_DURATION = 0.045 // Длительность одного шага встряхивания в секундах
+
+type NoAccessShakeState = {
+  initialX: number
+  timeline: gsap.core.Timeline
+}
+
+const noAccessShakeStates = new WeakMap<AnimatedTarget, NoAccessShakeState>()
+
 // Останавливает таймлайн и при необходимости сбрасывает ссылку на него.
 const clearTimeLine = (timeLine: gsap.core.Timeline | null | undefined, remove = false, progress = 0) => {
   if (timeLine) {
@@ -218,6 +228,22 @@ const shakeX = (el: AnimatedTarget) => {
     .to(el, {x: initX, duration: duration, ease: 'linear'})
 }
 
+// Запускает короткое встряхивание недоступного интерактивного элемента.
+const shakeNoAccess = (target: AnimatedTarget) => {
+  const activeState = noAccessShakeStates.get(target)
+  const initialX = activeState?.initialX ?? target.x
+  activeState?.timeline.kill()
+  target.x = initialX
+
+  const timeline = gsap
+    .timeline({onComplete: () => noAccessShakeStates.delete(target)})
+    .to(target, {x: initialX - NO_ACCESS_SHAKE_OFFSET, duration: NO_ACCESS_SHAKE_DURATION, ease: 'sine.inOut'})
+    .to(target, {x: initialX + NO_ACCESS_SHAKE_OFFSET, duration: NO_ACCESS_SHAKE_DURATION * 2, ease: 'sine.inOut'})
+    .to(target, {x: initialX, duration: NO_ACCESS_SHAKE_DURATION, ease: 'sine.inOut'})
+  noAccessShakeStates.set(target, {initialX, timeline})
+  return timeline
+}
+
 export {
   animateCounter,
   animateDots,
@@ -226,6 +252,7 @@ export {
   destroyTimeLine,
   jump,
   shake,
+  shakeNoAccess,
   shakeX,
   typewriterEffect,
 }
