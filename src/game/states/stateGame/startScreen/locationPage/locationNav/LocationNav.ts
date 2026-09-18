@@ -86,7 +86,7 @@ export default class LocationNav extends Container {
   }
 
   #setArrowEnabled = (arrow: Sprite, isEnabled: boolean) => {
-    arrow.visible = isEnabled
+    arrow.tint = isEnabled ? 0xFFFFFF : 0x5a5a5a
     arrow.eventMode = isEnabled ? 'static' : 'none'
     arrow.cursor = isEnabled ? 'pointer' : 'default'
   }

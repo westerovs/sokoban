@@ -149,7 +149,14 @@ export default class LocationPageView extends Container {
     this.#continueTitle = new Text({
       label: 'btnContinueAdventure-title',
       text: i18next.t('locationSelect.continue'),
-      style: {...primaryFontStyle, fill: 0xFFFFFF, fontSize: 36},
+      style: {
+        ...primaryFontStyle,
+        fill: 0xFFFFFF,
+        fontSize: 36,
+        letterSpacing: 2,
+        stroke: {color: 0x102217, width: 5, join: 'round'},
+      },
+
     })
     this.#continueTitle.anchor.set(0.5)
     this.#continueTitle.y = -14
