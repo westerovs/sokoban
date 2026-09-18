@@ -7,12 +7,7 @@ import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import LevelProgress from '@/game/gameConfig/levels/LevelProgress.js'
-import {
-  getLevelEntryById,
-  getLocationById,
-  getLocationPageIndex,
-  getLocations,
-} from '@/game/gameConfig/levels/locationCatalog.js'
+import {getLevelEntryById, getLocationById, getLocations} from '@/game/gameConfig/levels/locationCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import type GameView from '../GameView.js'
@@ -62,13 +57,10 @@ export default class StartScreen {
     this.#selectedLocationId = null
     Locator.options.setMainScreenNavigation(true)
     this.#showProgressBackground()
-    const unlockedLocation = this.#progress.consumeUnlockCelebration()
-    const pageIndex = unlockedLocation ? getLocationPageIndex(unlockedLocation.id) : this.#progress.locationPageIndex
     this.#gameMenu.showLocations(
       this.#progress.getLocationStates(),
-      pageIndex,
+      this.#progress.locationPageIndex,
       this.#progress.getContinueTargetEntry(),
-      unlockedLocation,
     )
     if (playSound) this.#playClickSound()
   }
@@ -148,7 +140,6 @@ export default class StartScreen {
       this.#progress.getLocationStates(),
       this.#progress.locationPageIndex,
       this.#progress.getContinueTargetEntry(),
-      null,
     )
     this.#playClickSound()
   }

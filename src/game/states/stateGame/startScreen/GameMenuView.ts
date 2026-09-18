@@ -34,15 +34,10 @@ export default class GameMenuView extends Container {
   }
 
   // Показывает страницу выбора локации.
-  showLocations = (
-    locations: LocationSelectionState[],
-    pageIndex: number,
-    continueEntry: LevelEntry | null,
-    unlockedLocation: LocationDefinition | null,
-  ) => {
+  showLocations = (locations: LocationSelectionState[], pageIndex: number, continueEntry: LevelEntry | null) => {
     this.#locationSelectView.visible = true
     this.#levelSelectView.visible = false
-    this.#locationSelectView.setData(locations, pageIndex, continueEntry, unlockedLocation)
+    this.#locationSelectView.setData(locations, pageIndex, continueEntry)
   }
 
   // Показывает уровни выбранной локации.
@@ -87,9 +82,8 @@ export default class GameMenuView extends Container {
       props: {name},
       spriteKeys: [
         {key: 'btn-ui-2', scale: 0.5},
-        {key: icon, scale: 1}
+        {key: icon, scale: 1},
       ],
-
     })
     button.alignRight = () => {
       Locator.uiLayer.alignRight(button, {x, y: 60})

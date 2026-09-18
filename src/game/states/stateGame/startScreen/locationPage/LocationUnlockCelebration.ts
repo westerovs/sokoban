@@ -5,7 +5,7 @@ import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.js'
 
-// Если все уровни локации пройдены, то создаёт на пекшоте и на гл.экране анимацию следующей разблокированной локации
+// Создаёт на экране победы анимацию следующей разблокированной локации.
 
 const CARD_WIDTH = 250 // Ширина карточки локации
 const CARD_HEIGHT = 350 // Высота карточки локации

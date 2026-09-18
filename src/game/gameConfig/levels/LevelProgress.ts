@@ -104,20 +104,6 @@ export default class LevelProgress {
     return canResumeLocation ? lastPlayed : this.getContinueEntry()
   }
 
-  consumeUnlockCelebration = () => {
-    const locations = getLocations()
-    const celebratedCount = this.#storage.playerData.celebratedLocationIds.length
-    if (locations[0]) this.#addCelebratedLocation(locations[0].id)
-
-    const location = locations.slice(1).find(({id}) => {
-      return this.isLocationUnlocked(id) && !this.#storage.playerData.celebratedLocationIds.includes(id)
-    })
-    if (location) this.#addCelebratedLocation(location.id)
-    if (celebratedCount !== this.#storage.playerData.celebratedLocationIds.length) this.#storage.save()
-
-    return location ?? null
-  }
-
   getSelectedEntry = (locationId: string | null = this.selectedLocationId) => {
     const selected = getLevelEntryById(this.#storage.playerData.selectedLevelId)
     if (selected?.location.id === locationId) return selected
@@ -303,12 +289,6 @@ export default class LevelProgress {
   #addUnlockedLocation = (locationId: string) => {
     if (!this.#storage.playerData.unlockedLocationIds.includes(locationId)) {
       this.#storage.playerData.unlockedLocationIds.push(locationId)
-    }
-  }
-
-  #addCelebratedLocation = (locationId: string) => {
-    if (!this.#storage.playerData.celebratedLocationIds.includes(locationId)) {
-      this.#storage.playerData.celebratedLocationIds.push(locationId)
     }
   }
 

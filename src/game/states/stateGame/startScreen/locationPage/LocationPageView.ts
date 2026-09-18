@@ -5,10 +5,9 @@ import LocationNav from '@/game/states/stateGame/startScreen/locationPage/locati
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import Hint from '@/game/utils/Hint.ts'
-import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectionState} from '../menuTypes.js'
+import type {GameMenuCallbacks, LevelEntry, LocationSelectionState} from '../menuTypes.js'
 import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './locationCard/LocationCard.ts'
 import LocationCatalogView from './locationCatalog/LocationCatalogView.js'
-import LocationUnlockCelebration from './LocationUnlockCelebration.js'
 
 // Отображает страницы карточек локаций и кнопку продолжения игры.
 
@@ -37,7 +36,6 @@ export default class LocationPageView extends Container {
   #pageIndex = 0 // Текущая страница локаций
   #tabsContainer!: Container
   #pageCount = 0
-  #unlockCelebration!: LocationUnlockCelebration
 
   constructor({
     onContinue,
@@ -52,13 +50,7 @@ export default class LocationPageView extends Container {
   }
 
   // Показывает указанную страницу локаций и актуальный прогресс.
-  setData = (
-    locations: LocationSelectionState[],
-    pageIndex: number,
-    continueEntry: LevelEntry | null,
-    unlockedLocation: LocationDefinition | null,
-  ) => {
-    this.#unlockCelebration.stop()
+  setData = (locations: LocationSelectionState[], pageIndex: number, continueEntry: LevelEntry | null) => {
     this.#locations = locations
     this.#pageIndex = pageIndex
     this.#replaceTabs(locations.length)
@@ -68,16 +60,14 @@ export default class LocationPageView extends Container {
     this.#setContinueEntry(continueEntry)
     this.updateAdaptive()
     if (this.#catalogOpen) this.#showCatalog()
-    this.#showUnlockCelebration(unlockedLocation)
     this.#syncHint()
   }
 
-  // Скрывает экран и останавливает праздничную анимацию.
+  // Скрывает экран выбора локации.
   hide = () => {
     this.visible = false
     this.#catalogOpen = false
     void this.#catalog?.hide(false)
-    this.#unlockCelebration.stop()
     this.#hint.stop()
   }
 
@@ -90,13 +80,6 @@ export default class LocationPageView extends Container {
     this.#layoutPageNavigation()
     this.#catalog?.resize()
     this.#continueButton.position.set(0, CONTINUE_BUTTON_Y)
-    this.#unlockCelebration.resize({
-      cardScale: 1,
-      height: Locator.uiLayer.uiData.height,
-      isNarrow: true,
-      scale: this.scale.x,
-      width,
-    })
   }
 
   // Создаёт постоянные элементы экрана.
@@ -106,8 +89,7 @@ export default class LocationPageView extends Container {
     this.#createContinueButton(onContinue)
     this.#createHint()
 
-    this.#unlockCelebration = new LocationUnlockCelebration()
-    this.addChild(this.#continueButton, this.#hint, this.#unlockCelebration)
+    this.addChild(this.#continueButton, this.#hint)
   }
 
   #createTabsContainer = () => {
@@ -160,12 +142,11 @@ export default class LocationPageView extends Container {
       text: i18next.t('locationSelect.continue'),
       style: {
         ...primaryFontStyle,
-        fill: 0xFFFFFF,
+        fill: 0xffffff,
         fontSize: 36,
         letterSpacing: 2,
         stroke: {color: 0x102217, width: 5, join: 'round'},
       },
-
     })
     this.#continueTitle.anchor.set(0.5)
     this.#continueTitle.y = -14
@@ -191,23 +172,6 @@ export default class LocationPageView extends Container {
     this.#continueSubtitle.text = i18next.t('locationSelect.continueLocation', {
       level: entry.locationLevelIndex + 1,
       location: i18next.t(entry.location.titleKey),
-    })
-  }
-
-  // Запускает поздравление для только что открытой локации.
-  #showUnlockCelebration = (location: LocationDefinition | null) => {
-    if (!location) return this.#unlockCelebration.stop()
-
-    const card = this.#cards.find(({locationId}) => locationId === location.id)
-    const {height, width} = Locator.uiLayer.uiData
-    this.#unlockCelebration.start({
-      card,
-      cardScale: card?.scale.x,
-      height,
-      isNarrow: true,
-      locationName: i18next.t(location.titleKey),
-      scale: this.scale.x,
-      width,
     })
   }
 
@@ -281,7 +245,6 @@ export default class LocationPageView extends Container {
     this.#continueButton.visible = visible
     if (visible) this.#syncHint()
     else {
-      this.#unlockCelebration.stop()
       this.#hint.stop()
     }
   }
