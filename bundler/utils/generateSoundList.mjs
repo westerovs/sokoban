@@ -12,7 +12,7 @@ const rootDir = path.resolve(__dirname, '../..') // Корень проекта
 const AUDIO_DIR = path.resolve(rootDir, 'public/assets/audio') // Папка собранного аудио
 const SFX_DIR = path.resolve(AUDIO_DIR, 'sfx') // Папка звуковых эффектов
 const OUTPUT_FILE = path.resolve(rootDir, 'src/game/generatedAssets/soundList.ts') // Путь итогового TypeScript-файла
-const AUDIO_EXTENSIONS = ['.mp3', '.ogg'] // Допустимые расширения аудиофайлов
+const AUDIO_EXTENSIONS = ['.mp3', '.ogg', '.wav'] // Допустимые расширения аудиофайлов
 
 // проверяет, что файл является аудио
 const isAudioFile = (name) => {
