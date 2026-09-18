@@ -13,6 +13,8 @@ import {CATALOG_COLORS} from './locationCatalogTheme.js'
 const CONTENT_PADDING = 40 // Общий горизонтальный отступ содержимого дощечки
 const LOCK_GAP = 12 // Расстояние между названием и замком
 const LOCKED_BOARD_TINT = 0x91846d // Затемнение заблокированной дощечки
+const HOVER_SCALE = 1.02 // Увеличение дощечки при наведении
+const HOVER_DURATION = 0.15 // Длительность анимации наведения
 const SHAKE_OFFSET = 6 // Амплитуда горизонтального встряхивания
 const SHAKE_DURATION = 0.045 // Длительность одного шага встряхивания
 
@@ -33,6 +35,7 @@ export default class LocationCatalogRow extends Container {
   resize = (width: number, height: number) => {
     const scale = Math.min(width / this.#background.texture.width, height / this.#background.texture.height)
     this.hitArea = new Rectangle(0, 0, width, height)
+    this.origin.set(width / 2, height / 2)
     this.#background.scale.set(scale)
     this.#background.position.set(width / 2, height / 2)
     this.#title.position.set(CONTENT_PADDING, height / 2)
@@ -50,11 +53,29 @@ export default class LocationCatalogRow extends Container {
     this.cursor = this.#state.isUnlocked ? 'pointer' : 'default'
     this.interactiveChildren = false
     this.on('pointertap', () => this.#handlePress(onSelect))
+    this.#initHover()
+  }
+
+  // Подключает лёгкое увеличение дощечки при наведении.
+  #initHover = () => {
+    this.on('pointerover', () => this.#animateScale(HOVER_SCALE))
+    this.on('pointerout', () => this.#animateScale(1))
+  }
+
+  // Плавно изменяет масштаб всей дощечки относительно её центра.
+  #animateScale = (scale: number) => {
+    gsap.killTweensOf(this.scale)
+    gsap.to(this.scale, {
+      x: scale,
+      y: scale,
+      duration: HOVER_DURATION,
+      ease: 'sine.out',
+    })
   }
 
   // Создаёт деревянную подложку строки.
   #createBackground = () => {
-    this.#background = GameUtils.createSprite('board', {label: `${this.label}-background`})
+    this.#background = GameUtils.createSprite('select-board', {label: `selectBoard`})
     this.#background.tint = this.#getBackgroundTint()
     this.addChild(this.#background)
   }

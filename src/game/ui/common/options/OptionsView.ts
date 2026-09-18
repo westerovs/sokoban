@@ -189,7 +189,7 @@ export default class OptionsView extends BaseModal {
 
     this.#timeLine = await gsap
       .timeline({ease: 'linear'})
-      .to(this.#optionsToggleBtn, {angle: isVisible ? 90 : 0, duration: 0.1})
+      .to(this.#optionsToggleBtn, {angle: isVisible ? 50 : 0, duration: 0.1})
       .eventCallback('onComplete', () => {
         if (!isVisible) Locator.uiLayer.closeModal(this)
         destroyTimeLine(this.#timeLine as gsap.core.Timeline | null)

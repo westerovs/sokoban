@@ -8,19 +8,20 @@ import {GAME_EVENTS} from '../../gameConfig/gameEvents.js'
 import StoreCard, {CARD_SIZE, CARDS_DATA} from './StoreCard.js'
 import StoreTopRow from './StoreTopRow.js'
 
-// Создаёт модальное представление магазина и сетку товаров.
 
 export default class StoreView extends BaseModal {
   #cardsContainer!: Container
   #cards: StoreCard[] = []
 
-  // Создаёт окно магазина с заголовком.
   constructor(props: BaseModalOptions = {}) {
-    super({h: 648, w: 420, isNeedHeader: true, ...props})
+    super({
+      h: 800,
+      w: 600,
+      isNeedHeader: true,
+      ...props
+    })
 
     this.label = 'storeView'
-    this._initScale = 1.3
-
     this.#setHeaderText()
   }
 

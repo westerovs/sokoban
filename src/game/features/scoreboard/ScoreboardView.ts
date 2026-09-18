@@ -17,7 +17,6 @@ const getViewHeight = () => {
   return maxRows * (ROW_SIZE.rowHeight + offsetY) + header + padding
 }
 
-// Создаёт модальное представление таблицы лидеров.
 
 export default class ScoreboardView extends BaseModal {
   #loadingText!: Text
@@ -26,9 +25,13 @@ export default class ScoreboardView extends BaseModal {
   #userPlayerTextFill = 0x00ffa9
   #userPlayerRowFill = 0x20b2aa
 
-  // Создаёт окно и его статические элементы.
   constructor(props: BaseModalOptions = {}) {
-    super({h: getViewHeight(), w: 600, isNeedHeader: true, ...props})
+    super({
+      h: getViewHeight(),
+      w: 600,
+      isNeedHeader: true,
+      ...props
+    })
 
     this.label = 'scoreboardView'
     this.#create()

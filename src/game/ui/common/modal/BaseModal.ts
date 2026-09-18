@@ -71,7 +71,7 @@ export default class BaseModal extends Container {
     label,
     w = 430,
     h = 500,
-    crossOffset = {x: 0, y: 0},
+    crossOffset = {x: 30, y: -30},
     isSprite = true,
     spriteTexture = 'main-pop-up',
     nineSlice = {left: 0, top: 0, right: 0, bottom: 0},
@@ -300,18 +300,19 @@ export default class BaseModal extends Container {
 
     const header = new Container({label: 'baseModalHeader'})
     this.#header = header
-    const sprite = GameUtils.createSprite('frame-header', {
+    const spriteHeader = GameUtils.createSprite('select-board', {
       anchorY: 0,
       label: 'header',
     })
+    spriteHeader.scale.set(1.4)
     header.position.set(0, -topBorderOffset + topPadding)
 
     this.#headerText = GameUtils.createText('...', {
       style: {...primaryFontStyle, fontSize: 50},
     })
-    this.#headerText.y = sprite.height / 2
+    this.#headerText.y = spriteHeader.height / 2
 
-    header.addChild(sprite, this.#headerText)
+    header.addChild(spriteHeader, this.#headerText)
     this.addChild(header)
   }
 }

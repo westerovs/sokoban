@@ -7,6 +7,7 @@ import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectio
 import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './locationCard/LocationCard.ts'
 import LocationCatalogView from './locationCatalog/LocationCatalogView.js'
 import LocationUnlockCelebration from './LocationUnlockCelebration.js'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 
 // Отображает страницы карточек локаций и кнопку продолжения игры.
 
@@ -142,18 +143,16 @@ export default class LocationPageView extends Container {
       cursor: 'pointer',
     })
 
-    const background = new Graphics({label: 'btnContinueAdventure-background'})
-    background.roundRect(0, 0, 480, 100, 28).fill({color: 0x9fbd3b})
-    background.stroke({color: 0xe7de83, width: 5})
-    background.pivot.set(background.width / 2, background.height / 2)
+    const background = GameUtils.createSprite('btn-primary')
+    background.scale.set(1.5)
 
     this.#continueTitle = new Text({
       label: 'btnContinueAdventure-title',
       text: i18next.t('locationSelect.continue'),
-      style: {...primaryFontStyle, fill: 0x303b12, fontSize: 31},
+      style: {...primaryFontStyle, fill: 0xFFFFFF, fontSize: 36},
     })
     this.#continueTitle.anchor.set(0.5)
-    this.#continueTitle.y = -15
+    this.#continueTitle.y = -14
 
     this.#continueSubtitle = new Text({
       label: 'btnContinueAdventure-subtitle',
@@ -161,7 +160,7 @@ export default class LocationPageView extends Container {
       style: {...primaryFontStyle, fill: 0x3e4b1d, fontSize: 22},
     })
     this.#continueSubtitle.anchor.set(0.5)
-    this.#continueSubtitle.y = 22
+    this.#continueSubtitle.y = 18
 
     button.addChild(background, this.#continueTitle, this.#continueSubtitle)
     button.on('pointertap', onContinue)

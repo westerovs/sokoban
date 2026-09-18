@@ -85,7 +85,11 @@ export default class GameMenuView extends Container {
   #createToolButton = (name: string, icon: string, x: number, onPress: () => void) => {
     const button = new ButtonContainer({
       props: {name},
-      spriteKeys: ['btn-ui-3', icon],
+      spriteKeys: [
+        {key: 'btn-ui-2', scale: 0.5},
+        {key: icon, scale: 1}
+      ],
+
     })
     button.alignRight = () => {
       Locator.uiLayer.alignRight(button, {x, y: 60})
