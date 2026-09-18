@@ -65,6 +65,6 @@ export default class LoadLevelResources {
     const {textLevel, userLevel, textLoading} = this.#levelEntity.textPreloadData!
 
     const preloadText = this.#preloadText
-    preloadText.text = `${textLevel} ${userLevel}}\n${textLoading} ${progress}%`
+    preloadText.text = `${textLevel} ${userLevel}\n${textLoading} ${progress}%`
   }
 }

@@ -7,7 +7,12 @@ import StoreView from '@/game/features/store/StoreView.js'
 import {GAME_STATES} from '@/game/gameConfig/constants.js'
 import {GAME_EVENTS} from '@/game/gameConfig/gameEvents.js'
 import LevelProgress from '@/game/gameConfig/levels/LevelProgress.js'
-import {getLevelEntryById, getLocationById, getLocationPageIndex} from '@/game/gameConfig/levels/locationCatalog.js'
+import {
+  getLevelEntryById,
+  getLocationById,
+  getLocationPageIndex,
+  getLocations,
+} from '@/game/gameConfig/levels/locationCatalog.js'
 import YaMetrika from '@/game/modules/metrika/YaMetrika.js'
 import {clearTimeLine} from '@/game/utils/animations/gsapUtils.js'
 import type GameView from '../GameView.js'
@@ -56,7 +61,7 @@ export default class StartScreen {
   showLocations = (playSound = true) => {
     this.#selectedLocationId = null
     Locator.options.setMainScreenNavigation(true)
-    ;(this.#game.view as GameView).setBackground('startScreen')
+    this.#showProgressBackground()
     const unlockedLocation = this.#progress.consumeUnlockCelebration()
     const pageIndex = unlockedLocation ? getLocationPageIndex(unlockedLocation.id) : this.#progress.locationPageIndex
     this.#gameMenu.showLocations(
@@ -216,6 +221,13 @@ export default class StartScreen {
   // Воспроизводит звук нажатия кнопки.
   #playClickSound = () => {
     this.#soundManager.play('sfx_btnClick')
+  }
+
+  // Показывает фон локации, на которой остановился прогресс игрока.
+  #showProgressBackground = () => {
+    const backgroundName = this.#progress.getContinueTargetEntry()?.location.background ?? getLocations()[0]?.background
+    if (!backgroundName) return
+    ;(this.#game.view as GameView).setBackground(backgroundName)
   }
 
   // Отписывает стартовый экран от событий и очищает анимацию.

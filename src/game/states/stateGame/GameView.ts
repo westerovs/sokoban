@@ -6,11 +6,8 @@ export default class GameView extends Container {
   #backgroundName: string | null = null
   refs: Record<string, any> = {}
 
-  // Создаёт контейнер главного экрана и его начальный фон.
   constructor() {
     super({label: 'game-view', sortableChildren: true})
-
-    this.#init()
   }
 
   // Заменяет фоновую текстуру, если она действительно изменилась.
@@ -24,18 +21,7 @@ export default class GameView extends Container {
     this.#background.height = 1080
     this.#background.zIndex = -1
     this.#backgroundName = textureName
-    this.#background.alpha = 0.5
 
     this.addChildAt(this.#background, 0)
-  }
-
-  // Создаёт начальное содержимое представления.
-  #init = () => {
-    this.#createBackground()
-  }
-
-  // Устанавливает фон стартового экрана.
-  #createBackground() {
-    this.setBackground('startScreen')
   }
 }
