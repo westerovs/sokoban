@@ -1,31 +1,36 @@
 import i18next from 'i18next'
+import type {DestroyOptions} from 'pixi.js'
 import {Container, Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import LocationNav from '@/game/states/stateGame/startScreen/locationPage/locationNav/LocationNav.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
+import type {HintStep} from '@/game/utils/Hint.ts'
 import Hint from '@/game/utils/Hint.ts'
 import type {GameMenuCallbacks, LevelEntry, LocationSelectionState} from '../menuTypes.js'
-import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './locationCard/LocationCard.ts'
+import LocationCarousel from './locationCarousel/LocationCarousel.ts'
 import LocationCatalogView from './locationCatalog/LocationCatalogView.js'
 
 // Отображает страницы карточек локаций и кнопку продолжения игры.
 
 const PAGE_SIZE = 4 // Количество локаций на одной странице
-const CARD_GAP = 25 // Единый промежуток между карточками по обеим осям
-const CARD_ROW_Y = -178 // Центр первого ряда карточек
 const LAYOUT_WIDTH = 560 // Базовая ширина портретной раскладки
 const LAYOUT_HORIZONTAL_PADDING = 28 // Суммарный горизонтальный отступ раскладки
-const CONTINUE_BUTTON_Y = 445 // Вертикальная позиция кнопки продолжения
-const NAVIGATION_CARD_GAP = 24 // Отступ переключателя от верхнего края карточек
+const NAVIGATION_CARD_GAP = 24 // Отступ переключателя от верхнего края карточки
+const CONTINUE_CONTROLS_GAP = 160 // Отступ кнопки продолжения от элементов карусели
+const CAROUSEL_HINT_STEPS: readonly HintStep[] = [
+  {type: 'swipe', deltaX: -120},
+  {type: 'swipe', deltaX: 120},
+  {type: 'tap'},
+]
 
 export default class LocationPageView extends Container {
-  #cards: LocationCard[] = []
-  #cardsContainer!: Container
+  #carousel!: LocationCarousel
   #continueButton!: Container
   #continueSubtitle!: Text
   #continueTitle!: Text
   #hint!: Hint
+  #hintShown = false
   #catalog: LocationCatalogView | null = null
   #catalogOpen = false
   #chapterSelector!: LocationNav
@@ -46,21 +51,17 @@ export default class LocationPageView extends Container {
 
     this.#onLocationSelect = onLocationSelect
     this.#onPageSelect = onPageSelect
+    this.visible = false
     this.#init(onContinue)
   }
 
-  // Показывает указанную страницу локаций и актуальный прогресс.
-  setData = (locations: LocationSelectionState[], pageIndex: number, continueEntry: LevelEntry | null) => {
-    this.#locations = locations
-    this.#pageIndex = pageIndex
-    this.#replaceTabs(locations.length)
-    this.#replaceCards(locations.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE))
-    this.#chapterSelector.setText(i18next.t('locationSelect.chapter', {chapter: pageIndex + 1}))
-    this.#updatePageNavigation()
-    this.#setContinueEntry(continueEntry)
-    this.updateAdaptive()
-    if (this.#catalogOpen) this.#showCatalog()
-    this.#syncHint()
+  // Показывает указанную страницу локаций и запускает обучение один раз за открытие экрана.
+  show = (locations: LocationSelectionState[], pageIndex: number, continueEntry: LevelEntry | null) => {
+    const isNewVisit = !this.visible
+    this.visible = true
+    if (isNewVisit) this.#hintShown = false
+    this.#setData(locations, pageIndex, continueEntry)
+    if (isNewVisit) this.#showHintOnce()
   }
 
   // Скрывает экран выбора локации.
@@ -68,24 +69,48 @@ export default class LocationPageView extends Container {
     this.visible = false
     this.#catalogOpen = false
     void this.#catalog?.hide(false)
+    this.#carousel.setPaused(true)
     this.#hint.stop()
   }
 
   // Перестраивает расположение элементов под текущий размер окна.
   updateAdaptive = () => {
     const {width} = Locator.uiLayer.uiData
+    const layoutWidth = Math.max(LAYOUT_WIDTH, this.#carousel.preferredWidth)
     this.position.set(0)
-    this.scale.set(Math.min((width - LAYOUT_HORIZONTAL_PADDING) / LAYOUT_WIDTH, 1))
-    this.#layoutCards()
+    this.scale.set(Math.min((width - LAYOUT_HORIZONTAL_PADDING) / layoutWidth, 1))
+    this.#carousel.layout()
     this.#layoutPageNavigation()
     this.#catalog?.resize()
-    this.#continueButton.position.set(0, CONTINUE_BUTTON_Y)
+    this.#continueButton.position.set(0, this.#carousel.controlsY + CONTINUE_CONTROLS_GAP)
+  }
+
+  override destroy(options?: DestroyOptions) {
+    this.#hint.stop()
+    this.#carousel.setPaused(true)
+    this.#catalog?.destroy({children: true})
+    this.#catalog = null
+    const destroyOptions = typeof options === 'boolean' ? {children: true} : {...options, children: true}
+    super.destroy(destroyOptions)
+  }
+
+  #setData = (locations: LocationSelectionState[], pageIndex: number, continueEntry: LevelEntry | null) => {
+    this.#locations = locations
+    this.#pageIndex = pageIndex
+    this.#replaceTabs(locations.length)
+    this.#hint.stop()
+    this.#carousel.setData(locations.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE))
+    this.#chapterSelector.setText(i18next.t('locationSelect.chapter', {chapter: pageIndex + 1}))
+    this.#updatePageNavigation()
+    this.#setContinueEntry(continueEntry)
+    this.updateAdaptive()
+    if (this.#catalogOpen) this.#showCatalog()
   }
 
   // Создаёт постоянные элементы экрана.
   #init = (onContinue: GameMenuCallbacks['onContinue']) => {
     this.#createTabsContainer()
-    this.#createCardsContainer()
+    this.#createCarousel()
     this.#createContinueButton(onContinue)
     this.#createHint()
 
@@ -105,9 +130,12 @@ export default class LocationPageView extends Container {
     this.addChild(this.#pageNavigation)
   }
 
-  #createCardsContainer = () => {
-    this.#cardsContainer = new Container({label: 'location-cards'})
-    this.addChild(this.#cardsContainer)
+  #createCarousel = () => {
+    this.#carousel = new LocationCarousel({
+      onInteraction: this.#stopHint,
+      onLocationSelect: this.#onLocationSelect,
+    })
+    this.addChild(this.#carousel)
   }
 
   #createHint = () => {
@@ -134,7 +162,7 @@ export default class LocationPageView extends Container {
       cursor: 'pointer',
     })
 
-    const background = GameUtils.createSprite('btn-primary')
+    const background = GameUtils.createSprite('btn-primary', {label: 'btnContinueAdventure-background'})
     background.scale.set(1.5)
 
     this.#continueTitle = new Text({
@@ -175,24 +203,9 @@ export default class LocationPageView extends Container {
     })
   }
 
-  // Заменяет карточки данными текущей страницы.
-  #replaceCards = (locations: LocationSelectionState[]) => {
-    this.#hint.stop()
-    this.#cards.forEach((card) => card.destroy({children: true}))
-    this.#cards = locations.map((location) => {
-      const card = new LocationCard(location, this.#onLocationSelect)
-      card.setState(location)
-      this.#cardsContainer.addChild(card)
-      return card
-    })
-  }
-
   // Выравнивает переключатель относительно верхнего края карточек.
   #layoutPageNavigation = () => {
-    const cardScale = 1
-    const cardTop = CARD_ROW_Y - (CARD_HEIGHT * cardScale) / 2
-    const navigationHalfHeight = this.#chapterSelector.height / 2
-    const navigationY = cardTop - NAVIGATION_CARD_GAP - navigationHalfHeight
+    const navigationY = this.#carousel.cardTop - NAVIGATION_CARD_GAP - this.#chapterSelector.height / 2
     this.#pageNavigation.position.set(0, navigationY)
     this.#pageNavigation.scale.set(1)
     this.#updatePageNavigation()
@@ -241,37 +254,20 @@ export default class LocationPageView extends Container {
   // Одновременно переключает карточки, навигацию и кнопку продолжения.
   #setMainContentVisible = (visible: boolean) => {
     this.#pageNavigation.visible = visible
-    this.#cardsContainer.visible = visible
+    this.#carousel.visible = visible
+    this.#carousel.setPaused(!visible)
     this.#continueButton.visible = visible
-    if (visible) this.#syncHint()
-    else {
-      this.#hint.stop()
-    }
+    if (!visible) this.#hint.stop()
   }
 
-  #syncHint = () => {
-    if (this.#catalogOpen) return this.#hint.stop()
-
-    const activeLocation = this.#locations.find(({isCurrent, isUnlocked}) => isCurrent && isUnlocked)
-    const activeCard = this.#cards.find(({locationId}) => locationId === activeLocation?.id)
-    if (activeCard) this.#hint.start(activeCard, {x: 0, y: 0})
-    else this.#hint.stop()
+  #showHintOnce = () => {
+    const target = this.#carousel.selectedCard
+    if (this.#hintShown || this.#catalogOpen || !target) return
+    this.#hintShown = true
+    this.#hint.start(target, {steps: CAROUSEL_HINT_STEPS, targetPoint: {x: 0, y: 0}})
   }
 
-  // Располагает карточки в постоянной портретной сетке.
-  #layoutCards = () => {
-    const scale = 1
-    const columnCount = 2
-    const columnStep = CARD_WIDTH * scale + CARD_GAP
-    const rowStep = CARD_HEIGHT * scale + CARD_GAP
-
-    this.#cards.forEach((card, index) => {
-      const column = index % columnCount
-      const row = Math.floor(index / columnCount)
-      const x = (column - (columnCount - 1) / 2) * columnStep
-      const y = CARD_ROW_Y + row * rowStep
-      // card.scale.set(scale)
-      card.position.set(x, y)
-    })
+  #stopHint = () => {
+    this.#hint.stop()
   }
 }

@@ -5,7 +5,7 @@ import {Container, Rectangle, Sprite} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
 import ActiveCardGlowEmitter from '@/game/ui/common/emitters/activeCardGlow/ActiveCardGlowEmitter.ts'
-import {shakeNoAccess} from '@/game/utils/animations/gsapUtils.ts'
+import {shakeNoAccess, stopNoAccessShake} from '@/game/utils/animations/gsapUtils.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.ts'
 import LocationCardProgress from './LocationCardProgress.ts'
@@ -22,6 +22,7 @@ export default class LocationCard extends Container {
   #activeGlow!: ActiveCardGlowEmitter
   #levelPic!: Sprite
   #background!: Sprite
+  #effectsPaused = false
   #location: LocationSelectionState
   #lockIcon!: Sprite
   #onSelect: (locationId: string) => void
@@ -43,19 +44,35 @@ export default class LocationCard extends Container {
     return this.#location.id
   }
 
+  activate = () => {
+    this.#handleSelect()
+  }
+
+  stopInteractionFeedback = () => {
+    stopNoAccessShake(this)
+    gsap.killTweensOf(this.#lockIcon.scale)
+    gsap.killTweensOf(this.#progress.scale)
+    this.#lockIcon.scale.set(LOCK_SCALE)
+    this.#progress.scale.set(1)
+  }
+
+  setEffectsPaused = (paused: boolean) => {
+    this.#effectsPaused = paused
+    this.#syncActiveGlow()
+  }
+
   setState = (state: LocationSelectionState) => {
     this.#location = state
     this.#progress.setState(state)
-    this.#activeGlow.setActive(state.isCurrent && state.isUnlocked)
+    this.#syncActiveGlow()
     this.#lockIcon.visible = !state.isUnlocked
     this.#levelPic.tint = state.isUnlocked ? 0xffffff : LOCKED_ART_TINT
     this.cursor = state.isUnlocked ? 'pointer' : 'default'
   }
 
   override destroy(options?: DestroyOptions) {
+    this.stopInteractionFeedback()
     gsap.killTweensOf(this.#levelPic.scale)
-    gsap.killTweensOf(this.#lockIcon.scale)
-    gsap.killTweensOf(this.#progress.scale)
     gsap.killTweensOf(this)
     this.#activeGlow.destroy({children: true})
     super.destroy(options)
@@ -140,6 +157,10 @@ export default class LocationCard extends Container {
   #createActiveGlow = () => {
     this.#activeGlow = new ActiveCardGlowEmitter(`${this.label}-active-glow`, CARD_WIDTH, CARD_HEIGHT)
     this.addChild(this.#activeGlow)
+  }
+
+  #syncActiveGlow = () => {
+    this.#activeGlow.setActive(!this.#effectsPaused && this.#location.isCurrent && this.#location.isUnlocked)
   }
 
   #handleSelect = () => {

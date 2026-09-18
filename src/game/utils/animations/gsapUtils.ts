@@ -55,6 +55,15 @@ type NoAccessShakeState = {
 
 const noAccessShakeStates = new WeakMap<AnimatedTarget, NoAccessShakeState>()
 
+// Останавливает встряхивание и возвращает элемент в исходную позицию.
+const stopNoAccessShake = (target: AnimatedTarget) => {
+  const activeState = noAccessShakeStates.get(target)
+  if (!activeState) return
+  activeState.timeline.kill()
+  target.x = activeState.initialX
+  noAccessShakeStates.delete(target)
+}
+
 // Останавливает таймлайн и при необходимости сбрасывает ссылку на него.
 const clearTimeLine = (timeLine: gsap.core.Timeline | null | undefined, remove = false, progress = 0) => {
   if (timeLine) {
@@ -232,7 +241,7 @@ const shakeX = (el: AnimatedTarget) => {
 const shakeNoAccess = (target: AnimatedTarget) => {
   const activeState = noAccessShakeStates.get(target)
   const initialX = activeState?.initialX ?? target.x
-  activeState?.timeline.kill()
+  stopNoAccessShake(target)
   target.x = initialX
 
   const timeline = gsap
@@ -254,5 +263,6 @@ export {
   shake,
   shakeNoAccess,
   shakeX,
+  stopNoAccessShake,
   typewriterEffect,
 }

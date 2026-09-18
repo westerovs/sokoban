@@ -35,9 +35,8 @@ export default class GameMenuView extends Container {
 
   // Показывает страницу выбора локации.
   showLocations = (locations: LocationSelectionState[], pageIndex: number, continueEntry: LevelEntry | null) => {
-    this.#locationSelectView.visible = true
     this.#levelSelectView.visible = false
-    this.#locationSelectView.setData(locations, pageIndex, continueEntry)
+    this.#locationSelectView.show(locations, pageIndex, continueEntry)
   }
 
   // Показывает уровни выбранной локации.
