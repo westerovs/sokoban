@@ -142,7 +142,7 @@ export default class Game extends EventEmitter {
     await this.#app.init({
       resizeTo: window,
       autoDensity: true,
-      backgroundColor: 0x2396E5,
+      backgroundColor: 0x000000,
       backgroundAlpha: 1,
       resolution: getGameResolution(window.devicePixelRatio),
       antialias: false,

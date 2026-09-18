@@ -1,32 +1,36 @@
 import {gsap} from 'gsap'
 import i18next from 'i18next'
+import type {DestroyOptions} from 'pixi.js'
 import {Container, Graphics, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.ts'
 import LocationCardProgress from './LocationCardProgress.ts'
 
-// Отображает карточку локации, её доступность и прогресс игрока.
 
-const CARD_WIDTH = 250 // Ширина карточки
-const CARD_HEIGHT = 350 // Высота карточки
-const CARD_BACKGROUND_ALPHA = 0.7 // Прозрачность чёрной подложки карточки
-const CARD_ART_HOVER_SCALE = 1.25 // Увеличение изображения карточки при наведении на 25%
-const CARD_ART_ZOOM_DURATION = 0.25 // Длительность плавного зума изображения в секундах
-const LOCKED_ART_TINT = 0x616161 // Затемнение изображения заблокированной карточки
+const CARD_WIDTH = 250
+const CARD_HEIGHT = 350
+const CARD_ART_SIZE = 196
+const CARD_ART_CORNER_RADIUS = 10
+const CARD_ART_HOVER_SCALE = 1.25
+const CARD_ART_ZOOM_DURATION = 0.25
+const CARD_TITLE_WIDTH = 200
+const CARD_TITLE_HEIGHT = 44
+const CARD_TITLE_Y = -156
+const CARD_PROGRESS_Y = 126
+const CURRENT_PROGRESS_SCALE = 1.04
+const CURRENT_PROGRESS_PULSE_DURATION = 1.1
 
 export default class LocationCard extends Container {
+  #levelPic!: Sprite
+  #artScale!: number
   #background!: Sprite
-  #backgroundMask!: Graphics
-  #backgroundScale!: {x: number; y: number}
-  #frame!: Graphics
   #location: LocationSelectionState
   #lockIcon!: Sprite
   #onSelect: (locationId: string) => void
   #progress!: LocationCardProgress
   #title!: Text
 
-  // Сохраняет данные локации и создаёт интерактивную карточку.
   constructor(location: LocationSelectionState, onSelect: (locationId: string) => void) {
     super({label: `location-card-${location.id}`})
 
@@ -36,52 +40,83 @@ export default class LocationCard extends Container {
     this.#init()
   }
 
-  // Возвращает стабильный идентификатор локации.
   get locationId() {
     return this.#location.id
   }
 
-  // Обновляет доступность, прогресс и визуальное состояние карточки.
   setState = (state: LocationSelectionState) => {
-    this.#drawFrame(state)
     this.#progress.setState(state)
+    this.#setCurrentIndicator(state.isCurrent)
     this.#lockIcon.visible = !state.isUnlocked
-    this.#background.tint = state.isUnlocked ? 0xffffff : LOCKED_ART_TINT
     this.eventMode = state.isUnlocked ? 'static' : 'none'
     this.alpha = state.isUnlocked ? 1 : 0.78
-    if (!state.isUnlocked) this.#resetBackgroundScale()
+    if (!state.isUnlocked) this.#resetArtScale()
   }
 
-  // Создаёт все слои карточки и подписывает события.
+  override destroy(options?: DestroyOptions) {
+    gsap.killTweensOf(this.#levelPic.scale)
+    gsap.killTweensOf(this.#progress.scale)
+    super.destroy(options)
+  }
+
   #init = () => {
-    this.#frame = new Graphics({label: `${this.label}-frame`})
-    this.addChild(this.#frame)
-    this.#createBackground()
-    this.#createTitle()
+    this.#createCover()
+    this.#createLevelPic()
+
+    this.#createHeader()
     this.#createProgress()
+    this.#createTablet()
+
     this.#lockIcon = GameUtils.createSprite('icon-lock', {
       label: `${this.label}-lock`,
       scale: 1.5,
     })
     this.addChild(this.#lockIcon)
     this.on('pointertap', this.#handleSelect)
-    this.on('pointerenter', this.#handlePointerEnter)
-    this.on('pointerleave', this.#handlePointerLeave)
+
+    // this.on('pointerenter', this.#handlePointerEnter)
+    // this.on('pointerleave', this.#handlePointerLeave)
   }
 
-  // Создаёт изображение локации и маску скругления.
-  #createBackground = () => {
-    this.#background = GameUtils.createSprite(this.#location.cardTexture, {label: `${this.label}-art`})
-    this.#background.width = CARD_WIDTH
-    this.#background.height = CARD_HEIGHT
-    this.#backgroundScale = {x: this.#background.scale.x, y: this.#background.scale.y}
-    this.#backgroundMask = new Graphics({label: `${this.label}-art-mask`})
-    this.#background.mask = this.#backgroundMask
-    this.addChild(this.#background, this.#backgroundMask)
+  #createCover = () => {
+    this.#background = GameUtils.createSprite('main-pop-up', {
+      label: `cover`
+    })
+    this.#background.setSize(CARD_WIDTH, CARD_HEIGHT)
+    this.addChild(this.#background)
   }
 
-  // Создаёт заголовок карточки.
-  #createTitle = () => {
+  #createLevelPic = () => {
+    this.#levelPic = GameUtils.createSprite(this.#location.cardTexture, {label: `${this.label}-art`})
+    // this.#artScale = Math.max(CARD_ART_SIZE / this.#levelPic.texture.width, CARD_ART_SIZE / this.#levelPic.texture.height)
+    // this.#levelPic.scale.set(this.#artScale)
+    this.#levelPic.position.set(0, 0)
+
+    this.addChild(this.#levelPic)
+  }
+
+  #createMask = () => {
+    const mask = new Graphics({label: `${this.label}-art-mask`})
+    mask
+      .roundRect(
+        -CARD_ART_SIZE / 2,
+        CARD_ART_SIZE / 2,
+        CARD_ART_SIZE,
+        CARD_ART_SIZE,
+        CARD_ART_CORNER_RADIUS,
+      )
+      .fill(0xffffff)
+    this.#levelPic.mask = mask
+    this.addChild(this.#levelPic, mask)
+  }
+
+  #createHeader = () => {
+    const titleBackground = GameUtils.createSprite('select-board', {
+      label: `${this.label}-title-background`
+    })
+    titleBackground.setSize(CARD_TITLE_WIDTH, CARD_TITLE_HEIGHT)
+    titleBackground.position.set(0, CARD_TITLE_Y)
+
     this.#title = GameUtils.createText(i18next.t(this.#location.titleKey), {
       name: `${this.label}-title`,
       style: {
@@ -92,76 +127,65 @@ export default class LocationCard extends Container {
         stroke: {color: 0x102217, width: 5, join: 'round'},
       },
     })
-    this.#title.position.set(0, -142)
-    this.addChild(this.#title)
+    this.#title.position.set(0, CARD_TITLE_Y)
+    this.addChild(titleBackground, this.#title)
   }
 
-  // Добавляет самостоятельное отображение прогресса локации.
+  #createTablet = () => {
+    const tablet = GameUtils.createSprite('small-tablet')
+    tablet.y = 80
+    this.addChild(tablet)
+  }
+
   #createProgress = () => {
     this.#progress = new LocationCardProgress(`${this.label}-progress`)
-    this.#progress.position.set(0, 140)
+    this.#progress.position.set(0, CARD_PROGRESS_Y)
     this.addChild(this.#progress)
   }
 
-  // Рисует рамку согласно состоянию локации.
-  #drawFrame = ({isCurrent}: LocationSelectionState) => {
-    const color = isCurrent ? 0xd9ff5d : 0x000000
-    const width = isCurrent ? 6 : 4
+  #setCurrentIndicator = (isCurrent: boolean) => {
+    gsap.killTweensOf(this.#progress.scale)
+    this.#progress.scale.set(1)
+    if (!isCurrent) return
 
-    this.#frame
-      .clear()
-      .roundRect(-CARD_WIDTH / 2, -CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT, 22)
-      .fill({color: 0x000000, alpha: CARD_BACKGROUND_ALPHA})
-      .stroke({color, width, alpha: 0.95})
-    this.#drawBackgroundMask(width)
+    gsap.to(this.#progress.scale, {
+      x: CURRENT_PROGRESS_SCALE,
+      y: CURRENT_PROGRESS_SCALE,
+      duration: CURRENT_PROGRESS_PULSE_DURATION,
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true,
+    })
   }
 
-  // Перерисовывает маску изображения под толщину рамки.
-  #drawBackgroundMask = (frameWidth: number) => {
-    const inset = frameWidth / 2
 
-    this.#backgroundMask
-      .clear()
-      .roundRect(
-        -CARD_WIDTH / 2 + inset,
-        -CARD_HEIGHT / 2 + inset,
-        CARD_WIDTH - frameWidth,
-        CARD_HEIGHT - frameWidth,
-        22 - inset,
-      )
-      .fill(0xffffff)
-  }
-
-  // Передаёт выбор локации контроллеру.
-  #handleSelect = () => {
-    this.#onSelect(this.#location.id)
-  }
-
-  // Увеличивает изображение при наведении.
-  #handlePointerEnter = () => {
-    this.#animateBackgroundScale(CARD_ART_HOVER_SCALE)
-  }
-
-  // Возвращает изображение к исходному масштабу.
-  #handlePointerLeave = () => {
-    this.#animateBackgroundScale(1)
-  }
-
-  // Анимирует масштаб изображения карточки.
-  #animateBackgroundScale = (multiplier: number) => {
-    gsap.to(this.#background.scale, {
-      x: this.#backgroundScale.x * multiplier,
-      y: this.#backgroundScale.y * multiplier,
+  #animateArtScale = (multiplier: number) => {
+    gsap.to(this.#levelPic.scale, {
+      x: this.#artScale * multiplier,
+      y: this.#artScale * multiplier,
       duration: CARD_ART_ZOOM_DURATION,
       ease: 'power2.out',
       overwrite: true,
     })
   }
 
-  // Немедленно восстанавливает исходный масштаб изображения.
-  #resetBackgroundScale = () => {
-    gsap.killTweensOf(this.#background.scale)
-    this.#background.scale.set(this.#backgroundScale.x, this.#backgroundScale.y)
+  #resetArtScale = () => {
+    gsap.killTweensOf(this.#levelPic.scale)
+    this.#levelPic.scale.set(this.#artScale)
+  }
+
+  // --------- events
+
+  #handleSelect = () => {
+    this.#onSelect(this.#location.id)
+  }
+
+  #handlePointerEnter = () => {
+    this.#animateArtScale(CARD_ART_HOVER_SCALE)
+  }
+
+  #handlePointerLeave = () => {
+    this.#animateArtScale(1)
   }
 }
 

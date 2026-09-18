@@ -4,13 +4,11 @@ import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 import type {LocationSelectionState} from '../../menuTypes.ts'
 
-const PROGRESS_WIDTH = 190
-const PROGRESS_HEIGHT = 35
-const PROGRESS_PADDING = 3 // Внутренний отступ полосы прогресса
-const PROGRESS_STROKE_WIDTH = 4 // Толщина обводки плашки
+const COMPLETED_CHECK_RADIUS = 15 // Радиус кружка завершённой локации
+const COMPLETED_CHECK_GAP = 8 // Расстояние между текстом и кружком с галочкой
+const COMPLETED_CHECK_STROKE_WIDTH = 3 // Толщина светлой обводки кружка
 
 export default class LocationCardProgress extends Container {
-  #background!: Graphics
   #completedCheck!: Graphics
   #text!: Text
 
@@ -24,25 +22,17 @@ export default class LocationCardProgress extends Container {
     this.visible = state.isUnlocked
     if (!state.isUnlocked) return
 
-    this.#background.clear()
     this.#completedCheck.clear()
     this.#completedCheck.visible = state.isCompleted
     this.#text.text = state.isCompleted
       ? i18next.t('locationSelect.completed')
       : `${state.completedCount} / ${state.totalCount}`
-    this.#drawBackground(state.isCompleted)
+    this.#layoutContent(state.isCompleted)
 
-    if (state.isCompleted) {
-      this.#drawCompletedCheck()
-      return
-    }
-
-    const progress = state.totalCount > 0 ? state.completedCount / state.totalCount : 0
-    this.#drawProgress(progress)
+    if (state.isCompleted) this.#drawCompletedCheck()
   }
 
   #init = () => {
-    this.#background = new Graphics({label: `${this.label}-background`})
     this.#completedCheck = new Graphics({label: `${this.label}-completed-check`})
     this.#text = GameUtils.createText('', {
       name: `${this.label}-text`,
@@ -54,49 +44,32 @@ export default class LocationCardProgress extends Container {
         stroke: {color: 0x102217, width: 5, join: 'round'},
       },
     })
-    this.addChild(this.#background, this.#completedCheck, this.#text)
+    this.addChild(this.#completedCheck, this.#text)
   }
 
-  // Рисует основу плашки прогресса.
-  #drawBackground = (isCompleted: boolean) => {
-    this.#background
-      .roundRect(-PROGRESS_WIDTH / 2, -PROGRESS_HEIGHT / 2, PROGRESS_WIDTH, PROGRESS_HEIGHT, PROGRESS_HEIGHT / 2)
-      .fill({color: isCompleted ? 0x588f2d : 0x253927, alpha: 0.96})
-      .stroke({color: 0xb7ce5a, width: PROGRESS_STROKE_WIDTH})
-  }
+  // Центрирует одиночные цифры или связку текста с галочкой.
+  #layoutContent = (isCompleted: boolean) => {
+    if (!isCompleted) {
+      this.#text.position.set(0)
+      return
+    }
 
-  // Рисует заполнение только при положительном прогрессе.
-  #drawProgress = (progress: number) => {
-    const availableWidth = PROGRESS_WIDTH - PROGRESS_PADDING * 2
-    const innerHeight = PROGRESS_HEIGHT - PROGRESS_PADDING * 2
-    const normalizedProgress = Math.min(Math.max(progress, 0), 1)
-    if (normalizedProgress === 0) return
-
-    const filledWidth = Math.max(innerHeight, availableWidth * normalizedProgress)
-
-    this.#background
-      .roundRect(
-        -PROGRESS_WIDTH / 2 + PROGRESS_PADDING,
-        -innerHeight / 2,
-        filledWidth,
-        innerHeight,
-        Math.min(filledWidth, innerHeight) / 2,
-      )
-      .fill({color: 0x78c92e})
+    const contentWidth = this.#text.width + COMPLETED_CHECK_GAP + COMPLETED_CHECK_RADIUS * 2
+    const contentLeft = -contentWidth / 2
+    this.#text.position.set(contentLeft + this.#text.width / 2, 0)
+    this.#completedCheck.position.set(contentLeft + this.#text.width + COMPLETED_CHECK_GAP + COMPLETED_CHECK_RADIUS, 0)
   }
 
   // Рисует галочку завершённой локации справа от подписи.
   #drawCompletedCheck = () => {
-    const radius = PROGRESS_HEIGHT / 2
-    this.#completedCheck.position.set(PROGRESS_WIDTH / 2 - radius, 0)
     this.#completedCheck
-      .circle(0, 0, radius)
+      .circle(0, 0, COMPLETED_CHECK_RADIUS)
       .fill({color: 0x71972c})
-      .stroke({color: 0xe9d084, width: PROGRESS_STROKE_WIDTH})
+      .stroke({color: 0xffffff, width: COMPLETED_CHECK_STROKE_WIDTH})
     this.#completedCheck
-      .moveTo(-radius * 0.5, 0)
-      .lineTo(-radius * 0.12, radius * 0.36)
-      .lineTo(radius * 0.5, -radius * 0.4)
+      .moveTo(-COMPLETED_CHECK_RADIUS * 0.5, 0)
+      .lineTo(-COMPLETED_CHECK_RADIUS * 0.12, COMPLETED_CHECK_RADIUS * 0.36)
+      .lineTo(COMPLETED_CHECK_RADIUS * 0.5, -COMPLETED_CHECK_RADIUS * 0.4)
       .stroke({color: 0xffffff, width: 5, join: 'round', cap: 'round'})
   }
 }
