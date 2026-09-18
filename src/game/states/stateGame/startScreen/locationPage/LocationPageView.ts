@@ -1,13 +1,14 @@
 import i18next from 'i18next'
-import {Container, Graphics, Text} from 'pixi.js'
+import {Container, Text} from 'pixi.js'
 import Locator from '@/game/engine/Locator.ts'
 import LocationNav from '@/game/states/stateGame/startScreen/locationPage/locationNav/LocationNav.ts'
 import {primaryFontStyle} from '@/game/styles.ts'
+import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
+import Hint from '@/game/utils/Hint.ts'
 import type {GameMenuCallbacks, LevelEntry, LocationDefinition, LocationSelectionState} from '../menuTypes.js'
 import LocationCard, {CARD_HEIGHT, CARD_WIDTH} from './locationCard/LocationCard.ts'
 import LocationCatalogView from './locationCatalog/LocationCatalogView.js'
 import LocationUnlockCelebration from './LocationUnlockCelebration.js'
-import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 
 // Отображает страницы карточек локаций и кнопку продолжения игры.
 
@@ -25,6 +26,7 @@ export default class LocationPageView extends Container {
   #continueButton!: Container
   #continueSubtitle!: Text
   #continueTitle!: Text
+  #hint!: Hint
   #catalog: LocationCatalogView | null = null
   #catalogOpen = false
   #chapterSelector!: LocationNav
@@ -67,6 +69,7 @@ export default class LocationPageView extends Container {
     this.updateAdaptive()
     if (this.#catalogOpen) this.#showCatalog()
     this.#showUnlockCelebration(unlockedLocation)
+    this.#syncHint()
   }
 
   // Скрывает экран и останавливает праздничную анимацию.
@@ -75,6 +78,7 @@ export default class LocationPageView extends Container {
     this.#catalogOpen = false
     void this.#catalog?.hide(false)
     this.#unlockCelebration.stop()
+    this.#hint.stop()
   }
 
   // Перестраивает расположение элементов под текущий размер окна.
@@ -100,9 +104,10 @@ export default class LocationPageView extends Container {
     this.#createTabsContainer()
     this.#createCardsContainer()
     this.#createContinueButton(onContinue)
+    this.#createHint()
 
     this.#unlockCelebration = new LocationUnlockCelebration()
-    this.addChild(this.#continueButton, this.#unlockCelebration)
+    this.addChild(this.#continueButton, this.#hint, this.#unlockCelebration)
   }
 
   #createTabsContainer = () => {
@@ -121,6 +126,10 @@ export default class LocationPageView extends Container {
   #createCardsContainer = () => {
     this.#cardsContainer = new Container({label: 'location-cards'})
     this.addChild(this.#cardsContainer)
+  }
+
+  #createHint = () => {
+    this.#hint = new Hint()
   }
 
   // Создаёт каталог, который открывается поверх карточек по нажатию на главу.
@@ -204,6 +213,7 @@ export default class LocationPageView extends Container {
 
   // Заменяет карточки данными текущей страницы.
   #replaceCards = (locations: LocationSelectionState[]) => {
+    this.#hint.stop()
     this.#cards.forEach((card) => card.destroy({children: true}))
     this.#cards = locations.map((location) => {
       const card = new LocationCard(location, this.#onLocationSelect)
@@ -235,6 +245,7 @@ export default class LocationPageView extends Container {
     if (pageIndex < 0 || pageIndex >= this.#pageCount) return
 
     this.#catalogOpen = false
+    this.#hint.stop()
     this.#onPageSelect(pageIndex)
   }
 
@@ -268,7 +279,20 @@ export default class LocationPageView extends Container {
     this.#pageNavigation.visible = visible
     this.#cardsContainer.visible = visible
     this.#continueButton.visible = visible
-    if (!visible) this.#unlockCelebration.stop()
+    if (visible) this.#syncHint()
+    else {
+      this.#unlockCelebration.stop()
+      this.#hint.stop()
+    }
+  }
+
+  #syncHint = () => {
+    if (this.#catalogOpen) return this.#hint.stop()
+
+    const activeLocation = this.#locations.find(({isCurrent, isUnlocked}) => isCurrent && isUnlocked)
+    const activeCard = this.#cards.find(({locationId}) => locationId === activeLocation?.id)
+    if (activeCard) this.#hint.start(activeCard, {x: 0, y: 0})
+    else this.#hint.stop()
   }
 
   // Располагает карточки в постоянной портретной сетке.

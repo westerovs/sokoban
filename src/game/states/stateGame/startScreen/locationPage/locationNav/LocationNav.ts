@@ -1,8 +1,9 @@
+import {gsap} from 'gsap'
 import {Container, Sprite, Text} from 'pixi.js'
 import {primaryFontStyle} from '@/game/styles.ts'
 import GameUtils from '@/game/utils/gameUtils/GameUtils.ts'
 
-const ARROW_GAP = 4 // Расстояние между телом вкладки и боковой стрелкой
+const ARROW_GAP = 10
 
 type PageDirection = 'left' | 'right'
 
@@ -21,6 +22,7 @@ export default class LocationNav extends Container {
   constructor({onNext, onOpenCatalog, onPrevious}: LocationTabCallbacks) {
     super({label: 'location-nav'})
     this.eventMode = 'passive'
+    this.sortableChildren = true
 
     this.#init({onNext, onOpenCatalog, onPrevious})
   }
@@ -37,20 +39,8 @@ export default class LocationNav extends Container {
 
   #init = ({onNext, onOpenCatalog, onPrevious}: LocationTabCallbacks) => {
     this.#createSelect(onOpenCatalog)
-    this.#createTitle()
     this.#leftArrow = this.#createArrowTab('left', onPrevious)
     this.#rightArrow = this.#createArrowTab('right', onNext)
-  }
-
-  #createTitle = () => {
-    this.#title = new Text({
-      label: `${this.label}-title`,
-      text: '',
-      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 30},
-      anchor: 0.5,
-    })
-    this.#title.x = -20
-    this.addChild(this.#title)
   }
 
   #createSelect = (onOpenCatalog: () => void) => {
@@ -59,17 +49,31 @@ export default class LocationNav extends Container {
       eventMode: 'static',
       cursor: 'pointer',
     })
+    this.#select.zIndex = 1
 
     this.#createSelectBackground()
+    this.#createSelectTitle()
+
     this.#select.on('pointertap', onOpenCatalog)
     this.addChild(this.#select)
   }
 
   #createSelectBackground = () => {
     const background = GameUtils.createSprite('select', {label: `${this.label}-background`})
-
     this.#select.addChild(background)
   }
+
+  #createSelectTitle = () => {
+    this.#title = new Text({
+      label: `${this.label}-title`,
+      text: '',
+      style: {...primaryFontStyle, fill: 0xffe6a1, fontSize: 30},
+      anchor: 0.5,
+    })
+    this.#title.x = -20
+    this.#select.addChild(this.#title)
+  }
+
 
   #createArrowTab = (direction: PageDirection, onSelect: () => void) => {
     const arrow = GameUtils.createSprite('tab-arrow', {
@@ -79,8 +83,12 @@ export default class LocationNav extends Container {
     const offset = this.#select.width / 2 + arrow.width / 2 + ARROW_GAP
     arrow.x = direction === 'left' ? -offset : offset
     arrow.scale.x = direction === 'left' ? 1 : -1
+
     arrow.on('pointertap', onSelect)
     this.addChild(arrow)
+
+    const animationPosX = (direction === 'left') ? -offset : offset
+    gsap.fromTo(arrow, {x: 0}, {x: animationPosX, ease: 'back.out'})
 
     return arrow
   }
